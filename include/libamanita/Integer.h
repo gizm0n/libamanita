@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <stdint.h>
 
 
 class Integer {
@@ -13,15 +14,21 @@ private:
 		NaN,			/** < Sign of this is set to Minus if it is not a number. */
 		Infinite,	/** < Sign of this is set to Minus if it is an infinite number. */
 	};
-	char sign;					/** < Sign tells what type of number this is. */
-	unsigned long *num;	/** < Num contains all data of this. */
+	uint8_t sign;				/** < Sign tells what type of number this is. */
+	uint32_t *num;				/** < Num contains all data of this. */
 	size_t len;					/** < Len is the length of the number this is set to in number of 32 bit integers, it is always >= 1. */
 	size_t cap;					/** < Cap is the capacity of num, it is always >= 1, and len is always <= cap. */
 
-	void resize(long n);
+	void resize(int n);
 
-	void inc(unsigned long n);
-	void dec(unsigned long n);
+	void set32(int32_t n);
+	void setu32(uint32_t n);
+	void set64(int64_t n);
+	void setu64(uint64_t n);
+	void set(const char *n);
+	void set(const Integer &n);
+	void inc(uint32_t n);
+	void dec(uint32_t n);
 	void add(const Integer &n);
 	void sub(const Integer &n);
 	void mul(const Integer &n);
@@ -29,41 +36,40 @@ private:
 	void lshift(size_t n);
 	void rshift(size_t n);
 
-	int cmp(long n);
-	int cmp(unsigned long n);
-	int cmp(long long n);
-	int cmp(unsigned long long n);
+	int cmp(int32_t n);
+	int cmp(uint32_t n);
+	int cmp(int64_t n);
+	int cmp(uint64_t n);
 	int cmp(const Integer &n);
 
 	void monpro(const Integer &n,const Integer &r);
 
 public:
-	Integer();
-	Integer(int n);
-	Integer(long n);
-	Integer(unsigned long n);
-	Integer(long long n);
-	Integer(unsigned long long n);
-	Integer(const Integer &n);
+	Integer() : num(0) { set((uint32_t)0); }
+	Integer(int32_t n) : num(0) { set32((int32_t)n); }
+	Integer(uint32_t n) : num(0) { setu32((uint32_t)n); }
+	Integer(int64_t n) : num(0) { set64((int64_t)n); }
+	Integer(uint64_t n) : num(0) { setu64((uint64_t)n); }
+	Integer(const char *n) : num(0) { set(n); }
+	Integer(const Integer &n) : num(0) { set(n); }
 	~Integer();
 
-	Integer &operator=(int n);
-	Integer &operator=(long n);
-	Integer &operator=(unsigned long n);
-	Integer &operator=(long long n);
-	Integer &operator=(unsigned long long n);
-	Integer &operator=(const char *n);
-	Integer &operator=(const Integer &n);
-	Integer &operator++(int n) { if(sign==Minus) dec(1ul);else inc(1ul);return *this; }
-	Integer &operator--(int n) { if(sign==Minus) inc(1ul);else dec(1ul);return *this; }
+	Integer &operator=(int32_t n) { set32(n);return *this; }
+	Integer &operator=(uint32_t n) { setu32(n);return *this; }
+	Integer &operator=(int64_t n) { set64(n);return *this; }
+	Integer &operator=(uint64_t n) { setu64(n);return *this; }
+	Integer &operator=(const char *n) { set(n);return *this; }
+	Integer &operator=(const Integer &n) { set(n);return *this; }
+	Integer &operator++(int n) { if(sign==Minus) dec(1);else inc(1);return *this; }
+	Integer &operator--(int n) { if(sign==Minus) inc(1);else dec(1);return *this; }
 	Integer operator+(const Integer &n) { Integer i(*this);i += n;return i; }
 	Integer &operator+=(int n) { if(n<0) *this -= -n;else if(sign==Minus) dec(n);else inc(n);return *this; }
-	Integer &operator+=(long n) { if(n<0l) *this -= -n;else if(sign==Minus) dec(n);else inc(n);return *this; }
+	Integer &operator+=(long n) { if(n<0) *this -= -n;else if(sign==Minus) dec(n);else inc(n);return *this; }
 	Integer &operator+=(unsigned long n) { if(sign==Minus) dec(n);else inc(n);return *this; }
 	Integer &operator+=(const Integer &n);
 	Integer operator-(const Integer &n) { Integer i(*this);i -= n;return i;}
 	Integer &operator-=(int n) { if(n<0) *this += -n;else if(sign==Minus) inc(n);else dec(n);return *this; }
-	Integer &operator-=(long n) { if(n<0l) *this += -n;else if(sign==Minus) inc(n);else dec(n);return *this; }
+	Integer &operator-=(long n) { if(n<0) *this += -n;else if(sign==Minus) inc(n);else dec(n);return *this; }
 	Integer &operator-=(unsigned long n) { if(sign==Minus) inc(n);else dec(n);return *this; }
 	Integer &operator-=(const Integer &n);
 	Integer operator*(const Integer &n) { Integer i(*this);i.mul(n);return i; }
@@ -77,41 +83,35 @@ public:
 	Integer operator>>(size_t n) { Integer i(*this);i.rshift(n);return i; }
 	Integer &operator>>=(size_t n) { rshift(n);return *this; }
 
-	bool operator==(int n) { return cmp((long)n)==0; }
-	bool operator==(long n) { return cmp(n)==0; }
-	bool operator==(unsigned long n) { return cmp(n)==0; }
-	bool operator==(long long n) { return cmp(n)==0; }
-	bool operator==(unsigned long long n) { return cmp(n)==0; }
+	bool operator==(int32_t n) { return cmp(n)==0; }
+	bool operator==(uint32_t n) { return cmp(n)==0; }
+	bool operator==(int64_t n) { return cmp(n)==0; }
+	bool operator==(uint64_t n) { return cmp(n)==0; }
 	bool operator==(const Integer &n) { return cmp(n)==0; }
-	bool operator!=(int n) { return cmp((long)n)!=0; }
-	bool operator!=(long n) { return cmp(n)!=0; }
-	bool operator!=(unsigned long n) { return cmp(n)!=0; }
-	bool operator!=(long long n) { return cmp(n)!=0; }
-	bool operator!=(unsigned long long n) { return cmp(n)!=0; }
+	bool operator!=(int32_t n) { return cmp(n)!=0; }
+	bool operator!=(uint32_t n) { return cmp(n)!=0; }
+	bool operator!=(int64_t n) { return cmp(n)!=0; }
+	bool operator!=(uint64_t n) { return cmp(n)!=0; }
 	bool operator!=(const Integer &n) { return cmp(n)!=0; }
-	bool operator<(int n) { return cmp((long)n)<0; }
-	bool operator<(long n) { return cmp(n)<0; }
-	bool operator<(unsigned long n) { return cmp(n)<0; }
-	bool operator<(long long n) { return cmp(n)<0; }
-	bool operator<(unsigned long long n) { return cmp(n)<0; }
+	bool operator<(int32_t n) { return cmp(n)<0; }
+	bool operator<(uint32_t n) { return cmp(n)<0; }
+	bool operator<(int64_t n) { return cmp(n)<0; }
+	bool operator<(uint64_t n) { return cmp(n)<0; }
 	bool operator<(const Integer &n) { return cmp(n)<0; }
-	bool operator<=(int n) { return cmp((long)n)<=0; }
-	bool operator<=(long n) { return cmp(n)<=0; }
-	bool operator<=(unsigned long n) { return cmp(n)<=0; }
-	bool operator<=(long long n) { return cmp(n)<=0; }
-	bool operator<=(unsigned long long n) { return cmp(n)<=0; }
+	bool operator<=(int32_t n) { return cmp(n)<=0; }
+	bool operator<=(uint32_t n) { return cmp(n)<=0; }
+	bool operator<=(int64_t n) { return cmp(n)<=0; }
+	bool operator<=(uint64_t n) { return cmp(n)<=0; }
 	bool operator<=(const Integer &n) { return cmp(n)<=0; }
-	bool operator>(int n) { return cmp((long)n)>0; }
-	bool operator>(long n) { return cmp(n)>0; }
-	bool operator>(unsigned long n) { return cmp(n)>0; }
-	bool operator>(long long n) { return cmp(n)>0; }
-	bool operator>(unsigned long long n) { return cmp(n)>0; }
+	bool operator>(int32_t n) { return cmp(n)>0; }
+	bool operator>(uint32_t n) { return cmp(n)>0; }
+	bool operator>(int64_t n) { return cmp(n)>0; }
+	bool operator>(uint64_t n) { return cmp(n)>0; }
 	bool operator>(const Integer &n) { return cmp(n)>0; }
-	bool operator>=(int n) { return cmp((long)n)>=0; }
-	bool operator>=(long n) { return cmp(n)>=0; }
-	bool operator>=(unsigned long n) { return cmp(n)>=0; }
-	bool operator>=(long long n) { return cmp(n)>=0; }
-	bool operator>=(unsigned long long n) { return cmp(n)>=0; }
+	bool operator>=(int32_t n) { return cmp(n)>=0; }
+	bool operator>=(uint32_t n) { return cmp(n)>=0; }
+	bool operator>=(int64_t n) { return cmp(n)>=0; }
+	bool operator>=(uint64_t n) { return cmp(n)>=0; }
 	bool operator>=(const Integer &n) { return cmp(n)>=0; }
 
 	/** Sets the Integer sign to Plus. */
@@ -176,11 +176,11 @@ public:
 	/** returns true if this is an odd number. */
 	bool isOdd() { return (*num&1)==1; }
 
-	operator long() const { return sign==Minus? -(long)*num : (long)*num; }
-	operator unsigned long() const { return *num; }
-	operator unsigned long *() const { return num; }
-	operator long long() const;
-	operator unsigned long long() const { return *num|((unsigned long long)num[1]<<32); }
+	//operator long() const { return sign==Minus? -(long)*num : (long)*num; }
+	//operator unsigned long() const { return *num; }
+	//operator unsigned long *() const { return num; }
+	//operator long long() const;
+	//operator unsigned long long() const { return *num|((unsigned long long)num[1]<<32); }
 
 	void print(FILE *fp=stdout) const;
 };

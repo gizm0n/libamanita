@@ -3,7 +3,6 @@
 #include <time.h>
 #include <libamanita/Math.h>
 #include <libamanita/Random.h>
-#include <libamanita/Integer.h>
 
 
 
@@ -14,7 +13,7 @@ Random rnd = Random();
 Random::Random(seed_t n) { setSeed(n); }
 Random::Random() { setSeed(time(0)); }
 
-unsigned long Random::generate() { return (num=1812433253ul*((num^(num>>30ul))+(index++))); }
+uint32_t Random::generate() { return (num=1812433253*((num^(num>>30))+(index++))); }
 
 void Random::setSeed(seed_t n) {
 	seed = n,num = n,index = 1;
@@ -25,9 +24,9 @@ void Random::setSeed(seed_t n) {
 	index = 0;
 }
 
-void Random::setSeed(seed_t *n,int l) {
+void Random::setSeed(seed_t *n,size_t l) {
 	seed = 0,num = 0,index = 1;
-	for(int i=0,j=0; i<256; i++,j++) {
+	for(size_t i=0,j=0; i<256; i++,j++) {
 		if(j==l) j = 0;
 		num ^= n[j];
 		table[i] = generate();
@@ -36,33 +35,29 @@ void Random::setSeed(seed_t *n,int l) {
 	index = 0;
 }
 
-void Random::setSeed(Integer &n) {
-	setSeed((seed_t *)((unsigned long *)n),(int)n.length());
-}
-
-unsigned long Random::getUint32() { return (num=(table[(index++)&0xff]^=(table[num&0xff]+num))); }
-unsigned long long Random::getUint64() {
-	unsigned long long n = (unsigned long long)getUint32();
-	n = (n<<32)|(unsigned long long)getUint32();
+uint32_t Random::uint32() { return (num=(table[(index++)&0xff]^=(table[num&0xff]+num))); }
+uint64_t Random::uint64() {
+	uint64_t n = (uint64_t)uint32();
+	n = (n<<32)|(uint64_t)uint32();
 	return n;
 }
-double Random::getDouble() { return (double)getUint32()*n2p32; }
+double Random::real64() { return (double)uint32()*n2p32; }
 
-unsigned long Random::getUintN(int n) {
-	if(n<=0 || n>32) return 0ul;
+uint32_t Random::uintN(int n) {
+	if(n<=0 || n>32) return 0;
 	int j;
-	unsigned long r = getUint32(),i,m = 0xffffffff>>(32-n);
+	uint32_t r = uint32(),i,m = 0xffffffff>>(32-n);
 	for(j=32,i=0x80000000; i && !(r&i); j--,i>>=1);
 // printf("Random::getUintN(r=%lx,i=%lx,m=%lx,j=%d)\n",r,i,m,j);
 	if(j>=n) return r>>(j-n);
 	r <<= n-j,m >>= n-(n-j);
-	return r|(getUint32()&m);
+	return r|(uint32()&m);
 }
 
 int Random::roll(int d,int n) {
 	if(d<=1) return d*n;
 	int v = 0;
-	while(n--) v += getUint32(d)+1;
+	while(n--) v += uint32(d)+1;
 	return v;
 }
 
@@ -81,9 +76,9 @@ int Random::oe(int d,int n) {
 }
 
 int Random::oeD4(int n) {
-	unsigned long v = 0,i= 0,c = 10;
+	uint32_t v = 0,i= 0,c = 10;
 	while(n-->0) {
-		if(c==10) i = getUint32(),c = 1;
+		if(c==10) i = uint32(),c = 1;
 		else i >>= 3,c++;
 		// One version of this algorithm discards each value of 4 and adds 2d4
 		// if((i&3)==3) n += 2;
@@ -94,7 +89,7 @@ int Random::oeD4(int n) {
 		else v += (i&3)+1;
 	}
 	while(n-->0) {
-		if(c==10) i = getUint32(),c = 1;
+		if(c==10) i = uint32(),c = 1;
 		else i >>= 3,c++;
 		if((i&3)==3) n += 2;
 		else v += (i&3)+1;
@@ -103,9 +98,9 @@ int Random::oeD4(int n) {
 }
 
 int Random::oeD8(int n) {
-	int v = 0,i = 0,c = 8;
+	uint32_t v = 0,i = 0,c = 8;
 	while(n--) {
-		if(c==8) i = getUint32(),c = 1;
+		if(c==8) i = uint32(),c = 1;
 		else i >>= 4,c++;
 		// One version of this algorithm discards each value of 8 and adds 2d8
 		// if((i&7)==7) n += 2;
@@ -118,11 +113,11 @@ int Random::oeD8(int n) {
 	return v;
 }
 
-unsigned long Random::rollTable(unsigned long *t,size_t l,unsigned long s) {
-	if(!t || !l) return 0ul;
-	unsigned long i = 0ul;
+uint32_t Random::rollTable(uint32_t *t,size_t l,uint32_t s) {
+	if(!t || !l) return 0;
+	uint32_t i = 0;
 	if(!s) s = Math::sum(t,l);
-	s = getUint32(s);
+	s = uint32(s);
 	while(s>=t[i]) s -= t[i++];
 	return i;
 }

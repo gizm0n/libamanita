@@ -18,7 +18,7 @@ public:
 			const char *d=0,const char *u=0);
 	~Word();
 
-	void setSeed(unsigned long n);
+	void setSeed(unsigned int n);
 	char *generate(int minlen,int maxlen);
 };
 

@@ -180,7 +180,7 @@ const char *Http::post(const char *host,const char *url) {
 	if(multipart>0) {
 		String boundary;
 		boundary.append('-',(size_t)12);
-		for(int i=0; i<12; i++) boundary.append(rnd.getAlphaNumeric());
+		for(int i=0; i<12; i++) boundary.append(rnd.alphanum());
 		void *p;
 		char *p1;
 		const char *s[] = {
@@ -192,7 +192,7 @@ fprintf(stderr,"Boundary 1: %s\n",boundary.toString());
 		while((p=(void *)iter.next())) {
 			if(iter.valueType()==TYPE_VOID_P) p1 = (char *)((packet *)p)->data;
 			else p1 = (char *)p;
-			while((p1=strstr(p1,boundary.toString()))) boundary.append(rnd.getAlphaNumeric());
+			while((p1=strstr(p1,boundary.toString()))) boundary.append(rnd.alphanum());
 		}
 		iter = form.iterate();
 		while((p=(void *)iter.next())) if(iter.valueType()==TYPE_CHAR_P)
@@ -234,13 +234,13 @@ const char *Http::post(const char *host,const char *url,const char *form, ...) {
 	file.vappendf(form,args);
    va_end(args);
 
-fprintf(stderr,"Http::post(file=\"%s\",len=%d)\n",file.toString(),file.length());
+fprintf(stderr,"Http::post(file=\"%s\",len=%zu)\n",file.toString(),file.length());
 fflush(stderr);
 	headers.put(http_headers[HTTP_CONTENT_TYPE],http_mimes[HTTP_FORM_URLENCODED]);
 	return request(host,url,HTTP_METHOD_POST,file.toString(),file.length());
 }
 
-const char *Http::request(const char *host,const char *url,HTTP_METHOD method,const char *data,unsigned long len) {
+const char *Http::request(const char *host,const char *url,HTTP_METHOD method,const char *data,size_t len) {
 	response.removeAll();
 	body.clear();
 
@@ -271,11 +271,11 @@ fflush(stderr);
 				while(iter.next())
 					header.append((const char *)iter.key()).append(": ").append((const char *)iter.value()).append("\r\n");
 				header.append("\r\n");
-fprintf(stderr,"Http::request(header=\"%s\",len=%d)\n",header.toString(),header.length());
+fprintf(stderr,"Http::request(header=\"%s\",len=%zu)\n",header.toString(),header.length());
 fflush(stderr);
 				t2 = SDL_GetTicks();
 				if(data && len) {
-fprintf(stderr,"Http::request(data=\"%s\",len=%lu)\n",data,len);
+fprintf(stderr,"Http::request(data=\"%s\",len=%zu)\n",data,len);
 fflush(stderr);
 					SDLNet_TCP_Send(sock,header.toString(),header.length());
 					SDLNet_TCP_Send(sock,data,len+1);
@@ -350,7 +350,7 @@ fflush(stderr);
 	clearForm();
 
 fprintf(stderr,"Time alltogether: %d\nTime to init: %d\nTime to send: %d\nTime until response: %d\nTime to download: %d\n"
-	"header[%s]\nbody[%s]\nlen=%d\nver=%.1f\nstatus=%d\n",
+	"header[%s]\nbody[%s]\nlen=%zu\nver=%.1f\nstatus=%d\n",
 	t5-t1,t2-t1,t3-t2,t4-t3,t5-t4,response.getString("Header"),body.toString(),body.length(),ver,status);
 fflush(stderr);
 	return body.toString();

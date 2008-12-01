@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <inttypes.h>
 #include <libamanita/RegEx.h>
 
 
@@ -50,7 +51,7 @@ const char *blank = "";
 
 struct recode {
 	char c;
-	unsigned long f;
+	uint32_t f;
 	unsigned short min,max;
 };
 
@@ -62,28 +63,28 @@ class REBlock {
 		RegEx *re;
 		char brack;
 		recode *code;
-		unsigned long *chars;
-		unsigned long depth,ref,pos,len,flags;
+		uint32_t *chars;
+		uint32_t depth,ref,pos,len,flags;
 		unsigned short min,max;
 		REBlock *prev,*next,*last,*first,*onmatch,*onfail;
 
-		REBlock(RegEx *re,REBlock *prev,unsigned long pos,unsigned long f=0,char br=0);
+		REBlock(RegEx *re,REBlock *prev,uint32_t pos,uint32_t f=0,char br=0);
 		~REBlock();
 
-		void setFlags(unsigned long m,unsigned short min,unsigned short max);
+		void setFlags(uint32_t m,unsigned short min,unsigned short max);
 		void compile(const char *exp);
-		bool test(const char *t,unsigned long p,unsigned long i) {
+		bool test(const char *t,uint32_t p,uint32_t i) {
 			char c = t[p];
 			return test(p? t[p-1] : 0,c,c? t[p+1] : 0,i);
 		}
-		bool test(char c0,char c1,char c2,unsigned long i);
+		bool test(char c0,char c1,char c2,uint32_t i);
 };
 
 
 const char REBlock::whitespace[] = " \n\t\r\f\v";
 const char REBlock::word[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
 
-REBlock::REBlock(RegEx *re,REBlock *prev,unsigned long pos,unsigned long f,char br)
+REBlock::REBlock(RegEx *re,REBlock *prev,uint32_t pos,uint32_t f,char br)
 		: re(re),brack(br),code(NULL),chars(NULL),depth(0),ref(0),pos(pos),len(0),flags(f),min(1),max(1),
 			prev(prev),next(NULL),last(NULL),first(NULL),onmatch(NULL),onfail(NULL) {
 	if(prev!=NULL) prev->next = this;
@@ -95,7 +96,7 @@ REBlock::~REBlock() {
 	if(next!=NULL) { delete next;next = NULL; }
 }
 
-void REBlock::setFlags(unsigned long m,unsigned short min,unsigned short max) {
+void REBlock::setFlags(uint32_t m,unsigned short min,unsigned short max) {
 	if(m&REGEX_LOOP) {
 		if(min==0) m |= REGEX_SKIP;
 		if(max==1) m ^= REGEX_LOOP;
@@ -108,12 +109,12 @@ void REBlock::compile(const char *exp) {
 	char c,t;
 	int b,n = 0;
 	exp += pos;
-	unsigned long i,j;
+	uint32_t i,j;
 	recode q;
 	if(brack!=REGEX_RNDBR && brack!=REGEX_SQRBR) brack = REGEX_RNDBR;
 	if(brack==REGEX_RNDBR) code = (recode *)malloc((len+1)*sizeof(recode));
 	else {
-		chars = (unsigned long *)malloc(8*sizeof(unsigned long));
+		chars = (uint32_t *)malloc(32);
 		for(i=0; i<8; i++) chars[i] = '\0';
 	}
 //printf("REBlock::compile(%p,len=%d,\"",this,len);
@@ -179,7 +180,7 @@ void REBlock::compile(const char *exp) {
 				} else q.c = c,q.f = REGEX_CHAR;
 		}
 		if(brack==REGEX_RNDBR) {
-printf("q.c=%c,q.f=%08lx\n",q.c,q.f);
+printf("q.c=%c,q.f=%08" PRIx32 "\n",q.c,q.f);
 			do {
 				c = exp[++i];
 				if(c=='?') {
@@ -226,7 +227,7 @@ printf("{\n");
 //printf("\");\n");
 }
 
-bool REBlock::test(char c0,char c1,char c2,unsigned long i) {
+bool REBlock::test(char c0,char c1,char c2,uint32_t i) {
 	char n;
 	REBlock *bl = this;
 //printf("\nREBlock::test(%p,%c,%c,%c,%c,%c);\n",this,brack,c0,c1,c2,code!=NULL? code[i].c : ' ');
@@ -267,17 +268,17 @@ class REMatch {
 	public:
 		RegEx *re;
 		char *match,**brs;
-		unsigned long pos,len,*brslen,nbrs;
+		uint32_t pos,len,*brslen,nbrs;
 		REMatch *next;
 
-		REMatch(RegEx *re,REMatch *prev,const char *m,unsigned long p,unsigned long len);
+		REMatch(RegEx *re,REMatch *prev,const char *m,uint32_t p,uint32_t len);
 		~REMatch();
 
-		void backrefs(const char *t,unsigned long *r,unsigned long l);
-		int backrefsLength(unsigned long *r);
+		void backrefs(const char *t,uint32_t *r,uint32_t l);
+		int backrefsLength(uint32_t *r);
 };
 
-REMatch::REMatch(RegEx *re,REMatch *prev,const char *m,unsigned long p,unsigned long len)
+REMatch::REMatch(RegEx *re,REMatch *prev,const char *m,uint32_t p,uint32_t len)
 		: re(re),brs(NULL),pos(p),len(len),brslen(NULL),nbrs(0),next(NULL) {
 	match = (char *)malloc(len+1);
 	memcpy(match,m,len);
@@ -288,7 +289,7 @@ REMatch::REMatch(RegEx *re,REMatch *prev,const char *m,unsigned long p,unsigned 
 REMatch::~REMatch() {
 	if(match!=NULL) { free(match);match = NULL,len = 0; }
 	if(brs!=NULL) {
-		for(unsigned long i=0; i<nbrs; i++) if(brs[i]!=NULL) free(brs[i]);
+		for(uint32_t i=0; i<nbrs; i++) if(brs[i]!=NULL) free(brs[i]);
 		free(brs);
 		brs = NULL,nbrs = 0;
 	}
@@ -296,13 +297,13 @@ REMatch::~REMatch() {
 	next = NULL;
 }
 
-void REMatch::backrefs(const char *t,unsigned long *r,unsigned long n) {
+void REMatch::backrefs(const char *t,uint32_t *r,uint32_t n) {
 	if(t==NULL || r==NULL || !n) return;
-	unsigned long i = 0,j = 0,l = 0;
+	uint32_t i = 0,j = 0,l = 0;
 	if(brs!=NULL) { for(i=0; brs[i]; i++) free(brs[i]);free(brs); }
 	if(brslen!=NULL) { free(brslen);brslen = NULL; }
 	brs = (char **)malloc(n*sizeof(char *));
-	brslen = (unsigned long *)malloc(n*sizeof(unsigned long));
+	brslen = (uint32_t *)malloc(n*4);
 	nbrs = n;
 	for(i=0; i<n; i++) {
 		j = r[i],l = r[9+i];
@@ -316,10 +317,10 @@ void REMatch::backrefs(const char *t,unsigned long *r,unsigned long n) {
 	}
 }
 
-int REMatch::backrefsLength(unsigned long *r) {
+int REMatch::backrefsLength(uint32_t *r) {
 	int l = 0;
 	if(r[0]>0) l += r[0]*len;
-	for(unsigned long i=0; i<nbrs; i++) if(r[i+1]>0 && brs[i]!=NULL && brslen[i]>0) {
+	for(uint32_t i=0; i<nbrs; i++) if(r[i+1]>0 && brs[i]!=NULL && brslen[i]>0) {
 //printf("REMatch::backrefsLength(i=%d,backref=%s,len=%d)\n",i,brs[i],brslen[i]);
 		l += r[i+1]*brslen[i];
 	}
@@ -347,7 +348,7 @@ void RegEx::clearBlocks() {
 void RegEx::clearMatches() {
 	if(strings!=NULL) { free(strings);strings = NULL; }
 	if(found>0) {
-		for(unsigned long i=0; i<found; i++) {
+		for(uint32_t i=0; i<found; i++) {
 			if(list[i]!=NULL) delete list[i];
 		}
 		free(list);
@@ -376,7 +377,7 @@ printf("Compiling...\n");
 	if(!*exp) return 0; // If e is empty, no need to compile.
 	blocks = new REBlock(this,0,0,REGEX_FIRST,REGEX_RNDBR);
 	REBlock *first = blocks,*last = first,*temp;
-	unsigned long pos = 0,p = 0,n = 0,l = 0,d = 1;
+	uint32_t pos = 0,p = 0,n = 0,l = 0,d = 1;
 	unsigned short min = 1,max = 1;
 	char c = *exp,b=REGEX_RNDBR,sh = 0,ush = 0,oa = 0,ca = 0;
 	while(true) {
@@ -533,21 +534,21 @@ printf("Block: %s\n",&exp[p]);
 
 struct blockstack {
 	REBlock *bl;
-	unsigned long p;
+	uint32_t p;
 	int i,l,a,loops,s;
 };
 
-blockstack *resizeStack(blockstack *st,unsigned long &stsz,unsigned long size) {
+blockstack *resizeStack(blockstack *st,uint32_t &stsz,uint32_t size) {
 	stsz = stsz<size && stsz*2>size? size : stsz*2;
 	return (blockstack *)realloc(st,stsz*sizeof(blockstack));
 }
 
 #ifdef PRINT_OUTPUT
-void printSetStack(blockstack &st,unsigned long stn,char c,int n) {
+void printSetStack(blockstack &st,uint32_t stn,char c,int n) {
 printf("\nSET STACK! - - - - - - - - - - - - - - - - - - - - - - - - - - - - -[%lu]%c %d\n\
 bl=%p,p=%lu,i=%d,l=%d,a=%d,loops=%d,s=%d\n",stn,c,n,st.bl,st.p,st.i,st.l,st.a,st.loops,st.s);
 }
-void printGetStack(blockstack &st,unsigned long stn) {
+void printGetStack(blockstack &st,uint32_t stn) {
 printf("\nGET STACK! -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-[%lu]\n\
 bl=%p,p=%lu,i=%d,l=%d,a=%d,loops=%d,s=%d\n",stn,st.bl,st.p,st.i,st.l,st.a,st.loops,st.s);
 }
@@ -562,9 +563,9 @@ PRINTF("sizeof(blockstack)=%d\n",sizeof(blockstack));
 	clearMatches();
 	REBlock *bl,*bl0 = blocks,*bl1,*bln,*blr;
 	REMatch *match = NULL;
-	unsigned long i = 0,l = 0,a = 0,r = 0,s = 0,n = 0,hit = 0;
+	uint32_t i = 0,l = 0,a = 0,r = 0,s = 0,n = 0,hit = 0;
 	recode q = { 0,0,0,0 };
-	unsigned long test = 0,scan = 0,rscan,p = 0,loops = 1,backrefs[18],stsz = size<32? size : 32,stn = 0;
+	uint32_t test = 0,scan = 0,rscan,p = 0,loops = 1,backrefs[18],stsz = size<32? size : 32,stn = 0;
 	bool lazy = false;
 	blockstack *st = (blockstack *)malloc(stsz*sizeof(blockstack));
 	char cc0 = '\0',cc1 = ic(*text),cc2 = cc1=='\0'? cc1 : ic(text[1]),c0 = '\0',c1 = '\0',c2 = '\0';
@@ -790,7 +791,7 @@ PRINTF("[%p]search_next: %lu[%c%c%c]\n",bl,test,cc0,cc1,cc2);
 		for(i=0; i<found; i++)
 			strings[i] = match->match,list[i] = match,match = match->next;
 	}
-printf("\nSearch done in %lu (%lu,%lu) ticks, matches found: %lu stsz=%lu\n",(time2-time1),time1,time2,found,stsz);
+printf("\nSearch done in %zu (%zu,%zu) ticks, matches found: %" PRIu32 " stsz=%" PRIu32 "\n",(time2-time1),time1,time2,found,stsz);
 	return found;
 }
 
@@ -798,7 +799,7 @@ printf("\nSearch done in %lu (%lu,%lu) ticks, matches found: %lu stsz=%lu\n",(ti
 const char *RegEx::replace(const char *t,const char *r) {
 	if(search(t)>0 && r!=NULL) {
 printf("\nReplace: %s\n",r);
-		unsigned long sz = size,i,n,br[10],l;
+		uint32_t sz = size,i,n,br[10],l;
 		for(i=0; i<=9; i++) br[i] = 0;
 		const char *s1,*s3 = r;
 		char *s2,c,*del = data;
@@ -811,13 +812,13 @@ printf("\nReplace: %s\n",r);
 		}
 		while(m!=NULL) {
 			n = l+m->backrefsLength(br)-m->len;
-printf("Backrefs Length: l=%lu, n=%lu, m->len=%lu\n",l,n,m->len);
+printf("Backrefs Length: l=%" PRIu32 ", n=%" PRIu32 ", m->len=%" PRIu32 "\n",l,n,m->len);
 			sz += n,m = m->next;
 		}
-printf("Size: size=%lu subst=%lu\n",size,sz);
+printf("Size: size=%" PRIu32 " subst=%" PRIu32 "\n",size,sz);
 		for(m=hits,data=(char *)malloc(sz+1),s1=text,s2=data,i=0; i<=size;)
 			if(m!=NULL) {
-printf("Match: %s (len=%lu)\n",m->match,m->len);
+printf("Match: %s (len=%" PRIu32 ")\n",m->match,m->len);
 				memcpy(s2,s1,m->pos-i);
 				s1 += m->pos-i,s2 += m->pos-i,i = m->pos;
 
@@ -849,17 +850,16 @@ const char *RegEx::replace(const char *t,const char *e,const char *r,const char 
 void RegEx::print() {
 	if(blocks==NULL) return;
 	REBlock *bl = blocks;
-	unsigned long i,j,c,n;
+	uint32_t i,j,c,m,n;
 	recode q;
-	unsigned long m;
 	printf("\n\nText:\n%s\n\nExpression: %s\nModifiers: %s\n",text,exp,mods);
 	printf("\nBlock: First: Last:  Match: Fail:  Flags:         L D BR Code:\n");
 	while(bl!=NULL) {
-		printf("%06lx %06lx %06lx %06lx %06lx %08lx %c%u-%u %2lu %lu ",(unsigned long)bl,(unsigned long)bl->first,
-            (unsigned long)bl->last,(unsigned long)bl->onmatch,(unsigned long)bl->onfail,bl->flags,bl->brack,
-            bl->min,bl->max,bl->len,bl->depth);
+		printf("%06" PRIxPTR " %06" PRIxPTR " %06" PRIxPTR " %06" PRIxPTR " %06" PRIxPTR " %08" PRIx32 " %c%hu-%hu %2" PRIu32 " %" PRIu32 " ",
+				(intptr_t)bl,(intptr_t)bl->first,(intptr_t)bl->last,(intptr_t)bl->onmatch,(intptr_t)bl->onfail,
+					bl->flags,bl->brack,bl->min,bl->max,bl->len,bl->depth);
 		m = bl->flags;
-		if(m&REGEX_BACKREFS) printf("\\%lu ",bl->ref);
+		if(m&REGEX_BACKREFS) printf("\\%" PRIu32 " ",bl->ref);
 		else printf("   ");
 		for(i=0; i<bl->depth; i++) printf("   ");
 		if(bl->brack==REGEX_SQRBR) {
@@ -924,11 +924,11 @@ void RegEx::print() {
 		bl = bl->next;
 	}
 	if(found) {
-		printf("\nNumber of matches: %lu\nNumber of backrefs: %lu\n",found,refs);
+		printf("\nNumber of matches: %" PRIu32 "\nNumber of backrefs: %" PRIu32 "\n",found,refs);
 		printf("\n%-32s\tBackreferences:\n","Found Matches:");
 		for(i=0; i<found; i++) {
-			printf("%2lu. %-28s\t[",i,strings[i]);
-			for(unsigned long j=0; j<refs; j++) printf(" %-8s",j<list[i]->nbrs && list[i]->brs[j]!=NULL? list[i]->brs[j] : "-");
+			printf("%2" PRIu32 ". %-28s\t[",i,strings[i]);
+			for(uint32_t j=0; j<refs; j++) printf(" %-8s",j<list[i]->nbrs && list[i]->brs[j]!=NULL? list[i]->brs[j] : "-");
 			printf(" ]\n");
 		}
 	}
@@ -946,7 +946,7 @@ const char *RegEx::getMatch(int n) {
 }
 
 const char *RegEx::getBackRef(int n,int r) {
-	return n>=0 && (unsigned long)n<found && r>=0 && (unsigned long)r<refs && list[n]->brs[r]?
+	return n>=0 && (uint32_t)n<found && r>=0 && (uint32_t)r<refs && list[n]->brs[r]?
          (const char *)list[n]->brs[r] : blank;
 }
 

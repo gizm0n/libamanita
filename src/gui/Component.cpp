@@ -2,6 +2,7 @@
 #include "../config.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include <libamanita/sdl/Graphics.h>
 #include <libamanita/gui/Component.h>
 #include <libamanita/gui/ToolTip.h>
@@ -61,7 +62,7 @@ char indent[32] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 int indentn = 0;
 
 Component::~Component() {
-printf("%sComponent::~Component(parent=%p,%lx,instance=%p,%lx,x=%d,y=%d,w=%d,h=%d,size=%d)\n",
+printf("%sComponent::~Component(parent=%p,%" PRIx32 ",instance=%p,%" PRIx32 ",x=%d,y=%d,w=%d,h=%d,size=%zu)\n",
 indent,com.p,com.p? ((Class &)*com.p).getID() : 0,this,((Class &)*this).getID(),com.x,com.y,com.w,com.h,com.ch? com.ch->size() : 0);
 indent[indentn++] = '\t';
 	if(com.ch) {

@@ -2,9 +2,10 @@
 #include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <libamanita/Object.h>
 
-unsigned long Class::id_index = 0;
+uint32_t Class::id_index = 0;
 
 Class::Class(const char *nm,Class *s) : name(nm),super(s) {
 	id = Class::id_index++;
@@ -16,7 +17,7 @@ Class::Class(const char *nm,Class *s) : name(nm),super(s) {
 		while(c->super) c->d = 0,c = c->super;
 		c->setDepth(0);
 	}
-printf("Class::Class(name=%s,id=%lu,d=%d)\n",name,id,d);
+printf("Class::Class(name=%s,id=%" PRIu32 ",d=%d)\n",name,id,d);
 fflush(stdout);
 if(super) {
 	Class *c = super;
@@ -47,7 +48,7 @@ void Class::setDepth(int n) {
 void Class::print(char *ind) {
 	if(d) ind[d-1] = '\t';
 	ind[d] = '\0';
-	printf("%s->%s(id=%lu,d=%d)\n",ind,name,id,d);
+	printf("%s->%s(id=%" PRIu32 ",d=%d)\n",ind,name,id,d);
 	fflush(stdout);
 	if(nsub) for(size_t i=0ul; i<nsub; i++) sub[i]->print(ind);
 }

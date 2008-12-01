@@ -18,7 +18,7 @@ private:
 	void run();
 
 public:
-	Client(Uint32 (*l)(Socket *,Uint32,Uint32,Uint32,Uint32),Uint32 id=0,const char *nick=0);
+	Client(SocketListener l,Uint32 id=0,const char *nick=0);
 	~Client();
 
 	bool start(const char *con);

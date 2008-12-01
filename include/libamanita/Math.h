@@ -2,21 +2,24 @@
 #define _LIBAMANITA_MATH_H
 
 
+#include <stdlib.h>
+#include <stdint.h>
+
 class Math {
 public:
 	static const double PI; /** < The PI constant 3.1415926535897932384626433832795 */
 	static const int prime[]; /** < The prime number serie from 2 to 499. */
-	static const long fibonacci[]; /** < The fibonacci number serie from 0 to 1'836'311'903. */
+	static const int fibonacci[]; /** < The fibonacci number serie from 0 to 1'836'311'903. */
 
 	static long floor(double d); /** < Round double d to floor integer. */
 	static long ceil(double d); /** < Round double d to ceil integer. */
 	static long round(double d); /** < Round double d to closest integer. */
 
-	static unsigned long pythagoras(long x,long y);
+	static uint32_t pythagoras(int32_t x,int32_t y);
 	static double pythagoras(double x,double y);
 	static double pythagoras2(double kat,double tan);
 	static double angle(double x,double y);
-	static long distance(long x1,long y1,long x2,long y2);
+	static int32_t distance(int32_t x1,int32_t y1,int32_t x2,int32_t y2);
 	static double distance(double x1,double y1,double x2,double y2);
 	static double distance(double x1,double y1,double z1,double x2,double y2,double z2);
 	static double circleArea(double radius) { return PI*radius*radius; }
@@ -35,7 +38,7 @@ public:
 	static unsigned long sum(unsigned long *arr,long l); /** < The sum of l number of doubles in arr. */
 	static double sum(double *arr,long l); /** < The sum of l number of doubles in arr. */
 
-	static int bits(long long n);
+	static size_t bits(long long n);
 
 	/** Euclidean algorithm.
 	 * In number theory, the Euclidean algorithm (also called Euclid's algorithm) is an algorithm to determine

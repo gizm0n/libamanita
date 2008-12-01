@@ -96,7 +96,7 @@ enum {
 
 class Socket;
 
-typedef Uint32 (*SocketListener)(Socket *,Uint32,Uint32,Uint32,Uint32);
+typedef Uint32 (*SocketListener)(Socket *,Uint32,intptr_t,intptr_t,intptr_t);
 
 class Socket {
 private:
@@ -115,7 +115,7 @@ protected:
 	void setRunning(bool b) { status |= SOCK_ST_RUNNING;if(!b) status ^= SOCK_ST_RUNNING; }
 	void setStarting(bool b) { status |= SOCK_ST_STARTING;if(!b) status ^= SOCK_ST_STARTING; }
 
-	Uint32 stateChanged(Uint32 state,Uint32 p1,Uint32 p2,Uint32 p3) { return (*listener)(this,state,p1,p2,p3); }
+	Uint32 stateChanged(Uint32 state,intptr_t p1,intptr_t p2,intptr_t p3) { return (*listener)(this,state,p1,p2,p3); }
 	void *receive(TCPsocket s,Sint32 &n);
 	void releaseMessageBuffer(void *b) { if(b!=buf) free(b); }
 

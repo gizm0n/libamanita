@@ -156,7 +156,7 @@ void Path::rehash() {
 	} else {
 		int c = cap<<1;
 		if(!(c&1)) c++;
-		unsigned long i,h;
+		size_t i,h;
 		node **t = (node **)malloc(c*sizeof(node *));
 		memset(t,0,c*sizeof(node *));
 		node *n1,*n2;
@@ -196,7 +196,7 @@ void Path::remove(node *p) {
 void Path::clear() {
 	if(closed) {
 		node *n1,*n2;
-		for(unsigned long i=0; i<cap; i++) if((n1=closed[i])) do {
+		for(size_t i=0; i<cap; i++) if((n1=closed[i])) do {
 			n2 = n1->closed;
 			delete n1;
 			n1 = n2;

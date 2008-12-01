@@ -26,7 +26,7 @@ private:
 	};
 	struct component {
 		size_t cnt;
-		unsigned long id,status;
+		Uint32 id,status;
 		short x,y,w,h;
 		Component *p;					// Parent
 		Vector *ch;						// Children
@@ -53,9 +53,9 @@ public:
 	Component(Component &c);
 	virtual ~Component();
 
-	void setID(unsigned long i) { com.id = i; }
-	unsigned long getID() { return com.id; }
-	unsigned long getStatus() { return com.status; }
+	void setID(Uint32 i) { com.id = i; }
+	Uint32 getID() { return com.id; }
+	Uint32 getStatus() { return com.status; }
 
 	virtual void add(Component *c);
 	virtual void remove(Component *c);
@@ -134,8 +134,6 @@ public:
 	void setToolTip(ToolTip *tt);
 	ToolTip *getToolTip() { return com.tt; }
 	bool handleToolTip(ToolTipEvent &tte);
-
-	operator unsigned long() const { return com.id; }
 };
 
 

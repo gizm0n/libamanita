@@ -157,7 +157,7 @@ public:
 	 * @param data If set to NULL the program will load the file from harddrive.
 	 * @param len Length of data.
 	 */
-	void setFormFile(const char *key,const char *file,const char *content,bool binary=true,void *data=NULL,unsigned long len=0);
+	void setFormFile(const char *key,const char *file,const char *content,bool binary=true,void *data=0,size_t len=0);
 
 	/** Remove a form value.
 	 * @param key Same key that was used in setFormValue or setFormFile.
@@ -220,7 +220,7 @@ public:
 	 * http.request("www.host.com","script.php",POST);
 	 * @endcode
 	 */
-	const char *request(const char *host,const char *url,HTTP_METHOD method,const char *data=NULL,unsigned long len=0);
+	const char *request(const char *host,const char *url,HTTP_METHOD method,const char *data=0,size_t len=0);
 
 	/** Get the HTTP version returned by the response. */
 	float getHTTPVersion() { return ver; }

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include <libamanita/Dictionary.h>
 #include <libamanita/String.h>
 
@@ -23,7 +24,7 @@ Dictionary::~Dictionary() {
 
 
 void Dictionary::clear() {
-	for(size_t i=0ul; i<sz; i++) free(words[i].key);
+	for(size_t i=0; i<sz; i++) free(words[i].key);
 	free(words);
 	free(values);
 	words = 0,values = 0;
@@ -33,11 +34,11 @@ void Dictionary::createIndex(const char **ws,const value_t *vs,size_t l,bool c) 
 	size_t i;
 	word *w;
 	if(words) clear();
-	if(!l) for(i=0ul; ws[i]; i++);
+	if(!l) for(i=0; ws[i]; i++);
 	else i = l;
 	cap = sz = i;
 	words = (word *)malloc(cap*sizeof(word));
-	for(i=0ul; i<sz; i++) {
+	for(i=0; i<sz; i++) {
 		w = &words[i];
 		w->key = strdup(ws[i]);
 		w->value = vs[i];
@@ -51,11 +52,11 @@ void Dictionary::createIndex(const word *ws,size_t l,bool c) {
 	size_t i;
 	word *w;
 	if(words) clear();
-	if(!l) for(i=0ul; ws[i].key; i++);
+	if(!l) for(i=0; ws[i].key; i++);
 	else i = l;
 	cap = sz = i;
 	words = (word *)malloc(cap*sizeof(word));
-	for(i=0ul; i<sz; i++) {
+	for(i=0; i<sz; i++) {
 		w = &words[i];
 		w->key = strdup(ws[i].key);
 		w->value = ws[i].value;
@@ -70,18 +71,18 @@ void Dictionary::createIndex() {
 	node *n;
 	qsort(words,sz,sizeof(word),compareKey);
 	values = (word **)malloc(sz*sizeof(word *));
-	for(i=0ul; i<sz; i++) values[i] = &words[i];
+	for(i=0; i<sz; i++) values[i] = &words[i];
 	qsort(values,sz,sizeof(word *),compareValue);
 	memset(k_index,0,sizeof(k_index));
-	for(i=0ul; i<sz; i++) {
+	for(i=0; i<sz; i++) {
 		n = &k_index[(int)*words[i].key];
 		if(!n->range) n->offset = i;
 		n->range++;
 	}
 FILE *fp = fopen("dictionary.txt","w");
-for(i=0ul; i<sz; i++) fprintf(fp,"word(%d,\"%s\",length=%d,value=%lu)\n",i,words[i].key,words[i].len,words[i].value);
-for(i=0ul; i<sz; i++) fprintf(fp,"value(%d,\"%s\",length=%d,value=%lu)\n",i,values[i]->key,values[i]->len,values[i]->value);
-for(i=0ul; i<256; i++) fprintf(fp,"k_index(%d=%c,offset=%d,value=%d)\n",i,i,k_index[i].offset,k_index[i].range);
+for(i=0; i<sz; i++) fprintf(fp,"word(%zu,\"%s\",length=%zu,value=%" PRIuPTR ")\n",i,words[i].key,words[i].len,words[i].value);
+for(i=0; i<sz; i++) fprintf(fp,"value(%zu,\"%s\",length=%zu,value=%" PRIuPTR ")\n",i,values[i]->key,values[i]->len,values[i]->value);
+for(i=0; i<256; i++) fprintf(fp,"k_index(%zu=%c,offset=%zu,value=%zu)\n",i,(char)i,k_index[i].offset,k_index[i].range);
 fclose(fp);
 }
 
@@ -90,11 +91,11 @@ value_t Dictionary::getValue(const char *w,size_t l) {
 	if(!l) l = strlen(w);
 	if(n.range) for(size_t i=n.offset,c=i+n.range; i<c; i++)
 		if(l==words[i].len && *w==*words[i].key && !strncmp(w,words[i].key,l)) return words[i].value;
-	return 0ul;
+	return 0;
 }
 
 const char *Dictionary::getKey(value_t v) {
-	for(size_t i=0ul; i<sz; i++) if(values[i]->value==v) return values[i]->key;
+	for(size_t i=0; i<sz; i++) if(values[i]->value==v) return values[i]->key;
 	return 0;
 }
 

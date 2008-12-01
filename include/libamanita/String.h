@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <libamanita/Object.h>
 
 
@@ -45,16 +46,14 @@ public:
 	String &operator+=(String *s) { if(s) append(s->str,s->len);return *this; }
 	String &operator+=(String &s) { return append(s.str,s.len); }
 	String &operator+=(const char *s) { return append(s,0); }
-	String &operator+=(short s) { return append((long)s); }
-	String &operator+=(unsigned short s) { return append((unsigned long)s); }
-	String &operator+=(int i) { return append((long)i); }
-	String &operator+=(unsigned int i) { return append((unsigned long)i); }
-	String &operator+=(long l) { return append(l); }
-	String &operator+=(unsigned long ul) { return append(ul); }
+	String &operator+=(int16_t i) { return append((int32_t)i); }
+	String &operator+=(uint16_t i) { return append((uint32_t)i); }
+	String &operator+=(int32_t i) { return append(i); }
+	String &operator+=(uint32_t i) { return append(i); }
+	String &operator+=(int64_t i) { return append(i); }
+	String &operator+=(uint64_t i) { return append(i); }
 	String &operator+=(float f) { return append(f); }
 	String &operator+=(double d) { return append(d); }
-	String &operator+=(long long ll) { return append(ll); }
-	String &operator+=(unsigned long long ull) { return append(ull); }
 
 	String &append(char c);
 	String &append(char c,size_t n);
@@ -64,16 +63,14 @@ public:
 	String &append(String &s,size_t n) { return append(s.str,s.len,n); }
 	String &append(const char *s,size_t l=0ul);
 	String &append(const char *s,size_t l,size_t n);
-	String &append(short s) { return append((long)s); }
-	String &append(unsigned short s) { return append((unsigned long)s); }
-	String &append(int i) { return append((long)i); }
-	String &append(unsigned int i) { return append((unsigned long)i); }
-	String &append(long l);
-	String &append(long l,int base);
-	String &append(unsigned long ul);
+	String &append(int16_t i) { return append((int32_t)i); }
+	String &append(uint16_t i) { return append((uint32_t)i); }
+	String &append(int32_t i);
+	String &append(int32_t i,int base);
+	String &append(uint32_t i);
+	String &append(int64_t i);
+	String &append(uint64_t i);
 	String &append(double f,int n=2,char c='.');
-	String &append(long long ll);
-	String &append(unsigned long long ull);
 	String &append(FILE *fp,bool uesc=true) { return appendUntil(fp,0,0,uesc); }
 	String &appendln() { return append(endline); }
 
@@ -166,26 +163,22 @@ String operator+(String *s,String &s1);
 String operator+(String &s,String &s1);
 String operator+(String &s,const char *s1);
 String operator+(const char *s,String &s1);
-String operator+(String &s,short s1);
-String operator+(short s,String &s1);
-String operator+(String &s,unsigned short s1);
-String operator+(unsigned short s,String &s1);
-String operator+(String &s,int i);
-String operator+(int i,String &s);
-String operator+(String &s,unsigned int i);
-String operator+(unsigned int i,String &s);
-String operator+(String &s,long l);
-String operator+(long l,String &s);
-String operator+(String &s,unsigned long ul);
-String operator+(unsigned long ul,String &s);
+String operator+(String &s,int16_t i);
+String operator+(int16_t i,String &s);
+String operator+(String &s,uint16_t i);
+String operator+(uint16_t i,String &s);
+String operator+(String &s,int32_t i);
+String operator+(int32_t i,String &s);
+String operator+(String &s,uint32_t i);
+String operator+(uint32_t i,String &s);
+String operator+(String &s,int64_t i);
+String operator+(int64_t i,String &s);
+String operator+(String &s,uint64_t i);
+String operator+(uint64_t i,String &s);
 String operator+(String &s,float f);
 String operator+(float f,String &s);
 String operator+(String &s,double d);
 String operator+(double d,String &s);
-String operator+(String &s,long long ll);
-String operator+(long long ll,String &s);
-String operator+(String &s,unsigned long long ull);
-String operator+(unsigned long long ull,String &s);
 
 
 #endif /* _LIBAMANITA_STRING_H */
