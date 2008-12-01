@@ -15,11 +15,11 @@ const int Math::prime[] = {
 	409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,
 0};
 
-const long Math::fibonacci[] = {
-	0l,1l,1l,2l,3l,5l,8l,13l,21l,34l,55l,89l,144l,233l,377l,610l,987l,1597l,2584l,4181l,6765l,
-	10946l,17711l,28657l,46368l,75025l,121393l,196418l,317811l,514229l,832040l,1346269l,
-	2178309l,3524578l,5702887l,9227465l,14930352l,24157817l,39088169l,63245986l,102334155l,
-	165580141l,267914296l,433494437l,701408733l,1134903170l,1836311903l,
+const int Math::fibonacci[] = {
+	0,1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584,4181,6765,
+	10946,17711,28657,46368,75025,121393,196418,317811,514229,832040,1346269,
+	2178309,3524578,5702887,9227465,14930352,24157817,39088169,63245986,102334155,
+	165580141,267914296,433494437,701408733,1134903170,1836311903,
 0};
 
 
@@ -27,7 +27,7 @@ inline long Math::floor(double d) { return (long)d; }
 long Math::ceil(double d) { long n = (long)d;return n+(d-n>0.? 1 : 0); }
 long Math::round(double d) { long n = (long)d;return n+(d-n>=.5? 1 : 0); }
 
-inline unsigned long Math::pythagoras(long x,long y) { return Math::sqrt((unsigned long long)(x*x+y*y)); }
+inline uint32_t Math::pythagoras(int32_t x,int32_t y) { return Math::sqrt((uint64_t)(x*x+y*y)); }
 inline double Math::pythagoras(double x,double y) { return ::sqrt(x*x+y*y); }
 inline double Math::pythagoras2(double kat,double tan) { return ::sqrt(tan*tan-kat*kat); }
 double Math::angle(double x,double y) {
@@ -35,8 +35,8 @@ double Math::angle(double x,double y) {
 	if(tan==0.) return 0.;
 	return x==0.? acos(y/tan) : asin(x/tan);
 }
-long Math::distance(long x1,long y1,long x2,long y2) {
-	long x = abs(x1-x2),y = abs(y1-y2);
+int32_t Math::distance(int32_t x1,int32_t y1,int32_t x2,int32_t y2) {
+	int32_t x = abs(x1-x2),y = abs(y1-y2);
 	return x==0? y : (y==0? x : pythagoras(x,y));
 }
 double Math::distance(double x1,double y1,double x2,double y2) {
@@ -65,8 +65,8 @@ long Math::sum(long *arr,long l) { long s = 0;while(--l>=0) s += arr[l];return s
 unsigned long Math::sum(unsigned long *arr,long l) { unsigned long s = 0;while(--l>=0) s += arr[l];return s; }
 double Math::sum(double *arr,long l) { double s = 0;while(--l>=0) s += arr[l];return s; }
 
-int Math::bits(long long n) {
-	int i = 0;
+size_t Math::bits(long long n) {
+	size_t i = 0;
 	while(n) n >>= 1,i++;
 	return i;
 }

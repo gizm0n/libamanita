@@ -2,15 +2,16 @@
 #define _LIBAMANITA_OBJECT_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 
 class Class {
 friend class Object;
 
 private:
-	static unsigned long id_index;
+	static uint32_t id_index;
 
-	unsigned long id;
+	uint32_t id;
 	const char *name;
 	int d;
 	Class *super,**sub;
@@ -23,14 +24,14 @@ public:
 	Class(const char *nm,Class *s);
 	~Class();
 	bool instanceOf(Class &c);
-	unsigned long getID() { return id; }
+	uint32_t getID() { return id; }
 	const char *getName() { return name; }
 	Class *getSuperClass() { return super; }
-	operator unsigned long() const { return id; }
+	operator uint32_t() const { return id; }
 };
 
 /** hash_t is used by the Hashtable class to store a hash-values, and to get a hash-value from the Object-class. */
-typedef unsigned long hash_t;
+typedef intptr_t hash_t;
 
 #define RttiObjectInstance(class_name) \
 	private:\

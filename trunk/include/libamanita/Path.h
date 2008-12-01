@@ -21,7 +21,7 @@ protected:
 		unsigned char x,y,dir;
 	};
 	trailstep *trail;
-	unsigned long ind,len;
+	size_t ind,len;
 
 public:
 	Trail();
@@ -30,14 +30,14 @@ public:
 	int getX() const { return ind<len? trail[ind].x : -1; }
 	int getY() const { return ind<len? trail[ind].y : -1; }
 	int getDir() { return ind<len? trail[ind].dir : -1; }
-	int index() { return ind; }
-	int setIndex(unsigned long i) { return ind = i>=0 && i<len? i : 0; }
+	size_t index() { return ind; }
+	size_t setIndex(size_t i) { return ind = i>=0 && i<len? i : 0; }
 	void first() { ind = 0; }
 	void next() { if(ind<len) ind++; }
 	void previous() { if(ind>0) ind--; }
 	void last() { if(len>0) ind = len-1; }
-	int length() { return len; }
-	int steps() { return len-ind; }
+	size_t length() { return len; }
+	size_t steps() { return len-ind; }
 	bool hasMoreSteps() { return ind<len; }
 };
 
@@ -57,7 +57,7 @@ protected:
 	int width,height,style;
 	void *map,*obj;
 	node *open,**closed;
-	unsigned long cap,sz,full;
+	size_t cap,sz,full;
 
 	int (*areacmp)(int,int,int,int,void *);
 	int (*terraintype)(int,int,void *);

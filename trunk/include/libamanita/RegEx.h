@@ -2,6 +2,9 @@
 #define _LIBAMANITA_REGEX_H
 
 
+#include <stdint.h>
+
+
 enum REGEX_MODIFIER {
 	REGEX_GLOBAL				= 0x00000001,		// g
 	REGEX_CASELESS				= 0x00000002,		// i
@@ -20,7 +23,7 @@ friend class REBlock;
 friend class REMatch;
 
 private:
-	unsigned long mod,flags,depth,found,refs,size;
+	uint32_t mod,flags,depth,found,refs,size;
 	char *exp,*mods,*data,**strings;
 	const char *text;
 	REBlock *blocks;

@@ -2,6 +2,7 @@
 #include "../config.h"
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 #include <libamanita/sdl/Font.h>
 #include <libamanita/gui/Window.h>
 #include <libamanita/gui/Button.h>
@@ -57,7 +58,7 @@ void Window::setStyle(int st) {
 			cb->setActionListener(this);
 			cb->setToolTip(new ToolTip("Close"));
 			add(cb);
-fprintf(stderr,"Window::setDialogStyle(%p,instance=%lx,actionListener=%p)\n",cb,((Class &)*cb).getID(),cb->getActionListener());
+fprintf(stderr,"Window::setDialogStyle(%p,instance=%" PRIx32 ",actionListener=%p)\n",cb,((Class &)*cb).getID(),cb->getActionListener());
 fflush(stderr);
 		}
 	} else if(cb) {

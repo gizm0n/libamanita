@@ -31,13 +31,13 @@ protected:
 
 public:
 	Dictionary() : Collection(),words(0) {}
-	Dictionary(const char **ws,const value_t *vs,size_t l=0ul,bool c=false);
-	Dictionary(const word *ws,size_t l=0ul,bool c=false);
+	Dictionary(const char **ws,const value_t *vs,size_t l=0,bool c=false);
+	Dictionary(const word *ws,size_t l=0,bool c=false);
 	~Dictionary();
 
-	void createIndex(const char **ws,const value_t *vs,size_t l=0ul,bool c=false);
-	void createIndex(const word *w,size_t l=0ul,bool c=false);
-	value_t getValue(const char *w,size_t l=0ul);
+	void createIndex(const char **ws,const value_t *vs,size_t l=0,bool c=false);
+	void createIndex(const word *w,size_t l=0,bool c=false);
+	value_t getValue(const char *w,size_t l=0);
 	const char *getKey(value_t v);
 };
 

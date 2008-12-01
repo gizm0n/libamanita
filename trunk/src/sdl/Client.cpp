@@ -7,7 +7,7 @@
 
 
 
-Client::Client(Uint32 (*l)(Socket *,Uint32,Uint32,Uint32,Uint32),Uint32 id,const char *nick)
+Client::Client(SocketListener l,Uint32 id,const char *nick)
 		: Socket(l),id(id),nick(0) {
 	if(nick && *nick) setNick(nick);
 #ifndef TCPSOCK_NOCIPHER
@@ -110,7 +110,7 @@ fflush(stderr);
 				if(key) XORcipher(b,b,l,key,keylen);
 #	endif /*TCPSOCK_LENINCL*/
 #endif /*TCPSOCK_NOCIPHER*/
-				stateChanged(SM_GET_MESSAGE,0,(Uint32)b,l);
+				stateChanged(SM_GET_MESSAGE,0,(intptr_t)b,(intptr_t)l);
 			}
 			releaseMessageBuffer(b);
 		}
