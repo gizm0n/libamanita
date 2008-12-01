@@ -16,14 +16,20 @@ AC_PROG_RANLIB
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([stddef.h stdlib.h string.h])
+AC_CHECK_HEADERS([stddef.h stdlib.h string.h stdint.h inttypes.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
+AC_TYPE_UINT8_T
+AC_TYPE_INT16_T
+AC_TYPE_UINT16_T
+AC_TYPE_INT32_T
 AC_TYPE_UINT32_T
+AC_TYPE_INT64_T
+AC_TYPE_UINT64_T
 
 # Checks for library functions.
 AC_FUNC_MALLOC
