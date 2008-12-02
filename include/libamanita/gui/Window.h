@@ -89,7 +89,7 @@ public:
 	virtual bool mouseDown(MouseEvent &me);
 	virtual bool actionPerformed(ActionEvent &ae);
 
-	virtual void paint(int time);
+	virtual void paint(time_t time);
 };
 
 

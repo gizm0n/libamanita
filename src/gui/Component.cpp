@@ -141,9 +141,9 @@ bool Component::isShowing() {
 		com.x<g.getScreenWidth() && com.y<g.getScreenHeight();
 }
 
-void Component::paint(int time) {}
+void Component::paint(time_t time) {}
 
-void Component::paintAll(int time) {
+void Component::paintAll(time_t time) {
 	if(!isVisible() || !com.ch) return;
 	Component *c;
 	if(clipBounds()) {

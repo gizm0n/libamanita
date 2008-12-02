@@ -41,7 +41,7 @@ void IconButton::setImage(Image *img,int plain,int active,int down,int disabled)
 	}
 }
 
-void IconButton::paint(int time) {
+void IconButton::paint(time_t time) {
 	if(ib.img) ib.img->draw(getX(),getY(),
 		isEnabled()? (isMouseOver()? (isMouseDown()? ib.down : ib.active) : ib.plain) : ib.disabled);
 }

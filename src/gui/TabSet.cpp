@@ -114,7 +114,7 @@ bool TabSet::mouseDown(MouseEvent &me) {
 	return false;
 }
 
-void TabSet::paint(int time) {
+void TabSet::paint(time_t time) {
 	if(!tabs) return;
 	SDL_Rect *r;
 	int i,x = 0,w;
