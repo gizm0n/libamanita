@@ -110,8 +110,8 @@ public:
 	static Component *getToolTipFocus() { return toolTipFocus; }
 	bool hasToolTipFocus() { return this==toolTipFocus; }
 
-	virtual void paint(int time);
-	void paintAll(int time);
+	virtual void paint(time_t time);
+	void paintAll(time_t time);
 
 	void setFocusListener(FocusListener *fl) { focusListener = fl; }
 	FocusListener *getFocusListener() { return focusListener; }

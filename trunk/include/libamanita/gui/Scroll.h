@@ -74,7 +74,7 @@ public:
 	void positionSlide();
 	bool mouseDrag(MouseMotionEvent &mme);
 	bool actionPerformed(ActionEvent &ae);
-	void paint(int time);
+	void paint(time_t time);
 };
 
 

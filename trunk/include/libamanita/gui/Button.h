@@ -96,7 +96,7 @@ public:
 	void setFont(Font *font);
 	void setTextAlign(int align);
 	void setInsets(int l,int t,int r,int b);
-	void paint(int time);
+	void paint(time_t time);
 	bool mouseUp(MouseEvent &me);
 };
 

@@ -37,7 +37,7 @@ public:
 	static void setDefaultSettings(Image *img,Uint32 data[4]);
 
 	void setImage(Image *img,int plain,int active,int down,int disabled);
-	void paint(int time);
+	void paint(time_t time);
 	bool mouseUp(MouseEvent &me);
 };
 

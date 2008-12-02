@@ -83,7 +83,7 @@ public:
 	int getActiveTab() { return act; }
 	int getPreviousTab(int n=0);
 	bool mouseDown(MouseEvent &me);
-	void paint(int time);
+	void paint(time_t time);
 };
 
 

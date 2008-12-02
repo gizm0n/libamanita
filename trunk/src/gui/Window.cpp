@@ -83,7 +83,7 @@ bool Window::actionPerformed(ActionEvent &ae) {
 	return false;
 }
 
-void Window::paint(int time) {
+void Window::paint(time_t time) {
 	if(isOpaque()) {
 		if(bgimg) bgimg->draw(getX()+fr.l->w,getY()+fr.t->h,getWidth()-fr.l->w-fr.r->w,getHeight()-fr.t->h-fr.b->h,bgindex);
 		else g.fillRect(getX()+fr.l->w,getY()+fr.t->h,getWidth()-fr.l->w-fr.r->w,getHeight()-fr.t->h-fr.b->h,g.mapRGB(bgcol));

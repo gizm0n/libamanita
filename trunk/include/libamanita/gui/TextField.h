@@ -24,7 +24,7 @@ public:
 
 	void setTextAlign(int a) { align = a; }
 	bool keyDown(KeyEvent &ke);
-	void paint(int time);
+	void paint(time_t time);
 	void setShowCaret(bool c) { showCaret = c; }
 };
 

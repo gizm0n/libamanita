@@ -58,7 +58,7 @@ fflush(stderr);
 	return true;
 }
 
-void TextField::paint(int time) {
+void TextField::paint(time_t time) {
 	drawText(getX(),getY(),align,showCaret && isEnabled()/* && hasKeyFocus()*/ && (caretTimer>0 || ((time+caretTimer)&8)));
 	if(caretTimer>0 && (--caretTimer)==0) caretTimer = -(time%8);
 }

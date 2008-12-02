@@ -89,7 +89,7 @@ void Button::setInsets(int l,int t,int r,int b) {
 	setTextAlign(bt.align);
 }
 
-void Button::paint(int time) {
+void Button::paint(time_t time) {
 	if(isOpaque() && _s.img) {
 		_settings::state &st = _s.st[isEnabled()? (isMouseOver()? (isMouseDown()? 2 : 1) : 0) : 3];
 		_s.img->draw(getX()+st.l->w,getY()+st.t->h,getWidth()-st.l->w-st.r->w,getHeight()-st.t->h-st.b->h,*st.c);

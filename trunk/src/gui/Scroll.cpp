@@ -150,7 +150,7 @@ bool Scroll::actionPerformed(ActionEvent &ae) {
 	return false;
 }
 
-void Scroll::paint(int time) {
+void Scroll::paint(time_t time) {
 	_s.img->draw(getX()+slide.x,getY()+slide.y,slide.w,slide.h,*bar);
 }
 
