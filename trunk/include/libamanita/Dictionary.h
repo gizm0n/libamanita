@@ -9,7 +9,7 @@ RttiObjectInstance(Dictionary)
 
 public:
 	struct word {
-		char *key;
+		const char *key;
 		value_t value;
 		size_t len;
 	};

@@ -569,7 +569,7 @@ size_t String::nextWord(const char **s,const char *c) {
 }
 
 
-unsigned long String::fromHex(char *str) {
+unsigned long String::fromHex(const char *str) {
 	if(!str) return 0;
 	unsigned long n = 0;
 	while(isHex(*str)) n = (n<<4)|fromHex(*str),str++;
