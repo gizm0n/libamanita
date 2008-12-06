@@ -127,7 +127,7 @@ public:
 	static char toLower(const char c) { return (c>='A' && c<='Z') || (c!='×' && c>='À' && c<='Þ')? c+32 : c; }
 	static char toUpper(const char c) { return (c>='a' && c<='z') || (c!='÷' && c>='à' && c<='þ')? c-32 : c; }
 	static int fromHex(char c) { return c>='0' && c<='9'? c-'0' : (c>='a' && c<='f'? c-87 : (c>='A' && c<='F'? c-55 : 0)); }
-	static unsigned long fromHex(char *str);
+	static unsigned long fromHex(const char *str);
 	static char *toHex(char *h,unsigned long i);
 	static char *toLower(char *str);
 	static char *toUpper(char *str);

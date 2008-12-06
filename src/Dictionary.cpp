@@ -24,7 +24,7 @@ Dictionary::~Dictionary() {
 
 
 void Dictionary::clear() {
-	for(size_t i=0; i<sz; i++) free(words[i].key);
+	for(size_t i=0; i<sz; i++) free((char *)words[i].key);
 	free(words);
 	free(values);
 	words = 0,values = 0;
@@ -43,7 +43,7 @@ void Dictionary::createIndex(const char **ws,const value_t *vs,size_t l,bool c) 
 		w->key = strdup(ws[i]);
 		w->value = vs[i];
 		w->len = strlen(w->key);
-		if(c) String::toLower(w->key);
+		if(c) String::toLower((char *)w->key);
 	}
 	createIndex();
 }
@@ -61,7 +61,7 @@ void Dictionary::createIndex(const word *ws,size_t l,bool c) {
 		w->key = strdup(ws[i].key);
 		w->value = ws[i].value;
 		w->len = strlen(w->key);
-		if(c) String::toLower(w->key);
+		if(c) String::toLower((char *)w->key);
 	}
 	createIndex();
 }
