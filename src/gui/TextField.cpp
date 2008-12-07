@@ -12,7 +12,7 @@ RttiObjectInheritance(TextField,Component);
 
 TextField::_settings TextField::_s = { 0 };
 
-TextField::TextField(int x,int y,int w,int h,char *str)
+TextField::TextField(int x,int y,int w,int h,const char *str)
 		: Component(x,y,w,h),Text(w,h,str),align(ALIGN_LEFT|ALIGN_TOP),showCaret(1),caretTimer(0) {
 	Text::setFont(_s.font);
 	setKeyListener(this);

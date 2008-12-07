@@ -29,20 +29,20 @@ private:
 	int findLine(int pos);
 	void arrange(int from);
 public:
-	Text(int w=0,int h=0,char *str=0);
+	Text(int w=0,int h=0,const char *str=0);
 	~Text();
 	void append(char ch) { insert(ch,textLen); }
-	void append(char *str) { insert(str,textLen); }
+	void append(const char *str) { insert(str,textLen); }
 	void insert(char ch) { insert(ch,caret); }
-	void insert(char *str) { insert(str,caret); }
+	void insert(const char *str) { insert(str,caret); }
 	void insert(char ch,int n);
-	void insert(char *str,int n);
+	void insert(const char *str,int n);
 	void remove(int len) { leftShift(caret,len); }
 	void remove(int n,int len) { leftShift(n,len); }
 	void removeAll();
 	void setFont(Font *f) { if(f && f!=font) { font = f;arrange(0); } }
 	Font *getFont() { return font; }
-	void setText(char *str);
+	void setText(const char *str);
 	char *getText() { return text; }
 	int length() { return textLen; }
 	int lines() { return textLinesLen; }

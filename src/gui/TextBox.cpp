@@ -16,7 +16,7 @@ char TextBox::ok[16];
 char TextBox::cancel[16];
 
 
-TextBox::TextBox(int w,int h,char *msg,unsigned int st,Font *font) : Window(0,0,w,h,CLOSE_BUTTON) {
+TextBox::TextBox(int w,int h,const char *msg,unsigned int st,Font *font) : Window(0,0,w,h,CLOSE_BUTTON) {
 	moveToCenter();
 	setModal(true);
 	style = st;
@@ -42,7 +42,7 @@ TextBox::TextBox(int w,int h,char *msg,unsigned int st,Font *font) : Window(0,0,
 	add(label);
 }
 
-void TextBox::showMessage(char *msg,unsigned int st,ActionListener *al,Font *font) {
+void TextBox::showMessage(const char *msg,unsigned int st,ActionListener *al,Font *font) {
 	TextBox *m = new TextBox(240,120,msg,st,font);
 	m->setLocked(true);
 	m->setActionListener(al);

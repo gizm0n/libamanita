@@ -8,7 +8,7 @@
 
 
 
-Text::Text(int w,int h,char *str) {
+Text::Text(int w,int h,const char *str) {
 	text = 0,textLines = 0,width = w,height = h,maxLen = 0,drawing = false;
 	font = 0;
 	setText(str);
@@ -76,15 +76,14 @@ fflush(stderr);
 	arrange(n);
 }
 
-void Text::insert(char *str,int n) {
+void Text::insert(const char *str,int n) {
 	if(!str || !*str) return;
 	if(n>=(int)textLen) n = textLen;
-	int l = 0;
-	while(str[++l]);
+	int l = strlen(str),i;
 	if(maxLen && textLen+l>maxLen) return;
 	rightShift(n,l);
 	if(n==(int)textLen) l++;
-	for(int i=n; *str; i++,str++) text[i] = *str;
+	for(i=n; *str; i++,str++) text[i] = *str;
 	arrange(n);
 }
 
@@ -96,7 +95,7 @@ void Text::removeAll() {
 	caret = 0,caretLine = 0,select = 0,selectLine = 0,scroll = -1;
 }
 
-void Text::setText(char *str) {
+void Text::setText(const char *str) {
 	while(drawing);
 	char *t = text;
 	if(textLines) delete[] textLines;
