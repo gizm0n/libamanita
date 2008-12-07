@@ -20,7 +20,7 @@ private:
 public:
 	static void setDefaultSettings(Font *f);
 
-	TextField(int x=0,int y=0,int w=0,int h=0,char *str=0);
+	TextField(int x=0,int y=0,int w=0,int h=0,const char *str=0);
 
 	void setTextAlign(int a) { align = a; }
 	bool keyDown(KeyEvent &ke);
