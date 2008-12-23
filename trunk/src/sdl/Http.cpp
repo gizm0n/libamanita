@@ -259,6 +259,7 @@ fflush(stderr);
 		else if(SDLNet_TCP_AddSocket(set,sock)==-1) error = 4;
 		else {
 			char buf[1025];
+			t2 = SDL_GetTicks();
 			{
 				if(!headers.contains(http_headers[HTTP_HOST])) headers.put(http_headers[HTTP_HOST],host);
 				if(!headers.contains(http_headers[HTTP_CONNECTION])) headers.put(http_headers[HTTP_CONNECTION],"close");
@@ -273,7 +274,6 @@ fflush(stderr);
 				header.append("\r\n");
 fprintf(stderr,"Http::request(header=\"%s\",len=%zu)\n",header.toString(),header.length());
 fflush(stderr);
-				t2 = SDL_GetTicks();
 				if(data && len) {
 fprintf(stderr,"Http::request(data=\"%s\",len=%zu)\n",data,len);
 fflush(stderr);
