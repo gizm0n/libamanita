@@ -7,10 +7,10 @@
 
 class Client : public Socket {
 private:
-	Uint32 id;
+	uint32_t id;
 	char *nick;
 #ifndef TCPSOCK_NOCIPHER
-	Uint32 *key;
+	uint32_t *key;
 	int keylen;
 #endif /*TCPSOCK_NOCIPHER*/
 
@@ -18,20 +18,20 @@ private:
 	void run();
 
 public:
-	Client(SocketListener l,Uint32 id=0,const char *nick=0);
+	Client(SocketListener l,uint32_t id=0,const char *nick=0);
 	~Client();
 
 	bool start(const char *con);
 	bool start(const char *host,Uint16 port);
 	void stop(bool kill=true);
 
-	int send(void *p,Uint32 l);
+	int send(void *p,uint32_t l);
 
-	Uint32 getID() { return id; }
+	uint32_t getID() { return id; }
 	void setNick(const char *n);
 	const char *getNick() { return nick; }
 #ifndef TCPSOCK_NOCIPHER
-	void setKey(const Uint32 *k,int l);
+	void setKey(const uint32_t *k,int l);
 #endif /*TCPSOCK_NOCIPHER*/
 };
 

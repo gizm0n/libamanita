@@ -8,10 +8,10 @@
 
 
 #ifndef TCPSOCK_NOCIPHER
-void ServerConnection::setKey(const Uint32 *k,int l) {
+void ServerConnection::setKey(const uint32_t *k,int l) {
 	if(key) free(key);
-	key = (Uint32 *)malloc(sizeof(Uint32)*l),keylen = l;
-	memcpy(key,k,sizeof(Uint32)*keylen);
+	key = (uint32_t *)malloc(sizeof(uint32_t)*l),keylen = l;
+	memcpy(key,k,sizeof(uint32_t)*keylen);
 }
 #endif /*TCPSOCK_NOCIPHER*/
 
@@ -28,7 +28,7 @@ Server::~Server() {
 
 bool Server::start(const char *con) {
 	if(isRunning() || isStarting()) return false;
-	Uint32 id;
+	uint32_t id;
 	char nick[32];
 fprintf(stderr,"start()\n");
 fflush(stderr);
@@ -38,7 +38,7 @@ fflush(stderr);
 	return start(ip.port);
 }
 
-bool Server::start(Uint32 port) {
+bool Server::start(uint32_t port) {
 	if(isRunning() || isStarting()) return false;
 	lock();
 	setStarting(true);
@@ -83,13 +83,13 @@ void Server::run() {
 	TCPsocket s;
 	Connection c;
 	char *b;
-	Sint32 l;
+	int32_t l;
 	setRunning(true);
 	setsz = 16;
 	createSocketSet();
 	while(isRunning()) {
 		if(!set) { stop();break; }
-		n = SDLNet_CheckSockets(set,(Uint32)-1);
+		n = SDLNet_CheckSockets(set,(uint32_t)-1);
 		if(n==-1) {
 			stateChanged(SM_ERR_CHECK_SOCKETS,0,0,0);
 			break;
@@ -130,7 +130,7 @@ fflush(stderr);
 	}
 }
 
-void Server::changeNick(Uint32 id,const char *nick) {
+void Server::changeNick(uint32_t id,const char *nick) {
 	Connection client = (Connection)clients.get((unsigned long)id);
 	if(!client) return;
 	free(client->nick);
@@ -176,9 +176,9 @@ fflush(stderr);
 }
 
 
-Connection Server::addClient(TCPsocket s,void *p,Uint32 l) {
+Connection Server::addClient(TCPsocket s,void *p,uint32_t l) {
 	p = ((char *)p)+TCPSOCK_HD;
-	Uint32 id = SDL_SwapBE32(*(Uint32 *)p);
+	uint32_t id = SDL_SwapBE32(*(uint32_t *)p);
 	char *nick = ((char *)p)+4;
 fprintf(stderr,"Server::addClient(id=%" PRIu32 ",nick=%s)\n",id,nick);
 fflush(stderr);
@@ -197,7 +197,7 @@ fflush(stderr);
 	return 0;
 }
 
-void Server::killClient(Uint32 id) {
+void Server::killClient(uint32_t id) {
 fprintf(stderr,"Server::killClient(id=%" PRIu32 ")\n",id);
 fflush(stderr);
 	Connection client = (Connection)clients.remove((unsigned long)id);
@@ -259,7 +259,7 @@ fflush(stderr);
 	}
 }
 
-int Server::send(Connection c,void *p,Uint32 l) {
+int Server::send(Connection c,void *p,uint32_t l) {
 #ifndef TCPSOCK_NOCIPHER
 	if(c->key) {
 		char pc[l];
@@ -275,7 +275,7 @@ int Server::send(Connection c,void *p,Uint32 l) {
 		return Socket::send(c->sock,p,l);
 }
 
-void Server::send(Channel channel,void *p,Uint32 l) {
+void Server::send(Channel channel,void *p,uint32_t l) {
 	if(!channel) channel = (Channel)&main;
 	if(l==0 || !p || channel->size()==0) return;
 fprintf(stderr,"Server::send(l=%" PRIu32 ")\n",l);
