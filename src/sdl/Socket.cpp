@@ -23,7 +23,7 @@ Socket::~Socket() {
 	if(buf) { free(buf);buf = 0,len = 0; }
 }
 
-void Socket::resolveConnection(const char *con,Uint32 &ip,Uint16 &port,Uint32 &id,char *nick,int nlen) {
+void Socket::resolveConnection(const char *con,uint32_t &ip,uint16_t &port,uint32_t &id,char *nick,int nlen) {
 	ip = 0,port = 0,id = 0,*nick = '\0';
 	if(!con || !*con) return;
 	char buf[strlen(con)+1];
@@ -45,13 +45,13 @@ void Socket::resolveConnection(const char *con,Uint32 &ip,Uint16 &port,Uint32 &i
 	if(ip) ip = SDL_SwapBE32(ip);
 }
 
-void Socket::setMessageBuffer(Uint32 n) {
+void Socket::setMessageBuffer(uint32_t n) {
 	if(isRunning() || isStarting()) return;
 	if(buf) free(buf);
 	buf = malloc(n),len = n;
 }
 
-void *Socket::receive(TCPsocket s,Sint32 &n) {
+void *Socket::receive(TCPsocket s,int32_t &n) {
 	char *b = (char *)buf;
 	int l = 0,r;
 	do r = SDLNet_TCP_Recv(s,b+l,TCPSOCK_HD-l),l += r;
@@ -63,13 +63,13 @@ fprintf(stderr,"Socket::receive(1,r=%d,l=%d)\n",r,l);
 fflush(stderr);
 #ifdef TCPSOCK_LENINCL
 		n = TCPSOCK_HD;
-		if((Uint32)l>len) {
+		if((uint32_t)l>len) {
 			b = (char *)malloc(l);
 			memcpy(b,buf,TCPSOCK_HD);
 		}
 #else /*TCPSOCK_LENINCL*/
 		n = 0;
-		if((Uint32)l>len) b = (char *)malloc(l);
+		if((uint32_t)l>len) b = (char *)malloc(l);
 #endif /*TCPSOCK_LENINCL*/
 		while(r>0 && n<l) {
 			r = SDLNet_TCP_Recv(s,b+n,l-n);
@@ -91,9 +91,9 @@ fflush(stderr);
 
 
 #ifndef TCPSOCK_NOCIPHER
-void Socket::XORcipher(char *d,const char *s,Uint32 l,const Uint32 *k,int kl) {
-	Uint32 n,i,*d1 = (Uint32 *)d;
-	const Uint32 *s1 = (const Uint32 *)s;
+void Socket::XORcipher(char *d,const char *s,uint32_t l,const uint32_t *k,int kl) {
+	uint32_t n,i,*d1 = (uint32_t *)d;
+	const uint32_t *s1 = (const uint32_t *)s;
 	for(n=0,i=0; l>=4; n++,l-=4,i++) {
 		if((int)i==kl) i = 0;
 		d1[n] = s1[n]^k[i];
@@ -107,7 +107,7 @@ void Socket::XORcipher(char *d,const char *s,Uint32 l,const Uint32 *k,int kl) {
 #endif /*TCPSOCK_NOCIPHER*/
 
 
-int Socket::send(TCPsocket s,void *p,Uint32 l) {
+int Socket::send(TCPsocket s,void *p,uint32_t l) {
 	if(p && l>0) {
 fprintf(stderr,"Socket::send(0,s=%p,l=%d)\n",s,l);
 fflush(stderr);
@@ -122,7 +122,7 @@ fflush(stderr);
 fprintf(stderr,"Socket::send(1,l=%d)\n",l);
 fflush(stderr);
 	}
-//	stateChanged(SM_ERR_PUT_MESSAGE,(Uint32)buf,(Uint32)l,0);
+//	stateChanged(SM_ERR_PUT_MESSAGE,(uint32_t)buf,(uint32_t)l,0);
 	return 0;
 }
 

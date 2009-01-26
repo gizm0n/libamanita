@@ -22,25 +22,18 @@
  * TCPSOCK_OFFSET8 - Must not be set with TCPSOCK_LEN32.
  * TCPSOCK_OFFSET0 - Default, no need to define.
  *
- * Example using -DTCPSOCK_LENINCL:
- * void sendHello() {
- * 	struct package { Uint16 len,char data[7] };
- * 	package p = { 0,"Hello!" }; // Note len should not be set, it is done internally.
- * 	socket->send(s,p,sizeof(p)); // 'socket' is an instance of the Socket class, and 's' an instance of TCPsocket
- * }
- *
  */
 
 #ifdef TCPSOCK_LEN32
 #	define TCPSOCK_LEN 4
-#	define TCPSOCK_TYPE(v) ((Uint32 *)(v))
+#	define TCPSOCK_TYPE(v) ((uint32_t *)(v))
 #	define TCPSOCK_SWAP(v) SDL_SwapBE32(v)
-typedef Uint32 TCPsockHeader;
+typedef uint32_t TCPsockHeader;
 #else /*TCPSOCK_LEN32*/
 #	define TCPSOCK_LEN 2
-#	define TCPSOCK_TYPE(v) ((Uint16 *)(v))
+#	define TCPSOCK_TYPE(v) ((uint16_t *)(v))
 #	define TCPSOCK_SWAP(v) SDL_SwapBE16(v)
-typedef Uint16 TCPsockHeader;
+typedef uint16_t TCPsockHeader;
 #endif /*TCPSOCK_LEN32*/
 
 #ifdef TCPSOCK_OFFSET16
@@ -96,13 +89,13 @@ enum {
 
 class Socket;
 
-typedef Uint32 (*SocketListener)(Socket *,Uint32,intptr_t,intptr_t,intptr_t);
+typedef uint32_t (*SocketListener)(Socket *,uint32_t,intptr_t,intptr_t,intptr_t);
 
 class Socket {
 private:
 	SocketListener listener;
 	void *buf;
-	Uint32 len;
+	uint32_t len;
 
 protected:
 	SDL_Thread *handle;
@@ -115,29 +108,29 @@ protected:
 	void setRunning(bool b) { status |= SOCK_ST_RUNNING;if(!b) status ^= SOCK_ST_RUNNING; }
 	void setStarting(bool b) { status |= SOCK_ST_STARTING;if(!b) status ^= SOCK_ST_STARTING; }
 
-	Uint32 stateChanged(Uint32 state,intptr_t p1,intptr_t p2,intptr_t p3) { return (*listener)(this,state,p1,p2,p3); }
-	void *receive(TCPsocket s,Sint32 &n);
+	Uint32 stateChanged(uint32_t state,intptr_t p1,intptr_t p2,intptr_t p3) { return (*listener)(this,state,p1,p2,p3); }
+	void *receive(TCPsocket s,int32_t &n);
 	void releaseMessageBuffer(void *b) { if(b!=buf) free(b); }
 
 public:
 	Socket(SocketListener l);
 	~Socket();
 
-	static void resolveConnection(const char *con,Uint32 &ip,Uint16 &port,Uint32 &id,char *nick,int nlen);
+	static void resolveConnection(const char *con,uint32_t &ip,uint16_t &port,uint32_t &id,char *nick,int nlen);
 #ifndef TCPSOCK_NOCIPHER
-	static void XORcipher(char *d,const char *s,Uint32 l,const Uint32 *k,int kl);
+	static void XORcipher(char *d,const char *s,uint32_t l,const uint32_t *k,int kl);
 #endif /*TCPSOCK_NOCIPHER*/
 
 	bool isRunning() { return (status&SOCK_ST_RUNNING); }
 	bool isStarting() { return (status&SOCK_ST_STARTING); }
 
-	Uint32 getIP() { return ip.host; }
-	Uint32 getPort() { return ip.port; }
+	uint32_t getIP() { return ip.host; }
+	uint32_t getPort() { return ip.port; }
 	const char *getHost() { return host; }
 
-	void setMessageBuffer(Uint32 n);
+	void setMessageBuffer(uint32_t n);
 
-	int send(TCPsocket s,void *d,Uint32 l);
+	int send(TCPsocket s,void *d,uint32_t l);
 };
 
 

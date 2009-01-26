@@ -7,7 +7,7 @@
 
 
 
-Client::Client(SocketListener l,Uint32 id,const char *nick)
+Client::Client(SocketListener l,uint32_t id,const char *nick)
 		: Socket(l),id(id),nick(0) {
 	if(nick && *nick) setNick(nick);
 #ifndef TCPSOCK_NOCIPHER
@@ -24,8 +24,8 @@ Client::~Client() {
 }
 
 bool Client::start(const char *con) {
-	Uint32 i;
-	Uint16 port;
+	uint32_t i;
+	uint16_t port;
 	char host[16],nick[32];
 fprintf(stderr,"start()\n");
 fflush(stderr);
@@ -39,7 +39,7 @@ fflush(stderr);
 }
 
 
-bool Client::start(const char *host,Uint16 port) {
+bool Client::start(const char *host,uint16_t port) {
 fprintf(stderr,"start(\"%s\",%d)\n",host,port);
 fflush(stderr);
 	if(!(set=SDLNet_AllocSocketSet(1))) stateChanged(SM_ERR_ALLOC_SOCKETSET,0,0,0);
@@ -54,11 +54,11 @@ fprintf(stderr,"start(TCPSOCK_LENINCL)\n");
 fflush(stderr);
 			char b[strlen(nick)+TCPSOCK_HD+5];
 			*TCPSOCK_TYPE(b+TCPSOCK_OFFSET) = TCPSOCK_SWAP(sizeof(b));
-			*(Uint32 *)&b[TCPSOCK_HD] = SDL_SwapBE32(id);
+			*(uint32_t *)&b[TCPSOCK_HD] = SDL_SwapBE32(id);
 			strcpy(&b[TCPSOCK_HD+4],nick);
 #else /*TCPSOCK_LENINCL*/
 			char b[strlen(nick)+5];
-			*(Uint32 *)b = SDL_SwapBE32(id);
+			*(uint32_t *)b = SDL_SwapBE32(id);
 			strcpy(&b[4],nick);
 #endif /*TCPSOCK_LENINCL*/
 			if(Socket::send(sock,b,sizeof(b))) {
@@ -87,10 +87,10 @@ void Client::stop(bool kill) {
 void Client::run() {
 	int n;
 	char *b;
-	Sint32 l;
+	int32_t l;
 	setRunning(true);
 	while(isRunning()) {
-		n = SDLNet_CheckSockets(set,(Uint32)-1);
+		n = SDLNet_CheckSockets(set,(uint32_t)-1);
 fprintf(stderr,"Client::run(n=%d)\n",n);
 fflush(stderr);
 		if(n==-1) {
@@ -117,7 +117,7 @@ fflush(stderr);
 	}
 }
 
-int Client::send(void *p,Uint32 l) {
+int Client::send(void *p,uint32_t l) {
 #ifndef TCPSOCK_NOCIPHER
 	if(key) {
 		char pc[l];
@@ -139,10 +139,10 @@ void Client::setNick(const char *n) {
 }
 
 #ifndef TCPSOCK_NOCIPHER
-void Client::setKey(const Uint32 *k,int l) {
+void Client::setKey(const uint32_t *k,int l) {
 	if(key) free(key);
-	key = (Uint32 *)malloc(sizeof(Uint32)*l),keylen = l;
-	memcpy(key,k,sizeof(Uint32)*keylen);
+	key = (uint32_t *)malloc(sizeof(uint32_t)*l),keylen = l;
+	memcpy(key,k,sizeof(uint32_t)*keylen);
 }
 #endif /*TCPSOCK_NOCIPHER*/
 

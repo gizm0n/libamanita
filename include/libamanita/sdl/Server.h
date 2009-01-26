@@ -31,16 +31,16 @@ class ServerConnection {
 friend class Server;
 private:
 	TCPsocket sock;
-	Uint32 id;
+	uint32_t id;
 	char *nick;
 	unsigned char status;
 	Vector channels;
 #ifndef TCPSOCK_NOCIPHER
-	Uint32 *key;
+	uint32_t *key;
 	int keylen;
 #endif /*TCPSOCK_NOCIPHER*/
 
-	ServerConnection(TCPsocket sock,Uint32 id,const char *n)
+	ServerConnection(TCPsocket sock,uint32_t id,const char *n)
 			: sock(sock),id(id),status(0),channels()
 #ifndef TCPSOCK_NOCIPHER
 					,key(0),keylen(0)
@@ -53,7 +53,7 @@ private:
 			}
 public:
 	const TCPsocket getSocket() { return sock; }
-	Uint32 getID() { return id; }
+	uint32_t getID() { return id; }
 	void setNick(const char *n) { free(nick);nick = strdup(n); }
 	const char *getNick() { return nick; }
 	void setActive(bool a) { status |= CON_ACTIVE;if(!a) status ^= CON_ACTIVE; }
@@ -62,7 +62,7 @@ public:
 	void setOperator(bool o) { status |= CON_OPERATOR;if(!o) status ^= CON_OPERATOR; }
 	bool isOperator() { return status&CON_OPERATOR; }
 #ifndef TCPSOCK_NOCIPHER
-	void setKey(const Uint32 *k,int l);
+	void setKey(const uint32_t *k,int l);
 #endif /*TCPSOCK_NOCIPHER*/
 
 	void joinChannel(Channel c) { if(c) channels += c; }
@@ -80,13 +80,13 @@ private:
 	ServerChannel main;		/** < Main channel, contains all clients connected to this server. */
 	Hashtable channels;		/** < All channels in this server. */
 
-	Connection addClient(TCPsocket s,void *p,Uint32 l);
+	Connection addClient(TCPsocket s,void *p,uint32_t l);
 	void createSocketSet();
 	static int _run(void *p) { ((Server *)p)->run();return 0; }
 	void run();
-	bool uniqueID(Uint32 id) { return clients.get((unsigned long)id)==0; }
+	bool uniqueID(uint32_t id) { return clients.get((unsigned long)id)==0; }
 	void killClient(Connection c) { killClient(c->id); }
-	void killClient(Uint32 id);
+	void killClient(uint32_t id);
 	void killAllClients();
 
 public:
@@ -97,11 +97,11 @@ public:
 	int unlock() { return SDL_mutexV(mut); }
 
 	bool start(const char *con);
-	bool start(Uint32 port);
+	bool start(uint32_t port);
 	void stop(bool kill=true);
 
-	Connection getClient(Uint32 id) { return (Connection)clients.get((unsigned long)id); }
-	void changeNick(Uint32 id,const char *nick);
+	Connection getClient(uint32_t id) { return (Connection)clients.get((unsigned long)id); }
+	void changeNick(uint32_t id,const char *nick);
 
 	Channel createChannel(const char *ch);
 	void deleteChannel(const char *ch);
@@ -112,9 +112,9 @@ public:
 	void leaveChannel(Channel ch,Connection c);
 	Hashtable::iterator getChannels() { return channels.iterate(); }
 
-	int send(Connection c,void *p,Uint32 l);
-	void send(void *p,Uint32 l) { send((Channel)0,p,l); }
-	void send(Channel channel,void *p,Uint32 l);
+	int send(Connection c,void *p,uint32_t l);
+	void send(void *p,uint32_t l) { send((Channel)0,p,l); }
+	void send(Channel channel,void *p,uint32_t l);
 };
 
 
