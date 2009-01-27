@@ -7,8 +7,7 @@
 
 
 
-Client::Client(SocketListener l,uint32_t id,const char *nick)
-		: Socket(l),id(id),nick(0) {
+Client::Client(SocketListener l,uint32_t id,const char *nick) : Socket(l),id(id),nick(0) {
 	if(nick && *nick) setNick(nick);
 #ifndef TCPSOCK_NOCIPHER
 	key = 0,keylen = 0;
@@ -52,16 +51,16 @@ fflush(stderr);
 #ifdef TCPSOCK_LENINCL
 fprintf(stderr,"start(TCPSOCK_LENINCL)\n");
 fflush(stderr);
-			char b[strlen(nick)+TCPSOCK_HD+5];
-			*TCPSOCK_TYPE(b+TCPSOCK_OFFSET) = TCPSOCK_SWAP(sizeof(b));
-			*(uint32_t *)&b[TCPSOCK_HD] = SDL_SwapBE32(id);
-			strcpy(&b[TCPSOCK_HD+4],nick);
+			uint8_t d[strlen(nick)+TCPSOCK_HD+5];
+			*TCPSOCK_TYPE(d+TCPSOCK_OFFSET) = TCPSOCK_SWAP(sizeof(d));
+			*(uint32_t *)&d[TCPSOCK_HD] = SDL_SwapBE32(id);
+			strcpy((char *)&d[TCPSOCK_HD+4],nick);
 #else /*TCPSOCK_LENINCL*/
-			char b[strlen(nick)+5];
-			*(uint32_t *)b = SDL_SwapBE32(id);
-			strcpy(&b[4],nick);
+			uint8_t d[strlen(nick)+5];
+			*(uint32_t *)d = SDL_SwapBE32(id);
+			strcpy(&d[4],nick);
 #endif /*TCPSOCK_LENINCL*/
-			if(Socket::send(sock,b,sizeof(b))) {
+			if(Socket::send(sock,d,sizeof(d))) {
 				stateChanged(SM_STARTING_CLIENT,0,0,0);
 				handle = SDL_CreateThread(_run,this);
 				if(handle) return true;
@@ -86,8 +85,8 @@ void Client::stop(bool kill) {
 
 void Client::run() {
 	int n;
-	char *b;
-	int32_t l;
+	uint8_t *d;
+	size_t l;
 	setRunning(true);
 	while(isRunning()) {
 		n = SDLNet_CheckSockets(set,(uint32_t)-1);
@@ -98,39 +97,38 @@ fflush(stderr);
 			break;
 		}
 		if(n && SDLNet_SocketReady(sock)) {
-			b = (char *)receive(sock,l);
-fprintf(stderr,"Client::run(l=%d)\n",l);
+			d = receive(sock,l);
+fprintf(stderr,"Client::run(l=%zu)\n",l);
 fflush(stderr);
-			if(l<=0) setRunning(false);
-			else {
+			if(l>0) {
 #ifndef TCPSOCK_NOCIPHER
 #	ifdef TCPSOCK_LENINCL
-				if(key) XORcipher(&b[TCPSOCK_HD],&b[TCPSOCK_HD],l-TCPSOCK_HD,key,keylen);
+				if(key) XORcipher(&d[TCPSOCK_HD],&d[TCPSOCK_HD],l-TCPSOCK_HD,key,keylen);
 #	else /*TCPSOCK_LENINCL*/
-				if(key) XORcipher(b,b,l,key,keylen);
+				if(key) XORcipher(d,d,l,key,keylen);
 #	endif /*TCPSOCK_LENINCL*/
 #endif /*TCPSOCK_NOCIPHER*/
-				stateChanged(SM_GET_MESSAGE,0,(intptr_t)b,(intptr_t)l);
-			}
-			releaseMessageBuffer(b);
+				stateChanged(SM_GET_MESSAGE,0,(intptr_t)d,(intptr_t)l);
+			} else setRunning(false);
+			releaseMessageBuffer(d);
 		}
 	}
 }
 
-int Client::send(void *p,uint32_t l) {
+int Client::send(uint8_t *d,size_t l) {
 #ifndef TCPSOCK_NOCIPHER
 	if(key) {
-		char pc[l];
+		uint8_t dc[l];
 #	ifdef TCPSOCK_LENINCL
-		memcpy(pc,p,TCPSOCK_HD);
-		XORcipher(&pc[TCPSOCK_HD],&((char *)p)[TCPSOCK_HD],l-TCPSOCK_HD,key,keylen);
+		memcpy(dc,d,TCPSOCK_HD);
+		XORcipher(&dc[TCPSOCK_HD],&d[TCPSOCK_HD],l-TCPSOCK_HD,key,keylen);
 #	else /*TCPSOCK_LENINCL*/
-		XORcipher(pc,p,l,key,keylen);
+		XORcipher(dc,d,l,key,keylen);
 #	endif /*TCPSOCK_LENINCL*/
-		return Socket::send(sock,pc,l);
+		return Socket::send(sock,dc,l);
 	} else
 #endif /*TCPSOCK_NOCIPHER*/
-		return Socket::send(sock,p,l);
+		return Socket::send(sock,d,l);
 }
 
 void Client::setNick(const char *n) {
@@ -139,7 +137,7 @@ void Client::setNick(const char *n) {
 }
 
 #ifndef TCPSOCK_NOCIPHER
-void Client::setKey(const uint32_t *k,int l) {
+void Client::setKey(const uint32_t *k,size_t l) {
 	if(key) free(key);
 	key = (uint32_t *)malloc(sizeof(uint32_t)*l),keylen = l;
 	memcpy(key,k,sizeof(uint32_t)*keylen);

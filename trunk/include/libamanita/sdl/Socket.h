@@ -87,6 +87,23 @@ enum {
 	SOCK_ST_STARTING,
 };
 
+#define pack_int8(data,i) {*(int8_t *)(data) = (int8_t)(i);(data)++;}
+#define unpack_int8(data,i) {(i) = *(int8_t *)(data);(data)++;}
+#define pack_uint8(data,i) {*(uint8_t *)(data) = (uint8_t)(i);(data)++;}
+#define unpack_uint8(data,i) {(i) = *(uint8_t *)(data);(data)++;}
+#define pack_int16(data,i) {*(int16_t *)(data) = SDL_SwapBE16((int16_t)(i));(data) += 2;}
+#define unpack_int16(data,i) {(i) = SDL_SwapBE16(*(int16_t *)(data));(data) += 2;}
+#define pack_uint16(data,i) {*(uint16_t *)(data) = SDL_SwapBE16((uint16_t)(i));(data) += 2;}
+#define unpack_uint16(data,i) {(i) = SDL_SwapBE16(*(uint16_t *)(data));(data) += 2;}
+#define pack_int32(data,i) {*(int32_t *)(data) = SDL_SwapBE32((int32_t)(i));(data) += 4;}
+#define unpack_int32(data,i) {(i) = SDL_SwapBE32(*(int32_t *)(data));(data) += 4;}
+#define pack_uint32(data,i) {*(uint32_t *)(data) = SDL_SwapBE32((uint32_t)(i));(data) += 4;}
+#define unpack_uint32(data,i) {(i) = SDL_SwapBE32(*(uint32_t *)(data));(data) += 4;}
+#define pack_int64(data,i) {*(int64_t *)(data) = SDL_SwapBE64((int64_t)(i));(data) += 8;}
+#define unpack_int64(data,i) {(i) = SDL_SwapBE64(*(int64_t *)(data));(data) += 8;}
+#define pack_uint64(data,i) {*(uint64_t *)(data) = SDL_SwapBE64((uint64_t)(i));(data) += 8;}
+#define unpack_uint64(data,i) {(i) = SDL_SwapBE64(*(uint64_t *)(data));(data) += 8;}
+
 class Socket;
 
 typedef uint32_t (*SocketListener)(Socket *,uint32_t,intptr_t,intptr_t,intptr_t);
@@ -94,8 +111,8 @@ typedef uint32_t (*SocketListener)(Socket *,uint32_t,intptr_t,intptr_t,intptr_t)
 class Socket {
 private:
 	SocketListener listener;
-	void *buf;
-	uint32_t len;
+	uint8_t *buf;
+	size_t len;
 
 protected:
 	SDL_Thread *handle;
@@ -108,9 +125,9 @@ protected:
 	void setRunning(bool b) { status |= SOCK_ST_RUNNING;if(!b) status ^= SOCK_ST_RUNNING; }
 	void setStarting(bool b) { status |= SOCK_ST_STARTING;if(!b) status ^= SOCK_ST_STARTING; }
 
-	Uint32 stateChanged(uint32_t state,intptr_t p1,intptr_t p2,intptr_t p3) { return (*listener)(this,state,p1,p2,p3); }
-	void *receive(TCPsocket s,int32_t &n);
-	void releaseMessageBuffer(void *b) { if(b!=buf) free(b); }
+	uint32_t stateChanged(uint32_t state,intptr_t p1,intptr_t p2,intptr_t p3) { return (*listener)(this,state,p1,p2,p3); }
+	uint8_t *receive(TCPsocket s,size_t &l);
+	void releaseMessageBuffer(uint8_t *b) { if(b!=buf) free(b); }
 
 public:
 	Socket(SocketListener l);
@@ -118,7 +135,7 @@ public:
 
 	static void resolveConnection(const char *con,uint32_t &ip,uint16_t &port,uint32_t &id,char *nick,int nlen);
 #ifndef TCPSOCK_NOCIPHER
-	static void XORcipher(char *d,const char *s,uint32_t l,const uint32_t *k,int kl);
+	static void XORcipher(uint8_t *d,const uint8_t *s,size_t l,const uint32_t *k,size_t kl);
 #endif /*TCPSOCK_NOCIPHER*/
 
 	bool isRunning() { return (status&SOCK_ST_RUNNING); }
@@ -128,9 +145,9 @@ public:
 	uint32_t getPort() { return ip.port; }
 	const char *getHost() { return host; }
 
-	void setMessageBuffer(uint32_t n);
+	void setMessageBuffer(size_t l);
 
-	int send(TCPsocket s,void *d,uint32_t l);
+	size_t send(TCPsocket s,uint8_t *d,size_t l);
 };
 
 
