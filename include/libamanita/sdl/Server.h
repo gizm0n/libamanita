@@ -33,11 +33,11 @@ private:
 	TCPsocket sock;
 	uint32_t id;
 	char *nick;
-	unsigned char status;
+	uint8_t status;
 	Vector channels;
 #ifndef TCPSOCK_NOCIPHER
 	uint32_t *key;
-	int keylen;
+	size_t keylen;
 #endif /*TCPSOCK_NOCIPHER*/
 
 	ServerConnection(TCPsocket sock,uint32_t id,const char *n)
@@ -62,7 +62,7 @@ public:
 	void setOperator(bool o) { status |= CON_OPERATOR;if(!o) status ^= CON_OPERATOR; }
 	bool isOperator() { return status&CON_OPERATOR; }
 #ifndef TCPSOCK_NOCIPHER
-	void setKey(const uint32_t *k,int l);
+	void setKey(const uint32_t *k,size_t l);
 #endif /*TCPSOCK_NOCIPHER*/
 
 	void joinChannel(Channel c) { if(c) channels += c; }
@@ -80,11 +80,11 @@ private:
 	ServerChannel main;		/** < Main channel, contains all clients connected to this server. */
 	Hashtable channels;		/** < All channels in this server. */
 
-	Connection addClient(TCPsocket s,void *p,uint32_t l);
+	Connection addClient(TCPsocket s,uint8_t *d,size_t l);
 	void createSocketSet();
 	static int _run(void *p) { ((Server *)p)->run();return 0; }
 	void run();
-	bool uniqueID(uint32_t id) { return clients.get((unsigned long)id)==0; }
+	bool uniqueID(uint32_t id) { return clients.get(id)==0; }
 	void killClient(Connection c) { killClient(c->id); }
 	void killClient(uint32_t id);
 	void killAllClients();
@@ -100,7 +100,7 @@ public:
 	bool start(uint32_t port);
 	void stop(bool kill=true);
 
-	Connection getClient(uint32_t id) { return (Connection)clients.get((unsigned long)id); }
+	Connection getClient(uint32_t id) { return (Connection)clients.get(id); }
 	void changeNick(uint32_t id,const char *nick);
 
 	Channel createChannel(const char *ch);
@@ -112,9 +112,9 @@ public:
 	void leaveChannel(Channel ch,Connection c);
 	Hashtable::iterator getChannels() { return channels.iterate(); }
 
-	int send(Connection c,void *p,uint32_t l);
-	void send(void *p,uint32_t l) { send((Channel)0,p,l); }
-	void send(Channel channel,void *p,uint32_t l);
+	int send(Connection c,uint8_t *d,size_t l);
+	void send(uint8_t *d,size_t l) { send((Channel)0,d,l); }
+	void send(Channel channel,uint8_t *d,size_t l);
 };
 
 

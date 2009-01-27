@@ -8,7 +8,7 @@
 
 
 #ifndef TCPSOCK_NOCIPHER
-void ServerConnection::setKey(const uint32_t *k,int l) {
+void ServerConnection::setKey(const uint32_t *k,size_t l) {
 	if(key) free(key);
 	key = (uint32_t *)malloc(sizeof(uint32_t)*l),keylen = l;
 	memcpy(key,k,sizeof(uint32_t)*keylen);
@@ -82,8 +82,8 @@ void Server::run() {
 	int n,i;
 	TCPsocket s;
 	Connection c;
-	char *b;
-	int32_t l;
+	uint8_t *b;
+	size_t l;
 	setRunning(true);
 	setsz = 16;
 	createSocketSet();
@@ -98,7 +98,7 @@ void Server::run() {
 		if(SDLNet_SocketReady(sock)) {
 			n--;
 			if((s=SDLNet_TCP_Accept(sock))) {
-				b = (char *)receive(s,l);
+				b = receive(s,l);
 				if(l>0) c = addClient(s,b,l);
 				else SDLNet_TCP_Close(s);
 				releaseMessageBuffer(b);
@@ -112,7 +112,7 @@ fprintf(stderr,"Server::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),c->sock);
 fflush(stderr);
 			if(SDLNet_SocketReady(c->sock)) {
 				n--;
-				b = (char *)receive(c->sock,l);
+				b = receive(c->sock,l);
 				if(l>0) {
 #ifndef TCPSOCK_NOCIPHER
 #	ifdef TCPSOCK_LENINCL
@@ -131,7 +131,7 @@ fflush(stderr);
 }
 
 void Server::changeNick(uint32_t id,const char *nick) {
-	Connection client = (Connection)clients.get((unsigned long)id);
+	Connection client = (Connection)clients.get(id);
 	if(!client) return;
 	free(client->nick);
 	client->nick = strdup(nick);
@@ -176,17 +176,17 @@ fflush(stderr);
 }
 
 
-Connection Server::addClient(TCPsocket s,void *p,uint32_t l) {
-	p = ((char *)p)+TCPSOCK_HD;
-	uint32_t id = SDL_SwapBE32(*(uint32_t *)p);
-	char *nick = ((char *)p)+4;
+Connection Server::addClient(TCPsocket s,uint8_t *d,size_t l) {
+	d += TCPSOCK_HD;
+	uint32_t id = SDL_SwapBE32(*(uint32_t *)d);
+	char *nick = (char *)(d+4);
 fprintf(stderr,"Server::addClient(id=%" PRIu32 ",nick=%s)\n",id,nick);
 fflush(stderr);
 	stateChanged(SM_CHECK_NICK,(intptr_t)nick,0,0);
 	if(!uniqueID(id)) stateChanged(SM_DUPLICATE_ID,id,(intptr_t)nick,0);
 	else {
 		ServerConnection *c = new ServerConnection(s,id,nick);
-		clients.put((unsigned long)id,(void *)c);
+		clients.put(id,(void *)c);
 		main += c;
 		stateChanged(SM_ADD_CLIENT,(intptr_t)c,0,0);
 		if(main.size()+1>setsz) createSocketSet();
@@ -200,7 +200,7 @@ fflush(stderr);
 void Server::killClient(uint32_t id) {
 fprintf(stderr,"Server::killClient(id=%" PRIu32 ")\n",id);
 fflush(stderr);
-	Connection client = (Connection)clients.remove((unsigned long)id);
+	Connection client = (Connection)clients.remove(id);
 	if(client) {
 		main -= client;
 		if(client->channels.size()>0)
@@ -246,7 +246,7 @@ fflush(stderr);
 		SDLNet_TCP_AddSocket(set,sock);
 		Connection client;
 		int n;
-		for(size_t i=0ul; i<main.size(); i++) {
+		for(size_t i=0; i<main.size(); i++) {
 			client = (Connection)main[i];
 fprintf(stderr,"Server::createSocketSet(id=%" PRIu32 ",nick=%s)\n",client->getID(),client->getNick());
 fflush(stderr);
@@ -259,54 +259,54 @@ fflush(stderr);
 	}
 }
 
-int Server::send(Connection c,void *p,uint32_t l) {
+int Server::send(Connection c,uint8_t *d,size_t l) {
 #ifndef TCPSOCK_NOCIPHER
 	if(c->key) {
-		char pc[l];
+		uint8_t dc[l];
 #	ifdef TCPSOCK_LENINCL
-		memcpy(pc,p,TCPSOCK_HD);
-		XORcipher(&pc[TCPSOCK_HD],&((char *)p)[TCPSOCK_HD],l-TCPSOCK_HD,c->key,c->keylen);
+		memcpy(dc,d,TCPSOCK_HD);
+		XORcipher(&dc[TCPSOCK_HD],&d[TCPSOCK_HD],l-TCPSOCK_HD,c->key,c->keylen);
 #	else /*TCPSOCK_LENINCL*/
-		XORcipher(pc,p,l,c->key,c->keylen);
+		XORcipher(dc,d,l,c->key,c->keylen);
 #	endif /*TCPSOCK_LENINCL*/
-		return Socket::send(c->sock,pc,l);
+		return Socket::send(c->sock,dc,l);
 	} else
 #endif /*TCPSOCK_NOCIPHER*/
-		return Socket::send(c->sock,p,l);
+		return Socket::send(c->sock,d,l);
 }
 
-void Server::send(Channel channel,void *p,uint32_t l) {
+void Server::send(Channel channel,uint8_t *d,size_t l) {
 	if(!channel) channel = (Channel)&main;
-	if(l==0 || !p || channel->size()==0) return;
-fprintf(stderr,"Server::send(l=%" PRIu32 ")\n",l);
+	if(l==0 || !d || channel->size()==0) return;
+fprintf(stderr,"Server::send(l=%zu)\n",l);
 fflush(stderr);
 #ifndef TCPSOCK_NOCIPHER
-	char d[l],*pc;
-#	define TCPSOCK_P pc
+	uint8_t p[l],*dc;
+#	define TCPSOCK_P dc
 #else /*TCPSOCK_NOCIPHER*/
-#	define TCPSOCK_P p
+#	define TCPSOCK_P d
 #endif /*TCPSOCK_NOCIPHER*/
 #ifdef TCPSOCK_LENINCL
-	*TCPSOCK_TYPE(((char *)p)+TCPSOCK_OFFSET) = TCPSOCK_SWAP(l);
+	*TCPSOCK_TYPE(p+TCPSOCK_OFFSET) = TCPSOCK_SWAP(l);
 #	ifndef TCPSOCK_NOCIPHER
-	memcpy(d,p,TCPSOCK_HD);
+	memcpy(p,d,TCPSOCK_HD);
 #	endif /*TCPSOCK_NOCIPHER*/
 #else /*TCPSOCK_LENINCL*/
 	TCPsockType n = TCPSOCK_SWAP(l);
 #endif /*TCPSOCK_LENINCL*/
 	Connection c;
 	lock();
-	for(size_t i=0ul; i<channel->size(); i++)
+	for(size_t i=0; i<channel->size(); i++)
 		if((c=(Connection)(*channel)[i])->isActive()) {
 #ifndef TCPSOCK_NOCIPHER
 			if(c->key) {
-				pc = d;
+				dc = p;
 #	ifdef TCPSOCK_LENINCL
-				XORcipher(&pc[TCPSOCK_HD],&((char *)p)[TCPSOCK_HD],l-TCPSOCK_HD,c->key,c->keylen);
+				XORcipher(&dc[TCPSOCK_HD],&d[TCPSOCK_HD],l-TCPSOCK_HD,c->key,c->keylen);
 #	else /*TCPSOCK_LENINCL*/
-				XORcipher(pc,(char *)p,l,c->key,c->keylen);
+				XORcipher(dc,d,l,c->key,c->keylen);
 #	endif /*TCPSOCK_LENINCL*/
-			} else pc = (char *)p;
+			} else dc = d;
 #endif /*TCPSOCK_NOCIPHER*/
 #ifdef TCPSOCK_LENINCL
 			if(SDLNet_TCP_Send(c->sock,TCPSOCK_P,l)<(int)l) {
