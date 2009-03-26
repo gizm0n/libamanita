@@ -56,7 +56,7 @@ uint8_t *Socket::receive(TCPsocket s,size_t &l) {
 	int r;
 	size_t i = 0;
 	do { r = SDLNet_TCP_Recv(s,b+i,TCPSOCK_HD-i),i += r; } while(r>0 && i<TCPSOCK_HD);
-fprintf(stderr,"Socket::receive(0,r=%d,i=%d)\n",r,TCPSOCK_SWAP(*TCPSOCK_TYPE(b+TCPSOCK_OFFSET)));
+fprintf(stderr,"Socket::receive(0,r=%d,cmd=%d,len=%d)\n",r,(int)*b,TCPSOCK_SWAP(*TCPSOCK_TYPE(b+TCPSOCK_OFFSET)));
 fflush(stderr);
 	if(i==TCPSOCK_HD && (i=TCPSOCK_SWAP(*TCPSOCK_TYPE(b+TCPSOCK_OFFSET)))>0) {
 fprintf(stderr,"Socket::receive(1,r=%d,i=%zu)\n",r,i);
@@ -77,9 +77,19 @@ fflush(stderr);
 fprintf(stderr,"Socket::receive(3,r=%d,l=%zu)\n",r,l);
 fflush(stderr);
 		}
-		if(l==i) return b;
+		if(l==i) {
+fprintf(stderr,"Socket::receive(");
+for(i=3; i<l && i<20; i++) {
+	r = b[i];
+	fputc(((r>>4)&0xf)<=9? '0'+((r>>4)&0xf) : 'a'+((r>>4)&0xf)-9,stderr);
+	fputc((r&0xf)<=9? '0'+(r&0xf) : 'a'+(r&0xf)-9,stderr);
+}
+fprintf(stderr,")\n");
+fflush(stderr);
+			return b;
+		}
 		if(r==-1) {
-fprintf(stderr,"Socket::receive(4,SDL_Error=%s)\n",SDL_GetError());
+fprintf(stderr,"Socket::receive(SDL_Error=%s)\n",SDL_GetError());
 fflush(stderr);
 		}
 		if(b!=buf) free(b);

@@ -22,7 +22,7 @@ public:
 	~Client();
 
 	bool start(const char *con);
-	bool start(const char *host,Uint16 port);
+	bool start(const char *host,uint16_t port);
 	void stop(bool kill=true);
 
 	int send(uint8_t *d,size_t l);
