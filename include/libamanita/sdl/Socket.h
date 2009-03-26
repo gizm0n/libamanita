@@ -27,12 +27,12 @@
 #ifdef TCPSOCK_LEN32
 #	define TCPSOCK_LEN 4
 #	define TCPSOCK_TYPE(v) ((uint32_t *)(v))
-#	define TCPSOCK_SWAP(v) SDL_SwapBE32(v)
+#	define TCPSOCK_SWAP(v) SDL_SwapBE32(((uint32_t)(v)))
 typedef uint32_t TCPsockHeader;
 #else /*TCPSOCK_LEN32*/
 #	define TCPSOCK_LEN 2
 #	define TCPSOCK_TYPE(v) ((uint16_t *)(v))
-#	define TCPSOCK_SWAP(v) SDL_SwapBE16(v)
+#	define TCPSOCK_SWAP(v) SDL_SwapBE16(((uint16_t)(v)))
 typedef uint16_t TCPsockHeader;
 #endif /*TCPSOCK_LEN32*/
 
@@ -89,20 +89,35 @@ enum {
 
 #define pack_int8(data,i) {*(int8_t *)(data) = (int8_t)(i);(data)++;}
 #define unpack_int8(data,i) {(i) = *(int8_t *)(data);(data)++;}
+#define get_unpack_int8(data) (*(int8_t *)(data))
+
 #define pack_uint8(data,i) {*(uint8_t *)(data) = (uint8_t)(i);(data)++;}
 #define unpack_uint8(data,i) {(i) = *(uint8_t *)(data);(data)++;}
+#define get_unpack_uint8(data) (*(uint8_t *)(data))
+
 #define pack_int16(data,i) {*(int16_t *)(data) = SDL_SwapBE16((int16_t)(i));(data) += 2;}
 #define unpack_int16(data,i) {(i) = SDL_SwapBE16(*(int16_t *)(data));(data) += 2;}
+#define get_unpack_int16(data) (int16_t)SDL_SwapBE16(*(int16_t *)(data))
+
 #define pack_uint16(data,i) {*(uint16_t *)(data) = SDL_SwapBE16((uint16_t)(i));(data) += 2;}
 #define unpack_uint16(data,i) {(i) = SDL_SwapBE16(*(uint16_t *)(data));(data) += 2;}
+#define get_unpack_uint16(data) (uint16_t)SDL_SwapBE16(*(uint16_t *)(data))
+
 #define pack_int32(data,i) {*(int32_t *)(data) = SDL_SwapBE32((int32_t)(i));(data) += 4;}
 #define unpack_int32(data,i) {(i) = SDL_SwapBE32(*(int32_t *)(data));(data) += 4;}
+#define get_unpack_int32(data) (int32_t)SDL_SwapBE32(*(int32_t *)(data))
+
 #define pack_uint32(data,i) {*(uint32_t *)(data) = SDL_SwapBE32((uint32_t)(i));(data) += 4;}
 #define unpack_uint32(data,i) {(i) = SDL_SwapBE32(*(uint32_t *)(data));(data) += 4;}
+#define get_unpack_uint32(data) (uint32_t)SDL_SwapBE32(*(uint32_t *)(data))
+
 #define pack_int64(data,i) {*(int64_t *)(data) = SDL_SwapBE64((int64_t)(i));(data) += 8;}
 #define unpack_int64(data,i) {(i) = SDL_SwapBE64(*(int64_t *)(data));(data) += 8;}
+#define get_unpack_int64(data) (int64_t)SDL_SwapBE64(*(int64_t *)(data))
+
 #define pack_uint64(data,i) {*(uint64_t *)(data) = SDL_SwapBE64((uint64_t)(i));(data) += 8;}
 #define unpack_uint64(data,i) {(i) = SDL_SwapBE64(*(uint64_t *)(data));(data) += 8;}
+#define get_unpack_uint64(data) (uint64_t)SDL_SwapBE64(*(uint64_t *)(data))
 
 class Socket;
 

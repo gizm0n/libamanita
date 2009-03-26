@@ -278,8 +278,6 @@ int Server::send(Connection c,uint8_t *d,size_t l) {
 void Server::send(Channel channel,uint8_t *d,size_t l) {
 	if(!channel) channel = (Channel)&main;
 	if(l==0 || !d || channel->size()==0) return;
-fprintf(stderr,"Server::send(l=%zu)\n",l);
-fflush(stderr);
 #ifndef TCPSOCK_NOCIPHER
 	uint8_t p[l],*dc;
 #	define TCPSOCK_P dc
@@ -287,7 +285,7 @@ fflush(stderr);
 #	define TCPSOCK_P d
 #endif /*TCPSOCK_NOCIPHER*/
 #ifdef TCPSOCK_LENINCL
-	*TCPSOCK_TYPE(p+TCPSOCK_OFFSET) = TCPSOCK_SWAP(l);
+	*TCPSOCK_TYPE(d+TCPSOCK_OFFSET) = TCPSOCK_SWAP(l);
 #	ifndef TCPSOCK_NOCIPHER
 	memcpy(p,d,TCPSOCK_HD);
 #	endif /*TCPSOCK_NOCIPHER*/
@@ -295,6 +293,8 @@ fflush(stderr);
 	TCPsockType n = TCPSOCK_SWAP(l);
 #endif /*TCPSOCK_LENINCL*/
 	Connection c;
+fprintf(stderr,"Server::send(l=%zu,cmd=%d,len=%d)\n",l,(int)*d,TCPSOCK_SWAP(*TCPSOCK_TYPE(d+TCPSOCK_OFFSET)));
+fflush(stderr);
 	lock();
 	for(size_t i=0; i<channel->size(); i++)
 		if((c=(Connection)(*channel)[i])->isActive()) {
