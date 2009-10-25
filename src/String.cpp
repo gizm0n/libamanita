@@ -287,8 +287,9 @@ String &String::appendUntil(FILE *fp,const char *end,const char *trim,bool uesc)
 	}
 	int c,c2 = -1,t = trim && *trim? 0 : 1;
 	unsigned long l2 = 0;
+//fprintf(stderr,"String::appendUntil: ");
 	while((c=fgetc(fp)) && c!=EOF) {
-// fputc(c,stderr);
+//fputc(c,stderr);
 		if(uesc) {
 			if(c=='/') {
 				c = fgetc(fp);
@@ -333,7 +334,7 @@ String &String::appendUntil(FILE *fp,const char *end,const char *trim,bool uesc)
 	}
 	if(trim && *trim!='\0') while(len>l2 && strchr(trim,str[len-1])) len--;
 	str[len] = '\0';
-// fprintf(stderr,"[%s]\n",str);
+//fprintf(stderr,"[%s]\n",str);
 	return *this;
 }
 
@@ -352,6 +353,24 @@ String &String::println(FILE *fp) {
 		n = fwrite(endline,strlen(endline),1,fp);
 	}
 	return *this;
+}
+
+void String::printUTF8(char *d,const char *s,size_t offset,size_t len) {
+	char c;
+	size_t i,n;
+	if(offset) for(i=0; *s!='\0' && i<offset; i++) {
+		if(*s&0x80) {
+			for(c=(*s<<1),n=1; c&0x80 && n<8; c<<=1,n++);
+			while(n--) s++;
+		} else s++;
+	}
+	if(len) for(i=0; *s!='\0' && i<len; i++) {
+		if(*s&0x80) {
+			for(c=(*s<<1),n=1; c&0x80 && n<8; c<<=1,n++);
+			while(n--) *d++ = *s++;
+		} else *d++ = *s++;
+	}
+	*d = '\0';
 }
 
 long String::indexOf(const char *s,size_t l) {

@@ -261,7 +261,7 @@ size_t Vector::print(FILE *fp) {
 
 size_t Vector::load(const char *fn) {
 	FILE *fp;
-	if(!fn || !*fn || !(fp=fopen(fn,"r"))) return 0;
+	if(!fn || !*fn || !(fp=fopen(fn,"rb"))) return 0;
 	size_t s = load(fp);
 	fclose(fp);
 	return s;
@@ -284,7 +284,7 @@ size_t Vector::load(FILE *fp) {
 
 size_t Vector::save(const char *fn) {
 	FILE *fp;
-	if(!fn || !*fn || !(fp=fopen(fn,"w"))) return 0;
+	if(!fn || !*fn || !(fp=fopen(fn,"wb"))) return 0;
 	size_t s = save(fp);
 	fclose(fp);
 	return s;
