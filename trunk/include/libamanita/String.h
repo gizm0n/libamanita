@@ -89,6 +89,8 @@ public:
 	String &print(FILE *fp);
 	String &println(FILE *fp);
 
+	static void printUTF8(char *d,const char *s,size_t offset,size_t len);
+
 	long indexOf(String *s) { return s? indexOf(s->str,s->len) : -1l; }
 	long indexOf(String &s) { return indexOf(s.str,s.len); }
 	long indexOf(const char *s,size_t l=0ul);

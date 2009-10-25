@@ -40,6 +40,8 @@ nobase_include_HEADERS = \
 	../include/libamanita/sdl/Socket.h \
 	../include/libamanita/sdl/Text.h \
 	../include/libamanita/sdl/Thread.h \
+	../include/libamanita/sqlite/Record.h \
+	../include/libamanita/sqlite/ResultSet.h \
 	../include/libamanita/sqlite/SQLite.h
 
 libamanita_a_SOURCES = \
@@ -79,6 +81,8 @@ libamanita_a_SOURCES = \
 	../src/sdl/Socket.cpp \
 	../src/sdl/Text.cpp \
 	../src/sdl/Thread.cpp \
+	../src/sqlite/Record.cpp \
+	../src/sqlite/ResultSet.cpp \
 	../src/sqlite/SQLite.cpp
 
 

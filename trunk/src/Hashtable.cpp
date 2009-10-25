@@ -446,7 +446,7 @@ size_t Hashtable::load(const char *fn) {
 //fprintf(stderr,"Hashtable::load(%s)\n",fn);
 //fflush(stderr);
 	FILE *fp;
-	if(!fn || !*fn || !(fp=fopen(fn,"r"))) return 0;
+	if(!fn || !*fn || !(fp=fopen(fn,"rb"))) return 0;
 	size_t s = load(fp);
 	fclose(fp);
 	return s;
@@ -474,7 +474,7 @@ size_t Hashtable::load(FILE *fp) {
 
 size_t Hashtable::save(const char *fn) {
 	FILE *fp;
-	if(!fn || !*fn || !(fp=fopen(fn,"w"))) return 0;
+	if(!fn || !*fn || !(fp=fopen(fn,"wb"))) return 0;
 	size_t s = save(fp);
 	fclose(fp);
 	return s;

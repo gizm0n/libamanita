@@ -1,44 +1,10 @@
 #ifndef _DB_SQLITE_H
 #define _DB_SQLITE_H
 
-#include <stdlib.h>
-#include <string.h>
-#include <sqlite3.h>
-#include <libamanita/Vector.h>
+#include <libamanita/sqlite/ResultSet.h>
 
 
-class SQLite;
-
-
-class Record {
-private:
-	char **data;
-	size_t sz;
-
-public:
-	Record(char **d,unsigned int s);
-	~Record();
-
-	int size() { return sz; }
-	char *getString(int n) { return data[n]; }
-	int getInt(int n) { return atoi(data[n]); }
-	float getFloat(int n) { return (float)atof(data[n]); }
-	double getDouble(int n) { return atof(data[n]); }
-	long long getLongLong(int n) { return atoll(data[n]); }
-};
-
-
-class ResultSet : public Vector {
-private:
-	Record *cols;
-
-public:
-	friend class SQLite;
-
-	ResultSet() : Vector(),cols(0) {}
-	ResultSet(int n) : Vector(n),cols(0) {}
-	~ResultSet();
-};
+struct sqlite3;
 
 
 class SQLite {
@@ -50,13 +16,17 @@ private:
 	void open(const char *nm);
 	void close();
 
+	void error(int msg,char *err);
+
 public:
-	SQLite(const char *nm);
+	SQLite(const char *path,const char *nm=0);
 	~SQLite();
 
-	void openDatabaseFile(const char *nm);
-	void query(char *sql,ResultSet *rs=0);
-	long long lastInsertID() { return sqlite3_last_insert_rowid(db); }
+	void exec(const char *sql);
+	void execf(const char *sql, ...);
+	void query(ResultSet &rs,const char *sql);
+	void queryf(ResultSet &rs,const char *sql, ...);
+	long long lastInsertID();
 };
 
 
