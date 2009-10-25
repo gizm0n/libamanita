@@ -180,8 +180,8 @@ Vector &Vector::split(const char *str,const char *delim,bool trim) {
 					s2++;
 				}
 				if(trim) String::trim(s1);
-fprintf(stderr,"s1=\"%s\"\n",s1);
-fflush(stderr);
+//fprintf(stderr,"s1=\"%s\"\n",s1);
+//fflush(stderr);
 				if(*s1) insert((value_t)s1,sz,TYPE_CHAR_P);
 				s1 = s2;
 			}
