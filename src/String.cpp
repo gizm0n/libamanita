@@ -338,6 +338,22 @@ String &String::appendUntil(FILE *fp,const char *end,const char *trim,bool uesc)
 	return *this;
 }
 
+String &String::include(const char *fn) {
+	FILE *fp = fopen(fn,"r");
+	append(fp,true);
+	fclose(fp);
+	return *this;
+}
+
+String &String::includef(const char *format, ...) {
+	char buf[128];
+	va_list args;
+   va_start(args,format);
+	vsnprintf(buf,127,format,args);
+   va_end(args);
+	return include(buf);
+}
+
 String &String::print(FILE *fp) {
 	if(fp) {
 		size_t n;

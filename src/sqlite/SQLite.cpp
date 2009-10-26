@@ -35,7 +35,7 @@ SQLite::~SQLite() { close(); }
 
 void SQLite::open(const char *nm) {
 	*file = 0;
-	if(sqlite3_open(nm,&db)) fprintf(stderr,"SQLite: Can't open database '%s'\n",sqlite3_errmsg(db));
+	if(sqlite3_open(nm,&db)) fprintf(stderr,"SQLite: Can't open database '%s'.\nError message:'%s'\n",nm,sqlite3_errmsg(db));
 	else strcpy(file,nm);
 }
 
