@@ -86,6 +86,9 @@ public:
 	String &appendUntil(const char *s,const char *end,bool uesc=true);
 	String &appendUntil(FILE *fp,const char *end=0,const char *trim=0,bool uesc=true);
 
+	String &include(const char *fn);
+	String &includef(const char *format, ...);
+
 	String &print(FILE *fp);
 	String &println(FILE *fp);
 
