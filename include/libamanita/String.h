@@ -28,7 +28,7 @@ public:
 	static const char *whitespace;
 
 	String(size_t c=0);
-	String(const char *s,size_t l=0ul);
+	String(const char *s,size_t l=0);
 	String(String *s);
 	String(String &s);
 	~String();
@@ -61,7 +61,7 @@ public:
 	String &append(String *s,size_t n) { if(s) append(s->str,s->len,n);return *this; }
 	String &append(String &s) { return append(s.str,s.len); }
 	String &append(String &s,size_t n) { return append(s.str,s.len,n); }
-	String &append(const char *s,size_t l=0ul);
+	String &append(const char *s,size_t l=0);
 	String &append(const char *s,size_t l,size_t n);
 	String &append(int16_t i) { return append((int32_t)i); }
 	String &append(uint16_t i) { return append((uint32_t)i); }
@@ -106,6 +106,10 @@ public:
 	int compare(String *s) { return s? compare(s->str) : 256; }
 	int compare(String &s) { return compare(s.str); }
 	int compare(const char *s);
+
+	size_t count(const char *s);
+
+	String &replace(const char *s,const char *r);
 
 	String &escape();
 	String &unescape();

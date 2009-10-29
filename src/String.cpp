@@ -402,6 +402,34 @@ bool String::startsWith(const char *s,size_t l) { return str && s? (strncmp(str,
 bool String::equals(const char *s) { return str && s? strcmp(str,s)==0 : false; }
 int String::compare(const char *s) { return str && s? strcmp(str,s) : (str? -256 : 256); }
 
+size_t String::count(const char *s) {
+	if(!s || !*s) return 0;
+	char *p1 = str,*p2;
+	size_t n,sl = strlen(s);
+	for(n=0; *p1 && (p2=strstr(p1,s)); p1=p2+sl,n++);
+	return n;
+}
+
+String &String::replace(const char *s,const char *r) {
+	if(!s || !*s || !r) return *this;
+	size_t n;
+	n = count(s);
+	if(n>0) {
+		char *p1 = str,*p2;
+		size_t sl = strlen(s),rl = strlen(r);
+		cap = cap+(rl-sl)*n;
+		str = (char *)malloc(cap+1);
+		*str = '\0';
+		len = 0;
+		for(; *p1 && (p2=strstr(p1,s)); p1=p2+sl) {
+			append(p1,(size_t)(p2-p1));
+			append(r);
+		}
+		if(*p1) append(p1);
+	}
+	return *this;
+}
+
 String &String::escape() {
 	if(str && len) {
 		size_t i,n = 0;
