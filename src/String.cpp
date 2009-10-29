@@ -404,9 +404,9 @@ int String::compare(const char *s) { return str && s? strcmp(str,s) : (str? -256
 
 size_t String::count(const char *s) {
 	if(!s || !*s) return 0;
-	char *p1 = str,*p2;
+	char *p = str;
 	size_t n,sl = strlen(s);
-	for(n=0; *p1 && (p2=strstr(p1,s)); p1=p2+sl,n++);
+	for(n=0; *p && (p=strstr(p,s)); p+=sl,n++);
 	return n;
 }
 
@@ -415,17 +415,19 @@ String &String::replace(const char *s,const char *r) {
 	size_t n;
 	n = count(s);
 	if(n>0) {
-		char *p1 = str,*p2;
-		size_t sl = strlen(s),rl = strlen(r);
-		cap = cap+(rl-sl)*n;
+		char *p = str,*p1 = p,*p2;
+		size_t sl = strlen(s);
+		cap = cap+(strlen(r)-sl)*n;
 		str = (char *)malloc(cap+1);
 		*str = '\0';
 		len = 0;
 		for(; *p1 && (p2=strstr(p1,s)); p1=p2+sl) {
-			append(p1,(size_t)(p2-p1));
+			n = (size_t)(p2-p1);
+			if(n) append(p1,n);
 			append(r);
 		}
 		if(*p1) append(p1);
+		::free(p);
 	}
 	return *this;
 }
