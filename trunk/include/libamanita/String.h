@@ -17,6 +17,13 @@ private:
 
 	void resize(size_t n);
 
+#if __WORDSIZE < 64
+	String &appendi32(int32_t i);
+	String &appendu32(uint32_t i);
+#endif
+	String &appendi64(int64_t i);
+	String &appendu64(uint64_t i);
+
 public:
 	struct entity {
 		const char *name;
@@ -46,12 +53,23 @@ public:
 	String &operator+=(String *s) { if(s) append(s->str,s->len);return *this; }
 	String &operator+=(String &s) { return append(s.str,s.len); }
 	String &operator+=(const char *s) { return append(s,0); }
-	String &operator+=(int16_t i) { return append((int32_t)i); }
-	String &operator+=(uint16_t i) { return append((uint32_t)i); }
-	String &operator+=(int32_t i) { return append(i); }
-	String &operator+=(uint32_t i) { return append(i); }
-	String &operator+=(int64_t i) { return append(i); }
-	String &operator+=(uint64_t i) { return append(i); }
+#if __WORDSIZE < 64
+	String &operator+=(short i) { return appendi32((int32_t)i); }
+	String &operator+=(unsigned short i) { return appendu32((uint32_t)i); }
+	String &operator+=(int i) { return appendi32((int32_t)i); }
+	String &operator+=(unsigned int i) { return appendu32((uint32_t)i); }
+	String &operator+=(long int i) { return appendi32((int32_t)i); }
+	String &operator+=(unsigned long int i) { return appendu32((uint32_t)i); }
+#else
+	String &operator+=(short i) { return appendi64((int64_t)i); }
+	String &operator+=(unsigned short i) { return appendu64((uint64_t)i); }
+	String &operator+=(int i) { return appendi32((int64_t)i); }
+	String &operator+=(unsigned int i) { return appendu32((uint64_t)i); }
+	String &operator+=(long int i) { return appendi64((int64_t)i); }
+	String &operator+=(unsigned long int i) { return appendu64((uint64_t)i); }
+#endif
+	String &operator+=(long long int i) { return appendi64((int64_t)i); }
+	String &operator+=(unsigned long long int i) { return appendu64((uint64_t)i); }
 	String &operator+=(float f) { return append(f); }
 	String &operator+=(double d) { return append(d); }
 
@@ -63,13 +81,24 @@ public:
 	String &append(String &s,size_t n) { return append(s.str,s.len,n); }
 	String &append(const char *s,size_t l=0);
 	String &append(const char *s,size_t l,size_t n);
-	String &append(int16_t i) { return append((int32_t)i); }
-	String &append(uint16_t i) { return append((uint32_t)i); }
-	String &append(int32_t i);
+#if __WORDSIZE < 64
+	String &append(short i) { return appendi32((int32_t)i); }
+	String &append(unsigned short i) { return appendu32((uint32_t)i); }
+	String &append(int i) { return appendi32((int32_t)i); }
+	String &append(unsigned int i) { return appendu32((uint32_t)i); }
+	String &append(long int i) { return appendi32((int32_t)i); }
+	String &append(unsigned long int i) { return appendu32((uint32_t)i); }
+#else
+	String &append(short i) { return appendi64((int64_t)i); }
+	String &append(unsigned short i) { return appendu64((uint64_t)i); }
+	String &append(int i) { return appendi64((int64_t)i); }
+	String &append(unsigned int i) { return appendu64((uint64_t)i); }
+	String &append(long int i) { return appendi64((int64_t)i); }
+	String &append(unsigned long int i) { return appendu64((uint64_t)i); }
+#endif
+	String &append(long long int i) { return appendi64((int64_t)i); }
+	String &append(unsigned long long int i) { return appendu64((uint64_t)i); }
 	String &append(int32_t i,int base);
-	String &append(uint32_t i);
-	String &append(int64_t i);
-	String &append(uint64_t i);
 	String &append(double f,int n=2,char c='.');
 	String &append(FILE *fp,bool uesc=true) { return appendUntil(fp,0,0,uesc); }
 	String &appendln() { return append(endline); }
@@ -124,6 +153,7 @@ public:
 	String &clear() { if(str) *str = '\0',len = 0ul;return *this; }
 	String &free();
 	void setCapacity(size_t n);
+	void increaseCapacity(size_t n) { resize(n); }
 
 	size_t length() { return len; }
 	size_t capacity() { return cap; }
@@ -136,8 +166,8 @@ public:
 	static char toLower(const char c) { return (c>='A' && c<='Z') || (c!='×' && c>='À' && c<='Þ')? c+32 : c; }
 	static char toUpper(const char c) { return (c>='a' && c<='z') || (c!='÷' && c>='à' && c<='þ')? c-32 : c; }
 	static int fromHex(char c) { return c>='0' && c<='9'? c-'0' : (c>='a' && c<='f'? c-87 : (c>='A' && c<='F'? c-55 : 0)); }
-	static unsigned long fromHex(const char *str);
-	static char *toHex(char *h,unsigned long i);
+	static uint64_t fromHex(const char *str);
+	static char *toHex(char *h,uint64_t i);
 	static char *toLower(char *str);
 	static char *toUpper(char *str);
 	static int stricmp(const char *str1,const char *str2);

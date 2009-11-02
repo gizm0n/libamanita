@@ -93,7 +93,8 @@ String &String::append(const char *s,size_t l,size_t n) {
 	return *this;
 }
 
-String &String::append(int32_t i) {
+#if __WORDSIZE < 64
+String &String::appendi32(int32_t i) {
 	if(i==0) return append('0');
 	char s[13],*p = s+12,c = 0;
 	*p-- = '\0';
@@ -102,6 +103,7 @@ String &String::append(int32_t i) {
 	if(c) *p-- = c;
 	return append(p+1);
 }
+#endif
 
 String &String::append(int32_t i,int base) {
 	if(i==0) return append('0');
@@ -113,15 +115,17 @@ String &String::append(int32_t i,int base) {
 	return append(p+1);
 }
 
-String &String::append(uint32_t i) {
+#if __WORDSIZE < 64
+String &String::appendu32(uint32_t i) {
 	if(i==0) return append('0');
 	char s[12],*p = s+11;
 	*p-- = '\0';
 	for(; i; i/=10) *p-- = '0'+(i%10);
 	return append(p+1);
 }
+#endif
 
-String &String::append(int64_t i) {
+String &String::appendi64(int64_t i) {
 	if(i==0) return append('0');
 	char s[22],*p = s+21,c = 0;
 	*p-- = '\0';
@@ -131,7 +135,7 @@ String &String::append(int64_t i) {
 	return append(p+1);
 }
 
-String &String::append(uint64_t i) {
+String &String::appendu64(uint64_t i) {
 	if(i==0) return append('0');
 	char s[21],*p = s+20;
 	*p-- = '\0';
@@ -251,7 +255,7 @@ String &String::vappendf(const char *f,va_list list) {
 fprintf(stderr,"n=%f,flags=%" PRIx32 "\n",n,flags);
 //				if(w1 && !(flags&F_MINUS) && l<w1) append(w1-l,pad);
 				if((flags&F_PLUS) && n>=0.) append('+');
-				append(n,w2default? ((flags&F_L)? 6 : w2default) : w2);
+				append(n,(int)(w2default? ((flags&F_L)? 6 : w2default) : w2));
 //				if(w1 && (flags&F_MINUS) && l<w1) repeat(w1-l,pad);
 				break;
 			}
@@ -634,17 +638,17 @@ size_t String::nextWord(const char **s,const char *c) {
 }
 
 
-unsigned long String::fromHex(const char *str) {
+uint64_t String::fromHex(const char *str) {
 	if(!str) return 0;
-	unsigned long n = 0;
-	while(isHex(*str)) n = (n<<4)|fromHex(*str),str++;
+	uint64_t n = 0;
+	for(int i=0; isHex(*str) && i<16; i++) n = (n<<4)|fromHex(*str),str++;
 	return n;
 }
 
-char *String::toHex(char *h,unsigned long i) {
-	char u = 0;
-	for(int n=i; n; n>>=4) u++;
-	for(h+=u,*h='\0'; i; i>>=4) *--h = "0123456789abcdef"[i&0xf];//(u=(i&0xf))<10? '0'+u : 'a'+(u-10);
+char *String::toHex(char *h,uint64_t i) {
+	int u = 0;
+	for(uint64_t n=i; n; n>>=4) u++;
+	for(h+=u,*h='\0'; i; i>>=4) *--h = "0123456789ABCDEF"[i&0xf];//(u=(i&0xf))<10? '0'+u : 'a'+(u-10);
 	return h;
 }
 

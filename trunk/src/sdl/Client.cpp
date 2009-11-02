@@ -53,7 +53,7 @@ fprintf(stderr,"start(TCPSOCK_LENINCL)\n");
 fflush(stderr);
 			uint8_t d[strlen(nick)+TCPSOCK_HD+5];
 			*TCPSOCK_TYPE(d+TCPSOCK_OFFSET) = TCPSOCK_SWAP(sizeof(d));
-			*(uint32_t *)&d[TCPSOCK_HD] = SDL_SwapBE32(id);
+			*(uint32_t *)((void *)&d[TCPSOCK_HD]) = SDL_SwapBE32(id);
 			strcpy((char *)&d[TCPSOCK_HD+4],nick);
 #else /*TCPSOCK_LENINCL*/
 			uint8_t d[strlen(nick)+5];

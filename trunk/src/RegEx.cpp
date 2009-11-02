@@ -791,7 +791,7 @@ PRINTF("[%p]search_next: %lu[%c%c%c]\n",bl,test,cc0,cc1,cc2);
 		for(i=0; i<found; i++)
 			strings[i] = match->match,list[i] = match,match = match->next;
 	}
-printf("\nSearch done in %zu (%zu,%zu) ticks, matches found: %" PRIu32 " stsz=%" PRIu32 "\n",(time2-time1),time1,time2,found,stsz);
+printf("\nSearch done in %" PRIu64 " (%" PRIu64 ",%" PRIu64 ") ticks, matches found: %" PRIu32 " stsz=%" PRIu32 "\n",(uint64_t)(time2-time1),(uint64_t)time1,(uint64_t)time2,found,stsz);
 	return found;
 }
 
