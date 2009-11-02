@@ -98,7 +98,7 @@ void Http::setFormValue(const char *key,const char *value, ...) {
 	}
 }
 
-void Http::setFormFile(const char *key,const char *file,const char *content,bool binary,void *data,unsigned long len) {
+void Http::setFormFile(const char *key,const char *file,const char *content,bool binary,void *data,size_t len) {
 	if(!file || !*file) return;
 	removeFormValue(file);
 	if(*content && (!data || len>0)) {
@@ -165,13 +165,17 @@ void Http::clearForm() {
 }
 
 
-const char *Http::get(const char *host,const char *url, ...) {
-	String url1;
+const char *Http::get(const char *host,const char *url) {
+	return request(host,url,HTTP_METHOD_GET);
+}
+
+const char *Http::getf(const char *host,const char *url, ...) {
+	String u;
 	va_list args;
    va_start(args,url);
-	url1.vappendf(url,args);
+	u.vappendf(url,args);
    va_end(args);
-	return request(host,url1.toString(),HTTP_METHOD_GET);
+	return get(host,u.toString());
 }
 
 const char *Http::post(const char *host,const char *url) {
@@ -226,19 +230,15 @@ fprintf(stderr,"Boundary 1: %s\n",boundary.toString());
 	return request(host,url,HTTP_METHOD_POST,file.toString(),file.length());
 }
 
-
-const char *Http::post(const char *host,const char *url,const char *form, ...) {
-	String file;
+const char *Http::postf(const char *host,const char *url, ...) {
+	String u;
 	va_list args;
-   va_start(args,form);
-	file.vappendf(form,args);
+   va_start(args,url);
+	u.vappendf(url,args);
    va_end(args);
-
-fprintf(stderr,"Http::post(file=\"%s\",len=%zu)\n",file.toString(),file.length());
-fflush(stderr);
-	headers.put(http_headers[HTTP_CONTENT_TYPE],http_mimes[HTTP_FORM_URLENCODED]);
-	return request(host,url,HTTP_METHOD_POST,file.toString(),file.length());
+	return post(host,u.toString());
 }
+
 
 const char *Http::request(const char *host,const char *url,HTTP_METHOD method,const char *data,size_t len) {
 	response.removeAll();
@@ -264,7 +264,7 @@ fflush(stderr);
 				if(!headers.contains(http_headers[HTTP_HOST])) headers.put(http_headers[HTTP_HOST],host);
 				if(!headers.contains(http_headers[HTTP_CONNECTION])) headers.put(http_headers[HTTP_CONNECTION],"close");
 				if(data && len==0) len = strlen(data);
-				sprintf(buf,"%lu",len);
+				sprintf(buf,"%zu",len);
 				headers.put(http_headers[HTTP_CONTENT_LENGTH],buf);
 				String header(1024);
 				header.append(http_methods[method]).append(" /").append(url).append(" HTTP/1.1\r\n");
@@ -287,50 +287,122 @@ fflush(stderr);
 			else {
 				t4 = SDL_GetTicks();
 				int r = SDLNet_TCP_Recv(sock,buf,1024);
+fprintf(stderr,"Http::request(response=\"%s\")\n",buf);
+fflush(stderr);
 				if(r<=0) error = 6;
 				else {
-					unsigned long n;
-					char *p1 = strstr(buf,"\r\n\r\n"),*p2,*p3;
+					int i,m,n;
+					char *p1 = strstr(buf,"\r\n\r\n"),*p2,*p3,*pb;
 					if(!p1) error = 7;
 					else {
-						p1[2] = '\0',p2 = p1+4;
+						bool chunked;
+						p1[2] = '\0',pb = p1+4;
 						response.put("Header",buf);
-						n = r-(strlen(buf)+2);
-						p1 = strstr(buf,http_headers[HTTP_CONTENT_LENGTH]);
-						if(!p1) error = 8;
-						else {
-							len = atol(p1+16);
-							body.setCapacity(len);
-							if(n>0) body.append(p2,n);
-							{ // Split header
-								p1 = strstr(buf,"\r\n");
-								while(p1) {
-									p2 = strstr(p1,": "),p3 = 0;
-									if(p2) {
-										p3 = strstr(p2,"\r\n");
-										if(p3) {
-											*p2 = '\0',p2 += 2,*p3 = '\0',p3 += 2;
-											response.put(p1,p2);
-										}
+
+						{ // Split header
+							p1 = strstr(buf,"\r\n");
+							while(p1) {
+								p2 = strstr(p1,": "),p3 = 0;
+								if(p2) {
+									p3 = strstr(p2,"\r\n");
+									if(p3) {
+										*p2 = '\0',p2 += 2,*p3 = '\0',p3 += 2;
+										response.put(p1,p2);
 									}
-									p1 = p3;
 								}
-								response.put("HTTP",buf);
-								if(!strncmp(buf,"HTTP/",5)) sscanf(buf,"HTTP/%f %d",&ver,&status);
+								p1 = p3;
 							}
-fprintf(stderr,"Http::request(len=%lu)\n",len);
+							response.put("HTTP",buf);
+							if(!strncmp(buf,"HTTP/",5)) sscanf(buf,"HTTP/%f %d",&ver,&status);
+						}
+
+						p1 = response.getString(http_headers[HTTP_CONTENT_ENCODING]);
+						chunked = strcmp(p1,"identity")!=0;
+						p2 = response.getString(http_headers[HTTP_CONTENT_LENGTH]);
+						n = p2? atol(p2) : 0;
+
+						r -= (int)(pb-buf);
+						for(i=0; 1; i++) {
+							if(n>0 && r>0) {
+fprintf(stderr,"Http::request(n=%d,r=%d,pb=%s)\n",n,r,pb);
 fflush(stderr);
-							if(!len) body.append('\0');
-							else while(n<len) {
-								r = SDLNet_TCP_Recv(sock,buf,1024);
+								if(n>r) {
+									body.append(pb,r);
+									n -= r;
+									pb = buf;
+									r = 0;
+								} else {
+									body.append(pb,n);
+									r -= n;
+									pb += n;
+									n = 0;
+								}
+							}
+							if(n==0) {
+								if(chunked || i==0) {
+									if(r<32) {
+										if(r>0) memmove(buf,pb,r);
+										pb = buf;
+										m = SDLNet_TCP_Recv(sock,pb+r,1024-r);
+										if(m<0) break;
+										r += m;
+									}
+									pb += 2;
+									n = String::fromHex(pb);
+fprintf(stderr,"Http::request(read_length: n=%d,r=%d,pb=%s)\n",n,r,pb);
+fflush(stderr);
+									if(n==0) break;
+									pb = strstr(pb,"\r\n")+2;
+									body.increaseCapacity(n);
+								} else break;
+							}
+							if(n>0 && r==0) {
+								pb = buf;
+								while(n>0) {
+									r = SDLNet_TCP_Recv(sock,pb,1024);
+									if(r<=0) break;
+									if(n>1024) {
+fprintf(stderr,"Http::request(n=%d,r=%d,pb=%s)\n",n,r,pb);
+fflush(stderr);
+										body.append(pb,r);
+										n -= r;
+										r = 0;
+									} else break;
+								}
+							}
+						}
+							
+/*
+						body.setCapacity(len);
+						n = (uint64_t)(r-(pb-buf));
+						if(n>0) body.append(pb,n);
+fprintf(stderr,"Http::request(len=%lu),n=%d\n",len,n);
+fflush(stderr);
+
+						if(len-n<=0) body.append('\0');
+						else {
+							for(n=len-n; 1; n-=r) {
+								if(n<=0) {
+									if(chunked) {
+										r = SDLNet_TCP_Recv(sock,buf,1024);
+										if(r<=0) break;
+										len = String::fromHex(&buf[2]);
+										p2 = strstr(&buf[2],"\r\n")+2;
+										body.increaseCapacity(len);
+										n = (uint64_t)(r-(p2-buf));
+										if(n>0) body.append(p2,n);
+										n = len-n;
+									} else break;
+								}
+								r = SDLNet_TCP_Recv(sock,buf,n>1024? 1024 : n);
 								if(r<=0) break;
 fprintf(stderr,"Http::request(r=%d)\n",r);
 fflush(stderr);
 								body.append(buf,r);
-								n += r;
 							}
-							if(r<=0) error = 9;
 						}
+*/
+						if(r<=0) error = 8;
 						t5 = SDL_GetTicks();
 					}
 				}

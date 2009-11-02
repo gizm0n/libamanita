@@ -180,7 +180,22 @@ public:
 	 * http.get("www.host.com","script.php?param1=%s&param2=%d",param1,param2);
 	 * @endcode
 	 */
-	const char *get(const char *host,const char *url, ...);
+	const char *get(const char *host,const char *url);
+
+	/** Send a htt-prequest using the GET method, same as the get-method except accepting a url to be formatted.
+	 * The va_list can be used to format the url with extra params. Note that params should be URL encoded.
+	 * @param host A string containing the host.
+	 * @param url The script or file to be requested.
+	 * @param ... Optional values to be formatted into url.
+	 * @return The response body data.
+	 * @see String::encodeURL()
+	 *
+	 * @code
+	 * Http http;
+	 * http.get("www.host.com","script.php?param1=%s&param2=%d",param1,param2);
+	 * @endcode
+	 */
+	const char *getf(const char *host,const char *url, ...);
 
 	/** Send a htt-prequest using the POST method.
 	 * @param host A string containing the host.
@@ -189,21 +204,12 @@ public:
 	 */
 	const char *post(const char *host,const char *url);
 
-	/** Send a htt-prequest using the POST method.
-	 * This method does not make use of the values set with setFormValue() and setFormFile().
+	/** Send a htt-prequest using the POST method, same as the post-method except accepting a url to be formatted.
 	 * @param host A string containing the host.
 	 * @param url The script or file to be requested.
-	 * @param form The form string formatted with '=' and '&'.
-	 * @param ... Optional values to be formatted into form.
 	 * @return The response body data.
-	 * @see Http::get(const char *host,const char *url, ...)
-	 *
-	 * @code
-	 * Http http;
-	 * http.post("www.host.com","script.php","param1=%s&param2=%d",param1,param2);
-	 * @endcode
 	 */
-	const char *post(const char *host,const char *url,const char *form, ...);
+	const char *postf(const char *host,const char *url, ...);
 
 	/** Send a http-prequest using specified method.
 	 * Set headers and form data previous to calling this method.
