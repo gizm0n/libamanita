@@ -1,4 +1,4 @@
 
-SUBDIRS = obj
+SUBDIRS = output
 
 
