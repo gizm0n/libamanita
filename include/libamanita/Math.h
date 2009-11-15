@@ -15,6 +15,9 @@ public:
 	static long ceil(double d); /** < Round double d to ceil integer. */
 	static long round(double d); /** < Round double d to closest integer. */
 
+	static int log10(long n); /** < Return integer common logarithm (base-10) for n. */
+	static int log10(long long n); /** < Return integer common logarithm (base-10) for n. */
+
 	static uint32_t pythagoras(int32_t x,int32_t y);
 	static double pythagoras(double x,double y);
 	static double pythagoras2(double kat,double tan);
