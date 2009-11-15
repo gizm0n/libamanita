@@ -1,8 +1,8 @@
 
 #include "config.h"
-#include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 #include <inttypes.h>
 #include <libamanita/String.h>
 
@@ -105,16 +105,6 @@ String &String::appendi32(int32_t i) {
 }
 #endif
 
-String &String::append(int32_t i,int base) {
-	if(i==0) return append('0');
-	char s[33],*p = s+sizeof(s)-1,c = 0,n;
-	*p-- = '\0';
-	if(i<0) c = '-',i = -i;
-	for(; i; i/=base) n = i%base,*p-- = n<=9? '0'+n : 'A'+n-10;
-	if(c) *p-- = c;
-	return append(p+1);
-}
-
 #if __WORDSIZE < 64
 String &String::appendu32(uint32_t i) {
 	if(i==0) return append('0');
@@ -140,6 +130,16 @@ String &String::appendu64(uint64_t i) {
 	char s[21],*p = s+20;
 	*p-- = '\0';
 	for(; i; i/=10) *p-- = '0'+(i%10);
+	return append(p+1);
+}
+
+String &String::append(int64_t i,int base) {
+	if(i==0) return append('0');
+	char s[22],*p = s+21,c = 0,n;
+	*p-- = '\0';
+	if(i<0) c = '-',i = -i;
+	for(; i; i/=base) n = i%base,*p-- = n<=9? '0'+n : 'A'+n-10;
+	if(c) *p-- = c;
 	return append(p+1);
 }
 
@@ -180,13 +180,15 @@ String &String::appendf(const char *f, ...) {
 }
 
 enum {
-	F_PLUS			= 0x001,
-	F_MINUS			= 0x002,
-	F_HASH			= 0x008,
-	F_PRECISION		= 0x080,
-	F_h				= 0x200,
-	F_l				= 0x400,
-	F_L				= 0x800,
+	F_PLUS			= 0x0001,
+	F_MINUS			= 0x0002,
+	F_HASH			= 0x0008,
+	F_PRECISION		= 0x0080,
+	F_h				= 0x0200,
+	F_l				= 0x0400,
+	F_ll				= 0x0800,
+	F_L				= 0x1000,
+	F_z				= 0x2000,
 };
 
 String &String::vappendf(const char *f,va_list list) {
@@ -195,6 +197,8 @@ String &String::vappendf(const char *f,va_list list) {
 	uint32_t flags,*w,w1,w2,w2default,l;
 	char pad;
 	while(1) {
+fprintf(stderr,"String::vappendf(f=%s)\n",f);
+fflush(stderr);
 		while((c=*f++) && c!='%') {
 			if(len==cap) resize(0);
 			str[len++] = c;
@@ -213,10 +217,13 @@ String &String::vappendf(const char *f,va_list list) {
 				if(flags&F_PRECISION) w2default = 0;
 			} else if(c=='*') *w = va_arg(list,int);
 			else if(c=='h') flags |= F_h;
-			else if(c=='l') flags |= F_l;
-			else if(c=='L') flags |= F_L;
+			else if(c=='l') {
+				if(flags&F_l) flags |= F_ll;
+				else flags |= F_l;
+			} else if(c=='L') flags |= F_L;
+			else if(c=='z') flags |= F_z;
 			else break;
-			c=*f++;
+			c = *f++;
 		}
 		switch(c) {
 			case '%':
@@ -231,21 +238,42 @@ String &String::vappendf(const char *f,va_list list) {
 			case 'i':
 			case 'I':
 			{
-				long n = va_arg(list,long);
-//				if(w1 && !(flags&F_MINUS) && l<w1) append(w1-l,pad);
-				if((flags&F_PLUS) && n>=0) append('+');
-				append(n);
-//				if(w1 && (flags&F_MINUS) && l<w1) repeat(w1-l,pad);
+				if(flags&F_z) {
+					size_t n = va_arg(list,size_t);
+					if((flags&F_PLUS) && n>=0) append('+');
+					append(n);
+				} else if(flags&F_ll) {
+					long long n = va_arg(list,long long);
+					if((flags&F_PLUS) && n>=0) append('+');
+					append(n);
+				} else if(flags&F_l) {
+					long n = va_arg(list,long);
+					if((flags&F_PLUS) && n>=0) append('+');
+					append(n);
+				} else {
+					int n = va_arg(list,int);
+					if((flags&F_PLUS) && n>=0) append('+');
+					append(n);
+				}
 				break;
 			}
 			case 'u':
 			case 'U':
 			{
-				unsigned long n = va_arg(list,unsigned long);
-//				if(w1 && !(flags&F_MINUS) && l<w1) append(w1-l,pad);
-				if((flags&F_PLUS) && n>=0) append('+');
-				append(n);
-//				if(w1 && (flags&F_MINUS) && l<w1) repeat(w1-l,pad);
+				if(flags&F_PLUS) append('+');
+				if(flags&F_z) {
+					size_t n = va_arg(list,size_t);
+					append(n);
+				} else if(flags&F_ll) {
+					unsigned long long n = va_arg(list,unsigned long long);
+					append(n);
+				} else if(flags&F_l) {
+					unsigned long n = va_arg(list,unsigned long);
+					append(n);
+				} else {
+					unsigned int n = va_arg(list,unsigned int);
+					append(n);
+				}
 				break;
 			}
 			case 'f':
@@ -253,16 +281,17 @@ String &String::vappendf(const char *f,va_list list) {
 			{
 				double n = va_arg(list,double);
 fprintf(stderr,"n=%f,flags=%" PRIx32 "\n",n,flags);
-//				if(w1 && !(flags&F_MINUS) && l<w1) append(w1-l,pad);
+fflush(stderr);
 				if((flags&F_PLUS) && n>=0.) append('+');
 				append(n,(int)(w2default? ((flags&F_L)? 6 : w2default) : w2));
-//				if(w1 && (flags&F_MINUS) && l<w1) repeat(w1-l,pad);
 				break;
 			}
 			case 's':
 			case 'S':
 			{
 				char *s = va_arg(list,char *);
+fprintf(stderr,"s=%s\n",s);
+fflush(stderr);
 				l = strlen(s);
 				if(w2 && l>w2) l = w2;
 				if(w1 && !(flags&F_MINUS) && l<w1) append(pad,w1-l);

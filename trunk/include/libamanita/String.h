@@ -53,20 +53,20 @@ public:
 	String &operator+=(String *s) { if(s) append(s->str,s->len);return *this; }
 	String &operator+=(String &s) { return append(s.str,s.len); }
 	String &operator+=(const char *s) { return append(s,0); }
-#if __WORDSIZE < 64
-	String &operator+=(short i) { return appendi32((int32_t)i); }
-	String &operator+=(unsigned short i) { return appendu32((uint32_t)i); }
-	String &operator+=(int i) { return appendi32((int32_t)i); }
-	String &operator+=(unsigned int i) { return appendu32((uint32_t)i); }
-	String &operator+=(long int i) { return appendi32((int32_t)i); }
-	String &operator+=(unsigned long int i) { return appendu32((uint32_t)i); }
-#else
+#if __WORDSIZE == 64
 	String &operator+=(short i) { return appendi64((int64_t)i); }
 	String &operator+=(unsigned short i) { return appendu64((uint64_t)i); }
 	String &operator+=(int i) { return appendi32((int64_t)i); }
 	String &operator+=(unsigned int i) { return appendu32((uint64_t)i); }
 	String &operator+=(long int i) { return appendi64((int64_t)i); }
 	String &operator+=(unsigned long int i) { return appendu64((uint64_t)i); }
+#else
+	String &operator+=(short i) { return appendi32((int32_t)i); }
+	String &operator+=(unsigned short i) { return appendu32((uint32_t)i); }
+	String &operator+=(int i) { return appendi32((int32_t)i); }
+	String &operator+=(unsigned int i) { return appendu32((uint32_t)i); }
+	String &operator+=(long int i) { return appendi32((int32_t)i); }
+	String &operator+=(unsigned long int i) { return appendu32((uint32_t)i); }
 #endif
 	String &operator+=(long long int i) { return appendi64((int64_t)i); }
 	String &operator+=(unsigned long long int i) { return appendu64((uint64_t)i); }
@@ -81,24 +81,24 @@ public:
 	String &append(String &s,size_t n) { return append(s.str,s.len,n); }
 	String &append(const char *s,size_t l=0);
 	String &append(const char *s,size_t l,size_t n);
-#if __WORDSIZE < 64
-	String &append(short i) { return appendi32((int32_t)i); }
-	String &append(unsigned short i) { return appendu32((uint32_t)i); }
-	String &append(int i) { return appendi32((int32_t)i); }
-	String &append(unsigned int i) { return appendu32((uint32_t)i); }
-	String &append(long int i) { return appendi32((int32_t)i); }
-	String &append(unsigned long int i) { return appendu32((uint32_t)i); }
-#else
+#if __WORDSIZE == 64
 	String &append(short i) { return appendi64((int64_t)i); }
 	String &append(unsigned short i) { return appendu64((uint64_t)i); }
 	String &append(int i) { return appendi64((int64_t)i); }
 	String &append(unsigned int i) { return appendu64((uint64_t)i); }
 	String &append(long int i) { return appendi64((int64_t)i); }
 	String &append(unsigned long int i) { return appendu64((uint64_t)i); }
+#else
+	String &append(short i) { return appendi32((int32_t)i); }
+	String &append(unsigned short i) { return appendu32((uint32_t)i); }
+	String &append(int i) { return appendi32((int32_t)i); }
+	String &append(unsigned int i) { return appendu32((uint32_t)i); }
+	String &append(long int i) { return appendi32((int32_t)i); }
+	String &append(unsigned long int i) { return appendu32((uint32_t)i); }
 #endif
 	String &append(long long int i) { return appendi64((int64_t)i); }
 	String &append(unsigned long long int i) { return appendu64((uint64_t)i); }
-	String &append(int32_t i,int base);
+	String &append(int64_t i,int base);
 	String &append(double f,int n=2,char c='.');
 	String &append(FILE *fp,bool uesc=true) { return appendUntil(fp,0,0,uesc); }
 	String &appendln() { return append(endline); }

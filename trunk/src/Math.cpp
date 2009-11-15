@@ -27,6 +27,18 @@ inline long Math::floor(double d) { return (long)d; }
 long Math::ceil(double d) { long n = (long)d;return n+(d-n>0.? 1 : 0); }
 long Math::round(double d) { long n = (long)d;return n+(d-n>=.5? 1 : 0); }
 
+int Math::log10(long n) {
+	int i;
+	for(i=0,n/=10; n; i++) n /= 10;
+	return i;
+}
+
+int Math::log10(long long n) {
+	int i;
+	for(i=0,n/=10; n; i++) n /= 10;
+	return i;
+}
+
 inline uint32_t Math::pythagoras(int32_t x,int32_t y) { return Math::sqrt((uint64_t)(x*x+y*y)); }
 inline double Math::pythagoras(double x,double y) { return ::sqrt(x*x+y*y); }
 inline double Math::pythagoras2(double kat,double tan) { return ::sqrt(tan*tan-kat*kat); }
