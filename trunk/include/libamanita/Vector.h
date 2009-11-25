@@ -68,8 +68,8 @@ public:
 	Vector &operator+=(float v) { return insert(*(value_t *)((void *)&v),sz,TYPE_FLOAT); }
 #endif
 	Vector &operator+=(const char *v) { return insert((value_t)v,sz,TYPE_CHAR_P); }
-	Vector &operator+=(String *v) { return insert((value_t)v->toString(),sz,TYPE_CHAR_P); }
-	Vector &operator+=(String &v) { return insert((value_t)v.toString(),sz,TYPE_CHAR_P); }
+	Vector &operator+=(String *v) { return insert((value_t)v->toCharArray(),sz,TYPE_CHAR_P); }
+	Vector &operator+=(String &v) { return insert((value_t)v.toCharArray(),sz,TYPE_CHAR_P); }
 	Vector &operator+=(Object *v) { return insert((value_t)v,sz,TYPE_OBJECT_P); }
 	Vector &operator+=(Object &v) { return insert((value_t)&v,sz,TYPE_OBJECT_P); }
 	Vector &operator+=(Vector &a) { return insert(a,sz); }
@@ -83,8 +83,8 @@ public:
 	Vector &insert(float v,long n=-1) { return insert(*(value_t *)((void *)&v),n,TYPE_FLOAT); }
 #endif
 	Vector &insert(const char *v,long n=-1) { return insert((value_t)v,n,TYPE_CHAR_P); }
-	Vector &insert(String *v,long n=-1) { return insert((value_t)v->toString(),n,TYPE_CHAR_P); }
-	Vector &insert(String &v,long n=-1) { return insert((value_t)v.toString(),n,TYPE_CHAR_P); }
+	Vector &insert(String *v,long n=-1) { return insert((value_t)v->toCharArray(),n,TYPE_CHAR_P); }
+	Vector &insert(String &v,long n=-1) { return insert((value_t)v.toCharArray(),n,TYPE_CHAR_P); }
 	Vector &insert(Object *v,long n=-1) { return insert((value_t)v,n,TYPE_OBJECT_P); }
 	Vector &insert(Object &v,long n=-1) { return insert((value_t)&v,n,TYPE_OBJECT_P); }
 	Vector &insert(Vector &v,long n=-1);
@@ -99,8 +99,8 @@ public:
 	Vector &operator-=(float v) { return remove(*(value_t *)((void *)&v),TYPE_FLOAT); }
 #endif
 	Vector &operator-=(const char *v) { return remove(v); }
-	Vector &operator-=(String *v) { return remove(v->toString()); }
-	Vector &operator-=(String &v) { return remove(v.toString()); }
+	Vector &operator-=(String *v) { return remove(v->toCharArray()); }
+	Vector &operator-=(String &v) { return remove(v.toCharArray()); }
 	Vector &operator-=(Object *v) { return remove((value_t)v,TYPE_OBJECT_P); }
 	Vector &operator-=(Object &v) { return remove((value_t)&v,TYPE_OBJECT_P); }
 	Vector &remove(void *v) { return remove((value_t)v,TYPE_VOID_P); }
@@ -113,8 +113,8 @@ public:
 	Vector &remove(float v) { return remove(*(value_t *)((void *)&v),TYPE_FLOAT); }
 #endif
 	Vector &remove(const char *v);
-	Vector &remove(String *v) { return remove(v->toString()); }
-	Vector &remove(String &v) { return remove(v.toString()); }
+	Vector &remove(String *v) { return remove(v->toCharArray()); }
+	Vector &remove(String &v) { return remove(v.toCharArray()); }
 	Vector &remove(Object *v) { return remove((value_t)v,TYPE_OBJECT_P); }
 	Vector &remove(Object &v) { return remove((value_t)&v,TYPE_OBJECT_P); }
 	Vector &removeAt(size_t n);
@@ -130,8 +130,8 @@ public:
 	long indexOf(float v) { return indexOf(*(value_t *)((void *)&v),TYPE_FLOAT); }
 #endif
 	long indexOf(const char *v);
-	long indexOf(String *v) { return indexOf(v->toString()); }
-	long indexOf(String &v) { return indexOf(v.toString()); }
+	long indexOf(String *v) { return indexOf(v->toCharArray()); }
+	long indexOf(String &v) { return indexOf(v.toCharArray()); }
 	long indexOf(Object *v) { return indexOf((value_t)v,TYPE_OBJECT_P); }
 	long indexOf(Object &v) { return indexOf((value_t)&v,TYPE_OBJECT_P); }
 
@@ -145,12 +145,12 @@ public:
 	bool contains(float v) { return indexOf(*(value_t *)((void *)&v),TYPE_FLOAT)!=-1; }
 #endif
 	bool contains(const char *v) { return indexOf(v)!=-1; }
-	bool contains(String *v) { return indexOf(v->toString())!=-1; }
-	bool contains(String &v) { return indexOf(v.toString())!=-1; }
+	bool contains(String *v) { return indexOf(v->toCharArray())!=-1; }
+	bool contains(String &v) { return indexOf(v.toCharArray())!=-1; }
 	bool contains(Object *v) { return indexOf((value_t)v,TYPE_OBJECT_P)!=-1; }
 	bool contains(Object &v) { return indexOf((value_t)&v,TYPE_OBJECT_P)!=-1; }
 
-	Vector &split(String &str,const char *delim,bool trim=false) { return split(str.toString(),delim,trim); }
+	Vector &split(String &str,const char *delim,bool trim=false) { return split(str.toCharArray(),delim,trim); }
 	Vector &split(const char *str,const char *delim,bool trim=false);
 
 	void resize(size_t s=0);
