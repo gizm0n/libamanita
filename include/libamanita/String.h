@@ -136,6 +136,7 @@ public:
 	int compare(String &s) { return compare(s.str); }
 	int compare(const char *s);
 
+	size_t count(char c);
 	size_t count(const char *s);
 
 	String &replace(const char *s,const char *r);
@@ -158,8 +159,9 @@ public:
 	size_t length() { return len; }
 	size_t capacity() { return cap; }
 
-	const char *toString() { return str; }
+	const char *toCharArray() { return str; }
 	int toInt();
+	size_t toIntArray(int *n,char c);
 
 	static size_t nextWord(const char **s,const char *c=whitespace);
 

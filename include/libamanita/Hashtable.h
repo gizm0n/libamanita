@@ -30,8 +30,8 @@ enum {
 	void put(key_type1 key,unsigned long value) { put(key_value_t,(value_t)value,key_type2,TYPE_INTPTR); } \
 	void put(key_type1 key,float value) { put(key_value_t,*(value_t *)((void *)&value),key_type2,TYPE_FLOAT); } \
 	void put(key_type1 key,const char *value) { put(key_value_t,(value_t)strdup(value),key_type2,TYPE_CHAR_P); } \
-	void put(key_type1 key,String *value) { put(key_value_t,(value_t)strdup(value->toString()),key_type2,TYPE_CHAR_P); } \
-	void put(key_type1 key,String &value) { put(key_value_t,(value_t)strdup(value.toString()),key_type2,TYPE_CHAR_P); } \
+	void put(key_type1 key,String *value) { put(key_value_t,(value_t)strdup(value->toCharArray()),key_type2,TYPE_CHAR_P); } \
+	void put(key_type1 key,String &value) { put(key_value_t,(value_t)strdup(value.toCharArray()),key_type2,TYPE_CHAR_P); } \
 	void put(key_type1 key,const Object *value) { put(key_value_t,(value_t)value,key_type2,TYPE_OBJECT_P); } \
 	void put(key_type1 key,const Object &value) { put(key_value_t,(value_t)&value,key_type2,TYPE_OBJECT_P); }
 
@@ -47,8 +47,8 @@ enum {
 	void put(key_type1 key,unsigned long value) { put(key_value_t,(value_t)value,TYPE_INTPTR); } \
 	void put(key_type1 key,float value) { put(key_value_t,*(value_t *)((void *)&value),TYPE_FLOAT); } \
 	void put(key_type1 key,const char *value) { put(key_value_t,(value_t)strdup(value),TYPE_CHAR_P); } \
-	void put(key_type1 key,String *value) { put(key_value_t,(value_t)strdup(value->toString()),TYPE_CHAR_P); } \
-	void put(key_type1 key,String &value) { put(key_value_t,(value_t)strdup(value.toString()),TYPE_CHAR_P); } \
+	void put(key_type1 key,String *value) { put(key_value_t,(value_t)strdup(value->toCharArray()),TYPE_CHAR_P); } \
+	void put(key_type1 key,String &value) { put(key_value_t,(value_t)strdup(value.toCharArray()),TYPE_CHAR_P); } \
 	void put(key_type1 key,const Object *value) { put(key_value_t,(value_t)value,TYPE_OBJECT_P); } \
 	void put(key_type1 key,const Object &value) { put(key_value_t,(value_t)&value,TYPE_OBJECT_P); }
 
@@ -133,8 +133,8 @@ public:
 #endif
 			//void setValue(long double v);
 			void setValue(const char *v) { _HT_SET_STRING_VALUE(v,TYPE_CHAR_P); }
-			void setValue(String *v) { _HT_SET_STRING_VALUE(v->toString(),TYPE_CHAR_P); }
-			void setValue(String &v) { _HT_SET_STRING_VALUE(v.toString(),TYPE_CHAR_P); }
+			void setValue(String *v) { _HT_SET_STRING_VALUE(v->toCharArray(),TYPE_CHAR_P); }
+			void setValue(String &v) { _HT_SET_STRING_VALUE(v.toCharArray(),TYPE_CHAR_P); }
 			void setValue(const Object *v) { _HT_SET_INT_VALUE(v,TYPE_OBJECT_P); }
 			void setValue(const Object &v) { _HT_SET_INT_VALUE(&v,TYPE_OBJECT_P); }
 
@@ -170,8 +170,8 @@ _HT_PUT_KEY_INT_VALUE_LIST(long,(value_t)key,TYPE_INTPTR)
 _HT_PUT_KEY_INT_VALUE_LIST(unsigned long,(value_t)key,TYPE_INTPTR)
 _HT_PUT_KEY_INT_VALUE_LIST(float,*(value_t *)((void *)&key),TYPE_FLOAT)
 _HT_PUT_KEY_STRING_VALUE_LIST(const char *,key)
-_HT_PUT_KEY_STRING_VALUE_LIST(String *,key->toString())
-_HT_PUT_KEY_STRING_VALUE_LIST(String &,key.toString())
+_HT_PUT_KEY_STRING_VALUE_LIST(String *,key->toCharArray())
+_HT_PUT_KEY_STRING_VALUE_LIST(String &,key.toCharArray())
 _HT_PUT_KEY_INT_VALUE_LIST(Object *,(value_t)key->hash(),TYPE_OBJECT_P)
 _HT_PUT_KEY_INT_VALUE_LIST(Object &,(value_t)key.hash(),TYPE_OBJECT_P)
 

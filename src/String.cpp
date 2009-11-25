@@ -436,10 +436,18 @@ bool String::equals(const char *s) { return str && s? strcmp(str,s)==0 : false; 
 int String::compare(const char *s) { return str && s? strcmp(str,s) : (str? -256 : 256); }
 
 size_t String::count(const char *s) {
-	if(!s || !*s) return 0;
+	if(!s || !*s || !str || !len) return 0;
 	char *p = str;
 	size_t n,sl = strlen(s);
 	for(n=0; *p && (p=strstr(p,s)); p+=sl,n++);
+	return n;
+}
+
+size_t String::count(char c) {
+	if(c=='\0' || !str || !len) return 0;
+	char *p;
+	size_t n;
+	for(p=str; *p; p++) if(*p==c) n++;
 	return n;
 }
 
@@ -655,6 +663,20 @@ int String::toInt() {
 	while(isSpace(*p)) p++;
 	if(*p=='0' && *++p=='x') return fromHex(++p);
 	return atoi(p);
+}
+
+size_t String::toIntArray(int *n,char c) {
+	size_t i;
+	char *p1 = str,*p2;
+	while(*p1 && !isDigit(*p1)) p1++;
+	if(!*p1) return 0;
+	for(i=0; p1 && *p1; i++,p1=p2) {
+		p2 = strchr(p1,c);
+		if(p2) *p2++ = '\0';
+		if(*p1=='0' && *++p1=='x') n[i] = fromHex(++p1);
+		else n[i] = atoi(p1);
+	}
+	return i;
 }
 
 

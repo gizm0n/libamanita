@@ -255,7 +255,7 @@ public:
 	 */
 	const char *getResponseHeader(HTTP_HEADER key);
 	/** Get the file-body returned by the get, post or request methods. */
-	const char *getFile() { return body.toString(); }
+	const char *getFile() { return body.toCharArray(); }
 	/** Get size of the file-body returned by the get, post or request methods. */
 	long getFileSize() { return body.length(); }
 };
