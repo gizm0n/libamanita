@@ -71,7 +71,7 @@ String &String::append(char c,size_t n) {
 }
 
 String &String::append(const char *s,size_t l) {
-	if(s && *s) {
+	if(s) {
 		if(!l) l = strlen(s);
 		resize(l);
 		memcpy(&str[len],s,l);
@@ -81,7 +81,7 @@ String &String::append(const char *s,size_t l) {
 	return *this;
 }
 String &String::append(const char *s,size_t l,size_t n) {
-	if(s && *s && n>0) {
+	if(s && n>0) {
 		if(!l) l = strlen(s);
 		resize(l*n);
 		while(n--) {
@@ -666,6 +666,7 @@ int String::toInt() {
 }
 
 size_t String::toIntArray(int *n,char c) {
+	if(!n || c=='\0' || !str || !len) return 0;
 	size_t i;
 	char *p1 = str,*p2;
 	while(*p1 && !isDigit(*p1)) p1++;
