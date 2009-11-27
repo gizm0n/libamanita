@@ -277,7 +277,7 @@ fflush(stderr);
 		if(!(sock=SDLNet_TCP_Open(&ip))) error = 3;
 		else if(SDLNet_TCP_AddSocket(set,sock)==-1) error = 4;
 		else {
-			char buf[1025];
+			char buf[2049];
 			t2 = SDL_GetTicks();
 			{
 				if(!headers.contains(http_headers[HTTP_HOST])) headers.put(http_headers[HTTP_HOST],host);
@@ -285,7 +285,7 @@ fflush(stderr);
 				if(data && len==0) len = strlen(data);
 				sprintf(buf,"%zu",len);
 				headers.put(http_headers[HTTP_CONTENT_LENGTH],buf);
-				String header(1024);
+				String header(2048);
 				header.append(http_methods[method]).append(" /").append(url).append(" HTTP/1.1\r\n");
 				Hashtable::iterator iter = headers.iterate();
 				while(iter.next())
@@ -305,15 +305,15 @@ fflush(stderr);
 			if(SDLNet_CheckSockets(set,(Uint32)-1)<=0) error = 5;
 			else {
 				t4 = SDL_GetTicks();
-				int r = SDLNet_TCP_Recv(sock,buf,1024);
+				int r = SDLNet_TCP_Recv(sock,buf,2048);
 fprintf(stderr,"Http::request(response=\"%s\",r=%d)\n",buf,r);
 fflush(stderr);
 				if(r<=0) error = 6;
 				else {
 					int i,n;
 					char *p1 = strstr(buf,"\r\n\r\n"),*p2,*p3,*pb;
-fprintf(stderr,"Http::request(p1=\"%s\")\n",p1);
-fflush(stderr);
+//fprintf(stderr,"Http::request(p1=\"%s\")\n",p1);
+//fflush(stderr);
 					if(!p1) error = 7;
 					else {
 						bool chunked;
@@ -346,45 +346,56 @@ fflush(stderr);
 						p1 = response.getString(http_headers[HTTP_TRANSFER_ENCODING]);
 fprintf(stderr,"Http::request(encoding: %s)\n",p1);
 fflush(stderr);
-						chunked = p1? strcmp(p1,"identity")!=0 : true;
+						//chunked = p1? strcmp(p1,"identity")!=0 : true;
 						p2 = response.getString(http_headers[HTTP_CONTENT_LENGTH]);
 fprintf(stderr,"Http::request(content length: %s)\n",p2);
 fflush(stderr);
 						n = p2? atol(p2) : 0;
+						chunked = p2? false : true;
 
 						r -= (int)(pb-buf);
-						for(int chunks=1; 1;) {
-							if(n>0 && r>0) {
-fprintf(stderr,"Http::request(n=%d,r=%d,pb=%s)\n",n,r,pb);
+fprintf(stderr,"Http::request(n=%d,r=%d,chunked=%d)\n",n,r,chunked);
 fflush(stderr);
+						for(int chunks=1; 1;) {
+//fprintf(stderr,"Http::request(loop: n=%d,r=%d,len=%d)\n",n,r,body.length());
+//fflush(stderr);
+							if(n>0 && r>0) {
+//fprintf(stderr,"Http::request(append_data[1]: n=%d,r=%d,len=%d)\n",n,r,body.length());
+//fflush(stderr);
 								if(n>r) {
-									body.append(pb,r);
+									body.append((const char *)pb,(size_t)r);
 									n -= r;
 									pb = buf;
 									r = 0;
 								} else {
-									body.append(pb,n);
+									body.append((const char *)pb,(size_t)n);
 									r -= n;
 									pb += n;
 									n = 0;
 								}
+//fprintf(stderr,"Http::request(append_data[2]: n=%d,r=%d,len=%d)\n",n,r,body.length());
+//fflush(stderr);
 							}
 							if(n==0) {
-								if(chunked || chunks==1) {
+//fprintf(stderr,"Http::request(read_length[1]: n=%d,r=%d,len=%d)\n",n,r,body.length());
+//fflush(stderr);
+								if(chunked) {
 									if(r<32) {
 										if(r>0) memmove(buf,pb,r);
 										pb = buf;
-										i = SDLNet_TCP_Recv(sock,pb+r,1024-r);
+										i = SDLNet_TCP_Recv(sock,pb+r,2048-r);
 										if(i<0) break;
 										r += i;
 										pb[r] = '\0';
 									}
 									if(chunks>1) pb += 2;
 									n = String::fromHex(pb);
-fprintf(stderr,"Http::request(read_length: n=%d,r=%d,pb=%s)\n",n,r,pb);
-fflush(stderr);
+//fprintf(stderr,"Http::request(read_length: n=%d,r=%d,len=%d)\n",n,r,body.length());
+//fflush(stderr);
 									if(n==0) break;
-									pb = strstr(pb,"\r\n")+2;
+									p1 = strstr(pb,"\r\n")+2;
+									r -= p1-pb;
+									pb = p1;
 									body.increaseCapacity(n);
 									chunks++;
 								} else break;
@@ -392,16 +403,20 @@ fflush(stderr);
 							if(n>0 && r==0) {
 								pb = buf;
 								while(n>0) {
-									r = SDLNet_TCP_Recv(sock,pb,1024);
+									r = SDLNet_TCP_Recv(sock,pb,2048);
 									if(r<=0) break;
-									if(n>1024) {
-fprintf(stderr,"Http::request(n=%d,r=%d,pb=%s)\n",n,r,pb);
-fflush(stderr);
-										body.append(pb,r);
+									pb[r] = '\0';
+									if(n>2048) {
+//fprintf(stderr,"Http::request(read_data[1]: n=%d,r=%d,len=%d)\n",n,r,body.length());
+//fflush(stderr);
+										body.append((const char *)pb,(size_t)r);
 										n -= r;
 										r = 0;
+//fprintf(stderr,"Http::request(read_data[2]: n=%d,r=%d,len=%d)\n",n,r,body.length());
+//fflush(stderr);
 									} else break;
 								}
+								if(r<0) break;
 							}
 						}
 							
@@ -435,7 +450,7 @@ fflush(stderr);
 							}
 						}
 */
-						if(r<=0) error = 8;
+						if(r<0) error = 8;
 						t5 = SDL_GetTicks();
 					}
 				}
@@ -455,8 +470,8 @@ fflush(stderr);
 	clearForm();
 
 fprintf(stderr,"Time alltogether: %d\nTime to init: %d\nTime to send: %d\nTime until response: %d\nTime to download: %d\n"
-	"header[%s]\nbody[%s]\nlen=%zu\nver=%.1f\nstatus=%d\n",
-	t5-t1,t2-t1,t3-t2,t4-t3,t5-t4,response.getString("Header"),body.toCharArray(),body.length(),ver,status);
+	"header[%s]\nlen=%zu\nver=%.1f\nstatus=%d\n",
+	t5-t1,t2-t1,t3-t2,t4-t3,t5-t4,response.getString("Header"),body.length(),ver,status);
 fflush(stderr);
 	return body.toCharArray();
 }

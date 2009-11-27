@@ -161,7 +161,7 @@ public:
 
 	const char *toCharArray() { return str; }
 	int toInt();
-	size_t toIntArray(int *n,char c);
+	size_t toIntArray(int *n,char c=',');
 
 	static size_t nextWord(const char **s,const char *c=whitespace);
 
