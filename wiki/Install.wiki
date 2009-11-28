@@ -7,7 +7,7 @@ Dependencies:
   * libsdl1.2-dev
   * libsqlite3-dev
 
-To download, compile and install on linux, open a terminal and run the following sequence of commands:
+To download, compile and install on *linux*, open a terminal and run the following sequence of commands:
 {{{
 sudo aptitude update
 sudo aptitude install build-essential \
@@ -30,7 +30,9 @@ cd ..
 rm -r libamanita
 }}}
 
-For windows users, it's the same principles, if you install MinGW and MSYS, and you will have to install the dependencies manually. You can find everything you need here:
+
+
+For *windows* users, it's the same principles, if you install MinGW and MSYS, and you will have to install the dependencies manually. You can find everything you need here:
  http://sourceforge.net/projects/mingw/files
 
  http://www.libsdl.org/download-1.2.php
