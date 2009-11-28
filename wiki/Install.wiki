@@ -24,7 +24,7 @@ cd libamanita
 ./autogen.sh
 ./configure
 make
-make install
+sudo make install
 
 cd ..
 rm -r libamanita
