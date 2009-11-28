@@ -31,9 +31,14 @@ rm -r libamanita
 }}}
 
 For windows users, it's the same principles, if you install MinGW and MSYS, and you will have to install the dependencies manually. You can find everything you need here:
- http://sourceforge.net/projects/mingw/files/
+ http://sourceforge.net/projects/mingw/files
+
  http://www.libsdl.org/download-1.2.php
- http://www.libsdl.org/projects/SDL_net/
- http://www.libsdl.org/projects/SDL_ttf/
- http://www.libsdl.org/projects/SDL_image/
+
+ http://www.libsdl.org/projects/SDL_net
+
+ http://www.libsdl.org/projects/SDL_ttf
+
+ http://www.libsdl.org/projects/SDL_image
+
  http://www.sqlite.org/download.html
