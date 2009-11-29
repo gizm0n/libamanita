@@ -4,10 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#include <libamanita/Vector.h>
+#include <libamanita/aVector.h>
 
 
-value_t Vector::iterator::first(type_t type) {
+value_t aVector::iterator::first(type_t type) {
 	if(vec->sz) {
 		if(!type) return vec->list[index=0].value;
 		for(index=0; index<(long)vec->sz; index++)
@@ -17,7 +17,7 @@ value_t Vector::iterator::first(type_t type) {
 	return 0;
 }
 
-value_t Vector::iterator::next(type_t type) {
+value_t aVector::iterator::next(type_t type) {
 	if(!vec->sz) index = ITER_INDEX_EMPTY;
 	else if(index!=ITER_INDEX_AFTER_LAST) {
 		if(index<0) index = ITER_INDEX_BEFORE_FIRST;
@@ -30,7 +30,7 @@ value_t Vector::iterator::next(type_t type) {
 	return 0;
 }
 
-value_t Vector::iterator::previous(type_t type) {
+value_t aVector::iterator::previous(type_t type) {
 	if(!vec->sz) index = ITER_INDEX_EMPTY;
 	else if(index!=ITER_INDEX_BEFORE_FIRST) {
 		if(index<0) index = vec->sz;
@@ -43,7 +43,7 @@ value_t Vector::iterator::previous(type_t type) {
 	return 0;
 }
 
-value_t Vector::iterator::last(type_t type) {
+value_t aVector::iterator::last(type_t type) {
 	if(vec->sz) {
 		if(!type) return vec->list[index=vec->sz-1].value;
 		for(index=vec->sz-1; index>=0; index--)
@@ -53,7 +53,7 @@ value_t Vector::iterator::last(type_t type) {
 	return 0;
 }
 
-value_t Vector::iterator::remove() {
+value_t aVector::iterator::remove() {
 	if(index>=0 && index<(long)vec->sz) {
 		value_t v = vec->list[index].value;
 		vec->removeAt(index--);
@@ -64,20 +64,20 @@ value_t Vector::iterator::remove() {
 
 
 
-RttiObjectInheritance(Vector,Collection);
+RttiObjectInheritance(aVector,aCollection);
 
 
-Vector::Vector() : Collection(),inc(0),list(0) {}
-Vector::Vector(size_t n) : Collection(),inc(0),list(0) { cap = n; }
-Vector::~Vector() { clear(); }
+aVector::aVector() : aCollection(),inc(0),list(0) {}
+aVector::aVector(size_t n) : aCollection(),inc(0),list(0) { cap = n; }
+aVector::~aVector() { clear(); }
 
 
-Vector::iterator Vector::iterate() {
-	Vector::iterator iter(this);
+aVector::iterator aVector::iterate() {
+	aVector::iterator iter(this);
 	return iter;
 }
 
-Vector &Vector::insert(value_t v,long n,type_t t) {
+aVector &aVector::insert(value_t v,long n,type_t t) {
 	if(n<0 || n>(long)sz) n = sz;
 	if(!list || sz==cap) resize(0);
 	if(t==TYPE_CHAR_P) v = (value_t)strdup((char *)v);
@@ -93,7 +93,7 @@ Vector &Vector::insert(value_t v,long n,type_t t) {
 	return *this;
 }
 
-Vector &Vector::insert(Vector &v,long n) {
+aVector &aVector::insert(aVector &v,long n) {
 	if(n<0 || n>(long)sz) n = sz;
 	if(!list || sz+v.sz>cap) resize(sz+v.sz);
 	size_t i;
@@ -112,7 +112,7 @@ Vector &Vector::insert(Vector &v,long n) {
 	return *this;
 }
 
-Vector &Vector::remove(value_t v,type_t t) {
+aVector &aVector::remove(value_t v,type_t t) {
 	if(v && sz) {
 		size_t i,n;
 		for(i=0,n=0; i+n<sz; i++) {
@@ -129,7 +129,7 @@ Vector &Vector::remove(value_t v,type_t t) {
 	return *this;
 }
 
-Vector &Vector::remove(const char *v) {
+aVector &aVector::remove(const char *v) {
 	if(v && *v && sz) {
 		size_t i,n;
 		for(i=0ul,n=0ul; i+n<sz; i++) {
@@ -144,7 +144,7 @@ Vector &Vector::remove(const char *v) {
 	return *this;
 }
 
-Vector &Vector::removeAt(size_t n) {
+aVector &aVector::removeAt(size_t n) {
 	if(sz && n<sz) {
 		if(list[n].type==TYPE_CHAR_P
 #if _WORDSIZE < 64
@@ -157,18 +157,18 @@ Vector &Vector::removeAt(size_t n) {
 	return *this;
 }
 
-long Vector::indexOf(value_t v,type_t t) {
+long aVector::indexOf(value_t v,type_t t) {
 	for(size_t i=0; i<sz; i++) if(list[i].value==v && list[i].type==t) return (long)i;
 	return -1;
 }
 
-long Vector::indexOf(const char *v) {
+long aVector::indexOf(const char *v) {
 	for(size_t i=0; i<sz; i++)
       if(list[i].type==TYPE_CHAR_P && !strcmp((char *)list[i].value,v)) return (long)i;
 	return -1;
 }
 
-Vector &Vector::split(const char *str,const char *delim,bool trim) {
+aVector &aVector::split(const char *str,const char *delim,bool trim) {
 	if(str && *str) {
 		if(delim && *delim) {
 			char *buf = strdup(str),*s1 = buf,*s2 = s1;
@@ -179,7 +179,7 @@ Vector &Vector::split(const char *str,const char *delim,bool trim) {
 					else if(*s2=='\\') s2++;
 					s2++;
 				}
-				if(trim) String::trim(s1);
+				if(trim) aString::trim(s1);
 //fprintf(stderr,"s1=\"%s\"\n",s1);
 //fflush(stderr);
 				if(*s1) insert((value_t)s1,sz,TYPE_CHAR_P);
@@ -194,7 +194,7 @@ Vector &Vector::split(const char *str,const char *delim,bool trim) {
 }
 
 
-void Vector::resize(size_t s) {
+void aVector::resize(size_t s) {
 	if(s<sz) s = inc? sz+inc : (sz<<1);
 	if(!s) s = cap>0? cap : 16;
 	node *l = (node *)malloc(s*sizeof(node));
@@ -206,7 +206,7 @@ void Vector::resize(size_t s) {
 	list = l;
 }
 
-void Vector::trim() {
+void aVector::trim() {
 	cap = sz;
 	if(sz>0) {
 		node *l = (node *)malloc(cap*sizeof(node));
@@ -216,7 +216,7 @@ void Vector::trim() {
 	}
 }
 
-void Vector::clear() {
+void aVector::clear() {
 	if(list) {
 		for(size_t i=0; i<sz; i++) if(list[i].type==TYPE_CHAR_P) free((void *)list[i].value);
 		free(list);
@@ -225,7 +225,7 @@ void Vector::clear() {
 }
 
 
-size_t Vector::print(const char *fn) {
+size_t aVector::print(const char *fn) {
 	FILE *fp;
 	if(!fn || !*fn || !(fp=fopen(fn,"w"))) return 0;
 	size_t s = print(fp);
@@ -233,7 +233,7 @@ size_t Vector::print(const char *fn) {
 	return s;
 }
 
-size_t Vector::print(FILE *fp) {
+size_t aVector::print(FILE *fp) {
 	if(!fp) return 0;
 	for(size_t i=0; i<sz; i++) {
 		fprintf(fp,"List[%zu,%u]",i,list[i].type);
@@ -259,7 +259,7 @@ size_t Vector::print(FILE *fp) {
 	return sz;
 }
 
-size_t Vector::load(const char *fn) {
+size_t aVector::load(const char *fn) {
 	FILE *fp;
 	if(!fn || !*fn || !(fp=fopen(fn,"rb"))) return 0;
 	size_t s = load(fp);
@@ -267,22 +267,22 @@ size_t Vector::load(const char *fn) {
 	return s;
 }
 
-size_t Vector::load(FILE *fp) {
+size_t aVector::load(FILE *fp) {
 	if(!fp) return 0;
-	String line("",256);
+	aString line("",256);
 	for(size_t i=0; !feof(fp); i++) {
-//fprintf(stderr,"Hashtable::load(readPair)\n");
+//fprintf(stderr,"aHashtable::load(readPair)\n");
 		line.clear().appendUntil(fp,"\r\n");
 		if(line.length()>0) {
 			insert(line,sz);
-//fprintf(stderr,"Hashtable::load(key='%s',val='%s')\n",key.array(),val.array());
+//fprintf(stderr,"aHashtable::load(key='%s',val='%s')\n",key.array(),val.array());
 //fflush(stderr);
 		}
 	}
 	return sz;
 }
 
-size_t Vector::save(const char *fn) {
+size_t aVector::save(const char *fn) {
 	FILE *fp;
 	if(!fn || !*fn || !(fp=fopen(fn,"wb"))) return 0;
 	size_t s = save(fp);
@@ -290,7 +290,7 @@ size_t Vector::save(const char *fn) {
 	return s;
 }
 
-size_t Vector::save(FILE *fp) {
+size_t aVector::save(FILE *fp) {
 	if(!fp) return 0;
 	for(size_t i=0; i<sz; i++) if(list[i].value) {
 		switch(list[i].type) {

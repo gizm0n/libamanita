@@ -1,12 +1,12 @@
-#ifndef _LIBAMANITA_RANDOM_H
-#define _LIBAMANITA_RANDOM_H
+#ifndef _LIBAMANITA_ARANDOM_H
+#define _LIBAMANITA_ARANDOM_H
 
 #include <stdio.h>
 #include <stdint.h>
 
 typedef uint32_t seed_t;
 
-class Random {
+class aRandom {
 private:
 	seed_t seed;
 	uint32_t num,index,table[256];
@@ -14,8 +14,8 @@ private:
 	uint32_t generate();
 
 public:
-	Random();
-	Random(seed_t n);
+	aRandom();
+	aRandom(seed_t n);
 
 	void setSeed(seed_t n);
 	void setSeed(seed_t *n,size_t l);
@@ -78,7 +78,7 @@ public:
 	uint32_t rollTable(uint32_t *t,size_t l,uint32_t s=0);
 };
 
-extern Random rnd;
+extern aRandom rnd;
 
-#endif /* _LIBAMANITA_RANDOM_H */
+#endif /* _LIBAMANITA_ARANDOM_H */
 

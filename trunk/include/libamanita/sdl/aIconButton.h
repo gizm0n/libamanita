@@ -1,45 +1,45 @@
-#ifndef _LIBAMANITA_GUI_ICONBUTTON_H
-#define _LIBAMANITA_GUI_ICONBUTTON_H
+#ifndef _LIBAMANITA_SDL_AICONBUTTON_H
+#define _LIBAMANITA_SDL_AICONBUTTON_H
 
-#include <libamanita/gui/Component.h>
+#include <libamanita/sdl/aComponent.h>
 
-class Image;
-class Font;
+class aImage;
+class aFont;
 
-class IconButton : public Component,public MouseListener {
-RttiObjectInstance(IconButton)
+class aIconButton : public aComponent,public aMouseListener {
+RttiObjectInstance(aIconButton)
 
 private:
 	struct _settings {
-		Image *img;
+		aImage *img;
 		short plain,active,down,disabled;
 	};
 	static _settings _s;
 
 	struct iconbutton {
-		Image *img;
+		aImage *img;
 		short plain,active,down,disabled;
 	} ib;
 
 public:
-	IconButton(int id,int x=0,int y=0);
-	IconButton(IconButton &b);
-	virtual ~IconButton();
+	aIconButton(int id,int x=0,int y=0);
+	aIconButton(aIconButton &b);
+	virtual ~aIconButton();
 
 	/**
-	 * Image *img - The image should contain all the images mapped on the same image
+	 * aImage *img - The image should contain all the images mapped on the same image
 	 * Uint32 data[4] - The array should be mapped as follows:
 	 *  0 = Default blank Iconbutton, plain
 	 *  1 = Default blank Iconbutton, active
 	 *  2 = Default blank Iconbutton, down
 	 *  3 = Default blank Iconbutton, disabled
 	 **/
-	static void setDefaultSettings(Image *img,Uint32 data[4]);
+	static void setDefaultSettings(aImage *img,Uint32 data[4]);
 
-	void setImage(Image *img,int plain,int active,int down,int disabled);
+	void setImage(aImage *img,int plain,int active,int down,int disabled);
 	void paint(time_t time);
-	bool mouseUp(MouseEvent &me);
+	bool mouseUp(aMouseEvent &me);
 };
 
 
-#endif /* _LIBAMANITA_GUI_ICONBUTTON_H */
+#endif /* _LIBAMANITA_SDL_AICONBUTTON_H */

@@ -1,10 +1,10 @@
-#ifndef _LIBAMANITA_SDL_SERVER_H
-#define _LIBAMANITA_SDL_SERVER_H
+#ifndef _LIBAMANITA_SDL_ASERVER_H
+#define _LIBAMANITA_SDL_ASERVER_H
 
 #include <string.h>
-#include <libamanita/sdl/Socket.h>
-#include <libamanita/Hashtable.h>
-#include <libamanita/Vector.h>
+#include <libamanita/sdl/aSocket.h>
+#include <libamanita/aHashtable.h>
+#include <libamanita/aVector.h>
 
 
 enum {
@@ -13,12 +13,12 @@ enum {
 };
 
 
-class ServerChannel : public Vector {
+class ServerChannel : public aVector {
 private:
 	char *name;
 
 public:
-	ServerChannel(const char *nm) : Vector() { name = strdup(nm); }
+	ServerChannel(const char *nm) : aVector() { name = strdup(nm); }
 	~ServerChannel() { free(name); }
 
 	const char *getName() { return name; }
@@ -28,13 +28,13 @@ typedef ServerChannel *Channel;
 
 
 class ServerConnection {
-friend class Server;
+friend class aServer;
 private:
 	TCPsocket sock;
 	uint32_t id;
 	char *nick;
 	uint8_t status;
-	Vector channels;
+	aVector channels;
 #ifndef TCPSOCK_NOCIPHER
 	uint32_t *key;
 	size_t keylen;
@@ -67,22 +67,22 @@ public:
 
 	void joinChannel(Channel c) { if(c) channels += c; }
 	void leaveChannel(Channel c) { if(c) channels -= c; }
-	Vector &getChannels() { return channels; }
+	aVector &getChannels() { return channels; }
 };
 
 typedef ServerConnection *Connection;
 
-class Server : public Socket {
+class aServer : public aSocket {
 private:
 	size_t setsz;				/** < SDL_SocketSet set, allocated size. */
-	SDL_mutex *mut;			/** < Server mutex. */
-	Hashtable clients;		/** < All clients connected to this server. */
+	SDL_mutex *mut;			/** < aServer mutex. */
+	aHashtable clients;		/** < All clients connected to this server. */
 	ServerChannel main;		/** < Main channel, contains all clients connected to this server. */
-	Hashtable channels;		/** < All channels in this server. */
+	aHashtable channels;		/** < All channels in this server. */
 
 	Connection addClient(TCPsocket s,uint8_t *d,size_t l);
 	void createSocketSet();
-	static int _run(void *p) { ((Server *)p)->run();return 0; }
+	static int _run(void *p) { ((aServer *)p)->run();return 0; }
 	void run();
 	bool uniqueID(uint32_t id) { return clients.get(id)==0; }
 	void killClient(Connection c) { killClient(c->id); }
@@ -90,8 +90,8 @@ private:
 	void killAllClients();
 
 public:
-	Server(SocketListener l);
-	~Server();
+	aServer(SocketListener l);
+	~aServer();
 
 	int lock() { return SDL_mutexP(mut); }
 	int unlock() { return SDL_mutexV(mut); }
@@ -110,7 +110,7 @@ public:
 	void joinChannel(Channel ch,Connection c) { if(ch && c && !ch->contains(c)) { *ch += c;c->joinChannel(ch); } }
 	void leaveChannel(const char *ch,Connection c) { if(c) leaveChannel(getChannel(ch),c); }
 	void leaveChannel(Channel ch,Connection c);
-	Hashtable::iterator getChannels() { return channels.iterate(); }
+	aHashtable::iterator getChannels() { return channels.iterate(); }
 
 	int send(Connection c,uint8_t *d,size_t l);
 	void send(uint8_t *d,size_t l) { send((Channel)0,d,l); }
@@ -118,5 +118,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_SERVER_H */
+#endif /* _LIBAMANITA_SDL_ASERVER_H */
 

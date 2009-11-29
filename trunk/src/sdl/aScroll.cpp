@@ -1,39 +1,39 @@
 
 #include "../config.h"
-#include <libamanita/sdl/Image.h>
-#include <libamanita/gui/Scroll.h>
-#include <libamanita/gui/IconButton.h>
+#include <libamanita/sdl/aImage.h>
+#include <libamanita/sdl/aScroll.h>
+#include <libamanita/sdl/aIconButton.h>
 
 
 
-RttiObjectInheritance(Scroll,Component);
+RttiObjectInheritance(aScroll,aComponent);
 
 
-Scroll::_settings Scroll::_s = { 0 };
+aScroll::_settings aScroll::_s = { 0 };
 
-Scroll::Scroll(int id,int x,int y,int w,int h,int st) : Component(x,y,w,h) {
-	// Object::setInstance(Scroll::Class);
+aScroll::aScroll(int id,int x,int y,int w,int h,int st) : aComponent(x,y,w,h) {
+	// aObject::setInstance(aScroll::aClass);
 	setID(id);
 	val = min = 0,max = 100,inc = 10;
-	bmin = new IconButton(0);
+	bmin = new aIconButton(0);
 	bmin->setActionListener(this);
 	add(bmin);
-	bmax = new IconButton(1);
+	bmax = new aIconButton(1);
 	bmax->setActionListener(this);
 	add(bmax);
-	bslide = new IconButton(2);
+	bslide = new aIconButton(2);
 	bslide->setImage(_s.img,_s.slide.plain,_s.slide.active,_s.slide.down,_s.slide.disabled);
 	bslide->setLocked(false);
 	bslide->setActionListener(this);
 	bslide->setMouseMotionListener(this);
 	add(bslide);
 	setStyle(st);
-	ae = (ActionEvent){ this,0 };
+	ae = (aActionEvent){ this,0 };
 }
 
-Scroll::~Scroll() {}
+aScroll::~aScroll() {}
 
-void Scroll::setDefaultSettings(Image *img,Uint32 data[22]) {
+void aScroll::setDefaultSettings(aImage *img,Uint32 data[22]) {
 	_s = (_settings){
 		img,
 		{ img->getCell(data[0]),data[0],data[1],data[2],data[3] },
@@ -45,7 +45,7 @@ void Scroll::setDefaultSettings(Image *img,Uint32 data[22]) {
 	};
 }
 
-void Scroll::setStyle(int st) {
+void aScroll::setStyle(int st) {
 	style = st;
 	if(style&SCROLL_HORIZ) {
 		bmin->setImage(_s.img,_s.left.plain,_s.left.active,_s.left.down,_s.left.disabled);
@@ -72,18 +72,18 @@ void Scroll::setStyle(int st) {
 	}
 	positionSlide();
 }
-void Scroll::setValues(int v,int mn,int mx,int i) {
+void aScroll::setValues(int v,int mn,int mx,int i) {
 	min = mn,max = mx,inc = i,val = v<min? min : (v>max? max : v);
 	positionSlide();
 	if(actionListener) actionListener->actionPerformed(ae);
 }
-void Scroll::setValue(int v) {
+void aScroll::setValue(int v) {
 	val = v<min? min : (v>max? max : v);
 	positionSlide();
 	if(actionListener) actionListener->actionPerformed(ae);
 }
 
-void Scroll::positionSlide() {
+void aScroll::positionSlide() {
 	int x,y;
 	if(style&SCROLL_HORIZ) {
 		x = getX()+bmin->getWidth()+((val-min)*slide.w)/max,y = getY()+slide.y;
@@ -99,7 +99,7 @@ void Scroll::positionSlide() {
 	bslide->setLocation(x,y);
 }
 
-bool Scroll::mouseDrag(MouseMotionEvent &mme) {
+bool aScroll::mouseDrag(aMouseMotionEvent &mme) {
 	if(mme.source==bslide) {
 		int v,x,y;
 		if(style&SCROLL_HORIZ) {
@@ -130,7 +130,7 @@ bool Scroll::mouseDrag(MouseMotionEvent &mme) {
 	return false;
 }
 
-bool Scroll::actionPerformed(ActionEvent &ae) {
+bool aScroll::actionPerformed(aActionEvent &ae) {
 	if(ae.source==bmin || ae.source==bmax) {
 		int v = val;
 		if(ae.source==bmin) {
@@ -150,7 +150,7 @@ bool Scroll::actionPerformed(ActionEvent &ae) {
 	return false;
 }
 
-void Scroll::paint(time_t time) {
+void aScroll::paint(time_t time) {
 	_s.img->draw(getX()+slide.x,getY()+slide.y,slide.w,slide.h,*bar);
 }
 

@@ -1,26 +1,26 @@
-#ifndef _LIBAMANITA_GUI_DISPLAY_H
-#define _LIBAMANITA_GUI_DISPLAY_H
+#ifndef _LIBAMANITA_SDL_ADISPLAY_H
+#define _LIBAMANITA_SDL_ADISPLAY_H
 
-#include <libamanita/sdl/Graphics.h>
-#include <libamanita/gui/Component.h>
+#include <libamanita/sdl/aGraphics.h>
+#include <libamanita/sdl/aComponent.h>
 
 
-class Display : public Component,public KeyListener,public MouseListener,public MouseMotionListener,public ActionListener {
-RttiObjectInstance(Display)
+class aDisplay : public aComponent,public aKeyListener,public aMouseListener,public aMouseMotionListener,public aActionListener {
+RttiObjectInstance(aDisplay)
 
 private:
-	static Display *activeDisplay;
+	static aDisplay *activeDisplay;
 	SDL_Rect screen;
 
 protected:
-	static void setActiveDisplay(Display *d) { activeDisplay = d; }
+	static void setActiveDisplay(aDisplay *d) { activeDisplay = d; }
 	void setScreen(int x,int y,int w,int h);
 
 public:
-	Display();
-	~Display();
+	aDisplay();
+	~aDisplay();
 
-	static Display *getActiveDisplay() { return activeDisplay; }
+	static aDisplay *getActiveDisplay() { return activeDisplay; }
 
 	int screenX() { return screen.x; }
 	int screenY() { return screen.y; }
@@ -30,10 +30,10 @@ public:
 	virtual void start() { setActiveDisplay(this);setKeyFocus(this); }
 	virtual void stop() {}
 
-	virtual bool actionPerformed(ActionEvent &ae) { return false; }
+	virtual bool actionPerformed(aActionEvent &ae) { return false; }
 };
 
 
 
-#endif /* _LIBAMANITA_GUI_DISPLAY_H */
+#endif /* _LIBAMANITA_SDL_ADISPLAY_H */
 

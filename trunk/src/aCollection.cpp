@@ -1,8 +1,8 @@
 
 #include "config.h"
-#include <libamanita/Collection.h>
+#include <libamanita/aCollection.h>
 
 
-RttiObjectInheritance(Collection,Object);
+RttiObjectInheritance(aCollection,aObject);
 
 

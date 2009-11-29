@@ -1,17 +1,17 @@
-#ifndef _LIBAMANITA_SDL_IMAGE_H
-#define _LIBAMANITA_SDL_IMAGE_H
+#ifndef _LIBAMANITA_SDL_AIMAGE_H
+#define _LIBAMANITA_SDL_AIMAGE_H
 
 #include <string.h>
 #include <stdio.h>
 #include <SDL/SDL.h>
-#include <libamanita/Object.h>
+#include <libamanita/aObject.h>
 
 
 
-class Image : public Object {
-friend class Graphics;
+class aImage : public aObject {
+friend class aGraphics;
 
-RttiObjectInstance(Image)
+RttiObjectInstance(aImage)
 
 protected:
 	char *name,*file;
@@ -25,17 +25,17 @@ protected:
 public:
 	static int created,deleted;
 
-	static Image **readXIM(const char *fn,int &n);
-	static Image **parseXIM(const char *lines[],int &n);
+	static aImage **readXIM(const char *fn,int &n);
+	static aImage **parseXIM(const char *lines[],int &n);
 	static void formatString(char *str,const char *format,int num);
 
 	static bool save(const char *fn,SDL_Surface *s);
 	bool save(const char *fn) { return save(fn,surface); }
 
-	Image();
-	Image(int w,int h);
-	Image(const char *fn);
-	~Image();
+	aImage();
+	aImage(int w,int h);
+	aImage(const char *fn);
+	~aImage();
 
 	void createMap(int sz);
 	void createMap(int rw,int rh);
@@ -70,5 +70,5 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_IMAGE_H */
+#endif /* _LIBAMANITA_SDL_AIMAGE_H */
 

@@ -1,11 +1,11 @@
 
 
-#include <libamanita/sqlite/ResultSet.h>
+#include <libamanita/sqlite/aResultset.h>
 
 
-ResultSet::~ResultSet() {
+aResultset::~aResultset() {
 	if(cols) { delete cols;cols = 0; }
-	for(int i=size()-1; i>=0; i--) delete (Record *)(*this)[i];
+	for(int i=size()-1; i>=0; i--) delete (aRecord *)(*this)[i];
 }
 
 

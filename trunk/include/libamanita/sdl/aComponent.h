@@ -1,18 +1,18 @@
-#ifndef _LIBAMANITA_GUI_COMPONENT_H
-#define _LIBAMANITA_GUI_COMPONENT_H
+#ifndef _LIBAMANITA_SDL_ACOMPONENT_H
+#define _LIBAMANITA_SDL_ACOMPONENT_H
 
-#include <libamanita/Object.h>
-#include <libamanita/Vector.h>
-#include <libamanita/sdl/Thread.h>
-#include <libamanita/gui/Event.h>
+#include <libamanita/aObject.h>
+#include <libamanita/aVector.h>
+#include <libamanita/sdl/aThread.h>
+#include <libamanita/sdl/aEvent.h>
 
 
-class ToolTip;
+class aTooltip;
 struct SDL_Rect;
 
 
-class Component : public Object {
-RttiObjectInstance(Component)
+class aComponent : public aObject {
+RttiObjectInstance(aComponent)
 
 private:
 	enum {
@@ -28,41 +28,41 @@ private:
 		size_t cnt;
 		Uint32 id,status;
 		short x,y,w,h;
-		Component *p;					// Parent
-		Vector *ch;						// Children
-		ToolTip *tt;
+		aComponent *p;					// Parent
+		aVector *ch;						// Children
+		aTooltip *tt;
 	};
 	component com;
 
 protected:
-	static Component *componentFocus,*keyFocus,*mouseDownFocus,*mouseOverFocus,*toolTipFocus;
-	FocusListener *focusListener;
-	KeyListener *keyListener;
-	MouseListener *mouseListener;
-	MouseMotionListener *mouseMotionListener;
-	ActionListener *actionListener;
+	static aComponent *componentFocus,*keyFocus,*mouseDownFocus,*mouseOverFocus,*toolTipFocus;
+	aFocusListener *focusListener;
+	aKeyListener *keyListener;
+	aMouseListener *mouseListener;
+	aMouseMotionListener *mouseMotionListener;
+	aActionListener *actionListener;
 
-	static bool setComponentFocus(Component *c);
-	static bool setKeyFocus(Component *c);
-	static bool setMouseDownFocus(Component *c) { mouseDownFocus = c;return true; }
-	static bool setMouseOverFocus(Component *c) { mouseOverFocus = c;return true; }
-	static bool setToolTipFocus(Component *c) { toolTipFocus = c;return true; }
+	static bool setaComponentFocus(aComponent *c);
+	static bool setKeyFocus(aComponent *c);
+	static bool setMouseDownFocus(aComponent *c) { mouseDownFocus = c;return true; }
+	static bool setMouseOverFocus(aComponent *c) { mouseOverFocus = c;return true; }
+	static bool setToolTipFocus(aComponent *c) { toolTipFocus = c;return true; }
 
 public:
-	Component(int x=0,int y=0,int w=0,int h=0);
-	Component(Component &c);
-	virtual ~Component();
+	aComponent(int x=0,int y=0,int w=0,int h=0);
+	aComponent(aComponent &c);
+	virtual ~aComponent();
 
 	void setID(Uint32 i) { com.id = i; }
 	Uint32 getID() { return com.id; }
 	Uint32 getStatus() { return com.status; }
 
-	virtual void add(Component *c);
-	virtual void remove(Component *c);
+	virtual void add(aComponent *c);
+	virtual void remove(aComponent *c);
 	void moveToTop();
-	Component *getComponent(size_t i);
-	Component *getComponent(int x,int y);
-	Component *getParent() { return com.p; }
+	aComponent *getaComponent(size_t i);
+	aComponent *getaComponent(int x,int y);
+	aComponent *getParent() { return com.p; }
 	void setBounds(int x,int y,int w,int h) { setLocation(x,y);com.w = w,com.h = h; }
 	void setLocation(int x,int y) { moveLocation(x-com.x,y-com.y); }
 	void moveLocation(int x,int y);
@@ -73,7 +73,7 @@ public:
 	int getY() { return com.y; }
 	int getWidth() { return com.w; }
 	int getHeight() { return com.h; }
-	bool contains(Component *c);
+	bool contains(aComponent *c);
 	bool contains(int x,int y) { return x>=com.x && y>=com.y && x<com.x+com.w && y<com.y+com.h; }
 	bool contains(const SDL_Rect &r,int x,int y);
 	void invalidate() { if(com.status&VALID) com.status ^= VALID; }
@@ -99,43 +99,43 @@ public:
 
 	bool requestFocus() { return setKeyFocus(this); }
 
-	static Component *getComponentFocus() { return componentFocus; }
-	bool hasComponentFocus() { return this==componentFocus; }
-	static Component *getKeyFocus() { return keyFocus; }
+	static aComponent *getaComponentFocus() { return componentFocus; }
+	bool hasaComponentFocus() { return this==componentFocus; }
+	static aComponent *getKeyFocus() { return keyFocus; }
 	bool hasKeyFocus() { return this==keyFocus; }
-	static Component *getMouseDownFocus() { return mouseDownFocus; }
+	static aComponent *getMouseDownFocus() { return mouseDownFocus; }
 	bool hasMouseDownFocus() { return this==mouseDownFocus; }
-	static Component *getMouseOverFocus() { return mouseOverFocus; }
+	static aComponent *getMouseOverFocus() { return mouseOverFocus; }
 	bool hasMouseOverFocus() { return this==mouseOverFocus; }
-	static Component *getToolTipFocus() { return toolTipFocus; }
+	static aComponent *getToolTipFocus() { return toolTipFocus; }
 	bool hasToolTipFocus() { return this==toolTipFocus; }
 
 	virtual void paint(time_t time);
 	void paintAll(time_t time);
 
-	void setFocusListener(FocusListener *fl) { focusListener = fl; }
-	FocusListener *getFocusListener() { return focusListener; }
-	void setKeyListener(KeyListener *kl) { keyListener = kl; }
-	KeyListener *getKeyListener() { return keyListener; }
-	void setMouseListener(MouseListener *ml) { mouseListener = ml; }
-	MouseListener *getMouseListener() { return mouseListener; }
-	void setMouseMotionListener(MouseMotionListener *mml) { mouseMotionListener = mml; }
-	MouseMotionListener *getMouseMotionListener() { return mouseMotionListener; }
-	void setActionListener(ActionListener *al) { actionListener = al; }
-	ActionListener *getActionListener() { return actionListener; }
+	void setFocusListener(aFocusListener *fl) { focusListener = fl; }
+	aFocusListener *getFocusListener() { return focusListener; }
+	void setKeyListener(aKeyListener *kl) { keyListener = kl; }
+	aKeyListener *getKeyListener() { return keyListener; }
+	void setMouseListener(aMouseListener *ml) { mouseListener = ml; }
+	aMouseListener *getMouseListener() { return mouseListener; }
+	void setMouseMotionListener(aMouseMotionListener *mml) { mouseMotionListener = mml; }
+	aMouseMotionListener *getMouseMotionListener() { return mouseMotionListener; }
+	void setActionListener(aActionListener *al) { actionListener = al; }
+	aActionListener *getActionListener() { return actionListener; }
 
-	bool handleKeyDown(KeyEvent &ke);
-	bool handleKeyUp(KeyEvent &ke);
-	bool handleMouseDown(MouseEvent &me);
-	bool handleMouseUp(MouseEvent &me);
-	bool handleMouseMove(MouseMotionEvent &me);
-	bool handleMouseDrag(MouseMotionEvent &me);
+	bool handleKeyDown(aKeyEvent &ke);
+	bool handleKeyUp(aKeyEvent &ke);
+	bool handleMouseDown(aMouseEvent &me);
+	bool handleMouseUp(aMouseEvent &me);
+	bool handleMouseMove(aMouseMotionEvent &me);
+	bool handleMouseDrag(aMouseMotionEvent &me);
 
-	void setToolTip(ToolTip *tt);
-	ToolTip *getToolTip() { return com.tt; }
-	bool handleToolTip(ToolTipEvent &tte);
+	void setToolTip(aTooltip *tt);
+	aTooltip *getToolTip() { return com.tt; }
+	bool handleToolTip(aTooltipEvent &tte);
 };
 
 
 
-#endif /* _LIBAMANITA_GUI_COMPONENT_H */
+#endif /* _LIBAMANITA_SDL_ACOMPONENT_H */

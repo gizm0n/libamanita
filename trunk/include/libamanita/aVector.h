@@ -1,17 +1,17 @@
-#ifndef _LIBAMANITA_VECTOR_H
-#define _LIBAMANITA_VECTOR_H
+#ifndef _LIBAMANITA_AVECTOR_H
+#define _LIBAMANITA_AVECTOR_H
 
 #include <stdint.h>
-#include <libamanita/Collection.h>
-#include <libamanita/Object.h>
-#include <libamanita/String.h>
+#include <libamanita/aCollection.h>
+#include <libamanita/aObject.h>
+#include <libamanita/aString.h>
 
-class Hashtable;
+class aHashtable;
 
-class Vector : public Collection {
-RttiObjectInstance(Vector)
+class aVector : public aCollection {
+RttiObjectInstance(aVector)
 
-friend class Hashtable;
+friend class aHashtable;
 
 private:
 	struct node {
@@ -21,18 +21,18 @@ private:
 	size_t inc;
 	node *list;
 
-	Vector &insert(value_t v,long n,type_t t);
-	Vector &remove(value_t v,type_t t);
+	aVector &insert(value_t v,long n,type_t t);
+	aVector &remove(value_t v,type_t t);
 	long indexOf(value_t v,type_t t);
 
 public:
 	class iterator {
-		friend class Vector;
+		friend class aVector;
 
 		private:
-			Vector *vec;
+			aVector *vec;
 			long index;
-			iterator(Vector *vec) : vec(vec) { reset(); }
+			iterator(aVector *vec) : vec(vec) { reset(); }
 
 		public:
 			void reset() { index = vec && vec->sz? ITER_INDEX_START : ITER_INDEX_EMPTY; }
@@ -52,73 +52,73 @@ public:
 			operator void *() const { return index>=0? (void *)vec->list[index].value : 0; }
 	};
 
-	Vector();
-	Vector(size_t s);
-	~Vector();
+	aVector();
+	aVector(size_t s);
+	~aVector();
 
 	iterator iterate();
 
-	Vector &operator+=(void *v) { return insert((value_t)v,sz,TYPE_VOID_P); }
-	Vector &operator+=(long v) { return insert((value_t)v,sz,TYPE_INTPTR); }
-	Vector &operator+=(unsigned long v) { return insert((value_t)v,sz,TYPE_INTPTR); }
+	aVector &operator+=(void *v) { return insert((value_t)v,sz,TYPE_VOID_P); }
+	aVector &operator+=(long v) { return insert((value_t)v,sz,TYPE_INTPTR); }
+	aVector &operator+=(unsigned long v) { return insert((value_t)v,sz,TYPE_INTPTR); }
 #if _WORDSIZE == 64
-	Vector &operator+=(float v) { double d = v;return insert(*(value_t *)((void *)&d),sz,TYPE_DOUBLE); }
-	Vector &operator+=(double v) { return insert(*(value_t *)((void *)&v),sz,TYPE_DOUBLE); }
+	aVector &operator+=(float v) { double d = v;return insert(*(value_t *)((void *)&d),sz,TYPE_DOUBLE); }
+	aVector &operator+=(double v) { return insert(*(value_t *)((void *)&v),sz,TYPE_DOUBLE); }
 #else
-	Vector &operator+=(float v) { return insert(*(value_t *)((void *)&v),sz,TYPE_FLOAT); }
+	aVector &operator+=(float v) { return insert(*(value_t *)((void *)&v),sz,TYPE_FLOAT); }
 #endif
-	Vector &operator+=(const char *v) { return insert((value_t)v,sz,TYPE_CHAR_P); }
-	Vector &operator+=(String *v) { return insert((value_t)v->toCharArray(),sz,TYPE_CHAR_P); }
-	Vector &operator+=(String &v) { return insert((value_t)v.toCharArray(),sz,TYPE_CHAR_P); }
-	Vector &operator+=(Object *v) { return insert((value_t)v,sz,TYPE_OBJECT_P); }
-	Vector &operator+=(Object &v) { return insert((value_t)&v,sz,TYPE_OBJECT_P); }
-	Vector &operator+=(Vector &a) { return insert(a,sz); }
-	Vector &insert(void *v,long n=-1) { return insert((value_t)v,n,TYPE_VOID_P); }
-	Vector &insert(long v,long n=-1) { return insert((value_t)v,n,TYPE_INTPTR); }
-	Vector &insert(unsigned long v,long n=-1) { return insert((value_t)v,n,TYPE_INTPTR); }
+	aVector &operator+=(const char *v) { return insert((value_t)v,sz,TYPE_CHAR_P); }
+	aVector &operator+=(aString *v) { return insert((value_t)v->toCharArray(),sz,TYPE_CHAR_P); }
+	aVector &operator+=(aString &v) { return insert((value_t)v.toCharArray(),sz,TYPE_CHAR_P); }
+	aVector &operator+=(aObject *v) { return insert((value_t)v,sz,TYPE_OBJECT_P); }
+	aVector &operator+=(aObject &v) { return insert((value_t)&v,sz,TYPE_OBJECT_P); }
+	aVector &operator+=(aVector &a) { return insert(a,sz); }
+	aVector &insert(void *v,long n=-1) { return insert((value_t)v,n,TYPE_VOID_P); }
+	aVector &insert(long v,long n=-1) { return insert((value_t)v,n,TYPE_INTPTR); }
+	aVector &insert(unsigned long v,long n=-1) { return insert((value_t)v,n,TYPE_INTPTR); }
 #if _WORDSIZE == 64
-	Vector &insert(float v,long n=-1) { double d = v;return insert(*(value_t *)((void *)&d),n,TYPE_DOUBLE); }
-	Vector &insert(double v,long n=-1) { return insert(*(value_t *)((void *)&v),n,TYPE_DOUBLE); }
+	aVector &insert(float v,long n=-1) { double d = v;return insert(*(value_t *)((void *)&d),n,TYPE_DOUBLE); }
+	aVector &insert(double v,long n=-1) { return insert(*(value_t *)((void *)&v),n,TYPE_DOUBLE); }
 #else
-	Vector &insert(float v,long n=-1) { return insert(*(value_t *)((void *)&v),n,TYPE_FLOAT); }
+	aVector &insert(float v,long n=-1) { return insert(*(value_t *)((void *)&v),n,TYPE_FLOAT); }
 #endif
-	Vector &insert(const char *v,long n=-1) { return insert((value_t)v,n,TYPE_CHAR_P); }
-	Vector &insert(String *v,long n=-1) { return insert((value_t)v->toCharArray(),n,TYPE_CHAR_P); }
-	Vector &insert(String &v,long n=-1) { return insert((value_t)v.toCharArray(),n,TYPE_CHAR_P); }
-	Vector &insert(Object *v,long n=-1) { return insert((value_t)v,n,TYPE_OBJECT_P); }
-	Vector &insert(Object &v,long n=-1) { return insert((value_t)&v,n,TYPE_OBJECT_P); }
-	Vector &insert(Vector &v,long n=-1);
+	aVector &insert(const char *v,long n=-1) { return insert((value_t)v,n,TYPE_CHAR_P); }
+	aVector &insert(aString *v,long n=-1) { return insert((value_t)v->toCharArray(),n,TYPE_CHAR_P); }
+	aVector &insert(aString &v,long n=-1) { return insert((value_t)v.toCharArray(),n,TYPE_CHAR_P); }
+	aVector &insert(aObject *v,long n=-1) { return insert((value_t)v,n,TYPE_OBJECT_P); }
+	aVector &insert(aObject &v,long n=-1) { return insert((value_t)&v,n,TYPE_OBJECT_P); }
+	aVector &insert(aVector &v,long n=-1);
 
-	Vector &operator-=(void *v) { return remove((value_t)v,TYPE_VOID_P); }
-	Vector &operator-=(long v) { return remove((value_t)v,TYPE_INTPTR); }
-	Vector &operator-=(unsigned long v) { return remove((value_t)v,TYPE_INTPTR); }
+	aVector &operator-=(void *v) { return remove((value_t)v,TYPE_VOID_P); }
+	aVector &operator-=(long v) { return remove((value_t)v,TYPE_INTPTR); }
+	aVector &operator-=(unsigned long v) { return remove((value_t)v,TYPE_INTPTR); }
 #if _WORDSIZE == 64
-	Vector &operator-=(float v) { double d = v;return remove(*(value_t *)((void *)&d),TYPE_DOUBLE); }
-	Vector &operator-=(double v) { return remove(*(value_t *)((void *)&v),TYPE_DOUBLE); }
+	aVector &operator-=(float v) { double d = v;return remove(*(value_t *)((void *)&d),TYPE_DOUBLE); }
+	aVector &operator-=(double v) { return remove(*(value_t *)((void *)&v),TYPE_DOUBLE); }
 #else
-	Vector &operator-=(float v) { return remove(*(value_t *)((void *)&v),TYPE_FLOAT); }
+	aVector &operator-=(float v) { return remove(*(value_t *)((void *)&v),TYPE_FLOAT); }
 #endif
-	Vector &operator-=(const char *v) { return remove(v); }
-	Vector &operator-=(String *v) { return remove(v->toCharArray()); }
-	Vector &operator-=(String &v) { return remove(v.toCharArray()); }
-	Vector &operator-=(Object *v) { return remove((value_t)v,TYPE_OBJECT_P); }
-	Vector &operator-=(Object &v) { return remove((value_t)&v,TYPE_OBJECT_P); }
-	Vector &remove(void *v) { return remove((value_t)v,TYPE_VOID_P); }
-	Vector &remove(long v) { return remove((value_t)v,TYPE_INTPTR); }
-	Vector &remove(unsigned long v) { return remove((value_t)v,TYPE_INTPTR); }
+	aVector &operator-=(const char *v) { return remove(v); }
+	aVector &operator-=(aString *v) { return remove(v->toCharArray()); }
+	aVector &operator-=(aString &v) { return remove(v.toCharArray()); }
+	aVector &operator-=(aObject *v) { return remove((value_t)v,TYPE_OBJECT_P); }
+	aVector &operator-=(aObject &v) { return remove((value_t)&v,TYPE_OBJECT_P); }
+	aVector &remove(void *v) { return remove((value_t)v,TYPE_VOID_P); }
+	aVector &remove(long v) { return remove((value_t)v,TYPE_INTPTR); }
+	aVector &remove(unsigned long v) { return remove((value_t)v,TYPE_INTPTR); }
 #if _WORDSIZE == 64
-	Vector &remove(float v) { double d = v;return remove(*(value_t *)((void *)&d),TYPE_DOUBLE); }
-	Vector &remove(double v) { return remove(*(value_t *)((void *)&v),TYPE_DOUBLE); }
+	aVector &remove(float v) { double d = v;return remove(*(value_t *)((void *)&d),TYPE_DOUBLE); }
+	aVector &remove(double v) { return remove(*(value_t *)((void *)&v),TYPE_DOUBLE); }
 #else
-	Vector &remove(float v) { return remove(*(value_t *)((void *)&v),TYPE_FLOAT); }
+	aVector &remove(float v) { return remove(*(value_t *)((void *)&v),TYPE_FLOAT); }
 #endif
-	Vector &remove(const char *v);
-	Vector &remove(String *v) { return remove(v->toCharArray()); }
-	Vector &remove(String &v) { return remove(v.toCharArray()); }
-	Vector &remove(Object *v) { return remove((value_t)v,TYPE_OBJECT_P); }
-	Vector &remove(Object &v) { return remove((value_t)&v,TYPE_OBJECT_P); }
-	Vector &removeAt(size_t n);
-	Vector &removeAll() { clear();return *this; }
+	aVector &remove(const char *v);
+	aVector &remove(aString *v) { return remove(v->toCharArray()); }
+	aVector &remove(aString &v) { return remove(v.toCharArray()); }
+	aVector &remove(aObject *v) { return remove((value_t)v,TYPE_OBJECT_P); }
+	aVector &remove(aObject &v) { return remove((value_t)&v,TYPE_OBJECT_P); }
+	aVector &removeAt(size_t n);
+	aVector &removeAll() { clear();return *this; }
 
 	long indexOf(void *v) { return indexOf((value_t)v,TYPE_VOID_P); }
 	long indexOf(long v) { return indexOf((value_t)v,TYPE_INTPTR); }
@@ -130,10 +130,10 @@ public:
 	long indexOf(float v) { return indexOf(*(value_t *)((void *)&v),TYPE_FLOAT); }
 #endif
 	long indexOf(const char *v);
-	long indexOf(String *v) { return indexOf(v->toCharArray()); }
-	long indexOf(String &v) { return indexOf(v.toCharArray()); }
-	long indexOf(Object *v) { return indexOf((value_t)v,TYPE_OBJECT_P); }
-	long indexOf(Object &v) { return indexOf((value_t)&v,TYPE_OBJECT_P); }
+	long indexOf(aString *v) { return indexOf(v->toCharArray()); }
+	long indexOf(aString &v) { return indexOf(v.toCharArray()); }
+	long indexOf(aObject *v) { return indexOf((value_t)v,TYPE_OBJECT_P); }
+	long indexOf(aObject &v) { return indexOf((value_t)&v,TYPE_OBJECT_P); }
 
 	bool contains(void *v) { return indexOf((value_t)v,TYPE_VOID_P)!=-1; }
 	bool contains(long v) { return indexOf((value_t)v,TYPE_INTPTR)!=-1; }
@@ -145,13 +145,13 @@ public:
 	bool contains(float v) { return indexOf(*(value_t *)((void *)&v),TYPE_FLOAT)!=-1; }
 #endif
 	bool contains(const char *v) { return indexOf(v)!=-1; }
-	bool contains(String *v) { return indexOf(v->toCharArray())!=-1; }
-	bool contains(String &v) { return indexOf(v.toCharArray())!=-1; }
-	bool contains(Object *v) { return indexOf((value_t)v,TYPE_OBJECT_P)!=-1; }
-	bool contains(Object &v) { return indexOf((value_t)&v,TYPE_OBJECT_P)!=-1; }
+	bool contains(aString *v) { return indexOf(v->toCharArray())!=-1; }
+	bool contains(aString &v) { return indexOf(v.toCharArray())!=-1; }
+	bool contains(aObject *v) { return indexOf((value_t)v,TYPE_OBJECT_P)!=-1; }
+	bool contains(aObject &v) { return indexOf((value_t)&v,TYPE_OBJECT_P)!=-1; }
 
-	Vector &split(String &str,const char *delim,bool trim=false) { return split(str.toCharArray(),delim,trim); }
-	Vector &split(const char *str,const char *delim,bool trim=false);
+	aVector &split(aString &str,const char *delim,bool trim=false) { return split(str.toCharArray(),delim,trim); }
+	aVector &split(const char *str,const char *delim,bool trim=false);
 
 	void resize(size_t s=0);
 	void trim();
@@ -177,7 +177,7 @@ public:
 	size_t save(FILE *fp);
 };
 
-#endif /* _LIBAMANITA_VECTOR_H */
+#endif /* _LIBAMANITA_AVECTOR_H */
 
 
 

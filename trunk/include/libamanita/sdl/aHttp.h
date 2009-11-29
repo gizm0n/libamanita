@@ -1,7 +1,7 @@
-#ifndef _LIBAMANITA_SDL_HTTP_H
-#define _LIBAMANITA_SDL_HTTP_H
+#ifndef _LIBAMANITA_SDL_AHTTP_H
+#define _LIBAMANITA_SDL_AHTTP_H
 
-#include <libamanita/Hashtable.h>
+#include <libamanita/aHashtable.h>
 
 enum HTTP_METHOD {
 	HTTP_METHOD_HEADER,
@@ -75,7 +75,7 @@ enum HTTP_MIMES {
 /** HTTP Protocol class.
  * This is a cute little class for communicating with a server through the HTTP protocol,
  * using the SDL and SDL_net libraries.
- * @author Per Löwgren
+ * @author Per LÃ¶wgren
  * @date Created: 2008-04-09
  *
  * Code to demonstrate how this class can be used:
@@ -83,14 +83,14 @@ enum HTTP_MIMES {
 #include <stdio.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_net.h>
-#include "sdl/Http.h"
+#include "sdl/aHttp.h"
 
 int main(int argc, char *argv[]) {
 	if(SDL_Init(0)<0) exit(1);
 	if(SDLNet_Init()==-1) exit(2);
 
-	Http http;
-	http.setUserAgent("Http Class User-Agent, v.0.1");
+	aHttp http;
+	http.setUserAgent("aHttp Class User-Agent, v.0.1");
 
 	http.setFormValue("test1","test1");
 	http.setFormValue("test2","test2=(test1&test2)");
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
 }
  * @endcode
  */
-class Http {
+class aHttp {
 private:
 	struct packet {
 		char *file;
@@ -119,17 +119,17 @@ private:
 		long len;
 	};
 	int timeout;				/**< Timeout for server responce																*/
-	Hashtable headers;		/**< Request headers																				*/
-	Hashtable form;			/**< Post form																						*/
-	Hashtable response;		/**< Response headers																			*/
+	aHashtable headers;		/**< Request headers																				*/
+	aHashtable form;			/**< Post form																						*/
+	aHashtable response;		/**< Response headers																			*/
 	int multipart;				/**< Is set if form data implies that it should be a multipart transfer.		*/
 	float ver;					/**< Response HTTP version																		*/
 	int status;					/**< Response status code																		*/
-	String body;				/**< Response body data																			*/
+	aString body;				/**< Response body data																			*/
 
 public:
-	Http();
-	~Http();
+	aHttp();
+	~aHttp();
 
 	
 	void setTimeout(int t) { timeout = t; } /**< Set timeout for request. */
@@ -140,14 +140,14 @@ public:
 	 * @param value Header value.
 	 *
 	 * @code
-	 * Http http;
+	 * aHttp http;
 	 * http.setRequestHeader("Content-Type","text/html");
 	 * @endcode
 	 */
 	void setRequestHeader(const char *key,const char *value);
 
 	/** Set a request header.
-	 * @see Http::setRequestHeader(const char *key,const char *value)
+	 * @see aHttp::setRequestHeader(const char *key,const char *value)
 	 * @see HTTP_HEADER
 	 */
 	void setRequestHeader(HTTP_HEADER key,const char *value);
@@ -189,10 +189,10 @@ public:
 	 * @param url The script or file to be requested.
 	 * @param ... Optional values to be formatted into url.
 	 * @return The response body data.
-	 * @see String::encodeURL()
+	 * @see aString::encodeURL()
 	 *
 	 * @code
-	 * Http http;
+	 * aHttp http;
 	 * http.get("www.host.com","script.php?param1=%s&param2=%d",param1,param2);
 	 * @endcode
 	 */
@@ -204,10 +204,10 @@ public:
 	 * @param url The script or file to be requested.
 	 * @param ... Optional values to be formatted into url.
 	 * @return The response body data.
-	 * @see String::encodeURL()
+	 * @see aString::encodeURL()
 	 *
 	 * @code
-	 * Http http;
+	 * aHttp http;
 	 * http.get("www.host.com","script.php?param1=%s&param2=%d",param1,param2);
 	 * @endcode
 	 */
@@ -237,7 +237,7 @@ public:
 	 * @see HTTP_METHOD
 	 *
 	 * @code
-	 * Http http;
+	 * aHttp http;
 	 * http.setFormValue("key","value");
 	 * http.request("www.host.com","script.php",POST);
 	 * @endcode
@@ -261,5 +261,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_HTTP_H */
+#endif /* _LIBAMANITA_SDL_AHTTP_H */
 

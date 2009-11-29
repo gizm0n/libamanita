@@ -1,14 +1,14 @@
 
 #include "../config.h"
-#include <libamanita/Math.h>
-#include <libamanita/sdl/Graphics.h>
-#include <libamanita/sdl/Font.h>
+#include <libamanita/aMath.h>
+#include <libamanita/sdl/aGraphics.h>
+#include <libamanita/sdl/aFont.h>
 
 
-Graphics g;
+aGraphics g;
 
 
-void Graphics::initSDL(const char *caption,const char *ic1,SDL_Surface *ic2,int w,int h,int d,int f) {
+void aGraphics::initSDL(const char *caption,const char *ic1,SDL_Surface *ic2,int w,int h,int d,int f) {
 	if(ic1 || ic2) {
 		if(ic1) {
 			ic2 = SDL_LoadBMP(ic1);
@@ -28,7 +28,7 @@ void Graphics::initSDL(const char *caption,const char *ic1,SDL_Surface *ic2,int 
 	g.resetClip();
 }
 
-void Graphics::close() {
+void aGraphics::close() {
 	g.screen = 0;
 	g.canvas = 0;
 	if(g.icon) { SDL_FreeSurface(g.icon);g.icon = 0; }
@@ -36,19 +36,19 @@ void Graphics::close() {
 }
 
 
-void Graphics::pixel(int x,int y,Uint32 c) {
+void aGraphics::pixel(int x,int y,Uint32 c) {
 	int bpp = canvas->format->BytesPerPixel;
 	char *p = ((char *)canvas->pixels)+x*bpp+y*canvas->pitch,*cp = (char *)&c;
 	for(; bpp; bpp--) *p++ = *cp++;
 }
 
-void Graphics::draw(int x,int y,SDL_Surface *s,SDL_Rect *src) {
+void aGraphics::draw(int x,int y,SDL_Surface *s,SDL_Rect *src) {
 	SDL_Rect dst = { x,y,0,0 };
 	SDL_BlitSurface(s,src,canvas,&dst);
 }
 
 // Bresenhem's line algorithm
-void Graphics::drawLine(int x1,int y1,int x2,int y2,Uint32 c) {
+void aGraphics::drawLine(int x1,int y1,int x2,int y2,Uint32 c) {
 	int pitch = canvas->pitch,bpp = canvas->format->BytesPerPixel;
 	char *pixels = (char *)canvas->pixels,*p,*cp;
 	int xinc1,xinc2,yinc1,yinc2,den,num,numadd,npx,cpx;
@@ -70,7 +70,7 @@ void Graphics::drawLine(int x1,int y1,int x2,int y2,Uint32 c) {
 	}
 }
 
-void Graphics::drawDottedRect(int x,int y,int w,int h,Uint32 *p) {
+void aGraphics::drawDottedRect(int x,int y,int w,int h,Uint32 *p) {
 	if(x+w<=cl.x || x>=cl.x+cl.w || y+h<=cl.y || y>=cl.y+cl.h) return;
 	int pitch = canvas->pitch,bpp = canvas->format->BytesPerPixel;
 	char *pixels = (char *)canvas->pixels,*cp;
@@ -88,14 +88,14 @@ void Graphics::drawDottedRect(int x,int y,int w,int h,Uint32 *p) {
 
 
 
-void Graphics::fillRect(int x,int y,int w,int h,Uint32 c) {
+void aGraphics::fillRect(int x,int y,int w,int h,Uint32 c) {
 	SDL_Rect r = (SDL_Rect){x,y,w,h};
 	SDL_FillRect(canvas,&r,c);
 }
 
 
-bool Graphics::screenDump(const char *fn) {
-	return Image::save(fn,screen);
+bool aGraphics::screenDump(const char *fn) {
+	return aImage::save(fn,screen);
 }
 
 

@@ -1,8 +1,8 @@
-#ifndef _LIBAMANITA_ITERATOR_H
-#define _LIBAMANITA_ITERATOR_H
+#ifndef _LIBAMANITA_AITERATOR_H
+#define _LIBAMANITA_AITERATOR_H
 
 
-class Iterator {
+class aIterator {
 public:
 	virtual bool hasMoreElements() = 0;
 	virtual void reset() = 0;
@@ -13,5 +13,5 @@ public:
 	virtual void *remove() = 0;
 };
 
-#endif /* _LIBAMANITA_ITERATOR_H */
+#endif /* _LIBAMANITA_AITERATOR_H */
 

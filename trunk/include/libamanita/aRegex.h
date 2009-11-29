@@ -1,5 +1,5 @@
-#ifndef _LIBAMANITA_REGEX_H
-#define _LIBAMANITA_REGEX_H
+#ifndef _LIBAMANITA_AREGEX_H
+#define _LIBAMANITA_AREGEX_H
 
 
 #include <stdint.h>
@@ -18,7 +18,7 @@ class REBlock;
 class REMatch;
 
 
-class RegEx {
+class aRegex {
 friend class REBlock;
 friend class REMatch;
 
@@ -50,8 +50,8 @@ private:
 	const char *replace(const char *t,const char *r);
 
 public:
-	RegEx();
-	~RegEx();
+	aRegex();
+	~aRegex();
 
 	int match(const char *t,const char *e,const char *m=NULL);
 	const char *replace(const char *t,const char *e,const char *r,const char *m=NULL);
@@ -68,5 +68,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_REGEX_H */
+#endif /* _LIBAMANITA_AREGEX_H */
 

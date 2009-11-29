@@ -1,5 +1,5 @@
-#ifndef _LIBAMANITA_SDL_SOCKET_H
-#define _LIBAMANITA_SDL_SOCKET_H
+#ifndef _LIBAMANITA_SDL_ASOCKET_H
+#define _LIBAMANITA_SDL_ASOCKET_H
 
 #include <stdarg.h>
 #include <SDL/SDL.h>
@@ -119,11 +119,11 @@ enum {
 #define unpack_uint64(data,i) {(i) = SDL_SwapBE64(*(uint64_t *)(data));(data) += 8;}
 #define get_unpack_uint64(data) (uint64_t)SDL_SwapBE64(*(uint64_t *)(data))
 
-class Socket;
+class aSocket;
 
-typedef uint32_t (*SocketListener)(Socket *,uint32_t,intptr_t,intptr_t,intptr_t);
+typedef uint32_t (*SocketListener)(aSocket *,uint32_t,intptr_t,intptr_t,intptr_t);
 
-class Socket {
+class aSocket {
 private:
 	SocketListener listener;
 	uint8_t *buf;
@@ -145,8 +145,8 @@ protected:
 	void releaseMessageBuffer(uint8_t *b) { if(b!=buf) free(b); }
 
 public:
-	Socket(SocketListener l);
-	~Socket();
+	aSocket(SocketListener l);
+	~aSocket();
 
 	static void resolveConnection(const char *con,uint32_t &ip,uint16_t &port,uint32_t &id,char *nick,int nlen);
 #ifndef TCPSOCK_NOCIPHER
@@ -166,5 +166,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_SOCKET_H */
+#endif /* _LIBAMANITA_SDL_ASOCKET_H */
 

@@ -1,17 +1,17 @@
-#ifndef _LIBAMANITA_GUI_TOOLTIP_H
-#define _LIBAMANITA_GUI_TOOLTIP_H
+#ifndef _LIBAMANITA_SDL_ATOOLTIP_H
+#define _LIBAMANITA_SDL_ATOOLTIP_H
 
-#include <libamanita/gui/Component.h>
+#include <libamanita/sdl/aComponent.h>
 
-class Image;
-class Font;
+class aImage;
+class aFont;
 
-class ToolTip {
-friend class Component;
+class aTooltip {
+friend class aComponent;
 protected:
 	struct _settings {
-		Image *img;
-		Font *font;
+		aImage *img;
+		aFont *font;
 		SDL_Rect *tl,*t,*tr,*l,*r,*bl,*b,*br,*c;
 		SDL_Rect ins;
 	};
@@ -24,14 +24,14 @@ protected:
 	} tt;
 
 public:
-	ToolTip();
-	ToolTip(const char *text);
-	virtual ~ToolTip();
+	aTooltip();
+	aTooltip(const char *text);
+	virtual ~aTooltip();
 
 	/**
-	 * Image *img - The image should contain all the images mapped on the same image
-	 * Image *ttimg - The image should contain all the tooltipimages mapped on the same image
-	 * Font *f - Default font used for tooltip
+	 * aImage *img - The image should contain all the images mapped on the same image
+	 * aImage *ttimg - The image should contain all the tooltipimages mapped on the same image
+	 * aFont *f - Default font used for tooltip
 	 * Uint32 data[35] - The array should be mapped as follows:
 	 *  0 = Top left corner of tooltip
 	 *  1 = Top border of tooltip
@@ -47,12 +47,12 @@ public:
 	 * 11 = Insets, Right
 	 * 12 = Insets, Bottom
 	 **/
-	static void setDefaultSettings(Image *img,Font *f,Uint32 data[13]);
+	static void setDefaultSettings(aImage *img,aFont *f,Uint32 data[13]);
 
 	void setText(const char *text);
-	virtual bool paintToolTip(ToolTipEvent &tte);
+	virtual bool paintToolTip(aTooltipEvent &tte);
 	static void paintToolTipRect(int x,int y,int w,int h);
 };
 
 
-#endif /* _LIBAMANITA_GUI_TOOLTIP_H */
+#endif /* _LIBAMANITA_SDL_ATOOLTIP_H */

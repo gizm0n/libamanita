@@ -2,30 +2,30 @@
 #include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <libamanita/sdl/Graphics.h>
-#include <libamanita/sdl/Font.h>
-#include <libamanita/sdl/Image.h>
-#include <libamanita/gui/ToolTip.h>
+#include <libamanita/sdl/aGraphics.h>
+#include <libamanita/sdl/aFont.h>
+#include <libamanita/sdl/aImage.h>
+#include <libamanita/sdl/aTooltip.h>
 
 
 extern char indent[32];
 
 
-ToolTip::_settings ToolTip::_s = { 0,0,0,0,0,0,0,0,0,0,0 };
+aTooltip::_settings aTooltip::_s = { 0,0,0,0,0,0,0,0,0,0,0 };
 
-ToolTip::ToolTip() {
+aTooltip::aTooltip() {
 	tt = (tooltip){ 0ul,0,0,0,-1,-1,0,0 };
 }
-ToolTip::ToolTip(const char *text) {
+aTooltip::aTooltip(const char *text) {
 	tt = (tooltip){ 0ul,0,0,0,-1,-1,0,0 };
 	if(text && *text) setText(text);
 }
-ToolTip::~ToolTip() {
+aTooltip::~aTooltip() {
 	if(tt.text) { free(tt.text);tt.text = 0; }
 	if(tt.lines) { free(tt.lines);tt.lines = 0,tt.nlines = 0; }
 }
 
-void ToolTip::setDefaultSettings(Image *img,Font *f,Uint32 data[13]) {
+void aTooltip::setDefaultSettings(aImage *img,aFont *f,Uint32 data[13]) {
 	_s = (_settings){
 		img,f,
 		img->getCell(data[0]),img->getCell(data[1]),img->getCell(data[2]),
@@ -35,7 +35,7 @@ void ToolTip::setDefaultSettings(Image *img,Font *f,Uint32 data[13]) {
 	};
 }
 
-void ToolTip::setText(const char *text) {
+void aTooltip::setText(const char *text) {
 	char *p,**l;
 	if(tt.text) free(tt.text);
 	tt.text = strdup(text);
@@ -53,7 +53,7 @@ void ToolTip::setText(const char *text) {
 	tt.h = _s.t->h+_s.font->getHeight()*tt.nlines+_s.b->h+_s.ins.y+_s.ins.h;
 }
 
-bool ToolTip::paintToolTip(ToolTipEvent &tte) {
+bool aTooltip::paintToolTip(aTooltipEvent &tte) {
 	if(!tt.text || !*tt.text) return false;
 	tt.x = tte.x,tt.y = tte.y+16;
 	if(tt.x+tt.w>g.getScreenWidth()) tt.x = g.getScreenWidth()-1-tt.w;
@@ -67,7 +67,7 @@ bool ToolTip::paintToolTip(ToolTipEvent &tte) {
 	return true;
 }
 
-void ToolTip::paintToolTipRect(int x,int y,int w,int h) {
+void aTooltip::paintToolTipRect(int x,int y,int w,int h) {
 	_s.img->draw(x+_s.l->w,y+_s.t->h,w-_s.l->w-_s.r->w,h-_s.t->h-_s.b->h,_s.c);
 	_s.img->draw(x,y,_s.tl);
 	_s.img->draw(x+_s.tl->w,y,w-_s.tl->w-_s.tr->w,_s.t->h,_s.t);

@@ -1,9 +1,9 @@
-#ifndef _LIBAMANITA_FLOOD_H
-#define _LIBAMANITA_FLOOD_H
+#ifndef _LIBAMANITA_AFLOOD_H
+#define _LIBAMANITA_AFLOOD_H
 
 
 
-class Flood {
+class aFlood {
 private:
 	int *table;
 	int size,*stack,pointer,stackMax,max,from,to;
@@ -16,8 +16,8 @@ protected:
 	bool push(int x,int y,bool b);
 
 public:
-	Flood(int wr=0);
-	~Flood();
+	aFlood(int wr=0);
+	~aFlood();
 
 	void setWrapping(int wr) { wrap = wr; }
 	int fill(int *tbl,int w,int h,int x,int y,int t,int rx=0,int ry=0);
@@ -29,5 +29,5 @@ public:
 
 
 
-#endif /* _LIBAMANITA_FLOOD_H */
+#endif /* _LIBAMANITA_AFLOOD_H */
 

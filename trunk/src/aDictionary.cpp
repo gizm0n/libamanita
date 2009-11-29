@@ -4,33 +4,33 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#include <libamanita/Dictionary.h>
-#include <libamanita/String.h>
+#include <libamanita/aDictionary.h>
+#include <libamanita/aString.h>
 
 
-RttiObjectInheritance(Dictionary,Collection);
+RttiObjectInheritance(aDictionary,aCollection);
 
 
-Dictionary::Dictionary(const char **ws,const value_t *vs,size_t l,bool c) : Collection(),words(0),values(0) {
+aDictionary::aDictionary(const char **ws,const value_t *vs,size_t l,bool c) : aCollection(),words(0),values(0) {
 	createIndex(ws,vs,l,c);
 }
-Dictionary::Dictionary(const word *ws,size_t l,bool c) : Collection(),words(0),values(0) {
+aDictionary::aDictionary(const word *ws,size_t l,bool c) : aCollection(),words(0),values(0) {
 	createIndex(ws,l,c);
 }
 
-Dictionary::~Dictionary() {
+aDictionary::~aDictionary() {
 	if(words) clear();
 }
 
 
-void Dictionary::clear() {
+void aDictionary::clear() {
 	for(size_t i=0; i<sz; i++) free((char *)words[i].key);
 	free(words);
 	free(values);
 	words = 0,values = 0;
 }
 
-void Dictionary::createIndex(const char **ws,const value_t *vs,size_t l,bool c) {
+void aDictionary::createIndex(const char **ws,const value_t *vs,size_t l,bool c) {
 	size_t i;
 	word *w;
 	if(words) clear();
@@ -43,12 +43,12 @@ void Dictionary::createIndex(const char **ws,const value_t *vs,size_t l,bool c) 
 		w->key = strdup(ws[i]);
 		w->value = vs[i];
 		w->len = strlen(w->key);
-		if(c) String::toLower((char *)w->key);
+		if(c) aString::toLower((char *)w->key);
 	}
 	createIndex();
 }
 
-void Dictionary::createIndex(const word *ws,size_t l,bool c) {
+void aDictionary::createIndex(const word *ws,size_t l,bool c) {
 	size_t i;
 	word *w;
 	if(words) clear();
@@ -61,12 +61,12 @@ void Dictionary::createIndex(const word *ws,size_t l,bool c) {
 		w->key = strdup(ws[i].key);
 		w->value = ws[i].value;
 		w->len = strlen(w->key);
-		if(c) String::toLower((char *)w->key);
+		if(c) aString::toLower((char *)w->key);
 	}
 	createIndex();
 }
 
-void Dictionary::createIndex() {
+void aDictionary::createIndex() {
 	size_t i;
 	node *n;
 	qsort(words,sz,sizeof(word),compareKey);
@@ -86,7 +86,7 @@ for(i=0; i<256; i++) fprintf(fp,"k_index(%zu=%c,offset=%zu,value=%zu)\n",i,(char
 fclose(fp);
 }
 
-value_t Dictionary::getValue(const char *w,size_t l) {
+value_t aDictionary::getValue(const char *w,size_t l) {
 	node &n = k_index[(int)*w];
 	if(!l) l = strlen(w);
 	if(n.range) for(size_t i=n.offset,c=i+n.range; i<c; i++)
@@ -94,16 +94,16 @@ value_t Dictionary::getValue(const char *w,size_t l) {
 	return 0;
 }
 
-const char *Dictionary::getKey(value_t v) {
+const char *aDictionary::getKey(value_t v) {
 	for(size_t i=0; i<sz; i++) if(values[i]->value==v) return values[i]->key;
 	return 0;
 }
 
-int Dictionary::compareKey(const void *w1, const void *w2) {
+int aDictionary::compareKey(const void *w1, const void *w2) {
 	return strcmp(((word *)w1)->key,((word *)w2)->key);
 }
 
-int Dictionary::compareValue(const void *w1, const void *w2) {
+int aDictionary::compareValue(const void *w1, const void *w2) {
 	return ((word *)w1)->value-((word *)w2)->value;
 }
 

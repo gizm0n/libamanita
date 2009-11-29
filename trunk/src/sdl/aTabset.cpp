@@ -1,28 +1,28 @@
 
 #include "../config.h"
-#include <libamanita/sdl/Image.h>
-#include <libamanita/sdl/Font.h>
-#include <libamanita/gui/TabSet.h>
+#include <libamanita/sdl/aImage.h>
+#include <libamanita/sdl/aFont.h>
+#include <libamanita/sdl/aTabset.h>
 
 
-RttiObjectInheritance(TabSet,Component);
+RttiObjectInheritance(aTabset,aComponent);
 
 
-TabSet::_settings TabSet::_s = { 0 };
+aTabset::_settings aTabset::_s = { 0 };
 
-TabSet::TabSet(int id,int x,int y,int st) : Component(x,y,0,0),tabs(0) {
+aTabset::aTabset(int id,int x,int y,int st) : aComponent(x,y,0,0),tabs(0) {
 	setID(id);
 	setStyle(st);
 	ntabs = 0,act = 0;
-	ae = (ActionEvent){ this,0 };
+	ae = (aActionEvent){ this,0 };
 	setMouseListener(this);
 }
 
-TabSet::~TabSet() {
+aTabset::~aTabset() {
 	deleteTabs();
 }
 
-void TabSet::setDefaultSettings(Image *img,Font *f1,Font *f2,Uint32 data[26]) {
+void aTabset::setDefaultSettings(aImage *img,aFont *f1,aFont *f2,Uint32 data[26]) {
 	_s = (_settings){
 		img,f1,f2,
 		{
@@ -39,12 +39,12 @@ void TabSet::setDefaultSettings(Image *img,Font *f1,Font *f2,Uint32 data[26]) {
 	};
 }
 
-void TabSet::setStyle(int st) {
+void aTabset::setStyle(int st) {
 	style = st;
 	t = style&TABSET_BOTTOM? &_s.bottom : &_s.top;
 }
 
-void TabSet::setTabs(const char *str[],int len) {
+void aTabset::setTabs(const char *str[],int len) {
 	if(!str || !len) return;
 	deleteTabs();
 	act = 0;
@@ -61,7 +61,7 @@ void TabSet::setTabs(const char *str[],int len) {
 	updateTabs();
 }
 
-void TabSet::updateTabs() {
+void aTabset::updateTabs() {
 	if(!tabs) return;
 	SDL_Rect *r;
 	int i,tw,w = 0,h = t->b2->h>t->b1->h? t->b2->h : t->b1->h;
@@ -76,14 +76,14 @@ void TabSet::updateTabs() {
 	if(w!=getWidth() || h!=getHeight()) setSize(w,h);
 }
 
-void TabSet::deleteTabs() {
+void aTabset::deleteTabs() {
 	if(!tabs) return;
 	for(int i=0; i<ntabs; i++) free(tabs[i].text);
 	free(tabs);
 	tabs = 0,ntabs = 0,act = 0;
 }
 
-void TabSet::setActiveTab(int a) {
+void aTabset::setActiveTab(int a) {
 	if(a==act || !tabs) return;
 	a = a<0? 0 : (a>=ntabs? ntabs-1 : a);
 	int n = tabs[a].index;
@@ -91,7 +91,7 @@ void TabSet::setActiveTab(int a) {
 	tabs[a].index = 0,tabs[act].index = 1,act = a;
 	updateTabs();
 }
-int TabSet::getPreviousTab(int n) {
+int aTabset::getPreviousTab(int n) {
 	if(tabs) {
       if(n<0 || n>=ntabs-1) return act;
       for(int i=0; i<ntabs; i++) if(tabs[i].index==n+1) return i;
@@ -99,7 +99,7 @@ int TabSet::getPreviousTab(int n) {
 	return 0;
 }
 
-bool TabSet::mouseDown(MouseEvent &me) {
+bool aTabset::mouseDown(aMouseEvent &me) {
 	if(tabs) for(int i=0; i<ntabs; i++) {
 		SDL_Rect &r = tabs[i].r;
 		if(me.x>=getX()+r.x && me.y>=getY()+r.y && me.x<getX()+r.x+r.w && me.y<getY()+r.y+r.h) {
@@ -114,7 +114,7 @@ bool TabSet::mouseDown(MouseEvent &me) {
 	return false;
 }
 
-void TabSet::paint(time_t time) {
+void aTabset::paint(time_t time) {
 	if(!tabs) return;
 	SDL_Rect *r;
 	int i,x = 0,w;

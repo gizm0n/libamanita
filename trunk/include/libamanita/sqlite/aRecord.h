@@ -1,21 +1,21 @@
-#ifndef _LIBAMANITA_SQLITE_RECORD_H
-#define _LIBAMANITA_SQLITE_RECORD_H
+#ifndef _LIBAMANITA_SQLITE_ARECORD_H
+#define _LIBAMANITA_SQLITE_ARECORD_H
 
 #include <stdlib.h>
 #include <string.h>
 
 
-class ResultSet;
+class aResultset;
 
 
-class Record {
+class aRecord {
 private:
 	char **data;
 	size_t sz;
 
 public:
-	Record(ResultSet &rs,char **d,unsigned int s);
-	~Record();
+	aRecord(aResultset &rs,char **d,unsigned int s);
+	~aRecord();
 
 	int size() { return sz; }
 	char *getString(int n) { return data[n]; }
@@ -27,4 +27,4 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SQLITE_RECORD_H */
+#endif /* _LIBAMANITA_SQLITE_ARECORD_H */

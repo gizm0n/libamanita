@@ -1,21 +1,21 @@
-#ifndef _LIBAMANITA_SDL_TEXT_H
-#define _LIBAMANITA_SDL_TEXT_H
+#ifndef _LIBAMANITA_SDL_ATEXT_H
+#define _LIBAMANITA_SDL_ATEXT_H
 
-#include <libamanita/sdl/Font.h>
+#include <libamanita/sdl/aFont.h>
 
 
-class Text {
+class aText {
 private:
-	struct TextLine {
+	struct text_line {
 		unsigned int pos;
 		unsigned short length,width;
 	};
-	struct TextElement {
-		unsigned int start,end,length,type,value;
-	};
+//	struct text_element {
+//		unsigned int start,end,length,type,value;
+//	};
 	char *text;
-	Font *font;
-	TextLine *textLines;
+	aFont *font;
+	text_line *textLines;
 	unsigned int textLen,textCap,textLinesLen,textLinesCap,maxLen;
 	unsigned int width,height;
 	unsigned int caret,caretLine,select,selectLine;
@@ -29,8 +29,8 @@ private:
 	int findLine(int pos);
 	void arrange(int from);
 public:
-	Text(int w=0,int h=0,const char *str=0);
-	~Text();
+	aText(int w=0,int h=0,const char *str=0);
+	~aText();
 	void append(char ch) { insert(ch,textLen); }
 	void append(const char *str) { insert(str,textLen); }
 	void insert(char ch) { insert(ch,caret); }
@@ -40,8 +40,8 @@ public:
 	void remove(int len) { leftShift(caret,len); }
 	void remove(int n,int len) { leftShift(n,len); }
 	void removeAll();
-	void setFont(Font *f) { if(f && f!=font) { font = f;arrange(0); } }
-	Font *getFont() { return font; }
+	void setFont(aFont *f) { if(f && f!=font) { font = f;arrange(0); } }
+	aFont *getFont() { return font; }
 	void setText(const char *str);
 	char *getText() { return text; }
 	int length() { return textLen; }
@@ -72,4 +72,4 @@ public:
 	void drawText(int x,int y,int a=(ALIGN_LEFT|ALIGN_TOP),bool showCaret=0);
 };
 
-#endif /* _LIBAMANITA_SDL_TEXT_H */
+#endif /* _LIBAMANITA_SDL_ATEXT_H */

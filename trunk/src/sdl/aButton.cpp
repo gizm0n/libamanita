@@ -2,21 +2,21 @@
 #include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <libamanita/sdl/Image.h>
-#include <libamanita/sdl/Font.h>
-#include <libamanita/sdl/Text.h>
-#include <libamanita/gui/Button.h>
+#include <libamanita/sdl/aImage.h>
+#include <libamanita/sdl/aFont.h>
+#include <libamanita/sdl/aText.h>
+#include <libamanita/sdl/aButton.h>
 
 
-RttiObjectInheritance(Button,Component);
+RttiObjectInheritance(aButton,aComponent);
 
 
 extern char indent[32];
 
 
-Button::_settings Button::_s = { 0,0,{} };
+aButton::_settings aButton::_s = { 0,0,{} };
 
-Button::Button(int id,int x,int y,int w,int h) : Component(x,y,w,h) {
+aButton::aButton(int id,int x,int y,int w,int h) : aComponent(x,y,w,h) {
 	setID(id);
 	bt = (button){
 		{ 0,0 },
@@ -27,18 +27,18 @@ Button::Button(int id,int x,int y,int w,int h) : Component(x,y,w,h) {
 	};
 	setMouseListener(this);
 }
-Button::Button(Button &b) : Component(b),bt(b.bt) {
+aButton::aButton(aButton &b) : aComponent(b),bt(b.bt) {
 	bt.font = b.bt.font;
 	bt.text = 0;
 	if(b.bt.text) setText(b.bt.text);
 	setMouseListener(this);
 }
-Button::~Button() {
-printf("%sButton::~Button()\n",indent);
+aButton::~aButton() {
+printf("%saButton::~aButton()\n",indent);
 	if(bt.text) { free(bt.text);bt.text = 0; }
 }
 
-void Button::setDefaultSettings(Image *img,Font *f,Uint32 data[36]) {
+void aButton::setDefaultSettings(aImage *img,aFont *f,Uint32 data[36]) {
 	_s = (_settings){
 		img,f,
 		{{
@@ -61,20 +61,20 @@ void Button::setDefaultSettings(Image *img,Font *f,Uint32 data[36]) {
 	};
 }
 
-void Button::setText(const char *text) {
+void aButton::setText(const char *text) {
 	if(!text || !*text) return;
 	if(bt.text) free(bt.text);
 	bt.text = strdup(text);
 	setFont(bt.font);
 }
 
-void Button::setFont(Font *font) {
+void aButton::setFont(aFont *font) {
 	bt.font = font;
 	bt.tw = bt.text? bt.font->stringWidth(bt.text) : 0;
 	setTextAlign(bt.align);
 }
 
-void Button::setTextAlign(int align) {
+void aButton::setTextAlign(int align) {
 	bt.align = align;
 	if(bt.align&ALIGN_CENTER) bt.tx = (getWidth()-bt.tw)/2;
 	else if(bt.align&ALIGN_RIGHT) bt.tx = getWidth()-bt.tw-bt.ins.w;
@@ -84,12 +84,12 @@ void Button::setTextAlign(int align) {
 	else bt.ty = bt.ins.y;
 }
 
-void Button::setInsets(int l,int t,int r,int b) {
+void aButton::setInsets(int l,int t,int r,int b) {
 	bt.ins = (SDL_Rect){ l,t,r,b };
 	setTextAlign(bt.align);
 }
 
-void Button::paint(time_t time) {
+void aButton::paint(time_t time) {
 	if(isOpaque() && _s.img) {
 		_settings::state &st = _s.st[isEnabled()? (isMouseOver()? (isMouseDown()? 2 : 1) : 0) : 3];
 		_s.img->draw(getX()+st.l->w,getY()+st.t->h,getWidth()-st.l->w-st.r->w,getHeight()-st.t->h-st.b->h,*st.c);
@@ -110,10 +110,10 @@ void Button::paint(time_t time) {
 	if(bt.text) bt.font->print(getX()+bt.tx,getY()+bt.ty+(isEnabled() && isMouseDown()? 1 : 0),bt.text);
 }
 
-bool Button::mouseUp(MouseEvent &me) {
-printf("Button(%p)::mouseUp(source=%p,mouseListener=%p,actionListener=%p)\n",this,me.source,mouseListener,actionListener);
+bool aButton::mouseUp(aMouseEvent &me) {
+printf("aButton(%p)::mouseUp(source=%p,mouseListener=%p,actionListener=%p)\n",this,me.source,mouseListener,actionListener);
 	if(isVisible() && isEnabled() && contains(me.x,me.y) && actionListener) {
-		ActionEvent ae = { me.source,me.button };
+		aActionEvent ae = { me.source,me.button };
 		actionListener->actionPerformed(ae);
 		return true;
 	}
