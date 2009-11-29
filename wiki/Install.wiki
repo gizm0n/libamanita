@@ -1,3 +1,8 @@
+<wiki:toc max_depth="1" />
+
+=Installation of Amanita Library=
+Here follows instructions on how to compile and install on different platforms.
+
 ==Linux==
 ===The Linux way===
 To download, compile and install on *linux*, open a terminal and run the following sequence of commands:
