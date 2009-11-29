@@ -1,17 +1,17 @@
-#ifndef _LIBAMANITA_SDL_THREAD_H
-#define _LIBAMANITA_SDL_THREAD_H
+#ifndef _LIBAMANITA_SDL_ATHREAD_H
+#define _LIBAMANITA_SDL_ATHREAD_H
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_thread.h>
 
-class Thread {
+class aThread {
 private:
 	Uint32 t;
 	SDL_Thread *h;
 
 public:
-	Thread();
-	~Thread();
+	aThread();
+	~aThread();
 
 	void start(int (*f)(void *data),void *d=0);
 	void stop();
@@ -22,4 +22,4 @@ public:
 	void pause(int millis) { SDL_Delay(millis); }
 };
 
-#endif /* _LIBAMANITA_SDL_THREAD_H */
+#endif /* _LIBAMANITA_SDL_ATHREAD_H */

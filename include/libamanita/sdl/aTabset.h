@@ -1,7 +1,7 @@
-#ifndef _LIBAMANITA_GUI_TABSET_H
-#define _LIBAMANITA_GUI_TABSET_H
+#ifndef _LIBAMANITA_SDL_ATABSET_H
+#define _LIBAMANITA_SDL_ATABSET_H
 
-#include <libamanita/gui/Component.h>
+#include <libamanita/sdl/aComponent.h>
 
 
 enum {
@@ -9,16 +9,16 @@ enum {
 	TABSET_BOTTOM		= 1,
 };
 
-class Image;
-class Font;
+class aImage;
+class aFont;
 
-class TabSet : public Component,public MouseListener {
-RttiObjectInstance(TabSet)
+class aTabset : public aComponent,public aMouseListener {
+RttiObjectInstance(aTabset)
 
 private:
 	struct _settings {
-		Image *img;
-		Font *font1,*font2;
+		aImage *img;
+		aFont *font1,*font2;
 		struct button {
 			SDL_Rect *l1,*l2,*c1,*c2,*c3,*r1,*r2,*b1,*b2;
 			SDL_Rect ins;
@@ -36,17 +36,17 @@ protected:
 	int style,ntabs,act;
 	tab *tabs;
 	_settings::button *t;
-	ActionEvent ae;
+	aActionEvent ae;
 
 	void updateTabs();
 	void deleteTabs();
 
 public:
-	TabSet(int id,int x=0,int y=0,int st=0);
-	virtual ~TabSet();
+	aTabset(int id,int x=0,int y=0,int st=0);
+	virtual ~aTabset();
 
 	/**
-	 * Image *img - The image should contain all the scrollimages mapped on the same image
+	 * aImage *img - The image should contain all the scrollimages mapped on the same image
 	 * Uint32 data[10] - The array should be mapped as follows:
 	 *  0 = Top tabset, Inactive, left edge of first tab
 	 *  1 = Top tabset, Active, left edge
@@ -75,17 +75,17 @@ public:
 	 * 24 = Bottom tabset, Insets, Right
 	 * 25 = Bottom tabset, Insets, Bottom
 	 **/
-	static void setDefaultSettings(Image *img,Font *f1,Font *f2,Uint32 data[26]);
+	static void setDefaultSettings(aImage *img,aFont *f1,aFont *f2,Uint32 data[26]);
 
 	void setStyle(int st=0);
 	void setTabs(const char *str[],int len);
 	void setActiveTab(int a);
 	int getActiveTab() { return act; }
 	int getPreviousTab(int n=0);
-	bool mouseDown(MouseEvent &me);
+	bool mouseDown(aMouseEvent &me);
 	void paint(time_t time);
 };
 
 
 
-#endif /* _LIBAMANITA_GUI_TABSET_H */
+#endif /* _LIBAMANITA_SDL_ATABSET_H */

@@ -4,23 +4,23 @@
 #include <string.h>
 #include <SDL/SDL_image.h>
 #include <png.h>
-#include <libamanita/sdl/Image.h>
-#include <libamanita/sdl/Graphics.h>
+#include <libamanita/sdl/aImage.h>
+#include <libamanita/sdl/aGraphics.h>
 
 
-RttiObjectInheritance(Image,Object);
+RttiObjectInheritance(aImage,aObject);
 
 
-int Image::created = 0;
-int Image::deleted = 0;
+int aImage::created = 0;
+int aImage::deleted = 0;
 
 
 inline bool _space(char c) { return c==' ' || c=='\n' || c=='\t' || c=='\r' || c=='\f' || c=='\v' || c=='\0'; }
 
-Image::Image() : Object(),name(0),file(0),surface(0),map(0),mapSize(0),mapRow(0) {
+aImage::aImage() : aObject(),name(0),file(0),surface(0),map(0),mapSize(0),mapRow(0) {
 	created++;
 }
-Image::Image(int w,int h) : Object(),name(0),file(0),surface(0),map(0) {
+aImage::aImage(int w,int h) : aObject(),name(0),file(0),surface(0),map(0) {
 	created++;
 	SDL_PixelFormat *f = g.getScreenFormat();
 	SDL_Surface *s = SDL_CreateRGBSurface(/*SDL_HWSURFACE*/SDL_SWSURFACE,w,h,
@@ -28,14 +28,14 @@ Image::Image(int w,int h) : Object(),name(0),file(0),surface(0),map(0) {
 	surface = s;
 	createMap(1);
 }
-Image::Image(const char *fn) : Object(),name(0),file(0),surface(0),map(0) {
+aImage::aImage(const char *fn) : aObject(),name(0),file(0),surface(0),map(0) {
 	created++;
 	name = strdup(fn);
 	file = strdup(fn);
 	load(fn);
 	createMap(1);
 }
-Image::~Image() {
+aImage::~aImage() {
 	deleted++;
 	if(name) { free(name);name = 0; }
 	if(file) { free(file);file = 0; }
@@ -43,22 +43,22 @@ Image::~Image() {
 	if(map) { free(map);map = 0; }
 }
 
-void Image::createMap(int sz) {
+void aImage::createMap(int sz) {
 	if(map) free(map);
 	if(sz<=0) sz = 1;
 	mapRow = 0,mapSize = sz,map = (SDL_Rect *)malloc(sizeof(SDL_Rect)*mapSize);
 	setCell(0,0,0,surface->w,surface->h);
 }
 
-void Image::createMap(int rw,int rh) {
-//printf("Image::createMap(sx=%d,sy=%d)\n",sx,sy);
+void aImage::createMap(int rw,int rh) {
+//printf("aImage::createMap(sx=%d,sy=%d)\n",sx,sy);
 //fflush(stdout);
 	mapRow = (surface->w/rw);
-//printf("Image::createMap(mapRow=%d)\n",mapRow);
+//printf("aImage::createMap(mapRow=%d)\n",mapRow);
 //fflush(stdout);
 	unsigned int rows = (surface->h/rh);
 	mapSize = 1+mapRow*rows;
-//printf("Image::createMap(mapSize=%d)\n",mapSize);
+//printf("aImage::createMap(mapSize=%d)\n",mapSize);
 //fflush(stdout);
 	if(map) free(map);
 	map = (SDL_Rect *)malloc(sizeof(SDL_Rect)*mapSize);
@@ -68,10 +68,10 @@ void Image::createMap(int rw,int rh) {
 			setCell(i,x*rw,y*rh,rw,rh);
 }
 
-void Image::createMap(SDL_Rect *m,int l) {
+void aImage::createMap(SDL_Rect *m,int l) {
 	mapSize = l;
 	mapRow = 0;
-//printf("Image::createMap(width=%d,height=%d,mapSize=%d,mapRow=%d)\n",d[2],d[3],mapSize,mapRow);
+//printf("aImage::createMap(width=%d,height=%d,mapSize=%d,mapRow=%d)\n",d[2],d[3],mapSize,mapRow);
 //fflush(stdout);
 	if(map) free(map);
 	map = (SDL_Rect *)malloc(sizeof(SDL_Rect)*mapSize);
@@ -79,32 +79,32 @@ void Image::createMap(SDL_Rect *m,int l) {
 }
 
 
-void Image::load(const char *fn) {
+void aImage::load(const char *fn) {
 	SDL_Surface *s = IMG_Load(fn);
 	surface = SDL_DisplayFormat(s);
 	SDL_FreeSurface(s);
 }
 
 
-Image **Image::readXIM(const char *fn,int &n) {
+aImage **aImage::readXIM(const char *fn,int &n) {
 	n = 0;
-printf("Image::readXIM(fn=%s)\n",fn);
+printf("aImage::readXIM(fn=%s)\n",fn);
 fflush(stdout);
 	FILE *fp = fopen(fn,"r");
 	if(!fp) return 0;
-// printf("Image::readXIM()\n");
+// printf("aImage::readXIM()\n");
 // fflush(stdout);
 	int nlines = 0,f,r = 0,b;
 	char *p1 = NULL,*p2 = NULL,c1 = '\0',c2 = '\0';
 	fseek(fp,0,SEEK_END);
 	f = ftell(fp);
 	fseek(fp,0,SEEK_SET);
-// printf("Image::readXIM(sz=%d)\n",f);
+// printf("aImage::readXIM(sz=%d)\n",f);
 // fflush(stdout);
 	char *data = (char *)malloc(f+1);
 	for(p1=data; (f=fgetc(fp))!=EOF; ) *p1++ = (char)f;//fread(data,f,1,fp);
 	*p1 = '\0';//data[f] = '\0';
-// printf("Image::readXIM()\nFILE: %s\n",fn);
+// printf("aImage::readXIM()\nFILE: %s\n",fn);
 // fflush(stdout);
 	for(p1=data,p2=p1,f=0,b=0; *p2; p2++) {
 // putc(*p2,stderr);
@@ -169,7 +169,7 @@ fflush(stdout);
 	*p1 = '\0';
 // printf("\nEOF\nImage::readXIM(nlines=%d)\n",nlines);
 // fflush(stdout);
-	Image **images = 0;
+	aImage **images = 0;
 	if(nlines>0) {
 		const char **lines = (const char **)malloc(sizeof(char *)*nlines);
 		lines[0] = data;
@@ -186,7 +186,7 @@ fflush(stdout);
 }
 
 
-Image **Image::parseXIM(const char *lines[],int &n) {
+aImage **aImage::parseXIM(const char *lines[],int &n) {
 	struct mapping {
 		int sz,rw,rh;
 		SDL_Rect *r;
@@ -198,7 +198,7 @@ Image **Image::parseXIM(const char *lines[],int &n) {
 	};
 	int nlines = n;
 	image_template templates[nlines],*t;
-	Image **images,*img;
+	aImage **images,*img;
 	long maprects = 0;
 	long num;
 	int i,j,m,f,r,b,v,x1,y1,x,y,w,h,rw,rh,nimages;
@@ -316,7 +316,7 @@ Image **Image::parseXIM(const char *lines[],int &n) {
 						if(v==6) {
 							x = dd[0],y = dd[1],w = dd[2],h = dd[3],rw = dd[4],rh = dd[5];
 							r = (w/rw)*(h/rh);
-// printf("Image::parseXIM(v=%d,sz=%d,x=%d,y=%d,w=%d,h=%d,rw=%d,rh=%d)\n",v,r,x,y,w,h,rw,rh);
+// printf("aImage::parseXIM(v=%d,sz=%d,x=%d,y=%d,w=%d,h=%d,rw=%d,rh=%d)\n",v,r,x,y,w,h,rw,rh);
 // fflush(stdout);
 							d[dn].sz = r,d[dn].r = (SDL_Rect *)malloc(sizeof(SDL_Rect)*r);
 							for(y1=y,r=0; y1+rh<=y+h; y1+=rh) for(x1=x; x1+rw<=x+w; x1+=rw)
@@ -325,12 +325,12 @@ Image **Image::parseXIM(const char *lines[],int &n) {
 						} else if(v>=4) {
 							dr = d[dn].r = (SDL_Rect *)malloc(sizeof(SDL_Rect));
 							d[dn].sz = 1,dr->x = dd[0],dr->y = dd[1],dr->w = dd[2],dr->h = dd[3];
-// printf("Image::parseXIM(v=%d,sz=%d,x=%d,y=%d,w=%d,h=%d)\n",v,d[dn].sz,dr->x,dr->y,dr->w,dr->h);
+// printf("aImage::parseXIM(v=%d,sz=%d,x=%d,y=%d,w=%d,h=%d)\n",v,d[dn].sz,dr->x,dr->y,dr->w,dr->h);
 // fflush(stdout);
 							dn++;
 						} else if(v>=2) {
 							d[dn].sz = -1,d[dn].rw = dd[0],d[dn].rh = dd[1];
-// printf("Image::parseXIM(v=%d,sz=%d,rw=%d,rh=%d)\n",v,d[dn].sz,d[dn].rw,d[dn].rh);
+// printf("aImage::parseXIM(v=%d,sz=%d,rw=%d,rh=%d)\n",v,d[dn].sz,d[dn].rw,d[dn].rh);
 // fflush(stdout);
 							dn++;
 						}
@@ -349,21 +349,21 @@ Image **Image::parseXIM(const char *lines[],int &n) {
 		}
 		if(t->from<t->to) t->to++,nimages += t->to-t->from;
 		else t->to = t->from+1,nimages++;
-printf("Image::parseXIM(i=%d,name='%s',path='%s',alpha=%ld,colkey=0x%06lx/%ld,from=%ld,to=%ld)\n",
+printf("aImage::parseXIM(i=%d,name='%s',path='%s',alpha=%ld,colkey=0x%06lx/%ld,from=%ld,to=%ld)\n",
 		i,t->name,t->path,t->alpha,(unsigned long)t->colkey,t->colkey,t->from,t->to-1);
 fflush(stdout);
 	}
 	free(d);
 
-	images = new Image*[nimages];
+	images = new aImage*[nimages];
 	t = &templates[j=0],m = t->from;
 	for(i=0; i<nimages; i++,m++) {
-		img = images[i] = new Image();
+		img = images[i] = new aImage();
 		if(m==t->to) t = &templates[++j],m = t->from;
 
 		formatString(path,t->path,m);
 		if((s=IMG_Load(path))==0) {
-printf("Image::parseXIM(IMG_Load(%s))\n",SDL_GetError());
+printf("aImage::parseXIM(IMG_Load(%s))\n",SDL_GetError());
 fflush(stdout);
 		}
 		if(t->colkey!=-1) {
@@ -373,16 +373,16 @@ fflush(stdout);
 		if(t->alpha<255) {
 			SDL_SetAlpha(s,SDL_SRCALPHA|SDL_RLEACCEL,t->alpha);
 			img->surface = SDL_DisplayFormatAlpha(s);
-// printf("Image::parseXIM(alpha=%d,err=%s)\n",alpha,SDL_GetError());
+// printf("aImage::parseXIM(alpha=%d,err=%s)\n",alpha,SDL_GetError());
 // fflush(stdout);
 			if(img->surface==0) {
-printf("Image::parseXIM(SDL_DisplayFormatAlpha(%s))\n",SDL_GetError());
+printf("aImage::parseXIM(SDL_DisplayFormatAlpha(%s))\n",SDL_GetError());
 fflush(stdout);
 			}
 		} else {
 			img->surface = SDL_DisplayFormat(s);
 			if(img->surface==0) {
-printf("Image::parseXIM(SDL_DisplayFormat(%s))\n",SDL_GetError());
+printf("aImage::parseXIM(SDL_DisplayFormat(%s))\n",SDL_GetError());
 fflush(stdout);
 			}
 		}
@@ -397,12 +397,12 @@ fflush(stdout);
 				d[f].sz = r,d[f].r = (SDL_Rect *)malloc(sizeof(SDL_Rect)*r);
 				for(y1=0,r=0; y1+rh<=h; y1+=rh) for(x1=0; x1+rw<=w; x1+=rw)
 					d[f].r[r++] = (SDL_Rect){x1,y1,rw,rh};
-// printf("Image::parseXIM(w=%d,h=%d,rw=%d,rh=%d,d[f].sz=%d,r=%d)\n",w,h,rw,rh,d[f].sz,r);
+// printf("aImage::parseXIM(w=%d,h=%d,rw=%d,rh=%d,d[f].sz=%d,r=%d)\n",w,h,rw,rh,d[f].sz,r);
 // fflush(stdout);
 			}
 			dq += d[f].sz;
 		}
-// printf("Image::parseXIM(dn=%d,dq=%d)\n",dn,dq);
+// printf("aImage::parseXIM(dn=%d,dq=%d)\n",dn,dq);
 // fflush(stdout);
 		img->mapSize = 1+dq;
 		img->mapRow = 0;
@@ -410,7 +410,7 @@ fflush(stdout);
 		img->map[0] = (SDL_Rect){0,0,w,h};
 		for(f=0,v=1; f<dn; f++) {
 			r=0,b=d[f].sz;
-// printf("Image::parseXIM(5,f=%d,v=%d,b=%d)\n",f,v,b);
+// printf("aImage::parseXIM(5,f=%d,v=%d,b=%d)\n",f,v,b);
 // fflush(stdout);
 			while(r<b) img->map[v++] = d[f].r[r++];
 		}
@@ -419,7 +419,7 @@ fflush(stdout);
 		img->file = strdup(path);
 // for(f=0; f<img->mapSize; f++) {
 // SDL_Rect &rect = img->map[f];
-// printf("Image::parseXIM(map[%d]=(x=%d,y=%d,w=%d,h=%d))\n",f,rect.x,rect.y,rect.w,rect.h);
+// printf("aImage::parseXIM(map[%d]=(x=%d,y=%d,w=%d,h=%d))\n",f,rect.x,rect.y,rect.w,rect.h);
 // fflush(stdout);
 // }
 		maprects += img->mapSize;
@@ -435,7 +435,7 @@ fflush(stdout);
 	return images;
 }
 
-void Image::formatString(char *str,const char *format,int num) {
+void aImage::formatString(char *str,const char *format,int num) {
 	if(!str) return;
 	if(format) while(*format)
 		if(*format=='#') {
@@ -447,7 +447,7 @@ void Image::formatString(char *str,const char *format,int num) {
 }
 
 
-bool Image::save(const char *fn,SDL_Surface *s) {
+bool aImage::save(const char *fn,SDL_Surface *s) {
 	if(strstr(fn,".bmp")) return SDL_SaveBMP(s,fn)==0;
 	if(strstr(fn,".png")) {
 		bool ret = false;
@@ -522,16 +522,16 @@ bool Image::save(const char *fn,SDL_Surface *s) {
 }
 
 
-inline void Image::draw(SDL_Rect &src,SDL_Rect &dst) {
+inline void aImage::draw(SDL_Rect &src,SDL_Rect &dst) {
 	SDL_BlitSurface(surface,&src,g.getCanvas(),&dst);
 }
 
-void Image::draw(int x,int y,SDL_Rect &src) {
+void aImage::draw(int x,int y,SDL_Rect &src) {
 	SDL_Rect dst = { x,y,0,0 };
 	draw(src,dst);
 }
 
-void Image::draw(int x,int y,int w,int h,SDL_Rect &src) {
+void aImage::draw(int x,int y,int w,int h,SDL_Rect &src) {
 	int i,j;
 	SDL_Rect r,dst = { 0,0,0,0 };
 	for(i=0; i<h; i+=src.h)
@@ -547,7 +547,7 @@ void Image::draw(int x,int y,int w,int h,SDL_Rect &src) {
 }
 
 
-void Image::setCell(int index,int x,int y,int w,int h) {
+void aImage::setCell(int index,int x,int y,int w,int h) {
 	map[index].x = x,map[index].y = y,map[index].w = w,map[index].h = h;
 }
 

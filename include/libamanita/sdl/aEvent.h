@@ -1,68 +1,68 @@
-#ifndef _LIBAMANITA_GUI_EVENT_H
-#define _LIBAMANITA_GUI_EVENT_H
+#ifndef _LIBAMANITA_SDL_AEVENT_H
+#define _LIBAMANITA_SDL_AEVENT_H
 
 
 #include <SDL/SDL_stdinc.h>
 
 
-class Component;
+class aComponent;
 
 
-struct FocusEvent {
-	Component *source;
-	Component *prev;
+struct aFocusEvent {
+	aComponent *source;
+	aComponent *prev;
 };
-struct KeyEvent {
-	Component *source;
+struct aKeyEvent {
+	aComponent *source;
 	Uint32 sym;
 	Uint32 mod;
 	Uint16 unicode;
 };
-struct MouseEvent {
-	Component *source;
+struct aMouseEvent {
+	aComponent *source;
 	Uint16 x,y;
 	Uint8 button;
 	Uint16 clicks;
 };
-struct MouseMotionEvent {
-	Component *source;
+struct aMouseMotionEvent {
+	aComponent *source;
 	Uint16 x,y;
 	Uint16 dx,dy;
 };
-struct ActionEvent {
-	Component *source;
+struct aActionEvent {
+	aComponent *source;
 	Uint32 params;
 };
-struct ToolTipEvent {
-	Component *source;
+struct aTooltipEvent {
+	aComponent *source;
 	Uint16 x,y;
 	Uint16 showTimer,hideTimer;
 };
 
-class FocusListener {
+class aFocusListener {
 public:
-	virtual bool focusGained(FocusEvent &fe) { return false; }
-	virtual bool focusLost(FocusEvent &fe) { return false; }
+	virtual bool focusGained(aFocusEvent &fe) { return false; }
+	virtual bool focusLost(aFocusEvent &fe) { return false; }
 };
-class KeyListener {
+class aKeyListener {
 public:
-	virtual bool keyDown(KeyEvent &ke) { return false; }
-	virtual bool keyUp(KeyEvent &ke) { return false; }
+	virtual bool keyDown(aKeyEvent &ke) { return false; }
+	virtual bool keyUp(aKeyEvent &ke) { return false; }
 };
-class MouseListener {
+class aMouseListener {
 public:
-	virtual bool mouseDown(MouseEvent &me) { return false; }
-	virtual bool mouseUp(MouseEvent &me) { return false; }
+	virtual bool mouseDown(aMouseEvent &me) { return false; }
+	virtual bool mouseUp(aMouseEvent &me) { return false; }
 };
-class MouseMotionListener {
+class aMouseMotionListener {
 public:
-	virtual bool mouseMove(MouseMotionEvent &mme) { return false; }
-	virtual bool mouseDrag(MouseMotionEvent &mme) { return false; }
+	virtual bool mouseMove(aMouseMotionEvent &mme) { return false; }
+	virtual bool mouseDrag(aMouseMotionEvent &mme) { return false; }
 };
-class ActionListener {
+class aActionListener {
 public:
-	virtual bool actionPerformed(ActionEvent &ae) { return false; }
+	virtual bool actionPerformed(aActionEvent &ae) { return false; }
 };
 
 
-#endif /* _LIBAMANITA_GUI_EVENT_H */
+#endif /* _LIBAMANITA_SDL_AEVENT_H */

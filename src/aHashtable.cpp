@@ -2,15 +2,15 @@
 #include "config.h"
 #include <stdio.h>
 #include <inttypes.h>
-#include <libamanita/Hashtable.h>
-#include <libamanita/Vector.h>
+#include <libamanita/aHashtable.h>
+#include <libamanita/aVector.h>
 
 
 
 #define COMPARE(kt,vt,at) (!kt || at->k_type==kt) && (!vt || at->v_type==vt)
 
 
-value_t Hashtable::iterator::first(type_t kt,type_t vt) {
+value_t aHashtable::iterator::first(type_t kt,type_t vt) {
 	if(ht->sz) for(index=0; index<(long)ht->cap; index++) if((at=ht->table[index])) do {
 		if(COMPARE(kt,vt,at)) return at->value;
 		at = at->next;
@@ -19,7 +19,7 @@ value_t Hashtable::iterator::first(type_t kt,type_t vt) {
 	return 0;
 }
 
-value_t Hashtable::iterator::next() {
+value_t aHashtable::iterator::next() {
 	if(!ht->sz) index = ITER_INDEX_EMPTY;
 	else if(index!=ITER_INDEX_AFTER_LAST) {
 		if(index<0) index = ITER_INDEX_BEFORE_FIRST;
@@ -31,7 +31,7 @@ value_t Hashtable::iterator::next() {
 	return 0;
 }
 
-value_t Hashtable::iterator::next(type_t kt,type_t vt) {
+value_t aHashtable::iterator::next(type_t kt,type_t vt) {
 	if(!ht->sz) index = ITER_INDEX_EMPTY;
 	else if(index!=ITER_INDEX_AFTER_LAST) {
 		if(index<0) index = ITER_INDEX_BEFORE_FIRST;
@@ -45,7 +45,7 @@ value_t Hashtable::iterator::next(type_t kt,type_t vt) {
 	return 0;
 }
 
-value_t Hashtable::iterator::previous(type_t kt,type_t vt) {
+value_t aHashtable::iterator::previous(type_t kt,type_t vt) {
 	if(!ht->sz) index = ITER_INDEX_EMPTY;
 	else if(index!=ITER_INDEX_BEFORE_FIRST) {
 		if(index<0) index = ht->cap-1,at = 0;
@@ -61,7 +61,7 @@ value_t Hashtable::iterator::previous(type_t kt,type_t vt) {
 	return 0;
 }
 
-value_t Hashtable::iterator::last(type_t kt,type_t vt) {
+value_t aHashtable::iterator::last(type_t kt,type_t vt) {
 	if(ht->sz) {
 		at = 0,index = ht->cap-1;
 		for(node *n1,*n2; index>=0; index--) if((n1=ht->table[index])) do {
@@ -75,7 +75,7 @@ value_t Hashtable::iterator::last(type_t kt,type_t vt) {
 	return 0;
 }
 
-value_t Hashtable::iterator::remove() {
+value_t aHashtable::iterator::remove() {
 	node *n1 = at,*n2;
 	if(index>=0 && at && (n2=ht->table[index])) {
 		if(n2==at) ht->table[index--] = at->next,at = 0;
@@ -94,15 +94,15 @@ value_t Hashtable::iterator::remove() {
 
 
 
-RttiObjectInheritance(Hashtable,Collection);
+RttiObjectInheritance(aHashtable,aCollection);
 
 
-Hashtable::Hashtable(size_t c,float l,style_t st) : Collection(),table(0),full(0),style(st),ld(l) { cap = c; }
+aHashtable::aHashtable(size_t c,float l,style_t st) : aCollection(),table(0),full(0),style(st),ld(l) { cap = c; }
 
-Hashtable::iterator Hashtable::iterate() { return iterator(this); }
+aHashtable::iterator aHashtable::iterate() { return iterator(this); }
 
 
-void Hashtable::setCaseInsensitiveKeys(bool b) {
+void aHashtable::setCaseInsensitiveKeys(bool b) {
 	style_t st = style;
 	st |= HASH_STYLE_CASE_INSENSITIVE;
 	if(!b) st ^= HASH_STYLE_CASE_INSENSITIVE;
@@ -110,19 +110,19 @@ void Hashtable::setCaseInsensitiveKeys(bool b) {
 	else style = st;
 }
 
-void Hashtable::setAllowKeyMultiples(bool b) {
+void aHashtable::setAllowKeyMultiples(bool b) {
 	style |= HASH_STYLE_KEY_MULTIPLES;
 	if(!b) style ^= HASH_STYLE_KEY_MULTIPLES;
 }
 
-hash_t Hashtable::hash(const char *s) {
+hash_t aHashtable::hash(const char *s) {
 	hash_t h = 0;
-	if(style&HASH_STYLE_CASE_INSENSITIVE) while(*s) h = 31*h+String::toLower(*s),s++;
+	if(style&HASH_STYLE_CASE_INSENSITIVE) while(*s) h = 31*h+aString::toLower(*s),s++;
 	else while(*s) h = 31*h+(*s),s++;
 	return h;
 }
 
-void Hashtable::put(value_t key,value_t value,type_t kt,type_t vt) {
+void aHashtable::put(value_t key,value_t value,type_t kt,type_t vt) {
 	if(sz && !(style&HASH_STYLE_KEY_MULTIPLES)) {
 		node *n = table[key%cap];
 		while(n) {
@@ -145,11 +145,11 @@ void Hashtable::put(value_t key,value_t value,type_t kt,type_t vt) {
 	sz++;
 }
 
-void Hashtable::put(const char *key,value_t value,type_t vt) {
+void aHashtable::put(const char *key,value_t value,type_t vt) {
 	if(sz && !(style&HASH_STYLE_KEY_MULTIPLES)) {
 		node *n = table[hash(key)%cap];
 		if(style&HASH_STYLE_CASE_INSENSITIVE) while(n) {
-			if(n->k_type==TYPE_CHAR_P && !String::stricmp((char *)n->key,key)) break;
+			if(n->k_type==TYPE_CHAR_P && !aString::stricmp((char *)n->key,key)) break;
 			n = n->next;
 		} else while(n) {
 			if(n->k_type==TYPE_CHAR_P && !strcmp((char *)n->key,key)) break;
@@ -172,7 +172,7 @@ void Hashtable::put(const char *key,value_t value,type_t vt) {
 	sz++;
 }
 
-value_t Hashtable::get(value_t key,type_t kt) {
+value_t aHashtable::get(value_t key,type_t kt) {
 	if(!sz) return 0;
 	node *n = table[key%cap];
 	while(n) {
@@ -182,11 +182,11 @@ value_t Hashtable::get(value_t key,type_t kt) {
 	return 0;
 }
 
-value_t Hashtable::get(const char *key) {
+value_t aHashtable::get(const char *key) {
 	if(!sz) return 0;
 	node *n = table[hash(key)%cap];
 	if(style&HASH_STYLE_CASE_INSENSITIVE) while(n) {
-		if(n->k_type==TYPE_CHAR_P && !String::stricmp((char *)n->key,key)) return n->value;
+		if(n->k_type==TYPE_CHAR_P && !aString::stricmp((char *)n->key,key)) return n->value;
 		n = n->next;
 	} else while(n) {
 		if(n->k_type==TYPE_CHAR_P && !strcmp((char *)n->key,key)) return n->value;
@@ -195,7 +195,7 @@ value_t Hashtable::get(const char *key) {
 	return 0;
 }
 
-value_t Hashtable::get(value_t key,type_t kt,type_t &type) {
+value_t aHashtable::get(value_t key,type_t kt,type_t &type) {
 	type = TYPE_EMPTY;
 	if(!sz) return 0;
 	node *n = table[key%cap];
@@ -208,12 +208,12 @@ value_t Hashtable::get(value_t key,type_t kt,type_t &type) {
 	return n->value;
 }
 
-value_t Hashtable::get(const char *key,type_t &type) {
+value_t aHashtable::get(const char *key,type_t &type) {
 	type = TYPE_EMPTY;
 	if(!sz) return 0;
 	node *n = table[hash(key)%cap];
 	if(style&HASH_STYLE_CASE_INSENSITIVE) while(n) {
-		if(n->k_type==TYPE_CHAR_P && !String::stricmp((char *)n->key,key)) break;
+		if(n->k_type==TYPE_CHAR_P && !aString::stricmp((char *)n->key,key)) break;
 		n = n->next;
 	} else while(n) {
 		if(n->k_type==TYPE_CHAR_P && !strcmp((char *)n->key,key)) break;
@@ -224,7 +224,7 @@ value_t Hashtable::get(const char *key,type_t &type) {
 	return n->value;
 }
 
-size_t Hashtable::get(value_t key,type_t kt,Vector &v) {
+size_t aHashtable::get(value_t key,type_t kt,aVector &v) {
 	if(!sz) return 0;
 	int i = 0;
 	node *n = table[key%cap];
@@ -235,12 +235,12 @@ size_t Hashtable::get(value_t key,type_t kt,Vector &v) {
 	return i;
 }
 
-size_t Hashtable::get(const char *key,Vector &v) {
+size_t aHashtable::get(const char *key,aVector &v) {
 	if(!sz) return 0;
 	size_t i = 0;
 	node *n = table[hash(key)%cap];
 	if(style&HASH_STYLE_CASE_INSENSITIVE) while(n) {
-		if(n->k_type==TYPE_CHAR_P && !String::stricmp((char *)n->key,key)) v.insert(n->value,v.sz,n->v_type),i++;
+		if(n->k_type==TYPE_CHAR_P && !aString::stricmp((char *)n->key,key)) v.insert(n->value,v.sz,n->v_type),i++;
 		n = n->next;
 	} else while(n) {
 		if(n->k_type==TYPE_CHAR_P && !strcmp((char *)n->key,key)) v.insert(n->value,v.sz,n->v_type),i++;
@@ -249,7 +249,7 @@ size_t Hashtable::get(const char *key,Vector &v) {
 	return i;
 }
 
-value_t Hashtable::getByIndex(size_t index,type_t &type) {
+value_t aHashtable::getByIndex(size_t index,type_t &type) {
 	type = TYPE_EMPTY;
 	if(index>=sz) return 0;
 	size_t i = 0;
@@ -264,7 +264,7 @@ value_t Hashtable::getByIndex(size_t index,type_t &type) {
 	return n->value;
 }
 
-value_t Hashtable::remove(value_t key,type_t kt) {
+value_t aHashtable::remove(value_t key,type_t kt) {
 	if(!sz) return 0;
 	value_t k = key;
 	node *n1 = table[k%cap];
@@ -282,19 +282,19 @@ value_t Hashtable::remove(value_t key,type_t kt) {
 	return v;
 }
 
-value_t Hashtable::remove(const char *key) {
+value_t aHashtable::remove(const char *key) {
 	if(!sz) return 0;
 	hash_t h = hash(key)%cap;
 	node *n1 = table[h];
 	if(!n1) return 0;
 	if(n1->k_type==TYPE_CHAR_P &&
-		(((style&HASH_STYLE_CASE_INSENSITIVE) && !String::stricmp((char *)n1->key,key)) ||
+		(((style&HASH_STYLE_CASE_INSENSITIVE) && !aString::stricmp((char *)n1->key,key)) ||
 			(!(style&HASH_STYLE_CASE_INSENSITIVE) && !strcmp((char *)n1->key,key)))) table[h] = n1->next;
 	else {
 		node *n2;
 		if(style&HASH_STYLE_CASE_INSENSITIVE)
 			do { n2 = n1,n1 = n1->next; }
-				while(n1 && n1->k_type!=TYPE_CHAR_P && !String::stricmp((char *)n1->key,key));
+				while(n1 && n1->k_type!=TYPE_CHAR_P && !aString::stricmp((char *)n1->key,key));
 		else do { n2 = n1,n1 = n1->next; } while(n1 && n1->k_type!=TYPE_CHAR_P && !strcmp((char *)n1->key,key));
 		if(!n1) return 0;
 		n2->next = n1->next;
@@ -305,7 +305,7 @@ value_t Hashtable::remove(const char *key) {
 	return v;
 }
 
-value_t Hashtable::remove(value_t key,type_t kt,type_t &type) {
+value_t aHashtable::remove(value_t key,type_t kt,type_t &type) {
 	type = TYPE_EMPTY;
 	if(!sz) return 0;
 	value_t k = key;
@@ -325,20 +325,20 @@ value_t Hashtable::remove(value_t key,type_t kt,type_t &type) {
 	return v;
 }
 
-value_t Hashtable::remove(const char *key,type_t &type) {
+value_t aHashtable::remove(const char *key,type_t &type) {
 	type = TYPE_EMPTY;
 	if(!sz) return 0;
 	int h = hash(key)%cap;
 	node *n1 = table[h];
 	if(!n1) return 0;
 	if(n1->k_type==TYPE_CHAR_P &&
-		(((style&HASH_STYLE_CASE_INSENSITIVE) && !String::stricmp((char *)n1->key,key)) ||
+		(((style&HASH_STYLE_CASE_INSENSITIVE) && !aString::stricmp((char *)n1->key,key)) ||
 			(!(style&HASH_STYLE_CASE_INSENSITIVE) && !strcmp((char *)n1->key,key)))) table[h] = n1->next;
 	else {
 		node *n2;
 		if(style&HASH_STYLE_CASE_INSENSITIVE)
 			do { n2 = n1,n1 = n1->next; }
-				while(n1 && n1->k_type!=TYPE_CHAR_P && !String::stricmp((char *)n1->key,key));
+				while(n1 && n1->k_type!=TYPE_CHAR_P && !aString::stricmp((char *)n1->key,key));
 		else do { n2 = n1,n1 = n1->next; } while(n1 && n1->k_type!=TYPE_CHAR_P && !strcmp((char *)n1->key,key));
 		if(!n1) return 0;
 		n2->next = n1->next;
@@ -350,7 +350,7 @@ value_t Hashtable::remove(const char *key,type_t &type) {
 	return v;
 }
 
-void Hashtable::removeAll() {
+void aHashtable::removeAll() {
 	if(table) {
 		node *n1,*n2;
 		for(size_t i=0; i<cap; i++) if((n1=table[i]))
@@ -361,7 +361,7 @@ void Hashtable::removeAll() {
 	cap = 11,sz = 0,full = 0;
 }
 
-void Hashtable::rehash(style_t st) {
+void aHashtable::rehash(style_t st) {
 	if(!table) {
 		sz = 0;
 		table = (node **)malloc(cap*sizeof(node *));
@@ -388,10 +388,10 @@ void Hashtable::rehash(style_t st) {
 	}
 	style = st;
 	full = (size_t)((float)cap*ld);
-//ffprintf(stderr,fp,"Hashtable::rehash(st=%d)\nSize=%d,Full=%d,Capacity=%d\n",st,sz,full,cap);
+//ffprintf(stderr,fp,"aHashtable::rehash(st=%d)\nSize=%d,Full=%d,Capacity=%d\n",st,sz,full,cap);
 }
 
-size_t Hashtable::print(const char *fn) {
+size_t aHashtable::print(const char *fn) {
 	FILE *fp;
 	if(!fn || !*fn || !(fp=fopen(fn,"w"))) return 0;
 	size_t s = print(fp);
@@ -399,7 +399,7 @@ size_t Hashtable::print(const char *fn) {
 	return s;
 }
 
-size_t Hashtable::print(FILE *fp) {
+size_t aHashtable::print(FILE *fp) {
 	if(!fp) return 0;
 	size_t i,s = sz;
 	node *n;
@@ -442,8 +442,8 @@ size_t Hashtable::print(FILE *fp) {
 	return sz;
 }
 
-size_t Hashtable::load(const char *fn) {
-//fprintf(stderr,"Hashtable::load(%s)\n",fn);
+size_t aHashtable::load(const char *fn) {
+//fprintf(stderr,"aHashtable::load(%s)\n",fn);
 //fflush(stderr);
 	FILE *fp;
 	if(!fn || !*fn || !(fp=fopen(fn,"rb"))) return 0;
@@ -452,27 +452,27 @@ size_t Hashtable::load(const char *fn) {
 	return s;
 }
 
-size_t Hashtable::load(FILE *fp) {
+size_t aHashtable::load(FILE *fp) {
 	if(!fp) return 0;
-//fprintf(stderr,"Hashtable::load()\n");
+//fprintf(stderr,"aHashtable::load()\n");
 //fflush(stderr);
-	String key(64),val(256);
+	aString key(64),val(256);
 	size_t s = 0;
 	while(!feof(fp)) {
-//fprintf(stderr,"Hashtable::load(readPair)\n");
+//fprintf(stderr,"aHashtable::load(readPair)\n");
 //fflush(stderr);
 		readPair(fp,key.clear(),val.clear());
 		if(key.length()>0 && val.length()>0) {
 			put(key,val);
 			s++;
-//fprintf(stderr,"Hashtable::load(key='%s',val='%s')\n",key.toString(),val.toString());
+//fprintf(stderr,"aHashtable::load(key='%s',val='%s')\n",key.toString(),val.toString());
 //fflush(stderr);
 		}
 	}
 	return s;
 }
 
-size_t Hashtable::save(const char *fn) {
+size_t aHashtable::save(const char *fn) {
 	FILE *fp;
 	if(!fn || !*fn || !(fp=fopen(fn,"wb"))) return 0;
 	size_t s = save(fp);
@@ -480,7 +480,7 @@ size_t Hashtable::save(const char *fn) {
 	return s;
 }
 
-size_t Hashtable::save(FILE *fp) {
+size_t aHashtable::save(FILE *fp) {
 	if(!fp) return 0;
 	node *n;
 	if(table) for(size_t i=0; i<cap; i++) if((n=table[i])) while(n) {
@@ -514,9 +514,9 @@ size_t Hashtable::save(FILE *fp) {
 	return sz;
 }
 
-void Hashtable::readPair(FILE *fp,String &key,String &value) {
-	key.appendUntil(fp,"=:",String::whitespace);
-	if(!feof(fp)) value.appendUntil(fp,String::whitespace+2,String::whitespace);
+void aHashtable::readPair(FILE *fp,aString &key,aString &value) {
+	key.appendUntil(fp,"=:",aString::whitespace);
+	if(!feof(fp)) value.appendUntil(fp,aString::whitespace+2,aString::whitespace);
 }
 
 

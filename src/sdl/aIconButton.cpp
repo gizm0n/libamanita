@@ -2,38 +2,38 @@
 #include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <libamanita/sdl/Image.h>
-#include <libamanita/gui/IconButton.h>
+#include <libamanita/sdl/aImage.h>
+#include <libamanita/sdl/aIconButton.h>
 
 
-RttiObjectInheritance(IconButton,Component);
+RttiObjectInheritance(aIconButton,aComponent);
 
 
 extern char indent[32];
 
 
-IconButton::_settings IconButton::_s = { 0 };
+aIconButton::_settings aIconButton::_s = { 0 };
 
-IconButton::IconButton(int id,int x,int y) : Component(x,y) {
+aIconButton::aIconButton(int id,int x,int y) : aComponent(x,y) {
 	setID(id);
 	setImage(_s.img,_s.plain,_s.active,_s.down,_s.disabled);
 	setMouseListener(this);
 }
-IconButton::IconButton(IconButton &b) : Component(b),ib(b.ib) {
+aIconButton::aIconButton(aIconButton &b) : aComponent(b),ib(b.ib) {
 	setMouseListener(this);
 }
-IconButton::~IconButton() {
-printf("%sIconButton::~IconButton()\n",indent);
+aIconButton::~aIconButton() {
+printf("%sIconButton::~aIconButton()\n",indent);
 }
 
-void IconButton::setDefaultSettings(Image *img,Uint32 data[4]) {
+void aIconButton::setDefaultSettings(aImage *img,Uint32 data[4]) {
 	_s = (_settings){
 		img,
 		data[0],data[1],data[2],data[3],
 	};
 }
 
-void IconButton::setImage(Image *img,int plain,int active,int down,int disabled) {
+void aIconButton::setImage(aImage *img,int plain,int active,int down,int disabled) {
 	ib = (iconbutton){ img,plain,active,down,disabled };
 	if(ib.img) {
 		SDL_Rect *r = ib.img->getCell(ib.plain);
@@ -41,15 +41,15 @@ void IconButton::setImage(Image *img,int plain,int active,int down,int disabled)
 	}
 }
 
-void IconButton::paint(time_t time) {
+void aIconButton::paint(time_t time) {
 	if(ib.img) ib.img->draw(getX(),getY(),
 		isEnabled()? (isMouseOver()? (isMouseDown()? ib.down : ib.active) : ib.plain) : ib.disabled);
 }
 
-bool IconButton::mouseUp(MouseEvent &me) {
-printf("IconButton(%p)::mouseUp(source=%p,mouseListener=%p,actionListener=%p)\n",this,me.source,mouseListener,actionListener);
+bool aIconButton::mouseUp(aMouseEvent &me) {
+printf("aIconButton(%p)::mouseUp(source=%p,mouseListener=%p,actionListener=%p)\n",this,me.source,mouseListener,actionListener);
 	if(isVisible() && isEnabled() && contains(me.x,me.y) && actionListener) {
-		ActionEvent ae = { me.source,me.button };
+		aActionEvent ae = { me.source,me.button };
 		actionListener->actionPerformed(ae);
 		return true;
 	}

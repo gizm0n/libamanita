@@ -1,11 +1,11 @@
-#ifndef _LIBAMANITA_DICTIONARY_H
-#define _LIBAMANITA_DICTIONARY_H
+#ifndef _LIBAMANITA_ADICTIONARY_H
+#define _LIBAMANITA_ADICTIONARY_H
 
-#include <libamanita/Collection.h>
+#include <libamanita/aCollection.h>
 
 
-class Dictionary : public Collection {
-RttiObjectInstance(Dictionary)
+class aDictionary : public aCollection {
+RttiObjectInstance(aDictionary)
 
 public:
 	struct word {
@@ -30,10 +30,10 @@ protected:
 	static int compareValue(const void *w1, const void *w2);
 
 public:
-	Dictionary() : Collection(),words(0) {}
-	Dictionary(const char **ws,const value_t *vs,size_t l=0,bool c=false);
-	Dictionary(const word *ws,size_t l=0,bool c=false);
-	~Dictionary();
+	aDictionary() : aCollection(),words(0) {}
+	aDictionary(const char **ws,const value_t *vs,size_t l=0,bool c=false);
+	aDictionary(const word *ws,size_t l=0,bool c=false);
+	~aDictionary();
 
 	void createIndex(const char **ws,const value_t *vs,size_t l=0,bool c=false);
 	void createIndex(const word *w,size_t l=0,bool c=false);
@@ -41,5 +41,5 @@ public:
 	const char *getKey(value_t v);
 };
 
-#endif /* _LIBAMANITA_DICTIONARY_H */
+#endif /* _LIBAMANITA_ADICTIONARY_H */
 

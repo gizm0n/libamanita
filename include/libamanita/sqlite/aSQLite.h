@@ -1,13 +1,13 @@
-#ifndef _DB_SQLITE_H
-#define _DB_SQLITE_H
+#ifndef _LIBAMANITA_SQLITE_ASQLITE_H
+#define _LIBAMANITA_SQLITE_ASQLITE_H
 
-#include <libamanita/sqlite/ResultSet.h>
+#include <libamanita/sqlite/aResultset.h>
 
 
 struct sqlite3;
 
 
-class SQLite {
+class aSQLite {
 private:
 	char file[256];
 	sqlite3 *db;
@@ -19,15 +19,15 @@ private:
 	void error(int msg,char *err);
 
 public:
-	SQLite(const char *path,const char *nm=0);
-	~SQLite();
+	aSQLite(const char *path,const char *nm=0);
+	~aSQLite();
 
 	void exec(const char *sql);
 	void execf(const char *sql, ...);
-	void query(ResultSet &rs,const char *sql);
-	void queryf(ResultSet &rs,const char *sql, ...);
+	void query(aResultset &rs,const char *sql);
+	void queryf(aResultset &rs,const char *sql, ...);
 	long long lastInsertID();
 };
 
 
-#endif
+#endif /* _LIBAMANITA_SQLITE_ASQLITE_H */

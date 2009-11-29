@@ -5,7 +5,7 @@
 #include <string.h>
 #include <time.h>
 #include <inttypes.h>
-#include <libamanita/RegEx.h>
+#include <libamanita/aRegex.h>
 
 
 #define REGEX_RNDBR			'('
@@ -60,7 +60,7 @@ class REBlock {
 		static const char whitespace[];
 		static const char word[];
 
-		RegEx *re;
+		aRegex *re;
 		char brack;
 		recode *code;
 		uint32_t *chars;
@@ -68,7 +68,7 @@ class REBlock {
 		unsigned short min,max;
 		REBlock *prev,*next,*last,*first,*onmatch,*onfail;
 
-		REBlock(RegEx *re,REBlock *prev,uint32_t pos,uint32_t f=0,char br=0);
+		REBlock(aRegex *re,REBlock *prev,uint32_t pos,uint32_t f=0,char br=0);
 		~REBlock();
 
 		void setFlags(uint32_t m,unsigned short min,unsigned short max);
@@ -84,7 +84,7 @@ class REBlock {
 const char REBlock::whitespace[] = " \n\t\r\f\v";
 const char REBlock::word[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
 
-REBlock::REBlock(RegEx *re,REBlock *prev,uint32_t pos,uint32_t f,char br)
+REBlock::REBlock(aRegex *re,REBlock *prev,uint32_t pos,uint32_t f,char br)
 		: re(re),brack(br),code(NULL),chars(NULL),depth(0),ref(0),pos(pos),len(0),flags(f),min(1),max(1),
 			prev(prev),next(NULL),last(NULL),first(NULL),onmatch(NULL),onfail(NULL) {
 	if(prev!=NULL) prev->next = this;
@@ -137,9 +137,9 @@ void REBlock::compile(const char *exp) {
 					case 'S':q.f = REGEX_SPACE|REGEX_NOT;break;
 					case 'x':
 					case 'X':
-						if(RegEx::isHex(exp[i+1])) {
-							q.c = RegEx::fromHex(exp[++i]),q.f |= REGEX_CHAR;
-							if(RegEx::isHex(exp[i+1])) q.c = (q.c<<4)|RegEx::fromHex(exp[++i]);
+						if(aRegex::isHex(exp[i+1])) {
+							q.c = aRegex::fromHex(exp[++i]),q.f |= REGEX_CHAR;
+							if(aRegex::isHex(exp[i+1])) q.c = (q.c<<4)|aRegex::fromHex(exp[++i]);
 						}
 						break;
 					default:
@@ -168,9 +168,9 @@ void REBlock::compile(const char *exp) {
 			default:
 				if(brack==REGEX_SQRBR && i+2<len && exp[i+1]=='-') {
 					t = re->ic(exp[i+2]);
-					if((RegEx::isLower(c) && RegEx::isLower(t)) ||
-						(RegEx::isUpper(c) && RegEx::isUpper(t)) ||
-							(RegEx::isDigit(c) && RegEx::isDigit(t))) i += 2;
+					if((aRegex::isLower(c) && aRegex::isLower(t)) ||
+						(aRegex::isUpper(c) && aRegex::isUpper(t)) ||
+							(aRegex::isDigit(c) && aRegex::isDigit(t))) i += 2;
 					else break;
 //putchar('-');
 //putchar(b);
@@ -191,8 +191,8 @@ printf("q.c=%c,q.f=%08" PRIx32 "\n",q.c,q.f);
 				else if(c=='{') {
 printf("{\n");
 					q.f |= REGEX_LOOP|REGEX_MINMAX,q.min = 0,q.max = 0;
-					while(i<len-1 && RegEx::isDigit(c=exp[++i])) q.min = (q.min*10)+(c-'0');
-					if(c==',') while(i<len-1 && RegEx::isDigit(c=exp[++i])) q.max = (q.max*10)+(c-'0');
+					while(i<len-1 && aRegex::isDigit(c=exp[++i])) q.min = (q.min*10)+(c-'0');
+					if(c==',') while(i<len-1 && aRegex::isDigit(c=exp[++i])) q.max = (q.max*10)+(c-'0');
 					else q.max = q.min;
 					if(c!='}') q.f = 0,q.min = 1,q.max = 1;
 				} else c = '\0',--i;
@@ -204,11 +204,11 @@ printf("{\n");
 				if((b=q.c)) chars[b>>5] |= 1<<(b&31);
 				else if(q.f&REGEX_NOT) {
 					if(q.f&REGEX_WORD) for(b=0; b<=0xff; b++) {
-						if(!RegEx::isWord(b)) chars[b>>5] |= 1<<(b&31);
+						if(!aRegex::isWord(b)) chars[b>>5] |= 1<<(b&31);
 					} else if(q.f&REGEX_DIGIT) for(b=0; b<=0xff; b++) {
-						if(!RegEx::isDigit(b)) chars[b>>5] |= 1<<(b&31);
+						if(!aRegex::isDigit(b)) chars[b>>5] |= 1<<(b&31);
 					} else if(q.f&REGEX_SPACE) for(b=0; b<=0xff; b++) {
-						if(!RegEx::isSpace(b)) chars[b>>5] |= 1<<(b&31);
+						if(!aRegex::isSpace(b)) chars[b>>5] |= 1<<(b&31);
 					}
 				}
 				else if(q.f&REGEX_WORD) for(j=0; (b=word[j]); j++) chars[b>>5] |= 1<<(b&31);
@@ -239,20 +239,20 @@ bool REBlock::test(char c0,char c1,char c2,uint32_t i) {
 		if(brack==REGEX_RNDBR) for(recode q; i<len; i++) {
 			q = code[i],n = (q.f&REGEX_NOT)? 1 : 0;
 			if(c1 && c1==q.c) return true;
-			else if(q.f&REGEX_ANY) return ((re->mod&REGEX_DOTALL) || !RegEx::isBreak(c1));
-			else if(q.f&REGEX_WORD) return (RegEx::isWord(c1)^n);
-			else if(q.f&REGEX_DIGIT) return (RegEx::isDigit(c1)^n);
-			else if(q.f&REGEX_SPACE) return (RegEx::isSpace(c1)^n);
+			else if(q.f&REGEX_ANY) return ((re->mod&REGEX_DOTALL) || !aRegex::isBreak(c1));
+			else if(q.f&REGEX_WORD) return (aRegex::isWord(c1)^n);
+			else if(q.f&REGEX_DIGIT) return (aRegex::isDigit(c1)^n);
+			else if(q.f&REGEX_SPACE) return (aRegex::isSpace(c1)^n);
 			else if(q.f&REGEX_STRING_B) return (c0=='\0');
-			else if(q.f&REGEX_STRING_E) return (c1=='\0' || ((q.f&REGEX_LINE_E) && RegEx::isBreak(c1) && c2=='\0'));
-			else if(q.f&REGEX_LINE_BML) return (c0=='\0' || RegEx::isBreak(c0));
-			else if(q.f&REGEX_LINE_EML) return (c1=='\0' || RegEx::isBreak(c1));
+			else if(q.f&REGEX_STRING_E) return (c1=='\0' || ((q.f&REGEX_LINE_E) && aRegex::isBreak(c1) && c2=='\0'));
+			else if(q.f&REGEX_LINE_BML) return (c0=='\0' || aRegex::isBreak(c0));
+			else if(q.f&REGEX_LINE_EML) return (c1=='\0' || aRegex::isBreak(c1));
 			else if(q.f&REGEX_WORD_B) {
 				if(q.f&REGEX_WORD_E)
-					return (((c0=='\0' || RegEx::isSpace(c0))^n) || ((c1=='\0' || RegEx::isSpace(c1))^n));
-				return ((c0=='\0' || RegEx::isSpace(c0))^n);
+					return (((c0=='\0' || aRegex::isSpace(c0))^n) || ((c1=='\0' || aRegex::isSpace(c1))^n));
+				return ((c0=='\0' || aRegex::isSpace(c0))^n);
 			}
-			else if(q.f&REGEX_WORD_E) return ((c1=='\0' || RegEx::isSpace(c1))^n);
+			else if(q.f&REGEX_WORD_E) return ((c1=='\0' || aRegex::isSpace(c1))^n);
 			else if((!i && (flags&REGEX_SKIP)) || !(q.f&REGEX_SKIP) || i==len)
 				return onfail!=NULL && onfail->test(c0,c1,c2,0);
 		}
@@ -266,19 +266,19 @@ bool REBlock::test(char c0,char c1,char c2,uint32_t i) {
 
 class REMatch {
 	public:
-		RegEx *re;
+		aRegex *re;
 		char *match,**brs;
 		uint32_t pos,len,*brslen,nbrs;
 		REMatch *next;
 
-		REMatch(RegEx *re,REMatch *prev,const char *m,uint32_t p,uint32_t len);
+		REMatch(aRegex *re,REMatch *prev,const char *m,uint32_t p,uint32_t len);
 		~REMatch();
 
 		void backrefs(const char *t,uint32_t *r,uint32_t l);
 		int backrefsLength(uint32_t *r);
 };
 
-REMatch::REMatch(RegEx *re,REMatch *prev,const char *m,uint32_t p,uint32_t len)
+REMatch::REMatch(aRegex *re,REMatch *prev,const char *m,uint32_t p,uint32_t len)
 		: re(re),brs(NULL),pos(p),len(len),brslen(NULL),nbrs(0),next(NULL) {
 	match = (char *)malloc(len+1);
 	memcpy(match,m,len);
@@ -329,23 +329,23 @@ int REMatch::backrefsLength(uint32_t *r) {
 
 
 
-RegEx::RegEx() : mod(0),depth(1),found(0),refs(0),size(0),
+aRegex::aRegex() : mod(0),depth(1),found(0),refs(0),size(0),
 		exp(NULL),mods(NULL),data(NULL),strings(NULL),text(NULL),blocks(NULL),hits(NULL),list(NULL) {
 }
 
-RegEx::~RegEx() {
+aRegex::~aRegex() {
 	if(data!=NULL) { free(data);data = NULL; }
 	clear();
 }
 
-void RegEx::clearBlocks() {
+void aRegex::clearBlocks() {
 	if(exp!=NULL) { free(exp);exp = NULL; }
 	if(mods!=NULL) { free(mods);mods = NULL; }
 	if(blocks!=NULL) { delete blocks;blocks = NULL; }
 	mod = 0,flags = REGEX_BACKREFS,refs = 0;
 };
 
-void RegEx::clearMatches() {
+void aRegex::clearMatches() {
 	if(strings!=NULL) { free(strings);strings = NULL; }
 	if(found>0) {
 		for(uint32_t i=0; i<found; i++) {
@@ -358,7 +358,7 @@ void RegEx::clearMatches() {
 };
 
 
-int RegEx::compile(const char *e,const char *m) {
+int aRegex::compile(const char *e,const char *m) {
 printf("Compiling...\n");
 	if(e==NULL) return 0; // If e==NULL use previous compiled code. Ignore if m is set.
 	clear();
@@ -555,7 +555,7 @@ bl=%p,p=%lu,i=%d,l=%d,a=%d,loops=%d,s=%d\n",stn,st.bl,st.p,st.i,st.l,st.a,st.loo
 #endif
 
 
-int RegEx::search(const char *t) {
+int aRegex::search(const char *t) {
 printf("Searching...\n");
 PRINTF("sizeof(blockstack)=%d\n",sizeof(blockstack));
 	if(t!=NULL) setText(t);
@@ -796,7 +796,7 @@ printf("\nSearch done in %" PRIu64 " (%" PRIu64 ",%" PRIu64 ") ticks, matches fo
 }
 
 
-const char *RegEx::replace(const char *t,const char *r) {
+const char *aRegex::replace(const char *t,const char *r) {
 	if(search(t)>0 && r!=NULL) {
 printf("\nReplace: %s\n",r);
 		uint32_t sz = size,i,n,br[10],l;
@@ -838,16 +838,16 @@ printf("Match: %s (len=%" PRIu32 ")\n",m->match,m->len);
 	return text;
 }
 
-int RegEx::match(const char *t,const char *e,const char *m) {
+int aRegex::match(const char *t,const char *e,const char *m) {
 	return compile(e,m)? search(t) : 0;
 }
 
-const char *RegEx::replace(const char *t,const char *e,const char *r,const char *m) {
+const char *aRegex::replace(const char *t,const char *e,const char *r,const char *m) {
 	return compile(e,m)? replace(t,r) : NULL;
 }
 
 
-void RegEx::print() {
+void aRegex::print() {
 	if(blocks==NULL) return;
 	REBlock *bl = blocks;
 	uint32_t i,j,c,m,n;
@@ -935,17 +935,17 @@ void RegEx::print() {
 	printf("\n\n");
 }
 
-void RegEx::setText(const char *t) { text = t,size = strlen(text); }
+void aRegex::setText(const char *t) { text = t,size = strlen(text); }
 
-const char **RegEx::getMatches() {
+const char **aRegex::getMatches() {
 	return found? (const char **)(strings? strings : &hits->match) : &blank;
 }
 
-const char *RegEx::getMatch(int n) {
+const char *aRegex::getMatch(int n) {
 	return found? (const char *)(strings? strings[n] : hits->match) : blank;
 }
 
-const char *RegEx::getBackRef(int n,int r) {
+const char *aRegex::getBackRef(int n,int r) {
 	return n>=0 && (uint32_t)n<found && r>=0 && (uint32_t)r<refs && list[n]->brs[r]?
          (const char *)list[n]->brs[r] : blank;
 }

@@ -2,31 +2,31 @@
 #include "config.h"
 #include <stdlib.h>
 #include <string.h>
-#include <libamanita/Word.h>
-#include <libamanita/Random.h>
+#include <libamanita/aWord.h>
+#include <libamanita/aRandom.h>
 
 
-const char *Word::vowels = "aaaaaeeeeeiiiiooouuuyy";
-const char *Word::vowels2 = "aaaaaeeeeeiiiiooouuu";
-const char *Word::consonants = "bbbccdddffggghjjkkkllmmmnnnpppqrrrsssstttvvvwxz";
-const char *Word::consonants2 = "bbbdddffgggkkkllmmmnnnppprrrsssstttvv";
-const char *Word::singles = "chqwxz";
-const char *Word::doubles = "bdfglmnprstaei";
-const char *Word::unaccepted = "bk,bm,bp,bv,dk,fv,gf,gk,kg,pb,pk,pm,pv,sb,tb,td";
+const char *aWord::vowels = "aaaaaeeeeeiiiiooouuuyy";
+const char *aWord::vowels2 = "aaaaaeeeeeiiiiooouuu";
+const char *aWord::consonants = "bbbccdddffggghjjkkkllmmmnnnpppqrrrsssstttvvvwxz";
+const char *aWord::consonants2 = "bbbdddffgggkkkllmmmnnnppprrrsssstttvv";
+const char *aWord::singles = "chqwxz";
+const char *aWord::doubles = "bdfglmnprstaei";
+const char *aWord::unaccepted = "bk,bm,bp,bv,dk,fv,gf,gk,kg,pb,pk,pm,pv,sb,tb,td";
 
 
-Word::Word(const char *v,const char *v2,const char *c,const char *c2,const char *s,const char *d,const char *u) {
-	vl = strlen(this->v=strdup(v? v : Word::vowels));
-	v2l = strlen(this->v2=strdup(v2? v2 : Word::vowels2));
-	cl = strlen(this->c=strdup(c? c : Word::consonants));
-	c2l = strlen(this->c2=strdup(c2? c2 : Word::consonants2));
-	sl = strlen(this->s=strdup(s? s : Word::singles));
-	dl = strlen(this->d=strdup(d? d : Word::doubles));
-	ul = strlen(this->u=strdup(u? u : Word::unaccepted));
+aWord::aWord(const char *v,const char *v2,const char *c,const char *c2,const char *s,const char *d,const char *u) {
+	vl = strlen(this->v=strdup(v? v : aWord::vowels));
+	v2l = strlen(this->v2=strdup(v2? v2 : aWord::vowels2));
+	cl = strlen(this->c=strdup(c? c : aWord::consonants));
+	c2l = strlen(this->c2=strdup(c2? c2 : aWord::consonants2));
+	sl = strlen(this->s=strdup(s? s : aWord::singles));
+	dl = strlen(this->d=strdup(d? d : aWord::doubles));
+	ul = strlen(this->u=strdup(u? u : aWord::unaccepted));
 	rnd = &::rnd,str = 0,len = 0;
 }
 
-Word::~Word() {
+aWord::~aWord() {
 	free(v);
 	free(v2);
 	free(c);
@@ -39,12 +39,12 @@ Word::~Word() {
 	v = 0,v2 = 0,c = 0,c2 = 0,s = 0,d = 0,u = 0,rnd = 0,str = 0,len = 0;
 }
 
-void Word::setSeed(unsigned int n) {
-	if(rnd==&::rnd) rnd = new Random(n);
+void aWord::setSeed(unsigned int n) {
+	if(rnd==&::rnd) rnd = new aRandom(n);
 	else rnd->setSeed(n);
 }
 
-char *Word::generate(int minlen,int maxlen) {
+char *aWord::generate(int minlen,int maxlen) {
 	size_t l = minlen+(minlen>=maxlen? 0 : rnd->uint32(maxlen-minlen));
 	size_t i = 0,n = 0,r = rnd->uint32(2),a = 0;
 	if(l>len) {

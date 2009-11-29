@@ -1,30 +1,30 @@
-#ifndef _LIBAMANITA_GUI_BUTTON_H
-#define _LIBAMANITA_GUI_BUTTON_H
+#ifndef _LIBAMANITA_SDL_ABUTTON_H
+#define _LIBAMANITA_SDL_ABUTTON_H
 
-#include <libamanita/gui/Component.h>
+#include <libamanita/sdl/aComponent.h>
 
 enum {
-	COM_ID_CLOSE			= 0x00008021,		// Close Button ID, for Window class
-	COM_ID_UP				= 0x00008031,		// Up Button, for Scroll
-	COM_ID_DOWN				= 0x00008032,		// Down Button, for Scroll
-	COM_ID_LEFT				= 0x00008033,		// Left Button, for Scroll
-	COM_ID_RIGHT			= 0x00008034,		// Right Button, for Scroll
-	COM_ID_YES				= 0x00008051,		// Yes Button,for TextBox
-	COM_ID_NO				= 0x00008052,		// No Button,for TextBox
-	COM_ID_OK				= 0x00008053,		// OK Button,for TextBox
-	COM_ID_CANCEL			= 0x00008054,		// Cancel Button,for TextBox
+	COM_ID_CLOSE			= 0x00008021,		// Close aButton ID, for aWindow class
+	COM_ID_UP				= 0x00008031,		// Up aButton, for aScroll
+	COM_ID_DOWN				= 0x00008032,		// Down aButton, for aScroll
+	COM_ID_LEFT				= 0x00008033,		// Left aButton, for aScroll
+	COM_ID_RIGHT			= 0x00008034,		// Right aButton, for aScroll
+	COM_ID_YES				= 0x00008051,		// Yes aButton,for aTextbox
+	COM_ID_NO				= 0x00008052,		// No aButton,for aTextbox
+	COM_ID_OK				= 0x00008053,		// OK aButton,for aTextbox
+	COM_ID_CANCEL			= 0x00008054,		// Cancel aButton,for aTextbox
 };
 
-class Image;
-class Font;
+class aImage;
+class aFont;
 
-class Button : public Component,public MouseListener {
-RttiObjectInstance(Button)
+class aButton : public aComponent,public aMouseListener {
+RttiObjectInstance(aButton)
 
 private:
 	struct _settings {
-		Image *img;
-		Font *font;
+		aImage *img;
+		aFont *font;
 		struct state {
 			SDL_Rect *tl,*t,*tr,*l,*r,*bl,*b,*br,*c;
 		} st[4];
@@ -33,23 +33,23 @@ private:
 
 	struct button {
 		struct icon {
-			Image *img;
+			aImage *img;
 			short index;
 		} ic;
-		char *text,align;		// Text and textalign
-		short tw,tx,ty;		// Text width and text coordinates
-		Font *font;				// Text font
-		SDL_Rect ins;			// Text insets
+		char *text,align;		// aText and textalign
+		short tw,tx,ty;		// aText width and text coordinates
+		aFont *font;				// aText font
+		SDL_Rect ins;			// aText insets
 	} bt;
 
 public:
-	Button(int id,int x=0,int y=0,int w=0,int h=0);
-	Button(Button &b);
-	virtual ~Button();
+	aButton(int id,int x=0,int y=0,int w=0,int h=0);
+	aButton(aButton &b);
+	virtual ~aButton();
 
 	/**
-	 * Image *img - The image should contain all the buttonimages mapped on the same image
-	 * Font *f - Default font used for buttontext
+	 * aImage *img - The image should contain all the buttonimages mapped on the same image
+	 * aFont *f - Default font used for buttontext
 	 * Uint32 data[35] - The array should be mapped as follows:
 	 *  0 = Top left corner, plain
 	 *  1 = Top border, plain
@@ -88,17 +88,17 @@ public:
 	 * 34 = Bottom right corner, disabled
 	 * 35 = Center Background, disabled
 	 */
-	static void setDefaultSettings(Image *img,Font *f,Uint32 data[36]);
+	static void setDefaultSettings(aImage *img,aFont *f,Uint32 data[36]);
 
-	void setIcon(Image *i,int n=0) { bt.ic.img = i,bt.ic.index = n; }
+	void setIcon(aImage *i,int n=0) { bt.ic.img = i,bt.ic.index = n; }
 	void setText(const char *text);
 	const char *getText() { return bt.text; }
-	void setFont(Font *font);
+	void setFont(aFont *font);
 	void setTextAlign(int align);
 	void setInsets(int l,int t,int r,int b);
 	void paint(time_t time);
-	bool mouseUp(MouseEvent &me);
+	bool mouseUp(aMouseEvent &me);
 };
 
 
-#endif /* _LIBAMANITA_GUI_BUTTON_H */
+#endif /* _LIBAMANITA_SDL_ABUTTON_H */

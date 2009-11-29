@@ -1,66 +1,66 @@
 
 #include "../config.h"
-#include <libamanita/gui/TextField.h>
-#include <libamanita/gui/TextBox.h>
-#include <libamanita/gui/Button.h>
-#include <libamanita/gui/Display.h>
+#include <libamanita/sdl/aTextfield.h>
+#include <libamanita/sdl/aTextbox.h>
+#include <libamanita/sdl/aButton.h>
+#include <libamanita/sdl/aDisplay.h>
 
 
 
-RttiObjectInheritance(TextBox,Window);
+RttiObjectInheritance(aTextbox,aWindow);
 
 
-char TextBox::yes[16];
-char TextBox::no[16];
-char TextBox::ok[16];
-char TextBox::cancel[16];
+char aTextbox::yes[16];
+char aTextbox::no[16];
+char aTextbox::ok[16];
+char aTextbox::cancel[16];
 
 
-TextBox::TextBox(int w,int h,const char *msg,unsigned int st,Font *font) : Window(0,0,w,h,CLOSE_BUTTON) {
+aTextbox::aTextbox(int w,int h,const char *msg,unsigned int st,aFont *font) : aWindow(0,0,w,h,CLOSE_BUTTON) {
 	moveToCenter();
 	setModal(true);
 	style = st;
-	Button *b;
+	aButton *b;
 	int buttons = st==TEXTBOX_YES_NO || st==TEXTBOX_OK_CANCEL? 2 : 1;
-	b = new Button(st==TEXTBOX_YES || st==TEXTBOX_YES_NO? COM_ID_YES : COM_ID_OK);
+	b = new aButton(st==TEXTBOX_YES || st==TEXTBOX_YES_NO? COM_ID_YES : COM_ID_OK);
 	if(buttons==2) b->setBounds(w/2-63,h-fr.b->h-25,60,20);
 	else b->setBounds(w/2-60,h-fr.b->h-25,60,20);
 	b->setText(st==TEXTBOX_YES || st==TEXTBOX_YES_NO? yes : ok);
 	b->setActionListener(this);
 	add(b);
 	if(buttons==2) {
-		b = new Button(st==TEXTBOX_YES_NO? COM_ID_NO : COM_ID_CANCEL);
+		b = new aButton(st==TEXTBOX_YES_NO? COM_ID_NO : COM_ID_CANCEL);
 		b->setBounds(w/2+3,h-fr.b->h-25,60,20);
 		b->setText(st==TEXTBOX_YES_NO? no : cancel);
 		b->setActionListener(this);
 		add(b);
 	}
-	TextField *label = new TextField(5+fr.l->w,5+fr.t->h,w-10-fr.l->w-fr.r->w,h-10-fr.t->h-fr.b->h-b->getHeight(),msg);
+	aTextfield *label = new aTextfield(5+fr.l->w,5+fr.t->h,w-10-fr.l->w-fr.r->w,h-10-fr.t->h-fr.b->h-b->getHeight(),msg);
 	label->setTextAlign(ALIGN_CENTER|ALIGN_MIDDLE);
 	label->setFont(font);
 	label->setEnabled(false);
 	add(label);
 }
 
-void TextBox::showMessage(const char *msg,unsigned int st,ActionListener *al,Font *font) {
-	TextBox *m = new TextBox(240,120,msg,st,font);
+void aTextbox::showMessage(const char *msg,unsigned int st,aActionListener *al,aFont *font) {
+	aTextbox *m = new aTextbox(240,120,msg,st,font);
 	m->setLocked(true);
 	m->setActionListener(al);
-	Display::getActiveDisplay()->add(m);
+	aDisplay::getActiveDisplay()->add(m);
 	m->show();
 }
 
-void TextBox::hideMessage(TextBox *m,int id) {
+void aTextbox::hideMessage(aTextbox *m,int id) {
 	m->hide();
-	Display::getActiveDisplay()->remove(m);
+	aDisplay::getActiveDisplay()->remove(m);
 	if(m->actionListener) {
-		ActionEvent ae = { m,id };
+		aActionEvent ae = { m,id };
 		m->actionListener->actionPerformed(ae);
 	}
 	delete m;
 }
 
-bool TextBox::keyDown(KeyEvent &ke) {
+bool aTextbox::keyDown(aKeyEvent &ke) {
 	switch(ke.sym) {
 		case SDLK_ESCAPE:
 			if(style==TEXTBOX_YES_NO || style==TEXTBOX_OK_CANCEL) {
@@ -73,7 +73,7 @@ bool TextBox::keyDown(KeyEvent &ke) {
 	return true;
 }
 
-bool TextBox::actionPerformed(ActionEvent &ae) {
+bool aTextbox::actionPerformed(aActionEvent &ae) {
 	hideMessage(this,ae.source->getID());
 	return true;
 }

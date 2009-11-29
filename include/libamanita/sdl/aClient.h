@@ -1,11 +1,11 @@
-#ifndef _LIBAMANITA_SDL_CLIENT_H
-#define _LIBAMANITA_SDL_CLIENT_H
+#ifndef _LIBAMANITA_SDL_ACLIENT_H
+#define _LIBAMANITA_SDL_ACLIENT_H
 
-#include <libamanita/sdl/Socket.h>
+#include <libamanita/sdl/aSocket.h>
 
 
 
-class Client : public Socket {
+class aClient : public aSocket {
 private:
 	uint32_t id;
 	char *nick;
@@ -14,12 +14,12 @@ private:
 	int keylen;
 #endif /*TCPSOCK_NOCIPHER*/
 
-	static int _run(void *p) { ((Client *)p)->run();return 0; }
+	static int _run(void *p) { ((aClient *)p)->run();return 0; }
 	void run();
 
 public:
-	Client(SocketListener l,uint32_t id=0,const char *nick=0);
-	~Client();
+	aClient(SocketListener l,uint32_t id=0,const char *nick=0);
+	~aClient();
 
 	bool start(const char *con);
 	bool start(const char *host,uint16_t port);
@@ -36,5 +36,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_CLIENT_H */
+#endif /* _LIBAMANITA_SDL_ACLIENT_H */
 

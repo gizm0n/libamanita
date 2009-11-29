@@ -1,5 +1,10 @@
+#ifndef _CONFIG_H
+#define _CONFIG_H
 
-#include "../config.h"
+
+#ifdef __linux__
+#	include "../config.h"
+#endif
 
 
 #ifndef HAVE_STRNICMP
@@ -27,3 +32,8 @@
 #	endif
 #		define PRIlf		"L"
 #endif
+
+
+#endif /* _CONFIG_H */
+
+

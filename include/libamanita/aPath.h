@@ -1,5 +1,5 @@
-#ifndef _LIBAMANITA_PATH_H
-#define _LIBAMANITA_PATH_H
+#ifndef _LIBAMANITA_APATH_H
+#define _LIBAMANITA_APATH_H
 
 #include <stdio.h>
 
@@ -13,8 +13,8 @@ enum {
 };
 
 
-class Trail {
-friend class Path;
+class aTrail {
+friend class aPath;
 
 protected:
 	struct trailstep {
@@ -24,8 +24,8 @@ protected:
 	size_t ind,len;
 
 public:
-	Trail();
-	~Trail();
+	aTrail();
+	~aTrail();
 
 	int getX() const { return ind<len? trail[ind].x : -1; }
 	int getY() const { return ind<len? trail[ind].y : -1; }
@@ -42,7 +42,7 @@ public:
 };
 
 
-class Path {
+class aPath {
 protected:
 	struct node {
 		unsigned short key;
@@ -50,8 +50,8 @@ protected:
 		node *parent,*open,*closed;
 
 		node(int x,int y,int g,int h,node *p)
-			: x(x),y(y),g(g),h(h),f(g+h),parent(p),open(0),closed(0) { key = (x<<8)|y,s = p? p->s+1 : 0,Path::created++; }
-		~node() { Path::deleted++; }
+			: x(x),y(y),g(g),h(h),f(g+h),parent(p),open(0),closed(0) { key = (x<<8)|y,s = p? p->s+1 : 0,aPath::created++; }
+		~node() { aPath::deleted++; }
 	};
 
 	int width,height,style;
@@ -62,11 +62,11 @@ protected:
 	int (*areacmp)(int,int,int,int,void *);
 	int (*terraintype)(int,int,void *);
 	int (*movecost)(int,int,int,void *,void *);
-	void (*move)(Path &,int,int,int &,int &,int);
+	void (*move)(aPath &,int,int,int &,int &,int);
 
 	int getHeuristic(int x1,int y1,int x2,int y2,int n);
 	int getDir(int x1,int y1,int x2,int y2);
-	static void moveIso(Path &p,int x1,int y1,int &x2,int &y2,int dir);
+	static void moveIso(aPath &p,int x1,int y1,int &x2,int &y2,int dir);
 
 	void put(node *n);
 	node *get(unsigned short key);
@@ -79,16 +79,16 @@ protected:
 public:
 	static int created,deleted;
 
-	Path(int w,int h,int s,void *m,void *o,
+	aPath(int w,int h,int s,void *m,void *o,
 			int (*a)(int,int,int,int,void *),
 			int (*t)(int,int,void *),
 			int (*c)(int,int,int,void *,void *));
-	~Path();
-	Trail *search(int x1,int y1,int x2,int y2,int l=0);
+	~aPath();
+	aTrail *search(int x1,int y1,int x2,int y2,int l=0);
 };
 
 
 
 
-#endif /* _LIBAMANITA_PATH_H */
+#endif /* _LIBAMANITA_APATH_H */
 

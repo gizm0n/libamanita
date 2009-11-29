@@ -3,36 +3,36 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
-#include <libamanita/sdl/Font.h>
-#include <libamanita/gui/Window.h>
-#include <libamanita/gui/Button.h>
-#include <libamanita/gui/IconButton.h>
-#include <libamanita/gui/ToolTip.h>
+#include <libamanita/sdl/aFont.h>
+#include <libamanita/sdl/aWindow.h>
+#include <libamanita/sdl/aButton.h>
+#include <libamanita/sdl/aIconButton.h>
+#include <libamanita/sdl/aTooltip.h>
 
 
-RttiObjectInheritance(Window,Component);
+RttiObjectInheritance(aWindow,aComponent);
 
 
 extern char indent[32];
 
 
-Window::_settings Window::_s = { 0 };
+aWindow::_settings aWindow::_s = { 0 };
 
 
-Window::Window(int x,int y,int w,int h,int st)
-		: Component(x,y,w,h),style(0),bgimg(0),cb(0),tcap(0),bcap(0),tf(0),bf(0) {
-	Component::setLocked(false);
+aWindow::aWindow(int x,int y,int w,int h,int st)
+		: aComponent(x,y,w,h),style(0),bgimg(0),cb(0),tcap(0),bcap(0),tf(0),bf(0) {
+	aComponent::setLocked(false);
 	setFocusListener(this);
 	setMouseListener(this);
 	setStyle(st);
 	bgimg = _s.bgimg,bgindex = _s.bgindex,bgcol = _s.bgcol;
 }
 
-Window::~Window() {
-fprintf(stderr,"%sDialog::~Window()\n",indent);
+aWindow::~aWindow() {
+fprintf(stderr,"%sDialog::~aWindow()\n",indent);
 }
 
-void Window::setDefaultSettings(Image *img,Image *bgimg,Font *f,Uint32 data[21]) {
+void aWindow::setDefaultSettings(aImage *img,aImage *bgimg,aFont *f,Uint32 data[21]) {
 	_s = (_settings){
 		img,bgimg,data[0],data[0],f,
 		{
@@ -46,19 +46,19 @@ void Window::setDefaultSettings(Image *img,Image *bgimg,Font *f,Uint32 data[21])
 	};
 }
 
-void Window::setStyle(int st) {
+void aWindow::setStyle(int st) {
 	fr = _s.fr;
 	if(st&TOP_CAPTION) fr.tl = _s.cap.tl,fr.t = _s.cap.t,fr.tr = _s.cap.tr;
 	if(st&BOTTOM_CAPTION) fr.bl = _s.cap.bl,fr.b = _s.cap.b,fr.br = _s.cap.br;
 	if(st&CLOSE_BUTTON) {
 		if(!cb) {
-			cb = new IconButton(COM_ID_CLOSE);
+			cb = new aIconButton(COM_ID_CLOSE);
 			cb->setImage(_s.img,_s.cb.plain,_s.cb.active,_s.cb.down,_s.cb.disabled);
 			cb->setLocation(getWidth()-_s.cb.x-cb->getWidth(),_s.cb.y);
 			cb->setActionListener(this);
-			cb->setToolTip(new ToolTip("Close"));
+			cb->setToolTip(new aTooltip("Close"));
 			add(cb);
-fprintf(stderr,"Window::setDialogStyle(%p,instance=%" PRIx32 ",actionListener=%p)\n",cb,((Class &)*cb).getID(),cb->getActionListener());
+fprintf(stderr,"aWindow::setDialogStyle(%p,instance=%" PRIx32 ",actionListener=%p)\n",cb,((aClass &)*cb).getID(),cb->getActionListener());
 fflush(stderr);
 		}
 	} else if(cb) {
@@ -69,21 +69,21 @@ fflush(stderr);
 	style = st;
 }
 
-void Window::moveToCenter() {
+void aWindow::moveToCenter() {
 	setLocation((g.getScreenWidth()-getWidth())/2,(g.getScreenHeight()-getHeight())/2);
 }
 
-bool Window::mouseDown(MouseEvent &me) {
+bool aWindow::mouseDown(aMouseEvent &me) {
 	moveToTop();
 	return false;
 }
 
-bool Window::actionPerformed(ActionEvent &ae) {
+bool aWindow::actionPerformed(aActionEvent &ae) {
 	if(ae.source->getID()==COM_ID_CLOSE) { hide();return true; }
 	return false;
 }
 
-void Window::paint(time_t time) {
+void aWindow::paint(time_t time) {
 	if(isOpaque()) {
 		if(bgimg) bgimg->draw(getX()+fr.l->w,getY()+fr.t->h,getWidth()-fr.l->w-fr.r->w,getHeight()-fr.t->h-fr.b->h,bgindex);
 		else g.fillRect(getX()+fr.l->w,getY()+fr.t->h,getWidth()-fr.l->w-fr.r->w,getHeight()-fr.t->h-fr.b->h,g.mapRGB(bgcol));

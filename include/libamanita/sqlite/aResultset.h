@@ -1,30 +1,30 @@
-#ifndef _LIBAMANITA_SQLITE_RESULTSET_H
-#define _LIBAMANITA_SQLITE_RESULTSET_H
+#ifndef _LIBAMANITA_SQLITE_ARESULTSET_H
+#define _LIBAMANITA_SQLITE_ARESULTSET_H
 
 
-#include <libamanita/Vector.h>
-#include <libamanita/sqlite/Record.h>
+#include <libamanita/aVector.h>
+#include <libamanita/sqlite/aRecord.h>
 
 
-class SQLite;
+class aSQLite;
 
 
-class ResultSet : protected Vector {
+class aResultset : protected aVector {
 private:
-	SQLite *db;
-	Record *cols;
+	aSQLite *db;
+	aRecord *cols;
 
 public:
-	friend class SQLite;
+	friend class aSQLite;
 
-	ResultSet(int n=0) : Vector(n),db(0),cols(0) {}
-	~ResultSet();
+	aResultset(int n=0) : aVector(n),db(0),cols(0) {}
+	~aResultset();
 
-	Record *getCols() { return cols; }
+	aRecord *getCols() { return cols; }
 	size_t rows() { return size(); }
-	Record *getRow(size_t i) { return (Record *)(*this)[i]; }
+	aRecord *getRow(size_t i) { return (aRecord *)(*this)[i]; }
 };
 
 
-#endif /* _LIBAMANITA_SQLITE_RESULTSET_H */
+#endif /* _LIBAMANITA_SQLITE_ARESULTSET_H */
 

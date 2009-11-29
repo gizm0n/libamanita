@@ -1,11 +1,11 @@
-#ifndef _LIBAMANITA_MATH_H
-#define _LIBAMANITA_MATH_H
+#ifndef _LIBAMANITA_AMATH_H
+#define _LIBAMANITA_AMATH_H
 
 
 #include <stdlib.h>
 #include <stdint.h>
 
-class Math {
+class aMath {
 public:
 	static const double PI; /** < The PI constant 3.1415926535897932384626433832795 */
 	static const int prime[]; /** < The prime number serie from 2 to 499. */
@@ -57,7 +57,7 @@ public:
 
 	/** Extended Euclidean algorithm (Modular multiplicative inverse).
 	 * For finding the greatest common divisor (GCD) of integers a and b:
-	 * it also finds the integers x and y in Bézout's identity.
+	 * it also finds the integers x and y in BÃ©zout's identity.
 	 */
 	static long gcd(long a,long b,long &x,long &y);
 	static long long gcd(long long a,long long b,long long &x,long long &y);
@@ -88,5 +88,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_MATH_H */
+#endif /* _LIBAMANITA_AMATH_H */
 

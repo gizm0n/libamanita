@@ -3,23 +3,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <libamanita/sdl/Graphics.h>
-#include <libamanita/sdl/Text.h>
+#include <libamanita/sdl/aGraphics.h>
+#include <libamanita/sdl/aText.h>
 
 
 
-Text::Text(int w,int h,const char *str) {
+aText::aText(int w,int h,const char *str) {
 	text = 0,textLines = 0,width = w,height = h,maxLen = 0,drawing = false;
 	font = 0;
 	setText(str);
 }
 
-Text::~Text() {
+aText::~aText() {
 	if(text) { free(text);text = 0,textLen = 0; }
 	if(textLines) { delete[] textLines;textLines = 0,textLinesLen = 0; }
 }
 
-void Text::resizeText(int n) {
+void aText::resizeText(int n) {
 	while(drawing);
 	if(n<0xff) n = 0xff;
 	if((int)textCap<n) textCap = n;
@@ -34,14 +34,14 @@ void Text::resizeText(int n) {
 	}
 }
 
-void Text::resizeLines(int n) {
+void aText::resizeLines(int n) {
 	while(drawing);
 	if(n<0xff) n = 0xff;
 	if((int)textLinesCap<n) textLinesCap = n;
 	if(textLinesCap<1024) textLinesCap <<= 1;
 	else textLinesCap += 1024;
-	TextLine *t = new TextLine[textLinesCap];
-	memset(&t[textLinesLen],0,(textLinesCap-textLinesLen)*sizeof(TextLine));
+	text_line *t = new text_line[textLinesCap];
+	memset(&t[textLinesLen],0,(textLinesCap-textLinesLen)*sizeof(text_line));
 	if(textLines) {
 		for(unsigned int i=0; i<textLinesLen; i++) t[i] = textLines[i];
 		delete[] textLines;
@@ -49,7 +49,7 @@ void Text::resizeLines(int n) {
 	textLines = t;
 }
 
-void Text::leftShift(int n,int len) {
+void aText::leftShift(int n,int len) {
 	if(!len || !textLen) return;
 	if(n<len) len = n;
 	else if(n>(int)textLen) n = textLen;
@@ -58,7 +58,7 @@ void Text::leftShift(int n,int len) {
 	textLen -= len;
 }
 
-void Text::rightShift(int n,int len) {
+void aText::rightShift(int n,int len) {
 	if(!len) return;
 	if(textLen+len>=textCap) resizeText(len);
 	if(n>(int)textLen) n = textLen;
@@ -66,8 +66,8 @@ void Text::rightShift(int n,int len) {
 	textLen += len;
 }
 
-void Text::insert(char ch,int n) {
-fprintf(stderr,"Text::insert('%c',%d)\n",ch,n);
+void aText::insert(char ch,int n) {
+fprintf(stderr,"aText::insert('%c',%d)\n",ch,n);
 fflush(stderr);
 	if(maxLen && textLen>=maxLen) return;
 	if(n>=(int)textLen) n = textLen;
@@ -76,7 +76,7 @@ fflush(stderr);
 	arrange(n);
 }
 
-void Text::insert(const char *str,int n) {
+void aText::insert(const char *str,int n) {
 	if(!str || !*str) return;
 	if(n>=(int)textLen) n = textLen;
 	int l = strlen(str),i;
@@ -87,7 +87,7 @@ void Text::insert(const char *str,int n) {
 	arrange(n);
 }
 
-void Text::removeAll() {
+void aText::removeAll() {
 	while(drawing);
 	if(textLines) delete[] textLines;
 	if(text) free(text);
@@ -95,7 +95,7 @@ void Text::removeAll() {
 	caret = 0,caretLine = 0,select = 0,selectLine = 0,scroll = -1;
 }
 
-void Text::setText(const char *str) {
+void aText::setText(const char *str) {
 	while(drawing);
 	char *t = text;
 	if(textLines) delete[] textLines;
@@ -105,13 +105,13 @@ void Text::setText(const char *str) {
 	if(t) free(t);
 }
 
-int Text::findLine(int pos) {
+int aText::findLine(int pos) {
 	for(int i=textLinesLen-1; i>=0; i--) if(pos>=(int)textLines[i].pos) return i;
 	return 0;
 }
 
-void Text::arrange(int from) {
-//fprintf(stderr,"Text::arrange(from=%d,textLen=%d,width=%d)\n",from,textLen,width);
+void aText::arrange(int from) {
+//fprintf(stderr,"aText::arrange(from=%d,textLen=%d,width=%d)\n",from,textLen,width);
 //fflush(stderr);
 	if(!font || !width || !textLen) return;
 	short w = 0,len,i;
@@ -134,18 +134,18 @@ void Text::arrange(int from) {
 		}
 		if(l+1>=(int)textLinesCap) resizeLines(0);
 		textLines[l].length = len,textLines[l].width = w;
-//fprintf(stderr,"Text::arrange(line=%d,length=%d,width=%d,pos=%d)\n",l,textLines[l].length,textLines[l].width,p);
+//fprintf(stderr,"aText::arrange(line=%d,length=%d,width=%d,pos=%d)\n",l,textLines[l].length,textLines[l].width,p);
 //fflush(stderr);
 		p -= i-len;
 		textLines[++l].pos = p;
 		if(p>=(int)textLen) break;
 	}
 	textLinesLen = l;
-//fprintf(stderr,"Text::arrange(textLines=%d)\n",textLinesLen);
+//fprintf(stderr,"aText::arrange(textLines=%d)\n",textLinesLen);
 //fflush(stderr);
 }
 
-void Text::drawText(int x,int y,int a,bool showCaret) {
+void aText::drawText(int x,int y,int a,bool showCaret) {
 	if(!font) return;
 	drawing = true;
 	int i = 0;
@@ -165,7 +165,7 @@ void Text::drawText(int x,int y,int a,bool showCaret) {
 		unsigned char ch = 0;
 		for(; l<(int)textLinesLen && i+h<=(int)height; l++,i+=h) {
 			r.x = x,r.y = y+i;
-			TextLine &tl = textLines[l];
+			text_line &tl = textLines[l];
 			if(a&ALIGN_CENTER) r.x += (width-tl.width)>>1;
 			else if(a&ALIGN_RIGHT) r.x += (width-tl.width);
 			for(j=0,n=tl.pos; j<tl.length; j++,n++) {

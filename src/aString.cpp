@@ -4,27 +4,27 @@
 #include <stdlib.h>
 #include <math.h>
 #include <inttypes.h>
-#include <libamanita/String.h>
+#include <libamanita/aString.h>
 
 
-RttiObjectInheritance(String,Object);
+RttiObjectInheritance(aString,aObject);
 
 
-const char *String::blank = "";
+const char *aString::blank = "";
 
 #ifdef __linux__
-const char *String::endline = "\n";
+const char *aString::endline = "\n";
 #elif defined _WIN32
-const char *String::endline = "\r\n";
+const char *aString::endline = "\r\n";
 #endif
-const char *String::whitespace = " \t\n\r";
+const char *aString::whitespace = " \t\n\r";
 
 
-String::String(size_t c) : Object(),str(0),len(0),cap(0) {
+aString::aString(size_t c) : aObject(),str(0),len(0),cap(0) {
 	if(c>0) setCapacity(c);
 }
 
-String::String(const char *s,size_t l) : Object() {
+aString::aString(const char *s,size_t l) : aObject() {
 	if(s && *s) {
 		if(!l) len = strlen(s);
 		cap = len;
@@ -34,7 +34,7 @@ String::String(const char *s,size_t l) : Object() {
 	} else str = 0,len = 0,cap = 0;
 }
 
-String::String(String *s) : Object() {
+aString::aString(aString *s) : aObject() {
 	if(!s || !s->str) str = 0,len = 0,cap = 0;
 	else {
 		len = s->len,cap = s->cap,str = (char *)malloc(cap+1);
@@ -43,7 +43,7 @@ String::String(String *s) : Object() {
 	}
 }
 
-String::String(String &s) : Object() {
+aString::aString(aString &s) : aObject() {
 	if(!s.str) str = 0,len = 0,cap = 0;
 	else {
 		len = s.len,cap = s.cap,str = (char *)malloc(cap+1);
@@ -52,25 +52,25 @@ String::String(String &s) : Object() {
 	}
 }
 
-String::~String() {
+aString::~aString() {
 	::free(str);
 	str = 0,len = 0,cap = 0;
 }
 
-String &String::append(char c) {
+aString &aString::append(char c) {
 	if(len==cap) resize(0);
 	if(c!='\0') str[len++] = c;
 	str[len] = '\0';
 	return *this;
 }
-String &String::append(char c,size_t n) {
+aString &aString::append(char c,size_t n) {
 	resize(n);
 	while(n--) str[len++] = c;
 	str[len] = '\0';
 	return *this;
 }
 
-String &String::append(const char *s,size_t l) {
+aString &aString::append(const char *s,size_t l) {
 	if(s) {
 		if(!l) l = strlen(s);
 		resize(l);
@@ -80,7 +80,7 @@ String &String::append(const char *s,size_t l) {
 	}
 	return *this;
 }
-String &String::append(const char *s,size_t l,size_t n) {
+aString &aString::append(const char *s,size_t l,size_t n) {
 	if(s && n>0) {
 		if(!l) l = strlen(s);
 		resize(l*n);
@@ -94,7 +94,7 @@ String &String::append(const char *s,size_t l,size_t n) {
 }
 
 #if __WORDSIZE < 64
-String &String::appendi32(int32_t i) {
+aString &aString::appendi32(int32_t i) {
 	if(i==0) return append('0');
 	char s[13],*p = s+12,c = 0;
 	*p-- = '\0';
@@ -106,7 +106,7 @@ String &String::appendi32(int32_t i) {
 #endif
 
 #if __WORDSIZE < 64
-String &String::appendu32(uint32_t i) {
+aString &aString::appendu32(uint32_t i) {
 	if(i==0) return append('0');
 	char s[12],*p = s+11;
 	*p-- = '\0';
@@ -115,7 +115,7 @@ String &String::appendu32(uint32_t i) {
 }
 #endif
 
-String &String::appendi64(int64_t i) {
+aString &aString::appendi64(int64_t i) {
 	if(i==0) return append('0');
 	char s[22],*p = s+21,c = 0;
 	*p-- = '\0';
@@ -125,7 +125,7 @@ String &String::appendi64(int64_t i) {
 	return append(p+1);
 }
 
-String &String::appendu64(uint64_t i) {
+aString &aString::appendu64(uint64_t i) {
 	if(i==0) return append('0');
 	char s[21],*p = s+20;
 	*p-- = '\0';
@@ -133,7 +133,7 @@ String &String::appendu64(uint64_t i) {
 	return append(p+1);
 }
 
-String &String::append(int64_t i,int base) {
+aString &aString::append(int64_t i,int base) {
 	if(i==0) return append('0');
 	char s[22],*p = s+21,c = 0,n;
 	*p-- = '\0';
@@ -143,7 +143,7 @@ String &String::append(int64_t i,int base) {
 	return append(p+1);
 }
 
-String &String::append(double f,int n,char c) {
+aString &aString::append(double f,int n,char c) {
 	int64_t n1 = (int64_t)f;
 	uint32_t n2,m = 1;
 	if(n>10) n = 10;
@@ -152,7 +152,7 @@ String &String::append(double f,int n,char c) {
 	return append(n1).append(c).append(n2);
 }
 
-String &String::appendUntil(const char *s,const char *end,bool uesc) {
+aString &aString::appendUntil(const char *s,const char *end,bool uesc) {
 	if(!s || !*s) return *this;
 	char c;
 	while((c=*s++)) {
@@ -171,7 +171,7 @@ String &String::appendUntil(const char *s,const char *end,bool uesc) {
 }
 
 
-String &String::appendf(const char *f, ...) {
+aString &aString::appendf(const char *f, ...) {
 	va_list list;
 	va_start(list,f);
 	vappendf(f,list);
@@ -191,13 +191,13 @@ enum {
 	F_z				= 0x2000,
 };
 
-String &String::vappendf(const char *f,va_list list) {
+aString &aString::vappendf(const char *f,va_list list) {
 	if(!f || !*f) return *this;
 	int c;
 	uint32_t flags,*w,w1,w2,w2default,l;
 	char pad;
 	while(1) {
-fprintf(stderr,"String::vappendf(f=%s)\n",f);
+fprintf(stderr,"aString::vappendf(f=%s)\n",f);
 fflush(stderr);
 		while((c=*f++) && c!='%') {
 			if(len==cap) resize(0);
@@ -305,7 +305,7 @@ fflush(stderr);
 	return *this;
 }
 
-String &String::appendUntil(FILE *fp,const char *end,const char *trim,bool uesc) {
+aString &aString::appendUntil(FILE *fp,const char *end,const char *trim,bool uesc) {
 	if(!fp) return *this;
 	if(!trim) trim = end;
 	if(!end) {
@@ -320,7 +320,7 @@ String &String::appendUntil(FILE *fp,const char *end,const char *trim,bool uesc)
 	}
 	int c,c2 = -1,t = trim && *trim? 0 : 1;
 	unsigned long l2 = 0;
-//fprintf(stderr,"String::appendUntil: ");
+//fprintf(stderr,"aString::appendUntil: ");
 	while((c=fgetc(fp)) && c!=EOF) {
 //fputc(c,stderr);
 		if(uesc) {
@@ -371,14 +371,14 @@ String &String::appendUntil(FILE *fp,const char *end,const char *trim,bool uesc)
 	return *this;
 }
 
-String &String::include(const char *fn) {
+aString &aString::include(const char *fn) {
 	FILE *fp = fopen(fn,"r");
 	append(fp,true);
 	fclose(fp);
 	return *this;
 }
 
-String &String::includef(const char *format, ...) {
+aString &aString::includef(const char *format, ...) {
 	char buf[128];
 	va_list args;
    va_start(args,format);
@@ -387,7 +387,7 @@ String &String::includef(const char *format, ...) {
 	return include(buf);
 }
 
-String &String::print(FILE *fp) {
+aString &aString::print(FILE *fp) {
 	if(fp) {
 		size_t n;
 		n = fwrite(str,len,1,fp);
@@ -395,7 +395,7 @@ String &String::print(FILE *fp) {
 	return *this;
 }
 
-String &String::println(FILE *fp) {
+aString &aString::println(FILE *fp) {
 	if(fp) {
 		size_t n;
 		n = fwrite(str,len,1,fp);
@@ -404,7 +404,7 @@ String &String::println(FILE *fp) {
 	return *this;
 }
 
-void String::printUTF8(char *d,const char *s,size_t offset,size_t len) {
+void aString::printUTF8(char *d,const char *s,size_t offset,size_t len) {
 	char c;
 	size_t i,n;
 	if(offset) for(i=0; *s!='\0' && i<offset; i++) {
@@ -422,7 +422,7 @@ void String::printUTF8(char *d,const char *s,size_t offset,size_t len) {
 	*d = '\0';
 }
 
-long String::indexOf(const char *s,size_t l) {
+long aString::indexOf(const char *s,size_t l) {
 	if(str && *str && s && *s) {
 		if(!l) l = strlen(s);
 		for(size_t i=0,n=len-l; i<n; i++)
@@ -431,11 +431,11 @@ long String::indexOf(const char *s,size_t l) {
 	return -1;
 }
 
-bool String::startsWith(const char *s,size_t l) { return str && s? (strncmp(str,s,l? l : strlen(s))==0) : false; }
-bool String::equals(const char *s) { return str && s? strcmp(str,s)==0 : false; }
-int String::compare(const char *s) { return str && s? strcmp(str,s) : (str? -256 : 256); }
+bool aString::startsWith(const char *s,size_t l) { return str && s? (strncmp(str,s,l? l : strlen(s))==0) : false; }
+bool aString::equals(const char *s) { return str && s? strcmp(str,s)==0 : false; }
+int aString::compare(const char *s) { return str && s? strcmp(str,s) : (str? -256 : 256); }
 
-size_t String::count(const char *s) {
+size_t aString::count(const char *s) {
 	if(!s || !*s || !str || !len) return 0;
 	char *p = str;
 	size_t n = 0,sl = strlen(s);
@@ -443,7 +443,7 @@ size_t String::count(const char *s) {
 	return n;
 }
 
-size_t String::count(char c) {
+size_t aString::count(char c) {
 	if(c=='\0' || !str || !len) return 0;
 	char *p = str;
 	size_t n = 0;
@@ -451,7 +451,7 @@ size_t String::count(char c) {
 	return n;
 }
 
-String &String::replace(const char *s,const char *r) {
+aString &aString::replace(const char *s,const char *r) {
 	if(!s || !*s || !r) return *this;
 	size_t n;
 	n = count(s);
@@ -473,7 +473,7 @@ String &String::replace(const char *s,const char *r) {
 	return *this;
 }
 
-String &String::escape() {
+aString &aString::escape() {
 	if(str && len) {
 		size_t i,n = 0;
 		for(i=0; i<len; i++) if(isEscSpace(str[i])) n++;
@@ -491,7 +491,7 @@ String &String::escape() {
 	return *this;
 }
 
-String &String::unescape() {
+aString &aString::unescape() {
 	if(str && len) {
 		size_t i,n;
 		char c;
@@ -508,7 +508,7 @@ String &String::unescape() {
 	return *this;
 }
 
-String &String::quote(const char c) {
+aString &aString::quote(const char c) {
 	if(c && str && len) {
 		if(len+2>=cap) resize(0);
 		*str = c;
@@ -518,7 +518,7 @@ String &String::quote(const char c) {
 	return *this;
 }
 
-String &String::unquote() {
+aString &aString::unquote() {
 	if(str && len>1) {
 		char c = *str;
 		if((c=='"' || c=='\'') && str[len-1]==c) {
@@ -529,7 +529,7 @@ String &String::unquote() {
 	return *this;
 }
 
-String &String::encodeURL() {
+aString &aString::encodeURL() {
 	if(str && len) {
 		size_t i,n = 0;
 		for(i=0; i<len; i++) if(isURLEncoded(str[i]) && str[i]!=' ') n += 2;
@@ -551,7 +551,7 @@ String &String::encodeURL() {
 	return *this;
 }
 
-String &String::decodeURL() {
+aString &aString::decodeURL() {
 	if(str && len) {
 		size_t n = 0;
 		int c1,c2;
@@ -571,7 +571,7 @@ String &String::decodeURL() {
 	return *this;
 }
 
-String &String::encodeHTML() {
+aString &aString::encodeHTML() {
 	if(str && len) {
 		size_t i,n = 0;
 		const entity *e;
@@ -596,7 +596,7 @@ String &String::encodeHTML() {
 	return *this;
 }
 
-String &String::decodeHTML() {
+aString &aString::decodeHTML() {
 	if(str && len) {
 		size_t i,n = 0;
 		const entity *e;
@@ -629,13 +629,13 @@ String &String::decodeHTML() {
 	return *this;
 }
 
-String &String::free() {
+aString &aString::free() {
 	::free(str);
 	str = 0,len = 0,cap = 0;
 	return *this;
 }
 
-void String::resize(size_t n) {
+void aString::resize(size_t n) {
 	if(n<0 || len+n+n<cap) return;
 	if(!cap) cap = 1;
 	if(n && len+n>=cap) cap = len+n+1;
@@ -644,28 +644,28 @@ void String::resize(size_t n) {
 	if(!str) str = (char *)malloc(cap+1);
 	else str = (char *)realloc(str,cap+1);
 	str[cap] = '\0';
-//fprintf(stderr,"String::resize(len=%d,n=%d,cap=%d)\n",len,n,cap);
+//fprintf(stderr,"aString::resize(len=%d,n=%d,cap=%d)\n",len,n,cap);
 //fflush(stderr);
 }
 
-void String::setCapacity(size_t n) {
+void aString::setCapacity(size_t n) {
 	if(!n) return;
 	cap = n;
 	if(!str) str = (char *)malloc(cap+1);
 	else str = (char *)realloc(str,cap+1);
 	str[cap] = '\0';
-//fprintf(stderr,"String::resize(len=%d,n=%d,cap=%d)\n",len,n,cap);
+//fprintf(stderr,"aString::resize(len=%d,n=%d,cap=%d)\n",len,n,cap);
 //fflush(stderr);
 }
 
-int String::toInt() {
+int aString::toInt() {
 	char *p = str;
 	while(isSpace(*p)) p++;
 	if(*p=='0' && *++p=='x') return fromHex(++p);
 	return atoi(p);
 }
 
-size_t String::toIntArray(int *n,char c) {
+size_t aString::toIntArray(int *n,char c) {
 	if(!n || c=='\0' || !str || !len) return 0;
 	size_t i;
 	char *p1 = str,*p2;
@@ -681,7 +681,7 @@ size_t String::toIntArray(int *n,char c) {
 }
 
 
-size_t String::nextWord(const char **s,const char *c) {
+size_t aString::nextWord(const char **s,const char *c) {
 	size_t l = 0;
 	const char *p = *s;
 	while(*p && !strchr(c,*p)) p++,l++;
@@ -690,56 +690,56 @@ size_t String::nextWord(const char **s,const char *c) {
 }
 
 
-uint64_t String::fromHex(const char *str) {
+uint64_t aString::fromHex(const char *str) {
 	if(!str) return 0;
 	uint64_t n = 0;
 	for(int i=0; isHex(*str) && i<16; i++) n = (n<<4)|fromHex(*str),str++;
 	return n;
 }
 
-char *String::toHex(char *h,uint64_t i) {
+char *aString::toHex(char *h,uint64_t i) {
 	int u = 0;
 	for(uint64_t n=i; n; n>>=4) u++;
 	for(h+=u,*h='\0'; i; i>>=4) *--h = "0123456789ABCDEF"[i&0xf];//(u=(i&0xf))<10? '0'+u : 'a'+(u-10);
 	return h;
 }
 
-char *String::toLower(char *str) { char *s = str;while(*s) *s = toLower(*s),s++;return str; }
-char *String::toUpper(char *str) { char *s = str;while(*s) *s = toUpper(*s),s++;return str; }
+char *aString::toLower(char *str) { char *s = str;while(*s) *s = toLower(*s),s++;return str; }
+char *aString::toUpper(char *str) { char *s = str;while(*s) *s = toUpper(*s),s++;return str; }
 
-int String::stricmp(const char *str1,const char *str2) {
+int aString::stricmp(const char *str1,const char *str2) {
 	char c1 = toLower(*str1++),c2 = toLower(*str2++);
 	for(; c1 && c2; c1=toLower(*str1++),c2=toLower(*str2++)) if(c1!=c2) return c1<c2? -1 : 1;
 	return (!c1 && !c2)? 0 : (!c1? -1 : 1);
 }
 
-int String::strnicmp(const char *str1,const char *str2,size_t n) {
+int aString::strnicmp(const char *str1,const char *str2,size_t n) {
 	char c1 = toLower(*str1++),c2 = toLower(*str2++);
 	for(; --n && c1 && c2; c1=toLower(*str1++),c2=toLower(*str2++)) if(c1!=c2) return c1<c2? -1 : 1;
 	return (!n || (!c1 && !c2))? 0 : (!c1? -1 : 1);
 }
 
-char *String::stristr(char *str1,const char *str2) {
+char *aString::stristr(char *str1,const char *str2) {
 	int l = strlen(str2),c1,c2 = toLower(*str2);
 	for(; (c1=toLower(*str1)); str1++) if(c1==c2 && strnicmp(str1,str2,l)) return str1;
 	return 0;
 }
 
-int String::countTokens(char *str,const char *delim,bool cins) {
+int aString::countTokens(char *str,const char *delim,bool cins) {
 	int l = strlen(delim),n = 0;
 	if(cins) for(; str && *str; n++) { if((str=stristr(str,delim))) str += l; }
 	else for(; str && *str; n++) { if((str=strstr(str,delim))) str += l; }
 	return n;
 }
 
-char **String::split(char **list,char *str,const char *delim,bool cins) {
+char **aString::split(char **list,char *str,const char *delim,bool cins) {
 	size_t l = strlen(delim),n = 0;
 	if(cins) for(; str && *str; n++) { list[n] = str;if((str=stristr(str,delim))) *str = '\0',str += l; }
 	else for(; str && *str; n++) { list[n] = str;if((str=strstr(str,delim))) *str = '\0',str += l; }
 	return list;
 }
 
-size_t String::trim(char *str) {
+size_t aString::trim(char *str) {
 	if(!str || !*str) return 0;
 	size_t l = 0;
 	char *p = str;
@@ -753,29 +753,29 @@ size_t String::trim(char *str) {
 }
 
 
-String operator+(String &s,const char c) { String s1(s.length()+1);s1.append(s).append(c);return s1; }
-String operator+(const char c,String &s) { String s1(s.length()+1);s1.append(c).append(s);return s1; }
-String operator+(String &s,String *s1) { String s2(s.length()+(s1? s1->length() : 0));s2.append(s).append(s1);return s2; }
-String operator+(String *s,String &s1) { String s2((s? s->length() : 0)+s1.length());s2.append(s).append(s1);return s2; }
-String operator+(String &s,String &s1) { String s2(s.length()+s1.length());s2.append(s).append(s1);return s2; }
-String operator+(String &s,const char *s1) { String s2(s);s2.append(s1);return s2; }
-String operator+(const char *s,String &s1) { String s2(s);s2.append(s1);return s2; }
-String operator+(String &s,int16_t i) { String s1(s.length()+6);s1.append(s).append((int32_t)i);return s1; }
-String operator+(int16_t i,String &s) { String s1(6+s.length());s1.append((int32_t)i).append(s);return s1; }
-String operator+(String &s,uint16_t i) { String s1(s.length()+5);s1.append(s).append((uint16_t)i);return s1; }
-String operator+(uint16_t i,String &s) { String s1(5+s.length());s1.append((uint16_t)i).append(s);return s1; }
-String operator+(String &s,int32_t i) { String s1(s.length()+11);s1.append(s).append(i);return s1; }
-String operator+(int32_t i,String &s) { String s1(11+s.length());s1.append(i).append(s);return s1; }
-String operator+(String &s,uint32_t i) { String s1(s.length()+10);s1.append(s).append(i);return s1; }
-String operator+(uint32_t i,String &s) { String s1(10+s.length());s1.append(i).append(s);return s1; }
-String operator+(String &s,int64_t i) { String s1(s.length()+21);s1.append(s).append(i);return s1; }
-String operator+(int64_t i,String &s) { String s1(21+s.length());s1.append(i).append(s);return s1; }
-String operator+(String &s,uint64_t i) { String s1(s.length()+20);s1.append(s).append(i);return s1; }
-String operator+(uint64_t i,String &s) { String s1(20+s.length());s1.append(i).append(s);return s1; }
-String operator+(String &s,float f) { String s1(s.length()+16ul);s1.append(s).append(f);return s1; }
-String operator+(float f,String &s) { String s1(16ul+s.length());s1.append(f).append(s);return s1; }
-String operator+(String &s,double d) { String s1(s.length()+32ul);s1.append(s).append(d);return s1; }
-String operator+(double d,String &s) { String s1(32ul+s.length());s1.append(d).append(s);return s1; }
+aString operator+(aString &s,const char c) { aString s1(s.length()+1);s1.append(s).append(c);return s1; }
+aString operator+(const char c,aString &s) { aString s1(s.length()+1);s1.append(c).append(s);return s1; }
+aString operator+(aString &s,aString *s1) { aString s2(s.length()+(s1? s1->length() : 0));s2.append(s).append(s1);return s2; }
+aString operator+(aString *s,aString &s1) { aString s2((s? s->length() : 0)+s1.length());s2.append(s).append(s1);return s2; }
+aString operator+(aString &s,aString &s1) { aString s2(s.length()+s1.length());s2.append(s).append(s1);return s2; }
+aString operator+(aString &s,const char *s1) { aString s2(s);s2.append(s1);return s2; }
+aString operator+(const char *s,aString &s1) { aString s2(s);s2.append(s1);return s2; }
+aString operator+(aString &s,int16_t i) { aString s1(s.length()+6);s1.append(s).append((int32_t)i);return s1; }
+aString operator+(int16_t i,aString &s) { aString s1(6+s.length());s1.append((int32_t)i).append(s);return s1; }
+aString operator+(aString &s,uint16_t i) { aString s1(s.length()+5);s1.append(s).append((uint16_t)i);return s1; }
+aString operator+(uint16_t i,aString &s) { aString s1(5+s.length());s1.append((uint16_t)i).append(s);return s1; }
+aString operator+(aString &s,int32_t i) { aString s1(s.length()+11);s1.append(s).append(i);return s1; }
+aString operator+(int32_t i,aString &s) { aString s1(11+s.length());s1.append(i).append(s);return s1; }
+aString operator+(aString &s,uint32_t i) { aString s1(s.length()+10);s1.append(s).append(i);return s1; }
+aString operator+(uint32_t i,aString &s) { aString s1(10+s.length());s1.append(i).append(s);return s1; }
+aString operator+(aString &s,int64_t i) { aString s1(s.length()+21);s1.append(s).append(i);return s1; }
+aString operator+(int64_t i,aString &s) { aString s1(21+s.length());s1.append(i).append(s);return s1; }
+aString operator+(aString &s,uint64_t i) { aString s1(s.length()+20);s1.append(s).append(i);return s1; }
+aString operator+(uint64_t i,aString &s) { aString s1(20+s.length());s1.append(i).append(s);return s1; }
+aString operator+(aString &s,float f) { aString s1(s.length()+16ul);s1.append(s).append(f);return s1; }
+aString operator+(float f,aString &s) { aString s1(16ul+s.length());s1.append(f).append(s);return s1; }
+aString operator+(aString &s,double d) { aString s1(s.length()+32ul);s1.append(s).append(d);return s1; }
+aString operator+(double d,aString &s) { aString s1(32ul+s.length());s1.append(d).append(s);return s1; }
 
 
 

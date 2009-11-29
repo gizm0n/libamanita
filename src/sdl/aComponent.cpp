@@ -3,30 +3,30 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
-#include <libamanita/sdl/Graphics.h>
-#include <libamanita/gui/Component.h>
-#include <libamanita/gui/ToolTip.h>
-#include <libamanita/gui/Display.h>
+#include <libamanita/sdl/aGraphics.h>
+#include <libamanita/sdl/aComponent.h>
+#include <libamanita/sdl/aTooltip.h>
+#include <libamanita/sdl/aDisplay.h>
 
 
-RttiObjectInheritance(Component,Object);
+RttiObjectInheritance(aComponent,aObject);
 
 
-Component *Component::componentFocus = 0;
-Component *Component::keyFocus = 0;
-Component *Component::mouseDownFocus = 0;
-Component *Component::mouseOverFocus = 0;
-Component *Component::toolTipFocus = 0;
+aComponent *aComponent::componentFocus = 0;
+aComponent *aComponent::keyFocus = 0;
+aComponent *aComponent::mouseDownFocus = 0;
+aComponent *aComponent::mouseOverFocus = 0;
+aComponent *aComponent::toolTipFocus = 0;
 
-bool Component::setComponentFocus(Component *c) {
+bool aComponent::setaComponentFocus(aComponent *c) {
 	if(c!=componentFocus) {
 		bool ret = true;
 		if(componentFocus && componentFocus->focusListener) {
-			FocusEvent fe = { c,componentFocus };
+			aFocusEvent fe = { c,componentFocus };
 			ret = componentFocus->focusListener->focusLost(fe);
 		}
 		if(ret && c && c->focusListener) {
-			FocusEvent fe = { c,componentFocus };
+			aFocusEvent fe = { c,componentFocus };
 			ret = c->focusListener->focusGained(fe);
 			componentFocus = c;
 		}
@@ -34,11 +34,11 @@ bool Component::setComponentFocus(Component *c) {
 	}
 	return true;
 }
-bool Component::setKeyFocus(Component *c) {
+bool aComponent::setKeyFocus(aComponent *c) {
 	if(c!=keyFocus || !c->isVisible()) {
 		while(c && (!c->keyListener || !c->isVisible())) c = c->com.p;
 		if(c!=keyFocus) {
-			if(!setComponentFocus(c = c && c->keyListener && c->isVisible()? c : Display::getActiveDisplay()))
+			if(!setaComponentFocus(c = c && c->keyListener && c->isVisible()? c : aDisplay::getActiveDisplay()))
 				return false;
 			keyFocus = c;
 		}
@@ -46,12 +46,12 @@ bool Component::setKeyFocus(Component *c) {
 	return true;
 }
 
-Component::Component(int x,int y,int w,int h) : Object() {
+aComponent::aComponent(int x,int y,int w,int h) : aObject() {
 	com = (component){ 0ul,0,ENABLED|VISIBLE|LOCKED|OPAQUE,x,y,w,h,0,0,0 };
 	if(!keyFocus) keyFocus = this;
 	focusListener = 0,keyListener = 0,mouseListener = 0,mouseMotionListener = 0,actionListener = 0;
 }
-Component::Component(Component &c) : Object(),com(c.com) {
+aComponent::aComponent(aComponent &c) : aObject(),com(c.com) {
 	com.cnt = 0ul,com.p = 0,com.ch = 0,com.tt = 0;
 	if(!keyFocus) keyFocus = this;
 	focusListener = c.focusListener,keyListener = c.keyListener,mouseListener = c.mouseListener;
@@ -61,14 +61,14 @@ Component::Component(Component &c) : Object(),com(c.com) {
 char indent[32] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 int indentn = 0;
 
-Component::~Component() {
-printf("%sComponent::~Component(parent=%p,%" PRIx32 ",instance=%p,%" PRIx32 ",x=%d,y=%d,w=%d,h=%d,size=%zu)\n",
-indent,com.p,com.p? ((Class &)*com.p).getID() : 0,this,((Class &)*this).getID(),com.x,com.y,com.w,com.h,com.ch? com.ch->size() : 0);
+aComponent::~aComponent() {
+printf("%saComponent::~aComponent(parent=%p,%" PRIx32 ",instance=%p,%" PRIx32 ",x=%d,y=%d,w=%d,h=%d,size=%zu)\n",
+indent,com.p,com.p? ((aClass &)*com.p).getID() : 0,this,((aClass &)*this).getID(),com.x,com.y,com.w,com.h,com.ch? com.ch->size() : 0);
 indent[indentn++] = '\t';
 	if(com.ch) {
-		Component *c;
+		aComponent *c;
 		for(long i=0,n=com.ch->size(); i<n; i++) {
-			c = (Component *)(*com.ch)[i];
+			c = (aComponent *)(*com.ch)[i];
 			if(--c->com.cnt==0) delete c;
 		}
 		delete com.ch;
@@ -76,20 +76,20 @@ indent[indentn++] = '\t';
 	}
 	if(com.tt && (--com.tt->tt.cnt)==0) { delete com.tt;com.tt = 0; }
 indent[--indentn] = 0;
-printf("%sComponent::~Component()\n",indent);
+printf("%saComponent::~aComponent()\n",indent);
 }
 
-void Component::add(Component *c) {
+void aComponent::add(aComponent *c) {
 	if(!c) return;
 	if(c->com.p) c->com.p->remove(c);
-	if(!com.ch) com.ch = new Vector();
+	if(!com.ch) com.ch = new aVector();
 	*com.ch += c;
 	c->com.cnt++;
 	c->com.p = this;
 	c->moveLocation(com.x,com.y);
 }
 
-void Component::remove(Component *c) {
+void aComponent::remove(aComponent *c) {
 	if(!c || !com.ch || !com.ch->contains(c)) return;
 	*com.ch -= c;
 	c->com.cnt--;
@@ -98,54 +98,54 @@ void Component::remove(Component *c) {
 	if(com.ch->size()==0) { delete com.ch;com.ch = 0; }
 }
 
-void Component::moveToTop() {
+void aComponent::moveToTop() {
 	if(com.p) {
 		*com.p->com.ch -= this;
 		*com.p->com.ch += this;
 	}
 }
 
-Component *Component::getComponent(size_t i) {
-	return com.ch && i<com.ch->size()? (Component *)(*com.ch)[i] : 0;
+aComponent *aComponent::getaComponent(size_t i) {
+	return com.ch && i<com.ch->size()? (aComponent *)(*com.ch)[i] : 0;
 }
 
-Component *Component::getComponent(int x,int y) {
+aComponent *aComponent::getaComponent(int x,int y) {
 	if(!isVisible()) return 0;
-	Component *c = 0;
+	aComponent *c = 0;
 	if(com.ch) for(long i=com.ch->size()-1; !c && i>=0l; i--)
-		c = ((Component *)(*com.ch)[i])->getComponent(x,y);
+		c = ((aComponent *)(*com.ch)[i])->getaComponent(x,y);
 	return c? c :  (contains(x,y)? this : 0);
 }
 
-void Component::moveLocation(int x,int y) {
+void aComponent::moveLocation(int x,int y) {
 	com.x += x,com.y += y;
 	if(com.ch) {
-		Component *c;
+		aComponent *c;
 		for(long i=com.ch->size()-1; i>=0l; i--) {
-			c = (Component *)(*com.ch)[i];
+			c = (aComponent *)(*com.ch)[i];
 			c->moveLocation(x,y);
 		}
 	}
 }
 
-bool Component::contains(Component *c) {
+bool aComponent::contains(aComponent *c) {
 	while(c && c!=this) c = c->com.p;
 	return c && c==this;
 }
-bool Component::contains(const SDL_Rect &r,int x,int y) {
+bool aComponent::contains(const SDL_Rect &r,int x,int y) {
 	return x>=com.x+r.x && y>=com.y+r.y && x<com.x+r.x+r.w && y<com.y+r.y+r.h;
 }
 
-bool Component::isShowing() {
+bool aComponent::isShowing() {
 	return com.x+com.w>0 && com.y+com.h>0 &&
 		com.x<g.getScreenWidth() && com.y<g.getScreenHeight();
 }
 
-void Component::paint(time_t time) {}
+void aComponent::paint(time_t time) {}
 
-void Component::paintAll(time_t time) {
+void aComponent::paintAll(time_t time) {
 	if(!isVisible() || !com.ch) return;
-	Component *c;
+	aComponent *c;
 	if(clipBounds()) {
 		SDL_Rect r1 = g.getClip(),r2 = { com.x,com.y,com.w,com.h };
 		if(r2.x<r1.x) r2.w -= r1.x-r2.x,r2.x = r1.x;
@@ -153,12 +153,12 @@ void Component::paintAll(time_t time) {
 		if(r2.y<r1.y) r2.h -= r1.y-r2.y,r2.y = r1.y;
 		if(r2.y+r2.h>r1.y+r1.h) r2.h = r1.y+r1.h-r2.y;
 		g.setClip(r2);
-		for(size_t i=0ul; i<com.ch->size(); i++) if((c=(Component *)(*com.ch)[i])->isVisible()) {
+		for(size_t i=0ul; i<com.ch->size(); i++) if((c=(aComponent *)(*com.ch)[i])->isVisible()) {
 			c->paint(time);
 			c->paintAll(time);
 		}
 		g.setClip(r1);
-	} else for(size_t i=0ul; i<com.ch->size(); i++) if((c=(Component *)(*com.ch)[i])->isVisible()) {
+	} else for(size_t i=0ul; i<com.ch->size(); i++) if((c=(aComponent *)(*com.ch)[i])->isVisible()) {
 		c->paint(time);
 		c->paintAll(time);
 	}
@@ -168,22 +168,22 @@ short dragX = 0;
 short dragY = 0;
 int toolTipTimer = 0;
 
-bool Component::handleKeyDown(KeyEvent &ke) {
+bool aComponent::handleKeyDown(aKeyEvent &ke) {
 	if(keyFocus && keyFocus->keyListener) {
 		ke.source = keyFocus;
 		return keyFocus->keyListener->keyDown(ke);
 	} else return false;
 }
-bool Component::handleKeyUp(KeyEvent &ke) {
+bool aComponent::handleKeyUp(aKeyEvent &ke) {
 	if(keyFocus && keyFocus->keyListener) {
 		ke.source = keyFocus;
 		return keyFocus->keyListener->keyUp(ke);
 	} else return false;
 }
-bool Component::handleMouseDown(MouseEvent &me) {
+bool aComponent::handleMouseDown(aMouseEvent &me) {
 	if(toolTipFocus) toolTipTimer = 0;
 	if(!isVisible()) return false;
-	Component *c = getComponent(me.x,me.y);
+	aComponent *c = getaComponent(me.x,me.y);
 	if(!setKeyFocus(c)) return false;
 	setMouseDownFocus(c);
 	if(c) {
@@ -193,10 +193,10 @@ bool Component::handleMouseDown(MouseEvent &me) {
 	}
 	return false;
 }
-bool Component::handleMouseUp(MouseEvent &me) {
+bool aComponent::handleMouseUp(aMouseEvent &me) {
 	if(!isVisible()) return false;
 	if(mouseDownFocus) {
-		Component *c = mouseDownFocus;
+		aComponent *c = mouseDownFocus;
 		setMouseDownFocus(0);
 		if(!contains(me.x,me.y)) setMouseOverFocus(0);
 		if(c->mouseListener) {
@@ -206,9 +206,9 @@ bool Component::handleMouseUp(MouseEvent &me) {
 	}
 	return false;
 }
-bool Component::handleMouseMove(MouseMotionEvent &mme) {
+bool aComponent::handleMouseMove(aMouseMotionEvent &mme) {
 	if(!isVisible()) return false;
-	Component *c = getComponent(mme.x,mme.y);
+	aComponent *c = getaComponent(mme.x,mme.y);
 	setMouseOverFocus(c);
 	if(c && c->mouseMotionListener) {
 		mme.source = c;
@@ -216,9 +216,9 @@ bool Component::handleMouseMove(MouseMotionEvent &mme) {
 	}
 	return false;
 }
-bool Component::handleMouseDrag(MouseMotionEvent &mme) {
+bool aComponent::handleMouseDrag(aMouseMotionEvent &mme) {
 	if(isVisible() && mouseDownFocus) {
-		Component *c = mouseDownFocus;
+		aComponent *c = mouseDownFocus;
 		mme.source = c;
 		if(!c->isLocked()) c->setLocation(dragX+mme.x,dragY+mme.y);
 		if(c->mouseMotionListener) return c->mouseMotionListener->mouseDrag(mme);
@@ -227,14 +227,14 @@ bool Component::handleMouseDrag(MouseMotionEvent &mme) {
 }
 
 
-void Component::setToolTip(ToolTip *tt) {
+void aComponent::setToolTip(aTooltip *tt) {
 	if(com.tt) com.tt->tt.cnt--;
 	if(tt) tt->tt.cnt++;
 	com.tt = tt;
 	if(toolTipFocus==this) toolTipTimer = 0;
 }
 
-bool Component::handleToolTip(ToolTipEvent &tte) {
+bool aComponent::handleToolTip(aTooltipEvent &tte) {
 	if(mouseOverFocus && mouseOverFocus->com.tt) {
 		toolTipTimer++;
 		if(toolTipTimer>tte.showTimer && toolTipTimer<=tte.hideTimer) {

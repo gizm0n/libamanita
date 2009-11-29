@@ -1,27 +1,27 @@
-#ifndef _LIBAMANITA_GUI_SCROLL_H
-#define _LIBAMANITA_GUI_SCROLL_H
+#ifndef _LIBAMANITA_SDL_ASCROLL_H
+#define _LIBAMANITA_SDL_ASCROLL_H
 
-#include <libamanita/gui/Component.h>
+#include <libamanita/sdl/aComponent.h>
 
 
 enum {
-	SCROLL_VERT			= 0,		// Scroll vertically, default
-	SCROLL_HORIZ		= 1,		// Scroll horizontally
+	SCROLL_VERT			= 0,		// aScroll vertically, default
+	SCROLL_HORIZ		= 1,		// aScroll horizontally
 	SCROLL_LEFT			= 2,		// Place vertical scrollbar on left
 	SCROLL_TOP			= 4,		// Place vertical scrollbar on top
 	SCROLL_RIGHT		= 0,		// Place vertical scrollbar on right, default
 	SCROLL_BOTTOM		= 0,		// Place vertical scrollbar on bottom, default
 };
 
-class Image;
-class IconButton;
+class aImage;
+class aIconButton;
 
-class Scroll : public Component,public MouseMotionListener,public ActionListener {
-RttiObjectInstance(Scroll)
+class aScroll : public aComponent,public aMouseMotionListener,public aActionListener {
+RttiObjectInstance(aScroll)
 
 private:
 	struct _settings {
-		Image *img;
+		aImage *img;
 		struct button {
 			SDL_Rect *size;
 			int plain,active,down,disabled;
@@ -31,52 +31,52 @@ private:
 	static _settings _s;
 
 	int style,val,min,max,inc;
-	IconButton *bmin,*bmax,*bslide;
+	aIconButton *bmin,*bmax,*bslide;
 	SDL_Rect *bar,slide;
-	ActionEvent ae;
+	aActionEvent ae;
 
 public:
-	Scroll(int id,int x=0,int y=0,int w=0,int h=0,int st=0);
-	virtual ~Scroll();
+	aScroll(int id,int x=0,int y=0,int w=0,int h=0,int st=0);
+	virtual ~aScroll();
 
 	/**
-	 * Image *img - The image should contain all the scrollimages mapped on the same image
+	 * aImage *img - The image should contain all the scrollimages mapped on the same image
 	 * Uint32 data[35] - The array should be mapped as follows:
-	 *  0 = Up Button, plain
-	 *  1 = Up Button, active
-	 *  2 = Up Button, down
-	 *  3 = Up Button, disabled
-	 *  4 = Down Button, plain
-	 *  5 = Down Button, active
-	 *  6 = Down Button, down
-	 *  7 = Down Button, disabled
-	 *  8 = Left Button, plain
-	 *  9 = Left Button, active
-	 * 10 = Left Button, down
-	 * 11 = Left Button, disabled
-	 * 12 = Right Button, plain
-	 * 13 = Right Button, active
-	 * 14 = Right Button, down
-	 * 15 = Right Button, disabled
-	 * 16 = Slide Button, plain
-	 * 17 = Slide Button, active
-	 * 18 = Slide Button, down
-	 * 19 = Slide Button, disabled
+	 *  0 = Up aButton, plain
+	 *  1 = Up aButton, active
+	 *  2 = Up aButton, down
+	 *  3 = Up aButton, disabled
+	 *  4 = Down aButton, plain
+	 *  5 = Down aButton, active
+	 *  6 = Down aButton, down
+	 *  7 = Down aButton, disabled
+	 *  8 = Left aButton, plain
+	 *  9 = Left aButton, active
+	 * 10 = Left aButton, down
+	 * 11 = Left aButton, disabled
+	 * 12 = Right aButton, plain
+	 * 13 = Right aButton, active
+	 * 14 = Right aButton, down
+	 * 15 = Right aButton, disabled
+	 * 16 = Slide aButton, plain
+	 * 17 = Slide aButton, active
+	 * 18 = Slide aButton, down
+	 * 19 = Slide aButton, disabled
 	 * 20 = Vertical Scrollbar
 	 * 21 = Horizontal Scrollbar
 	 **/
-	static void setDefaultSettings(Image *img,Uint32 data[22]);
+	static void setDefaultSettings(aImage *img,Uint32 data[22]);
 
 	void setStyle(int st=0);
 	void setValues(int v,int mn,int mx,int i=1);
 	void setValue(int v);
 	int getValue() { return val; }
 	void positionSlide();
-	bool mouseDrag(MouseMotionEvent &mme);
-	bool actionPerformed(ActionEvent &ae);
+	bool mouseDrag(aMouseMotionEvent &mme);
+	bool actionPerformed(aActionEvent &ae);
 	void paint(time_t time);
 };
 
 
 
-#endif /* _LIBAMANITA_GUI_SCROLL_H */
+#endif /* _LIBAMANITA_SDL_ASCROLL_H */

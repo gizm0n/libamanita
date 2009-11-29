@@ -1,9 +1,9 @@
-#ifndef _LIBAMANITA_SDL_FONT_H
-#define _LIBAMANITA_SDL_FONT_H
+#ifndef _LIBAMANITA_SDL_AFONT_H
+#define _LIBAMANITA_SDL_AFONT_H
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
-#include <libamanita/Object.h>
+#include <libamanita/aObject.h>
 
 
 enum {
@@ -16,10 +16,10 @@ enum {
 };
 
 
-class Font : public Object {
-friend class Text;
+class aFont : public aObject {
+friend class aText;
 
-RttiObjectInstance(Font)
+RttiObjectInstance(aFont)
 
 private:
 	struct glyph {
@@ -33,8 +33,8 @@ private:
 
 public:
 
-	Font(const char *file,int size,int style=TTF_STYLE_NORMAL,long color=0,int render=0);
-	~Font();
+	aFont(const char *file,int size,int style=TTF_STYLE_NORMAL,long color=0,int render=0);
+	~aFont();
 
 	const char *getName() { return name; }
 	int getHeight() { return height; }
@@ -55,5 +55,5 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_FONT_H */
+#endif /* _LIBAMANITA_SDL_AFONT_H */
 

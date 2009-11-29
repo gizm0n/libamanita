@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <libamanita/sdl/Server.h>
+#include <libamanita/sdl/aServer.h>
 
 
 #ifndef TCPSOCK_NOCIPHER
@@ -15,18 +15,18 @@ void ServerConnection::setKey(const uint32_t *k,size_t l) {
 }
 #endif /*TCPSOCK_NOCIPHER*/
 
-Server::Server(SocketListener l) : Socket(l),clients(),main("main"),channels() {
+aServer::aServer(SocketListener l) : aSocket(l),clients(),main("main"),channels() {
 	setsz = 0;
 	mut = SDL_CreateMutex();
 	channels.put(main.getName(),&main);
 }
 
-Server::~Server() {
+aServer::~aServer() {
 	stop();
 	if(mut) { SDL_DestroyMutex(mut);mut = 0; }
 }
 
-bool Server::start(const char *con) {
+bool aServer::start(const char *con) {
 	if(isRunning() || isStarting()) return false;
 	uint32_t id;
 	char nick[32];
@@ -38,7 +38,7 @@ fflush(stderr);
 	return start(ip.port);
 }
 
-bool Server::start(uint32_t port) {
+bool aServer::start(uint32_t port) {
 	if(isRunning() || isStarting()) return false;
 	lock();
 	setStarting(true);
@@ -61,7 +61,7 @@ bool Server::start(uint32_t port) {
 	return ret;
 }
 
-void Server::stop(bool kill) {
+void aServer::stop(bool kill) {
 	if(isRunning()) {
 		lock();
 		stateChanged(SM_STOPPING_SERVER,0,0,0);
@@ -78,7 +78,7 @@ void Server::stop(bool kill) {
 	}
 }
 
-void Server::run() {
+void aServer::run() {
 	int n,i;
 	TCPsocket s;
 	Connection c;
@@ -104,11 +104,11 @@ void Server::run() {
 				releaseMessageBuffer(b);
 			}
 		}
-fprintf(stderr,"Server::run(clients=%zu,n=%d)\n",clients.size(),n);
+fprintf(stderr,"aServer::run(clients=%zu,n=%d)\n",clients.size(),n);
 fflush(stderr);
 		for(i=main.size()-1; n>0 && i>=0; i--) {
 			c = (Connection)main[i];
-fprintf(stderr,"Server::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),c->sock);
+fprintf(stderr,"aServer::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),c->sock);
 fflush(stderr);
 			if(SDLNet_SocketReady(c->sock)) {
 				n--;
@@ -130,14 +130,14 @@ fflush(stderr);
 	}
 }
 
-void Server::changeNick(uint32_t id,const char *nick) {
+void aServer::changeNick(uint32_t id,const char *nick) {
 	Connection client = (Connection)clients.get(id);
 	if(!client) return;
 	free(client->nick);
 	client->nick = strdup(nick);
 }
 
-Channel Server::createChannel(const char *ch) {
+Channel aServer::createChannel(const char *ch) {
 	if(!ch || !*ch) return 0;
 	Channel channel = (Channel)channels.get(ch);
 	if(!channel) {
@@ -147,8 +147,8 @@ Channel Server::createChannel(const char *ch) {
 	return channel;
 }
 
-void Server::deleteChannel(const char *ch) {
-fprintf(stderr,"Server::deleteChannel(name=%s)\n",ch);
+void aServer::deleteChannel(const char *ch) {
+fprintf(stderr,"aServer::deleteChannel(name=%s)\n",ch);
 fflush(stderr);
 	Channel channel = (Channel)channels.remove(ch);
 	if(channel && channel!=&main) {
@@ -163,24 +163,24 @@ fflush(stderr);
 	}
 }
 
-void Server::leaveChannel(Channel ch,Connection c) {
+void aServer::leaveChannel(Channel ch,Connection c) {
 	if(ch && c) {
-fprintf(stderr,"Server::leaveChannel(1,name=%s,size(%zu))\n",ch->getName(),ch->size());
+fprintf(stderr,"aServer::leaveChannel(1,name=%s,size(%zu))\n",ch->getName(),ch->size());
 fflush(stderr);
 		*ch -= c;
 		c->leaveChannel(ch);
-fprintf(stderr,"Server::leaveChannel(2,size(%zu))\n",ch->size());
+fprintf(stderr,"aServer::leaveChannel(2,size(%zu))\n",ch->size());
 fflush(stderr);
 		if(ch->size()==0) deleteChannel(ch->getName());
 	}
 }
 
 
-Connection Server::addClient(TCPsocket s,uint8_t *d,size_t l) {
+Connection aServer::addClient(TCPsocket s,uint8_t *d,size_t l) {
 	d += TCPSOCK_HD;
 	uint32_t id = SDL_SwapBE32(*(uint32_t *)d);
 	char *nick = (char *)(d+4);
-fprintf(stderr,"Server::addClient(id=%" PRIu32 ",nick=%s)\n",id,nick);
+fprintf(stderr,"aServer::addClient(id=%" PRIu32 ",nick=%s)\n",id,nick);
 fflush(stderr);
 	stateChanged(SM_CHECK_NICK,(intptr_t)nick,0,0);
 	if(!uniqueID(id)) stateChanged(SM_DUPLICATE_ID,id,(intptr_t)nick,0);
@@ -197,8 +197,8 @@ fflush(stderr);
 	return 0;
 }
 
-void Server::killClient(uint32_t id) {
-fprintf(stderr,"Server::killClient(id=%" PRIu32 ")\n",id);
+void aServer::killClient(uint32_t id) {
+fprintf(stderr,"aServer::killClient(id=%" PRIu32 ")\n",id);
 fflush(stderr);
 	Connection client = (Connection)clients.remove(id);
 	if(client) {
@@ -211,11 +211,11 @@ fflush(stderr);
 		stateChanged(SM_KILL_CLIENT,(intptr_t)client,0,0);
 		delete client;
 	}
-fprintf(stderr,"Server::killClient(done)\n");
+fprintf(stderr,"aServer::killClient(done)\n");
 fflush(stderr);
 }
 
-void Server::killAllClients() {
+void aServer::killAllClients() {
 	if(!clients.size()) return;
 	lock();
 	Connection client;
@@ -227,7 +227,7 @@ void Server::killAllClients() {
 	}
 	clients.removeAll();
 	main.clear();
-	Hashtable::iterator iter = channels.iterate();
+	aHashtable::iterator iter = channels.iterate();
 	Channel ch;
 	while((ch=(Channel)iter.next())) delete ch;
 	channels.removeAll();
@@ -235,10 +235,10 @@ void Server::killAllClients() {
 	unlock();
 }
 
-void Server::createSocketSet() {
+void aServer::createSocketSet() {
 	if(set) SDLNet_FreeSocketSet(set);
 	if(main.size()+1>setsz) setsz = (main.size()+1)*2;
-fprintf(stderr,"Server::createSocketSet(setsz=%zu)\n",setsz);
+fprintf(stderr,"aServer::createSocketSet(setsz=%zu)\n",setsz);
 fflush(stderr);
 	set = SDLNet_AllocSocketSet(setsz);
 	if(!set) stateChanged(SM_ERR_ALLOC_SOCKETSET,0,0,0);
@@ -248,18 +248,18 @@ fflush(stderr);
 		int n;
 		for(size_t i=0; i<main.size(); i++) {
 			client = (Connection)main[i];
-fprintf(stderr,"Server::createSocketSet(id=%" PRIu32 ",nick=%s)\n",client->getID(),client->getNick());
+fprintf(stderr,"aServer::createSocketSet(id=%" PRIu32 ",nick=%s)\n",client->getID(),client->getNick());
 fflush(stderr);
 			n = SDLNet_TCP_AddSocket(set,client->sock);
 if(n==-1) {
-fprintf(stderr,"Server::createSocketSet(error=%s)\n",SDLNet_GetError());
+fprintf(stderr,"aServer::createSocketSet(error=%s)\n",SDLNet_GetError());
 fflush(stderr);
 }
 		}
 	}
 }
 
-int Server::send(Connection c,uint8_t *d,size_t l) {
+int aServer::send(Connection c,uint8_t *d,size_t l) {
 #ifndef TCPSOCK_NOCIPHER
 	if(c->key) {
 		uint8_t dc[l];
@@ -269,13 +269,13 @@ int Server::send(Connection c,uint8_t *d,size_t l) {
 #	else /*TCPSOCK_LENINCL*/
 		XORcipher(dc,d,l,c->key,c->keylen);
 #	endif /*TCPSOCK_LENINCL*/
-		return Socket::send(c->sock,dc,l);
+		return aSocket::send(c->sock,dc,l);
 	} else
 #endif /*TCPSOCK_NOCIPHER*/
-		return Socket::send(c->sock,d,l);
+		return aSocket::send(c->sock,d,l);
 }
 
-void Server::send(Channel channel,uint8_t *d,size_t l) {
+void aServer::send(Channel channel,uint8_t *d,size_t l) {
 	if(!channel) channel = (Channel)&main;
 	if(l==0 || !d || channel->size()==0) return;
 #ifndef TCPSOCK_NOCIPHER
@@ -293,7 +293,7 @@ void Server::send(Channel channel,uint8_t *d,size_t l) {
 	TCPsockType n = TCPSOCK_SWAP(l);
 #endif /*TCPSOCK_LENINCL*/
 	Connection c;
-fprintf(stderr,"Server::send(l=%zu,cmd=%d,len=%d)\n",l,(int)*d,TCPSOCK_SWAP(*TCPSOCK_TYPE(d+TCPSOCK_OFFSET)));
+fprintf(stderr,"aServer::send(l=%zu,cmd=%d,len=%d)\n",l,(int)*d,TCPSOCK_SWAP(*TCPSOCK_TYPE(d+TCPSOCK_OFFSET)));
 fflush(stderr);
 	lock();
 	for(size_t i=0; i<channel->size(); i++)

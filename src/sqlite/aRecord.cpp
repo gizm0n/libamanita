@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <libamanita/sqlite/Record.h>
-#include <libamanita/sqlite/ResultSet.h>
-#include <libamanita/sqlite/SQLite.h>
+#include <libamanita/sqlite/aRecord.h>
+#include <libamanita/sqlite/aResultset.h>
+#include <libamanita/sqlite/aSQLite.h>
 
 
-Record::Record(ResultSet &rs,char **d,unsigned int s) {
+aRecord::aRecord(aResultset &rs,char **d,unsigned int s) {
 	if(d && s) {
 		data = (char **)malloc(s*sizeof(char *));
 		sz = s;
@@ -21,7 +21,7 @@ Record::Record(ResultSet &rs,char **d,unsigned int s) {
 	} else data = 0,sz = 0;
 }
 
-Record::~Record() {
+aRecord::~aRecord() {
 	if(data && sz) {
 		for(size_t i=0; i<sz; i++) free(data[i]);
 		free(data);

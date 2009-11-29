@@ -1,25 +1,25 @@
-#ifndef _LIBAMANITA_WORD_H
-#define _LIBAMANITA_WORD_H
+#ifndef _LIBAMANITA_AWORD_H
+#define _LIBAMANITA_AWORD_H
 
-class Random;
+class aRandom;
 
-class Word {
+class aWord {
 protected:
 	char *v,*v2,*c,*c2,*s,*d,*u;
 	int vl,cl,sl,dl,v2l,c2l,ul;
-	Random *rnd;
+	aRandom *rnd;
 	char *str;
 	size_t len;
 
 public:
 	static const char *vowels,*vowels2,*consonants,*consonants2,*singles,*doubles,*unaccepted;
 
-	Word(const char *v=0,const char *v2=0,const char *c=0,const char *c2=0,const char *s=0,
+	aWord(const char *v=0,const char *v2=0,const char *c=0,const char *c2=0,const char *s=0,
 			const char *d=0,const char *u=0);
-	~Word();
+	~aWord();
 
 	void setSeed(unsigned int n);
 	char *generate(int minlen,int maxlen);
 };
 
-#endif /* _LIBAMANITA_WORD_H */
+#endif /* _LIBAMANITA_AWORD_H */

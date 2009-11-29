@@ -2,16 +2,16 @@
 #include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <libamanita/Flood.h>
+#include <libamanita/aFlood.h>
 
 
-Flood::Flood(int wr) : size(0),stack(0),wrap(wr) {}
+aFlood::aFlood(int wr) : size(0),stack(0),wrap(wr) {}
 
-Flood::~Flood() {
+aFlood::~aFlood() {
 	if(stack) { free(stack);stack = 0; }
 }
 
-int Flood::fill(int *tbl,int w,int h,int x,int y,int t,int rx,int ry) {
+int aFlood::fill(int *tbl,int w,int h,int x,int y,int t,int rx,int ry) {
 	table = tbl,width = w,height = h;
 	pointer = 0,from = tbl[x+y*width],to = t,left = right = x,top = bottom = y;
 	if(to==from) return 0;
@@ -56,7 +56,7 @@ int Flood::fill(int *tbl,int w,int h,int x,int y,int t,int rx,int ry) {
 	return n;
 }
 
-bool Flood::push(int x,int y,bool b) {
+bool aFlood::push(int x,int y,bool b) {
 	if(((wrap&1) && (x<-width || x>=(width<<1))) || (!(wrap&1) && (x<0 || x>=width))) return b;
 	if(((wrap&2) && (y<-height || y>=(height<<1))) || (!(wrap&2) && (y<0 || y>=height))) return b;
 	int m = table[(x<0? x+width : (x>=width? x-width : x))+

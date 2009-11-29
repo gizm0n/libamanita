@@ -1,28 +1,28 @@
 
 #include "../config.h"
 #include <stdio.h>
-#include <libamanita/sdl/Graphics.h>
-#include <libamanita/sdl/Thread.h>
-#include <libamanita/gui/Display.h>
+#include <libamanita/sdl/aGraphics.h>
+#include <libamanita/sdl/aThread.h>
+#include <libamanita/sdl/aDisplay.h>
 
 
-RttiObjectInheritance(Display,Component);
+RttiObjectInheritance(aDisplay,aComponent);
 
 
-Display *Display::activeDisplay = 0;
+aDisplay *aDisplay::activeDisplay = 0;
 
-Display::Display() : Component(0,0,g.getScreenWidth(),g.getScreenHeight()) {
-	// setInstance(Screen::Class);
+aDisplay::aDisplay() : aComponent(0,0,g.getScreenWidth(),g.getScreenHeight()) {
+	// setInstance(Screen::aClass);
 	setScreen(0,0,getWidth(),getHeight());
 	setKeyListener(this);
 	setMouseListener(this);
 	setMouseMotionListener(this);
 }
 
-Display::~Display() {
+aDisplay::~aDisplay() {
 }
 
-void Display::setScreen(int x,int y,int w,int h) {
+void aDisplay::setScreen(int x,int y,int w,int h) {
 	screen.x = x,screen.y = y,screen.w = w,screen.h = h;
 }
 

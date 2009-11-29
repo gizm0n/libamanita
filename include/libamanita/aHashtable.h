@@ -1,11 +1,11 @@
-#ifndef _LIBAMANITA_HASHTABLE_H
-#define _LIBAMANITA_HASHTABLE_H
+#ifndef _LIBAMANITA_AHASHTABLE_H
+#define _LIBAMANITA_AHASHTABLE_H
 
 #include <string.h>
 #include <stdlib.h>
-#include <libamanita/Collection.h>
-#include <libamanita/Object.h>
-#include <libamanita/String.h>
+#include <libamanita/aCollection.h>
+#include <libamanita/aObject.h>
+#include <libamanita/aString.h>
 
 
 enum {
@@ -30,10 +30,10 @@ enum {
 	void put(key_type1 key,unsigned long value) { put(key_value_t,(value_t)value,key_type2,TYPE_INTPTR); } \
 	void put(key_type1 key,float value) { put(key_value_t,*(value_t *)((void *)&value),key_type2,TYPE_FLOAT); } \
 	void put(key_type1 key,const char *value) { put(key_value_t,(value_t)strdup(value),key_type2,TYPE_CHAR_P); } \
-	void put(key_type1 key,String *value) { put(key_value_t,(value_t)strdup(value->toCharArray()),key_type2,TYPE_CHAR_P); } \
-	void put(key_type1 key,String &value) { put(key_value_t,(value_t)strdup(value.toCharArray()),key_type2,TYPE_CHAR_P); } \
-	void put(key_type1 key,const Object *value) { put(key_value_t,(value_t)value,key_type2,TYPE_OBJECT_P); } \
-	void put(key_type1 key,const Object &value) { put(key_value_t,(value_t)&value,key_type2,TYPE_OBJECT_P); }
+	void put(key_type1 key,aString *value) { put(key_value_t,(value_t)strdup(value->toCharArray()),key_type2,TYPE_CHAR_P); } \
+	void put(key_type1 key,aString &value) { put(key_value_t,(value_t)strdup(value.toCharArray()),key_type2,TYPE_CHAR_P); } \
+	void put(key_type1 key,const aObject *value) { put(key_value_t,(value_t)value,key_type2,TYPE_OBJECT_P); } \
+	void put(key_type1 key,const aObject &value) { put(key_value_t,(value_t)&value,key_type2,TYPE_OBJECT_P); }
 
 #define _HT_PUT_KEY_STRING_VALUE_LIST(key_type1,key_value_t) \
 	void put(key_type1 key,void *value) { put(key_value_t,(value_t)value,TYPE_VOID_P); } \
@@ -47,16 +47,18 @@ enum {
 	void put(key_type1 key,unsigned long value) { put(key_value_t,(value_t)value,TYPE_INTPTR); } \
 	void put(key_type1 key,float value) { put(key_value_t,*(value_t *)((void *)&value),TYPE_FLOAT); } \
 	void put(key_type1 key,const char *value) { put(key_value_t,(value_t)strdup(value),TYPE_CHAR_P); } \
-	void put(key_type1 key,String *value) { put(key_value_t,(value_t)strdup(value->toCharArray()),TYPE_CHAR_P); } \
-	void put(key_type1 key,String &value) { put(key_value_t,(value_t)strdup(value.toCharArray()),TYPE_CHAR_P); } \
-	void put(key_type1 key,const Object *value) { put(key_value_t,(value_t)value,TYPE_OBJECT_P); } \
-	void put(key_type1 key,const Object &value) { put(key_value_t,(value_t)&value,TYPE_OBJECT_P); }
+	void put(key_type1 key,aString *value) { put(key_value_t,(value_t)strdup(value->toCharArray()),TYPE_CHAR_P); } \
+	void put(key_type1 key,aString &value) { put(key_value_t,(value_t)strdup(value.toCharArray()),TYPE_CHAR_P); } \
+	void put(key_type1 key,const aObject *value) { put(key_value_t,(value_t)value,TYPE_OBJECT_P); } \
+	void put(key_type1 key,const aObject &value) { put(key_value_t,(value_t)&value,TYPE_OBJECT_P); }
 
 
-class Vector;
+class aVector;
 
-class Hashtable : public Collection {
-RttiObjectInstance(Hashtable)
+class aHashtable : public aCollection {
+RttiObjectInstance(aHashtable)
+
+friend class iterator;
 
 protected:
 	struct node {
@@ -83,74 +85,73 @@ protected:
 	void put(const char *key,value_t value,type_t vt);
 	value_t get(value_t key,type_t kt);
 	value_t get(value_t key,type_t kt,type_t &type);
-	size_t get(value_t key,type_t kt,Vector &v);
+	size_t get(value_t key,type_t kt,aVector &v);
 	value_t remove(value_t key,type_t kt);
 	value_t remove(value_t key,type_t kt,type_t &type);
 	void rehash(style_t st);
 
 public:
 	class iterator {
-		friend class Hashtable;
-		private:
-			Hashtable *ht;
-			node *at;
-			long index;
-			iterator(Hashtable *ht) : ht(ht) { reset(); }
-		public:
-			iterator() : ht(0),at(0),index(ITER_INDEX_EMPTY) {}
-			void reset() { at = 0,index = ht && ht->sz? ITER_INDEX_START : ITER_INDEX_EMPTY; }
-			value_t first() { return first(TYPE_EMPTY,TYPE_EMPTY); }
-			value_t first(type_t kt,type_t vt=TYPE_EMPTY);
-			value_t next();
-			value_t next(type_t kt,type_t vt=TYPE_EMPTY);
-			value_t previous() { return previous(TYPE_EMPTY,TYPE_EMPTY); }
-			value_t previous(type_t kt,type_t vt=TYPE_EMPTY);
-			value_t last() { return last(TYPE_EMPTY,TYPE_EMPTY); }
-			value_t last(type_t kt,type_t vt=TYPE_EMPTY);
-			value_t remove();
+	friend class aHashtable;
+	private:
+		aHashtable *ht;
+		node *at;
+		long index;
+		iterator(aHashtable *ht) : ht(ht) { reset(); }
+	public:
+		iterator() : ht(0),at(0),index(ITER_INDEX_EMPTY) {}
+		void reset() { at = 0,index = ht && ht->sz? ITER_INDEX_START : ITER_INDEX_EMPTY; }
+		value_t first() { return first(TYPE_EMPTY,TYPE_EMPTY); }
+		value_t first(type_t kt,type_t vt=TYPE_EMPTY);
+		value_t next();
+		value_t next(type_t kt,type_t vt=TYPE_EMPTY);
+		value_t previous() { return previous(TYPE_EMPTY,TYPE_EMPTY); }
+		value_t previous(type_t kt,type_t vt=TYPE_EMPTY);
+		value_t last() { return last(TYPE_EMPTY,TYPE_EMPTY); }
+		value_t last(type_t kt,type_t vt=TYPE_EMPTY);
+		value_t remove();
 
-			value_t key() { return at? at->key : 0; }
-			type_t keyType() { return at? at->k_type : TYPE_EMPTY; }
-			value_t value() { return at? at->value : 0; }
-			type_t valueType() { return at? at->v_type : TYPE_EMPTY; }
-			void setValue(void *v) { _HT_SET_INT_VALUE(v,TYPE_VOID_P); }
-			void setValue(char v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
-			void setValue(unsigned char v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
-			void setValue(short v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
-			void setValue(unsigned short v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
-			void setValue(int v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
-			void setValue(unsigned int v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
-			void setValue(long v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
-			void setValue(unsigned long v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
+		value_t key() { return at? at->key : 0; }
+		type_t keyType() { return at? at->k_type : TYPE_EMPTY; }
+		value_t value() { return at? at->value : 0; }
+		type_t valueType() { return at? at->v_type : TYPE_EMPTY; }
+		void setValue(void *v) { _HT_SET_INT_VALUE(v,TYPE_VOID_P); }
+		void setValue(char v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
+		void setValue(unsigned char v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
+		void setValue(short v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
+		void setValue(unsigned short v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
+		void setValue(int v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
+		void setValue(unsigned int v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
+		void setValue(long v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
+		void setValue(unsigned long v) { _HT_SET_INT_VALUE(v,TYPE_INTPTR); }
 #if _WORDSIZE == 64
-			void setValue(float v) { double d = (double)v;_HT_SET_FLOAT_VALUE(d,TYPE_DOUBLE); }
-			void setValue(double v) { _HT_SET_FLOAT_VALUE(v,TYPE_DOUBLE); }
+		void setValue(float v) { double d = (double)v;_HT_SET_FLOAT_VALUE(d,TYPE_DOUBLE); }
+		void setValue(double v) { _HT_SET_FLOAT_VALUE(v,TYPE_DOUBLE); }
 #else
-			//void setValue(long long v);
-			//void setValue(unsigned long long v);
-			void setValue(float v) { _HT_SET_FLOAT_VALUE(v,TYPE_FLOAT); }
-			//void setValue(double v);
+		//void setValue(long long v);
+		//void setValue(unsigned long long v);
+		void setValue(float v) { _HT_SET_FLOAT_VALUE(v,TYPE_FLOAT); }
+		//void setValue(double v);
 #endif
-			//void setValue(long double v);
-			void setValue(const char *v) { _HT_SET_STRING_VALUE(v,TYPE_CHAR_P); }
-			void setValue(String *v) { _HT_SET_STRING_VALUE(v->toCharArray(),TYPE_CHAR_P); }
-			void setValue(String &v) { _HT_SET_STRING_VALUE(v.toCharArray(),TYPE_CHAR_P); }
-			void setValue(const Object *v) { _HT_SET_INT_VALUE(v,TYPE_OBJECT_P); }
-			void setValue(const Object &v) { _HT_SET_INT_VALUE(&v,TYPE_OBJECT_P); }
+		//void setValue(long double v);
+		void setValue(const char *v) { _HT_SET_STRING_VALUE(v,TYPE_CHAR_P); }
+		void setValue(aString *v) { _HT_SET_STRING_VALUE(v->toCharArray(),TYPE_CHAR_P); }
+		void setValue(aString &v) { _HT_SET_STRING_VALUE(v.toCharArray(),TYPE_CHAR_P); }
+		void setValue(const aObject *v) { _HT_SET_INT_VALUE(v,TYPE_OBJECT_P); }
+		void setValue(const aObject &v) { _HT_SET_INT_VALUE(&v,TYPE_OBJECT_P); }
 
-			iterator &operator++() { next(0);return *this; }
-			iterator &operator--() { previous(0);return *this; }
-			bool operator==(const iterator &iter) { return at==iter.at; }
-			bool operator!=(const iterator &iter) { return at!=iter.at; }
-			//operator void *() const { return at? (void *)at->value : 0; }
-			//operator long() const { return at && at->v_type==TYPE_INTPTR? (long)at->value : 0; }
-			//operator unsigned long() const { return at && at->v_type==TYPE_INTPTR? (unsigned long)at->value : 0; }
-			//operator char *() const { return at && at->v_type==TYPE_CHAR_P? (char *)at->value : 0; }
+		iterator &operator++() { next(0);return *this; }
+		iterator &operator--() { previous(0);return *this; }
+		bool operator==(const iterator &iter) { return at==iter.at; }
+		bool operator!=(const iterator &iter) { return at!=iter.at; }
+		//operator void *() const { return at? (void *)at->value : 0; }
+		//operator long() const { return at && at->v_type==TYPE_INTPTR? (long)at->value : 0; }
+		//operator unsigned long() const { return at && at->v_type==TYPE_INTPTR? (unsigned long)at->value : 0; }
+		//operator char *() const { return at && at->v_type==TYPE_CHAR_P? (char *)at->value : 0; }
 	};
-	friend class iterator;
 
-	Hashtable(size_t c=11,float l=0.5f,style_t st=0);
-	~Hashtable() { removeAll(); }
+	aHashtable(size_t c=11,float l=0.5f,style_t st=0);
+	~aHashtable() { removeAll(); }
 
 	iterator iterate();
 
@@ -170,10 +171,10 @@ _HT_PUT_KEY_INT_VALUE_LIST(long,(value_t)key,TYPE_INTPTR)
 _HT_PUT_KEY_INT_VALUE_LIST(unsigned long,(value_t)key,TYPE_INTPTR)
 _HT_PUT_KEY_INT_VALUE_LIST(float,*(value_t *)((void *)&key),TYPE_FLOAT)
 _HT_PUT_KEY_STRING_VALUE_LIST(const char *,key)
-_HT_PUT_KEY_STRING_VALUE_LIST(String *,key->toCharArray())
-_HT_PUT_KEY_STRING_VALUE_LIST(String &,key.toCharArray())
-_HT_PUT_KEY_INT_VALUE_LIST(Object *,(value_t)key->hash(),TYPE_OBJECT_P)
-_HT_PUT_KEY_INT_VALUE_LIST(Object &,(value_t)key.hash(),TYPE_OBJECT_P)
+_HT_PUT_KEY_STRING_VALUE_LIST(aString *,key->toCharArray())
+_HT_PUT_KEY_STRING_VALUE_LIST(aString &,key.toCharArray())
+_HT_PUT_KEY_INT_VALUE_LIST(aObject *,(value_t)key->hash(),TYPE_OBJECT_P)
+_HT_PUT_KEY_INT_VALUE_LIST(aObject &,(value_t)key.hash(),TYPE_OBJECT_P)
 
 	value_t get(void *key) { return get((value_t)key,TYPE_VOID_P); }
 	value_t get(char key) { return get((value_t)key,TYPE_INTPTR); }
@@ -186,8 +187,8 @@ _HT_PUT_KEY_INT_VALUE_LIST(Object &,(value_t)key.hash(),TYPE_OBJECT_P)
 	value_t get(unsigned long key) { return get((value_t)key,TYPE_INTPTR); }
 	value_t get(float key) { return get(*((value_t *)((void *)&key)),TYPE_FLOAT); }
 	value_t get(const char *key);
-	value_t get(Object *key) { return get((value_t)key->hash(),TYPE_OBJECT_P); }
-	value_t get(Object &key) { return get((value_t)key.hash(),TYPE_OBJECT_P); }
+	value_t get(aObject *key) { return get((value_t)key->hash(),TYPE_OBJECT_P); }
+	value_t get(aObject &key) { return get((value_t)key.hash(),TYPE_OBJECT_P); }
 
 	value_t get(void *key,type_t &type) { return get((value_t)key,TYPE_VOID_P,type); }
 	value_t get(char key,type_t &type) { return get((value_t)key,TYPE_INTPTR,type); }
@@ -200,8 +201,8 @@ _HT_PUT_KEY_INT_VALUE_LIST(Object &,(value_t)key.hash(),TYPE_OBJECT_P)
 	value_t get(unsigned long key,type_t &type) { return get((value_t)key,TYPE_INTPTR,type); }
 	value_t get(float key,type_t &type) { return get(*((value_t *)((void *)&key)),TYPE_FLOAT,type); }
 	value_t get(const char *key,type_t &type);
-	value_t get(Object *key,type_t &type) { return get((value_t)key->hash(),TYPE_OBJECT_P,type); }
-	value_t get(Object &key,type_t &type) { return get((value_t)key.hash(),TYPE_OBJECT_P,type); }
+	value_t get(aObject *key,type_t &type) { return get((value_t)key->hash(),TYPE_OBJECT_P,type); }
+	value_t get(aObject &key,type_t &type) { return get((value_t)key.hash(),TYPE_OBJECT_P,type); }
 
 	char *getString(void *key) { return (char *)get((value_t)key,TYPE_VOID_P); }
 	char *getString(char key) { return (char *)get((value_t)key,TYPE_INTPTR); }
@@ -214,22 +215,22 @@ _HT_PUT_KEY_INT_VALUE_LIST(Object &,(value_t)key.hash(),TYPE_OBJECT_P)
 	char *getString(unsigned long key) { return (char *)get((value_t)key,TYPE_INTPTR); }
 	char *getString(float key) { return (char *)get(*((value_t *)((void *)&key)),TYPE_FLOAT); }
 	char *getString(const char *key) { return (char *)get(key); }
-	char *getString(Object *key) { return (char *)get((value_t)key->hash(),TYPE_OBJECT_P); }
-	char *getString(Object &key) { return (char *)get((value_t)key.hash(),TYPE_OBJECT_P); }
+	char *getString(aObject *key) { return (char *)get((value_t)key->hash(),TYPE_OBJECT_P); }
+	char *getString(aObject &key) { return (char *)get((value_t)key.hash(),TYPE_OBJECT_P); }
 
-	size_t get(void *key,Vector &v) { return get((value_t)key,TYPE_VOID_P,v); }
-	size_t get(char key,Vector &v) { return get((value_t)key,TYPE_INTPTR,v); }
-	size_t get(unsigned char key,Vector &v) { return get((value_t)key,TYPE_INTPTR,v); }
-	size_t get(short key,Vector &v) { return get((value_t)key,TYPE_INTPTR,v); }
-	size_t get(unsigned short key,Vector &v) { return get((value_t)key,TYPE_INTPTR,v); }
-	size_t get(int key,Vector &v) { return get((value_t)key,TYPE_INTPTR,v); }
-	size_t get(unsigned int key,Vector &v) { return get((value_t)key,TYPE_INTPTR,v); }
-	size_t get(long key,Vector &v) { return get((value_t)key,TYPE_INTPTR,v); }
-	size_t get(unsigned long key,Vector &v) { return get((value_t)key,TYPE_INTPTR,v); }
-	size_t get(float key,Vector &v) { return get(*((value_t *)((void *)&key)),TYPE_FLOAT,v); }
-	size_t get(const char *key,Vector &v);
-	size_t get(Object *key,Vector &v) { return get((value_t)key->hash(),TYPE_OBJECT_P,v); }
-	size_t get(Object &key,Vector &v) { return get((value_t)key.hash(),TYPE_OBJECT_P,v); }
+	size_t get(void *key,aVector &v) { return get((value_t)key,TYPE_VOID_P,v); }
+	size_t get(char key,aVector &v) { return get((value_t)key,TYPE_INTPTR,v); }
+	size_t get(unsigned char key,aVector &v) { return get((value_t)key,TYPE_INTPTR,v); }
+	size_t get(short key,aVector &v) { return get((value_t)key,TYPE_INTPTR,v); }
+	size_t get(unsigned short key,aVector &v) { return get((value_t)key,TYPE_INTPTR,v); }
+	size_t get(int key,aVector &v) { return get((value_t)key,TYPE_INTPTR,v); }
+	size_t get(unsigned int key,aVector &v) { return get((value_t)key,TYPE_INTPTR,v); }
+	size_t get(long key,aVector &v) { return get((value_t)key,TYPE_INTPTR,v); }
+	size_t get(unsigned long key,aVector &v) { return get((value_t)key,TYPE_INTPTR,v); }
+	size_t get(float key,aVector &v) { return get(*((value_t *)((void *)&key)),TYPE_FLOAT,v); }
+	size_t get(const char *key,aVector &v);
+	size_t get(aObject *key,aVector &v) { return get((value_t)key->hash(),TYPE_OBJECT_P,v); }
+	size_t get(aObject &key,aVector &v) { return get((value_t)key.hash(),TYPE_OBJECT_P,v); }
 
 	value_t getByIndex(size_t index,type_t &type);
 
@@ -244,8 +245,8 @@ _HT_PUT_KEY_INT_VALUE_LIST(Object &,(value_t)key.hash(),TYPE_OBJECT_P)
 	bool contains(unsigned long key) { return get((value_t)key,TYPE_INTPTR)!=0; }
 	bool contains(float key) { return get(*((value_t *)((void *)&key)),TYPE_FLOAT)!=0; }
 	bool contains(const char *key) { return get(key)!=0; }
-	bool contains(Object *key) { return get((value_t)key->hash(),TYPE_OBJECT_P)!=0; }
-	bool contains(Object &key) { return get((value_t)key.hash(),TYPE_OBJECT_P)!=0; }
+	bool contains(aObject *key) { return get((value_t)key->hash(),TYPE_OBJECT_P)!=0; }
+	bool contains(aObject &key) { return get((value_t)key.hash(),TYPE_OBJECT_P)!=0; }
 
 	value_t remove(void *key) { return remove((value_t)key,TYPE_VOID_P); }
 	value_t remove(char key) { return remove((value_t)key,TYPE_INTPTR); }
@@ -258,8 +259,8 @@ _HT_PUT_KEY_INT_VALUE_LIST(Object &,(value_t)key.hash(),TYPE_OBJECT_P)
 	value_t remove(unsigned long key) { return remove((value_t)key,TYPE_INTPTR); }
 	value_t remove(float key) { return remove(*((value_t *)((void *)&key)),TYPE_FLOAT); }
 	value_t remove(const char *key);
-	value_t remove(Object *key) { return remove((value_t)key->hash(),TYPE_OBJECT_P); }
-	value_t remove(Object &key) { return remove((value_t)key.hash(),TYPE_OBJECT_P); }
+	value_t remove(aObject *key) { return remove((value_t)key->hash(),TYPE_OBJECT_P); }
+	value_t remove(aObject &key) { return remove((value_t)key.hash(),TYPE_OBJECT_P); }
 
 	value_t remove(void *key,type_t &type) { return remove((value_t)key,TYPE_VOID_P,type); }
 	value_t remove(char key,type_t &type) { return remove((value_t)key,TYPE_INTPTR,type); }
@@ -272,8 +273,8 @@ _HT_PUT_KEY_INT_VALUE_LIST(Object &,(value_t)key.hash(),TYPE_OBJECT_P)
 	value_t remove(unsigned long key,type_t &type) { return remove((value_t)key,TYPE_INTPTR,type); }
 	value_t remove(float key,type_t &type) { return remove(*((value_t *)((void *)&key)),TYPE_FLOAT,type); }
 	value_t remove(const char *key,type_t &type);
-	value_t remove(Object *key,type_t &type) { return remove((value_t)key->hash(),TYPE_OBJECT_P,type); }
-	value_t remove(Object &key,type_t &type) { return remove((value_t)key.hash(),TYPE_OBJECT_P,type); }
+	value_t remove(aObject *key,type_t &type) { return remove((value_t)key->hash(),TYPE_OBJECT_P,type); }
+	value_t remove(aObject &key,type_t &type) { return remove((value_t)key.hash(),TYPE_OBJECT_P,type); }
 
 	void removeAll();
 
@@ -283,9 +284,9 @@ _HT_PUT_KEY_INT_VALUE_LIST(Object &,(value_t)key.hash(),TYPE_OBJECT_P)
 	size_t load(FILE *fp);
 	size_t save(const char *fn);
 	size_t save(FILE *fp);
-	static void readPair(FILE *file,String &key,String &value);
+	static void readPair(FILE *file,aString &key,aString &value);
 };
 
 
-#endif /* _LIBAMANITA_HASHTABLE_H */
+#endif /* _LIBAMANITA_AHASHTABLE_H */
 
