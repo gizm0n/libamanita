@@ -15,8 +15,8 @@ public:
 	static long ceil(double d); /** < Round double d to ceil integer. */
 	static long round(double d); /** < Round double d to closest integer. */
 
-	static int min(int i1,int i2) { return i1<i2? i1 : i2; } /** < Return the smaller of the values. */
-	static int max(int i1,int i2) { return i1>i2? i1 : i2; } /** < Return the larger of the values. */
+	static int min(int i1,int i2) { return (i1<i2? i1 : i2); } /** < Return the smaller of the values. */
+	static int max(int i1,int i2) { return (i1>i2? i1 : i2); } /** < Return the larger of the values. */
 
 	static int log10(long n); /** < Return integer common logarithm (base-10) for n. */
 	static int log10(long long n); /** < Return integer common logarithm (base-10) for n. */
