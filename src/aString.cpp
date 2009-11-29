@@ -438,16 +438,16 @@ int String::compare(const char *s) { return str && s? strcmp(str,s) : (str? -256
 size_t String::count(const char *s) {
 	if(!s || !*s || !str || !len) return 0;
 	char *p = str;
-	size_t n,sl = strlen(s);
-	for(n=0; *p && (p=strstr(p,s)); p+=sl,n++);
+	size_t n = 0,sl = strlen(s);
+	for(; *p && (p=strstr(p,s)); p+=sl,n++);
 	return n;
 }
 
 size_t String::count(char c) {
 	if(c=='\0' || !str || !len) return 0;
-	char *p;
-	size_t n;
-	for(p=str; *p; p++) if(*p==c) n++;
+	char *p = str;
+	size_t n = 0;
+	for(; *p; p++) if(*p==c) n++;
 	return n;
 }
 
