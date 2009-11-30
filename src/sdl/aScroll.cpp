@@ -33,7 +33,7 @@ aScroll::aScroll(int id,int x,int y,int w,int h,int st) : aComponent(x,y,w,h) {
 
 aScroll::~aScroll() {}
 
-void aScroll::setDefaultSettings(aImage *img,Uint32 data[22]) {
+void aScroll::setDefaultSettings(aImage *img,uint32_t data[22]) {
 	_s = (_settings){
 		img,
 		{ img->getCell(data[0]),data[0],data[1],data[2],data[3] },

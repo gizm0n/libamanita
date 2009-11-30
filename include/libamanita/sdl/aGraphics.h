@@ -57,9 +57,9 @@ public:
 	void setClip(int x,int y,int w,int h) { cl = (SDL_Rect){ x,y,w,h };SDL_SetClipRect(canvas,&cl); }
 	SDL_Rect getClip() { return cl; }
 
-	Uint32 mapRGB(Uint32 c) { return SDL_MapRGB(canvas->format,c>>16,c>>8,c); }
-	Uint32 mapRGB(Uint8 r,Uint8 g,Uint8 b) { return SDL_MapRGB(canvas->format,r,g,b); }
-	void pixel(int x,int y,Uint32 c);
+	uint32_t mapRGB(uint32_t c) { return SDL_MapRGB(canvas->format,c>>16,c>>8,c); }
+	uint32_t mapRGB(Uint8 r,Uint8 g,Uint8 b) { return SDL_MapRGB(canvas->format,r,g,b); }
+	void pixel(int x,int y,uint32_t c);
 	void draw(int x,int y,aImage *s,int i) { draw(x,y,s->surface,s->getCell(i)); }
 	void draw(int x,int y,aImage &s,int i) { draw(x,y,s.surface,s.getCell(i)); }
 	void draw(int x,int y,aImage *s,SDL_Rect *src) { draw(x,y,s->surface,src); }
@@ -67,15 +67,15 @@ public:
 	void draw(int x,int y,aImage *s,SDL_Rect &src) { draw(x,y,s->surface,&src); }
 	void draw(int x,int y,aImage &s,SDL_Rect &src) { draw(x,y,s.surface,&src); }
 	void draw(int x,int y,SDL_Surface *s,SDL_Rect *src);
-	void drawLine(int x1,int y1,int x2,int y2,Uint32 c);
-	void drawCircle(int x,int y,int r,Uint32 c) {}
-	void drawEllipse(int x,int y,int w,int h,Uint32 c) {}
-	void drawDottedEllipse(int x,int y,int w,int h,Uint32 *p) {}
-	void drawRect(int x,int y,int w,int h,Uint32 c) {}
-	void drawDottedRect(int x,int y,int w,int h,Uint32 *p);
-	void fillEllipse(int x,int y,int w,int h,Uint32 c) {}
-	void fillRect(int x,int y,int w,int h,Uint32 c);
-	void floodFill(int x,int y,Uint32 c,int mode) {}
+	void drawLine(int x1,int y1,int x2,int y2,uint32_t c);
+	void drawCircle(int x,int y,int r,uint32_t c) {}
+	void drawEllipse(int x,int y,int w,int h,uint32_t c) {}
+	void drawDottedEllipse(int x,int y,int w,int h,uint32_t *p) {}
+	void drawRect(int x,int y,int w,int h,uint32_t c) {}
+	void drawDottedRect(int x,int y,int w,int h,uint32_t *p);
+	void fillEllipse(int x,int y,int w,int h,uint32_t c) {}
+	void fillRect(int x,int y,int w,int h,uint32_t c);
+	void floodFill(int x,int y,uint32_t c,int mode) {}
 
 	void blendLine(int x1,int y1,int x2,int y2,unsigned short c) {}
 	void blendCircle(int x,int y,int r,unsigned short c) {}

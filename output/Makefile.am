@@ -20,11 +20,11 @@ nobase_include_HEADERS = \
 	../include/libamanita/aString.h \
 	../include/libamanita/aVector.h \
 	../include/libamanita/aWord.h \
+	../include/libamanita/gui/aEvent.h \
 	../include/libamanita/sdl/aButton.h \
 	../include/libamanita/sdl/aClient.h \
 	../include/libamanita/sdl/aComponent.h \
 	../include/libamanita/sdl/aDisplay.h \
-	../include/libamanita/sdl/aEvent.h \
 	../include/libamanita/sdl/aFont.h \
 	../include/libamanita/sdl/aGraphics.h \
 	../include/libamanita/sdl/aHttp.h \

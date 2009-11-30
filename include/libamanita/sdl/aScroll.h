@@ -41,7 +41,7 @@ public:
 
 	/**
 	 * aImage *img - The image should contain all the scrollimages mapped on the same image
-	 * Uint32 data[35] - The array should be mapped as follows:
+	 * uint32_t data[35] - The array should be mapped as follows:
 	 *  0 = Up aButton, plain
 	 *  1 = Up aButton, active
 	 *  2 = Up aButton, down
@@ -65,7 +65,7 @@ public:
 	 * 20 = Vertical Scrollbar
 	 * 21 = Horizontal Scrollbar
 	 **/
-	static void setDefaultSettings(aImage *img,Uint32 data[22]);
+	static void setDefaultSettings(aImage *img,uint32_t data[22]);
 
 	void setStyle(int st=0);
 	void setValues(int v,int mn,int mx,int i=1);

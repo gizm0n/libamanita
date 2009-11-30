@@ -25,7 +25,7 @@ aTooltip::~aTooltip() {
 	if(tt.lines) { free(tt.lines);tt.lines = 0,tt.nlines = 0; }
 }
 
-void aTooltip::setDefaultSettings(aImage *img,aFont *f,Uint32 data[13]) {
+void aTooltip::setDefaultSettings(aImage *img,aFont *f,uint32_t data[13]) {
 	_s = (_settings){
 		img,f,
 		img->getCell(data[0]),img->getCell(data[1]),img->getCell(data[2]),

@@ -32,7 +32,7 @@ aWindow::~aWindow() {
 fprintf(stderr,"%sDialog::~aWindow()\n",indent);
 }
 
-void aWindow::setDefaultSettings(aImage *img,aImage *bgimg,aFont *f,Uint32 data[21]) {
+void aWindow::setDefaultSettings(aImage *img,aImage *bgimg,aFont *f,uint32_t data[21]) {
 	_s = (_settings){
 		img,bgimg,data[0],data[0],f,
 		{

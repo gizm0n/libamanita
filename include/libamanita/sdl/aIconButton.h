@@ -28,13 +28,13 @@ public:
 
 	/**
 	 * aImage *img - The image should contain all the images mapped on the same image
-	 * Uint32 data[4] - The array should be mapped as follows:
+	 * uint32_t data[4] - The array should be mapped as follows:
 	 *  0 = Default blank Iconbutton, plain
 	 *  1 = Default blank Iconbutton, active
 	 *  2 = Default blank Iconbutton, down
 	 *  3 = Default blank Iconbutton, disabled
 	 **/
-	static void setDefaultSettings(aImage *img,Uint32 data[4]);
+	static void setDefaultSettings(aImage *img,uint32_t data[4]);
 
 	void setImage(aImage *img,int plain,int active,int down,int disabled);
 	void paint(time_t time);

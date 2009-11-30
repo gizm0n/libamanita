@@ -26,7 +26,7 @@ void aThread::kill() {
 }
 
 void aThread::pauseFPS(int fps) {
-	Uint32 ticks = SDL_GetTicks();
+	uint32_t ticks = SDL_GetTicks();
 	int pause = t-ticks;
 //fprintf(out,"ticks=%d,next=%d,pause=%d, => %d\n",ticks,next,pause,ticks+pause+(1000/fps));
 	if(pause>0) SDL_Delay(pause);

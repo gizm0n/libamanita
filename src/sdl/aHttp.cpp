@@ -302,7 +302,7 @@ fflush(stderr);
 			}
 
 			t3 = SDL_GetTicks();
-			if(SDLNet_CheckSockets(set,(Uint32)-1)<=0) error = 5;
+			if(SDLNet_CheckSockets(set,(uint32_t)-1)<=0) error = 5;
 			else {
 				t4 = SDL_GetTicks();
 				int r = SDLNet_TCP_Recv(sock,buf,2048);

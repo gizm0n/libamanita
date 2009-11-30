@@ -32,7 +32,7 @@ public:
 	 * aImage *img - The image should contain all the images mapped on the same image
 	 * aImage *ttimg - The image should contain all the tooltipimages mapped on the same image
 	 * aFont *f - Default font used for tooltip
-	 * Uint32 data[35] - The array should be mapped as follows:
+	 * uint32_t data[35] - The array should be mapped as follows:
 	 *  0 = Top left corner of tooltip
 	 *  1 = Top border of tooltip
 	 *  2 = Top right of tooltip
@@ -47,7 +47,7 @@ public:
 	 * 11 = Insets, Right
 	 * 12 = Insets, Bottom
 	 **/
-	static void setDefaultSettings(aImage *img,aFont *f,Uint32 data[13]);
+	static void setDefaultSettings(aImage *img,aFont *f,uint32_t data[13]);
 
 	void setText(const char *text);
 	virtual bool paintToolTip(aTooltipEvent &tte);

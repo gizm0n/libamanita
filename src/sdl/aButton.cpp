@@ -38,7 +38,7 @@ printf("%saButton::~aButton()\n",indent);
 	if(bt.text) { free(bt.text);bt.text = 0; }
 }
 
-void aButton::setDefaultSettings(aImage *img,aFont *f,Uint32 data[36]) {
+void aButton::setDefaultSettings(aImage *img,aFont *f,uint32_t data[36]) {
 	_s = (_settings){
 		img,f,
 		{{

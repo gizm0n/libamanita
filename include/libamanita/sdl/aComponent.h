@@ -1,10 +1,11 @@
 #ifndef _LIBAMANITA_SDL_ACOMPONENT_H
 #define _LIBAMANITA_SDL_ACOMPONENT_H
 
+#include <stdint.h>
 #include <libamanita/aObject.h>
 #include <libamanita/aVector.h>
+#include <libamanita/gui/aEvent.h>
 #include <libamanita/sdl/aThread.h>
-#include <libamanita/sdl/aEvent.h>
 
 
 class aTooltip;
@@ -25,17 +26,26 @@ private:
 		MODAL				= 0x00001000,
 	};
 	struct component {
-		size_t cnt;
-		Uint32 id,status;
-		short x,y,w,h;
-		aComponent *p;					// Parent
-		aVector *ch;						// Children
-		aTooltip *tt;
+		size_t cnt;							/**< Counter for number of bindings to component. When 0 component is deleted. */
+		uint32_t id;						/**< ID. */
+		uint32_t status;					/**< Status. */
+		short x;								/**< X-coordinate. */
+		short y;								/**< Y-coordinate. */
+		short w;								/**< Width. */
+		short h;								/**< Height. */
+		aComponent *p;						/**< Parent. */
+		aVector *ch;						/**< Children. */
+		aTooltip *tt;						/**< Tooltip message. */
 	};
 	component com;
 
 protected:
-	static aComponent *componentFocus,*keyFocus,*mouseDownFocus,*mouseOverFocus,*toolTipFocus;
+	static aComponent *componentFocus;
+	static aComponent *keyFocus;
+	static aComponent *mouseDownFocus;
+	static aComponent *mouseOverFocus;
+	static aComponent *toolTipFocus;
+
 	aFocusListener *focusListener;
 	aKeyListener *keyListener;
 	aMouseListener *mouseListener;
@@ -53,15 +63,15 @@ public:
 	aComponent(aComponent &c);
 	virtual ~aComponent();
 
-	void setID(Uint32 i) { com.id = i; }
-	Uint32 getID() { return com.id; }
-	Uint32 getStatus() { return com.status; }
+	void setID(uint32_t i) { com.id = i; }
+	uint32_t getID() { return com.id; }
+	uint32_t getStatus() { return com.status; }
 
 	virtual void add(aComponent *c);
 	virtual void remove(aComponent *c);
 	void moveToTop();
-	aComponent *getaComponent(size_t i);
-	aComponent *getaComponent(int x,int y);
+	aComponent *getComponent(size_t i);
+	aComponent *getComponent(int x,int y);
 	aComponent *getParent() { return com.p; }
 	void setBounds(int x,int y,int w,int h) { setLocation(x,y);com.w = w,com.h = h; }
 	void setLocation(int x,int y) { moveLocation(x-com.x,y-com.y); }
