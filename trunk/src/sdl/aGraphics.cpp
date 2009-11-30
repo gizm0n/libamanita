@@ -36,7 +36,7 @@ void aGraphics::close() {
 }
 
 
-void aGraphics::pixel(int x,int y,Uint32 c) {
+void aGraphics::pixel(int x,int y,uint32_t c) {
 	int bpp = canvas->format->BytesPerPixel;
 	char *p = ((char *)canvas->pixels)+x*bpp+y*canvas->pitch,*cp = (char *)&c;
 	for(; bpp; bpp--) *p++ = *cp++;
@@ -48,7 +48,7 @@ void aGraphics::draw(int x,int y,SDL_Surface *s,SDL_Rect *src) {
 }
 
 // Bresenhem's line algorithm
-void aGraphics::drawLine(int x1,int y1,int x2,int y2,Uint32 c) {
+void aGraphics::drawLine(int x1,int y1,int x2,int y2,uint32_t c) {
 	int pitch = canvas->pitch,bpp = canvas->format->BytesPerPixel;
 	char *pixels = (char *)canvas->pixels,*p,*cp;
 	int xinc1,xinc2,yinc1,yinc2,den,num,numadd,npx,cpx;
@@ -70,7 +70,7 @@ void aGraphics::drawLine(int x1,int y1,int x2,int y2,Uint32 c) {
 	}
 }
 
-void aGraphics::drawDottedRect(int x,int y,int w,int h,Uint32 *p) {
+void aGraphics::drawDottedRect(int x,int y,int w,int h,uint32_t *p) {
 	if(x+w<=cl.x || x>=cl.x+cl.w || y+h<=cl.y || y>=cl.y+cl.h) return;
 	int pitch = canvas->pitch,bpp = canvas->format->BytesPerPixel;
 	char *pixels = (char *)canvas->pixels,*cp;
@@ -88,7 +88,7 @@ void aGraphics::drawDottedRect(int x,int y,int w,int h,Uint32 *p) {
 
 
 
-void aGraphics::fillRect(int x,int y,int w,int h,Uint32 c) {
+void aGraphics::fillRect(int x,int y,int w,int h,uint32_t c) {
 	SDL_Rect r = (SDL_Rect){x,y,w,h};
 	SDL_FillRect(canvas,&r,c);
 }

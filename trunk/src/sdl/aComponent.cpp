@@ -105,15 +105,15 @@ void aComponent::moveToTop() {
 	}
 }
 
-aComponent *aComponent::getaComponent(size_t i) {
+aComponent *aComponent::getComponent(size_t i) {
 	return com.ch && i<com.ch->size()? (aComponent *)(*com.ch)[i] : 0;
 }
 
-aComponent *aComponent::getaComponent(int x,int y) {
+aComponent *aComponent::getComponent(int x,int y) {
 	if(!isVisible()) return 0;
 	aComponent *c = 0;
 	if(com.ch) for(long i=com.ch->size()-1; !c && i>=0l; i--)
-		c = ((aComponent *)(*com.ch)[i])->getaComponent(x,y);
+		c = ((aComponent *)(*com.ch)[i])->getComponent(x,y);
 	return c? c :  (contains(x,y)? this : 0);
 }
 
@@ -183,7 +183,7 @@ bool aComponent::handleKeyUp(aKeyEvent &ke) {
 bool aComponent::handleMouseDown(aMouseEvent &me) {
 	if(toolTipFocus) toolTipTimer = 0;
 	if(!isVisible()) return false;
-	aComponent *c = getaComponent(me.x,me.y);
+	aComponent *c = getComponent(me.x,me.y);
 	if(!setKeyFocus(c)) return false;
 	setMouseDownFocus(c);
 	if(c) {
@@ -208,7 +208,7 @@ bool aComponent::handleMouseUp(aMouseEvent &me) {
 }
 bool aComponent::handleMouseMove(aMouseMotionEvent &mme) {
 	if(!isVisible()) return false;
-	aComponent *c = getaComponent(mme.x,mme.y);
+	aComponent *c = getComponent(mme.x,mme.y);
 	setMouseOverFocus(c);
 	if(c && c->mouseMotionListener) {
 		mme.source = c;

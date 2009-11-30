@@ -1,8 +1,8 @@
-#ifndef _LIBAMANITA_SDL_AEVENT_H
-#define _LIBAMANITA_SDL_AEVENT_H
+#ifndef _LIBAMANITA_GUI_AEVENT_H
+#define _LIBAMANITA_GUI_AEVENT_H
 
 
-#include <SDL/SDL_stdinc.h>
+#include <stdint.h>
 
 
 class aComponent;
@@ -14,29 +14,29 @@ struct aFocusEvent {
 };
 struct aKeyEvent {
 	aComponent *source;
-	Uint32 sym;
-	Uint32 mod;
-	Uint16 unicode;
+	uint32_t sym;
+	uint32_t mod;
+	uint16_t unicode;
 };
 struct aMouseEvent {
 	aComponent *source;
-	Uint16 x,y;
+	uint16_t x,y;
 	Uint8 button;
-	Uint16 clicks;
+	uint16_t clicks;
 };
 struct aMouseMotionEvent {
 	aComponent *source;
-	Uint16 x,y;
-	Uint16 dx,dy;
+	uint16_t x,y;
+	uint16_t dx,dy;
 };
 struct aActionEvent {
 	aComponent *source;
-	Uint32 params;
+	uint32_t params;
 };
 struct aTooltipEvent {
 	aComponent *source;
-	Uint16 x,y;
-	Uint16 showTimer,hideTimer;
+	uint16_t x,y;
+	uint16_t showTimer,hideTimer;
 };
 
 class aFocusListener {

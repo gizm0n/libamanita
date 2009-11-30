@@ -474,14 +474,14 @@ bool aImage::save(const char *fn,SDL_Surface *s) {
 							case 1:
 								for(i=0; i<s->h; i++) {
 									for(j=0,p=((Uint8 *)s->pixels)+i*s->pitch; j<s->w; j++,p++)
-										SDL_GetRGB((Uint32)*p,s->format,&line[j].r,&line[j].g,&line[j].b);
+										SDL_GetRGB((uint32_t)*p,s->format,&line[j].r,&line[j].g,&line[j].b);
 									png_write_row(png_ptr,(png_bytep)line);
 								}
 								break;
 							case 2:
 								for(i=0; i<s->h; i++) {
 									for(j=0,p=((Uint8 *)s->pixels)+i*s->pitch; j<s->w; j++,p+=2)
-										SDL_GetRGB((Uint32)*((Uint16 *)p),s->format,&line[j].r,&line[j].g,&line[j].b);
+										SDL_GetRGB((uint32_t)*((uint16_t *)p),s->format,&line[j].r,&line[j].g,&line[j].b);
 									png_write_row(png_ptr,(png_bytep)line);
 								}
 								break;
@@ -489,13 +489,13 @@ bool aImage::save(const char *fn,SDL_Surface *s) {
 								if(SDL_BYTEORDER==SDL_BIG_ENDIAN) {
 									for(i=0; i<s->h; i++) {
 										for(j=0,p=((Uint8 *)s->pixels)+i*s->pitch; j<s->w; j++,p+=3)
-											SDL_GetRGB((Uint32)((p[0]<<16)|(p[1]<<8)|p[2]),s->format,&line[j].r,&line[j].g,&line[j].b);
+											SDL_GetRGB((uint32_t)((p[0]<<16)|(p[1]<<8)|p[2]),s->format,&line[j].r,&line[j].g,&line[j].b);
 										png_write_row(png_ptr,(png_bytep)line);
 									}
 								} else {
 									for(i=0; i<s->h; i++) {
 										for(j=0,p=((Uint8 *)s->pixels)+i*s->pitch; j<s->w; j++,p+=3)
-											SDL_GetRGB((Uint32)(p[0]|(p[1]<<8)|(p[2]<<16)),s->format,&line[j].r,&line[j].g,&line[j].b);
+											SDL_GetRGB((uint32_t)(p[0]|(p[1]<<8)|(p[2]<<16)),s->format,&line[j].r,&line[j].g,&line[j].b);
 										png_write_row(png_ptr,(png_bytep)line);
 									}
 								}
@@ -503,7 +503,7 @@ bool aImage::save(const char *fn,SDL_Surface *s) {
 							case 4:
 								for(i=0; i<s->h; i++) {
 									for(j=0,p=((Uint8 *)s->pixels)+i*s->pitch; j<s->w; j++,p+=4)
-										SDL_GetRGB(*((Uint32 *)p),s->format,&line[j].r,&line[j].g,&line[j].b);
+										SDL_GetRGB(*((uint32_t *)p),s->format,&line[j].r,&line[j].g,&line[j].b);
 									png_write_row(png_ptr,(png_bytep)line);
 								}
 								break;

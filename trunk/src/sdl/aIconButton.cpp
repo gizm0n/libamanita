@@ -26,7 +26,7 @@ aIconButton::~aIconButton() {
 printf("%sIconButton::~aIconButton()\n",indent);
 }
 
-void aIconButton::setDefaultSettings(aImage *img,Uint32 data[4]) {
+void aIconButton::setDefaultSettings(aImage *img,uint32_t data[4]) {
 	_s = (_settings){
 		img,
 		data[0],data[1],data[2],data[3],

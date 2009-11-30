@@ -22,7 +22,7 @@ protected:
 	struct _settings {
 		aImage *img;
 		aImage *bgimg;
-		Uint32 bgindex,bgcol;
+		uint32_t bgindex,bgcol;
 		aFont *font;
 		struct frame {
 			SDL_Rect *tl,*t,*tr,*l,*r,*bl,*b,*br;
@@ -36,7 +36,7 @@ protected:
 
 	int style;
 	aImage *bgimg;
-	Uint32 bgindex,bgcol;
+	uint32_t bgindex,bgcol;
 	_settings::frame fr;
 	aIconButton *cb;
 	const char *tcap,*bcap;
@@ -73,13 +73,13 @@ public:
 	 * 19 = Close aButton, down (button pressed) image
 	 * 20 = Close aButton, disabled image
 	 **/
-	static void setDefaultSettings(aImage *img,aImage *bgimg,aFont *f,Uint32 data[21]);
+	static void setDefaultSettings(aImage *img,aImage *bgimg,aFont *f,uint32_t data[21]);
 
 	void setStyle(int st);
 	void setBackground(aImage *img,int index=0) { bgimg = img,bgindex = index; }
 	void setBackground(aImage &img,int index=0) { bgimg = &img,bgindex = index; }
-	void setBackground(Uint32 col) { bgcol = col; }
-	Uint32 getBackground() { return bgcol; }
+	void setBackground(uint32_t col) { bgcol = col; }
+	uint32_t getBackground() { return bgcol; }
 	void setTopCaption(const char *tc,aFont *f=0) { tcap = tc,tf = f? f : _s.font; }
 	void setBottomCaption(const char *bc,aFont *f=0) { bcap = bc,bf = f? f : _s.font; }
 	void moveToCenter();

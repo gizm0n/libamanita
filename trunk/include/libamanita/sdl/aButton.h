@@ -50,7 +50,7 @@ public:
 	/**
 	 * aImage *img - The image should contain all the buttonimages mapped on the same image
 	 * aFont *f - Default font used for buttontext
-	 * Uint32 data[35] - The array should be mapped as follows:
+	 * uint32_t data[35] - The array should be mapped as follows:
 	 *  0 = Top left corner, plain
 	 *  1 = Top border, plain
 	 *  2 = Top right corner, plain
@@ -88,7 +88,7 @@ public:
 	 * 34 = Bottom right corner, disabled
 	 * 35 = Center Background, disabled
 	 */
-	static void setDefaultSettings(aImage *img,aFont *f,Uint32 data[36]);
+	static void setDefaultSettings(aImage *img,aFont *f,uint32_t data[36]);
 
 	void setIcon(aImage *i,int n=0) { bt.ic.img = i,bt.ic.index = n; }
 	void setText(const char *text);

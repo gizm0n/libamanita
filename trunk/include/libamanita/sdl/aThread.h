@@ -1,12 +1,13 @@
 #ifndef _LIBAMANITA_SDL_ATHREAD_H
 #define _LIBAMANITA_SDL_ATHREAD_H
 
+#include <stdint.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_thread.h>
 
 class aThread {
 private:
-	Uint32 t;
+	uint32_t t;
 	SDL_Thread *h;
 
 public:
