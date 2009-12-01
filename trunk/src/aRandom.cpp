@@ -5,42 +5,50 @@
 #include <libamanita/aRandom.h>
 
 
+#define GENERATE_NUMBER (num=1812433253*((num^(num>>30))+(index++)))
+#define RANDOM_NUMBER (num=(table[(index++)&0xff]^=(table[num&0xff]+num)))
 
 const double n2p32 = 1.0/4294967295.0;
 aRandom rnd = aRandom();
 
 
-aRandom::aRandom(seed_t n) { setSeed(n); }
+aRandom::aRandom(random_t n) { setSeed(n); }
 aRandom::aRandom() { setSeed(time(0)); }
 
-uint32_t aRandom::generate() { return (num=1812433253*((num^(num>>30))+(index++))); }
 
-void aRandom::setSeed(seed_t n) {
+void aRandom::setSeed(random_t n) {
 	seed = n,num = n,index = 1;
 	for(int i=0; i<256; i++) {
-		table[i] = generate();
+		table[i] = GENERATE_NUMBER;
 // printf("table[%3d] = %8lx\n",i,table[i]);
 	}
 	index = 0;
 }
 
-void aRandom::setSeed(seed_t *n,size_t l) {
+void aRandom::setSeed(random_t *n,size_t l) {
 	seed = 0,num = 0,index = 1;
 	for(size_t i=0,j=0; i<256; i++,j++) {
 		if(j==l) j = 0;
 		num ^= n[j];
-		table[i] = generate();
+		table[i] = GENERATE_NUMBER;
 // printf("n[%3d] = %8lx\ttable[%3d] = %8lx\n",j,n[j],i,table[i]);
 	}
 	index = 0;
 }
 
-uint32_t aRandom::uint32() { return (num=(table[(index++)&0xff]^=(table[num&0xff]+num))); }
+
+uint32_t aRandom::uint32() { return (uint32_t)RANDOM_NUMBER; }
+
 uint64_t aRandom::uint64() {
-	uint64_t n = (uint64_t)uint32();
-	n = (n<<32)|(uint64_t)uint32();
+#if _WORDSIZE == 64
+	return (uint64_t)RANDOM_NUMBER;
+#else
+	uint64_t n = (uint64_t)RANDOM_NUMBER;
+	n = (n<<32)|(uint64_t)RANDOM_NUMBER;
 	return n;
+#endif
 }
+
 double aRandom::real64() { return (double)uint32()*n2p32; }
 
 uint32_t aRandom::uintN(int n) {
@@ -113,14 +121,33 @@ int aRandom::oeD8(int n) {
 	return v;
 }
 
-uint32_t aRandom::rollTable(uint32_t *t,size_t l,uint32_t s) {
-	if(!t || !l) return 0;
-	uint32_t i = 0;
+uint32_t aRandom::rollTable(uint32_t *t,uint32_t l,uint32_t s) {
+	if(!t) return 0;
+	if(!l) for(l=0; t[l]>0; l++);
+	if(!l) return 0;
 	if(!s) s = aMath::sum(t,l);
 	s = uint32(s);
+	uint32_t i = 0;
 	while(s>=t[i]) s -= t[i++];
 	return i;
 }
 
+
+void aRandom::write(FILE *fp) {
+	if(!fp // To keep compiler happy.
+		|| !fwrite(&seed,sizeof(random_t),1,fp)
+		|| !fwrite(&num,sizeof(random_t),1,fp)
+		|| !fwrite(&index,sizeof(random_t),1,fp)
+		|| !fwrite(table,256*sizeof(random_t),1,fp)) return;
+}
+
+
+void aRandom::read(FILE *fp) {
+	if(!fp // To keep compiler happy.
+		|| !fread(&seed,sizeof(random_t),1,fp)
+		|| !fread(&num,sizeof(random_t),1,fp)
+		|| !fread(&index,sizeof(random_t),1,fp)
+		|| !fread(table,256*sizeof(random_t),1,fp)) return;
+}
 
 
