@@ -1,0 +1,13 @@
+
+
+2009.11.29
+The GTK+ version works nicely, with no apparent bugs. Tried compiling on windows and compiles and
+runs, but not very well, so the plan at the moment is to make two versions, one GTK+ and another
+for win32 within the same codebase.
+
+So far the astrology tool and the tarot tool has been implemented with cairo and webkit.
+
+
+
+2009.10.25
+Opened an account for Mantichora Tools at Google Code, it is now officially an open source project.

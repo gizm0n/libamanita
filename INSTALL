@@ -1,0 +1,11 @@
+
+To build the project, run scripts like this:
+
+./autogen.sh
+./configure
+make
+sudo make install
+
+
+
+

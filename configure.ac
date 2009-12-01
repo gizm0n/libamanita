@@ -37,7 +37,7 @@ AC_FUNC_REALLOC
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([floor memset pow sqrt strchr strdup strpbrk strstr strnicmp])
 
-AC_CONFIG_FILES([Makefile output/Makefile])
+AC_CONFIG_FILES([Makefile bin/Makefile])
 AC_OUTPUT
 
 
