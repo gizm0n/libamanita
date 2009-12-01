@@ -1,4 +1,4 @@
 
-SUBDIRS = output
+SUBDIRS = bin
 
 
