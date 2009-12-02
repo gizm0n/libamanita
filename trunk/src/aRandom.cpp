@@ -5,7 +5,7 @@
 #include <libamanita/aRandom.h>
 
 
-#define GENERATE_NUMBER (num=1812433253*((num^(num>>30))+(index++)))
+#define GENERATE_NUMBER (num=(1812433253*((num^(num>>30))+(index++))))
 #define RANDOM_NUMBER (num=(table[(index++)&0xff]^=(table[num&0xff]+num)))
 
 const double n2p32 = 1.0/4294967295.0;
@@ -49,18 +49,18 @@ uint64_t aRandom::uint64() {
 #endif
 }
 
-double aRandom::real64() { return (double)uint32()*n2p32; }
-
-uint32_t aRandom::uintN(int n) {
+/*uint32_t aRandom::uintN(int n) {
 	if(n<=0 || n>32) return 0;
 	int j;
 	uint32_t r = uint32(),i,m = 0xffffffff>>(32-n);
 	for(j=32,i=0x80000000; i && !(r&i); j--,i>>=1);
-// printf("aRandom::getUintN(r=%lx,i=%lx,m=%lx,j=%d)\n",r,i,m,j);
+//printf("aRandom::getUintN(r=%lx,i=%lx,m=%lx,j=%d)\n",r,i,m,j);
 	if(j>=n) return r>>(j-n);
 	r <<= n-j,m >>= n-(n-j);
 	return r|(uint32()&m);
-}
+}*/
+
+double aRandom::real64() { return (double)uint32()*n2p32; }
 
 int aRandom::roll(int d,int n) {
 	if(d<=1) return d*n;
@@ -121,14 +121,15 @@ int aRandom::oeD8(int n) {
 	return v;
 }
 
-uint32_t aRandom::rollTable(uint32_t *t,uint32_t l,uint32_t s) {
-	if(!t) return 0;
-	if(!l) for(l=0; t[l]>0; l++);
-	if(!l) return 0;
-	if(!s) s = aMath::sum(t,l);
-	s = uint32(s);
+uint32_t aRandom::rollTable(uint32_t *t,uint32_t n,uint32_t l) {
+	if(!t || !*t) return 0;
+	if(!n) {
+		if(!l) for(; t[l]>0; l++);
+		n = aMath::sum(t,l);
+	}
+	n = uint32(n);
 	uint32_t i = 0;
-	while(s>=t[i]) s -= t[i++];
+	while(n>=t[i]) n -= t[i++];
 	return i;
 }
 
