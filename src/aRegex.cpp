@@ -545,12 +545,12 @@ blockstack *resizeStack(blockstack *st,uint32_t &stsz,uint32_t size) {
 
 #ifdef PRINT_OUTPUT
 void printSetStack(blockstack &st,uint32_t stn,char c,int n) {
-printf("\nSET STACK! - - - - - - - - - - - - - - - - - - - - - - - - - - - - -[%lu]%c %d\n\
-bl=%p,p=%lu,i=%d,l=%d,a=%d,loops=%d,s=%d\n",stn,c,n,st.bl,st.p,st.i,st.l,st.a,st.loops,st.s);
+	printf("\nSET STACK! - - - - - - - - - - - - - - - - - - - - - - - - - - - - -[%lu]%c %d\n"
+		"bl=%p,p=%lu,i=%d,l=%d,a=%d,loops=%d,s=%d\n",stn,c,n,st.bl,st.p,st.i,st.l,st.a,st.loops,st.s);
 }
 void printGetStack(blockstack &st,uint32_t stn) {
-printf("\nGET STACK! -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-[%lu]\n\
-bl=%p,p=%lu,i=%d,l=%d,a=%d,loops=%d,s=%d\n",stn,st.bl,st.p,st.i,st.l,st.a,st.loops,st.s);
+	printf("\nGET STACK! -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-[%lu]\n"
+		"bl=%p,p=%lu,i=%d,l=%d,a=%d,loops=%d,s=%d\n",stn,st.bl,st.p,st.i,st.l,st.a,st.loops,st.s);
 }
 #endif
 

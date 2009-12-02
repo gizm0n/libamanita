@@ -432,7 +432,9 @@ aInteger &aInteger::random(size_t n) {
 		if(i>len) resize(i-len);
 		else len = i;
 		for(i=0; i<len-1; i++) num[i] = ::rnd.uint32();
-		num[len-1] = ::rnd.uintN((n%32)==0? 32 : n%32);
+		n %= 32;
+		if(n==0) n = 32;
+		num[len-1] = (n==32? ::rnd.uint32() : ::rnd.uintN(n)) | (0x80000000>>(32-n));
 	}
 	return *this;
 }

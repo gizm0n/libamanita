@@ -465,7 +465,7 @@ size_t aHashtable::load(FILE *fp) {
 		if(key.length()>0 && val.length()>0) {
 			put(key,val);
 			s++;
-//fprintf(stderr,"aHashtable::load(key='%s',val='%s')\n",key.toString(),val.toString());
+//fprintf(stderr,"aHashtable::load(key='%s',val='%s')\n",key.toCharArray(),val.toCharArray());
 //fflush(stderr);
 		}
 	}
