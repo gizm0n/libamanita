@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_AITERATOR_H
-#define _LIBAMANITA_AITERATOR_H
+#ifndef _LIBAMANITA_ITERATOR_H
+#define _LIBAMANITA_ITERATOR_H
+
+/**
+ * @file libamanita/aIterator.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 
 class aIterator {
@@ -13,5 +20,5 @@ public:
 	virtual void *remove() = 0;
 };
 
-#endif /* _LIBAMANITA_AITERATOR_H */
+#endif /* _LIBAMANITA_ITERATOR_H */
 

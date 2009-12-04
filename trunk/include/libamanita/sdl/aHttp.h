@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SDL_AHTTP_H
-#define _LIBAMANITA_SDL_AHTTP_H
+#ifndef _LIBAMANITA_SDL_HTTP_H
+#define _LIBAMANITA_SDL_HTTP_H
+/**
+ * @file libamanita/sdl/aHttp.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-04-09
+ */ 
+
 
 #include <libamanita/aHashtable.h>
 
@@ -75,8 +82,6 @@ enum HTTP_MIMES {
 /** HTTP Protocol class.
  * This is a cute little class for communicating with a server through the HTTP protocol,
  * using the SDL and SDL_net libraries.
- * @author Per Löwgren
- * @date Created: 2008-04-09
  *
  * Code to demonstrate how this class can be used:
  * @code
@@ -261,5 +266,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_AHTTP_H */
+#endif /* _LIBAMANITA_SDL_HTTP_H */
 

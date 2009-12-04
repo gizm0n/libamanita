@@ -116,13 +116,14 @@ void aText::arrange(int from) {
 	if(!font || !width || !textLen) return;
 	short w = 0,len,i;
 	int l = 0,w1,w2,p = 0;
+	const aFontmetrics &metrics = font->getFontMetrics();
 	if(textLinesCap) p = textLines[l=(from==(int)caret? caretLine : findLine(from))].pos;
 	unsigned char ch;
 	while(true) {
 		for(len=0,w=0,w1=0,w2=0,i=0,ch=0; true; i++) {
 			if(ch==' ') len = i,w2 = w;
 			ch = text[p++];
-			if(ch>=' ') w1 = w,w += font->glyphs[ch].advance;
+			if(ch>=' ') w1 = w,w += metrics.glyphs[ch].advance;
 			if(p>(int)textLen || w>(int)width || ch=='\n') {
 				if(p>(int)textLen) len = i;
 				else if(ch=='\n') len = ++i;
@@ -149,12 +150,13 @@ void aText::drawText(int x,int y,int a,bool showCaret) {
 	if(!font) return;
 	drawing = true;
 	int i = 0;
+	const aFontmetrics &metrics = font->getFontMetrics();
 	SDL_Rect r;
 	r.x = x,r.y = y;
 	SDL_Surface *canvas = g.getCanvas();
 	if(textLinesLen) {
-		x += font->adjx,y += font->adjy;
-		int sc = scroll,w,h = font->getLineSkip(),l = 0,j = 0,n = 0;
+		x += metrics.adjx,y += metrics.adjy;
+		int sc = scroll,w,h = metrics.lineskip,l = 0,j = 0,n = 0;
 		if(sc<0) {
 			if(a&ALIGN_MIDDLE) sc = ((textLinesLen*h)>>1)-(height>>1);
 			else if(a&ALIGN_BOTTOM) sc = (textLinesLen*h)-height;
@@ -170,13 +172,13 @@ void aText::drawText(int x,int y,int a,bool showCaret) {
 			else if(a&ALIGN_RIGHT) r.x += (width-tl.width);
 			for(j=0,n=tl.pos; j<tl.length; j++,n++) {
 				if(showCaret && (int)caret==n) {
-					r.y = y+i-font->glyphs[(int)'|'].maxy;
-					SDL_BlitSurface(font->glyphs[(int)'|'].surface,0,canvas,&r);
+					r.y = y+i-metrics.glyphs[(int)'|'].maxy;
+					SDL_BlitSurface(font->getGlyphSurface((int)'|'),0,canvas,&r);
 				}
 				if((ch=text[n])>=' ') {
-					r.x += font->glyphs[ch].minx,w = font->glyphs[ch].advance-font->glyphs[ch].minx;
-					r.y = y+i-font->glyphs[ch].maxy;
-					SDL_BlitSurface(font->glyphs[ch].surface,0,canvas,&r);
+					r.x += metrics.glyphs[ch].minx,w = metrics.glyphs[ch].advance-metrics.glyphs[ch].minx;
+					r.y = y+i-metrics.glyphs[ch].maxy;
+					SDL_BlitSurface(font->getGlyphSurface(ch),0,canvas,&r);
 					r.x += w;
 				}
 			}
@@ -185,8 +187,8 @@ void aText::drawText(int x,int y,int a,bool showCaret) {
 		else i -= h;
 	}
 	if(showCaret && caret==textLen) {
-		r.y = y+i-font->glyphs[(int)'|'].maxy;
-		SDL_BlitSurface(font->glyphs[(int)'|'].surface,0,canvas,&r);
+		r.y = y+i-metrics.glyphs[(int)'|'].maxy;
+		SDL_BlitSurface(font->getGlyphSurface((int)'|'),0,canvas,&r);
 	}
 	drawing = false;
 }

@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SDL_AGRAPHICS_H
-#define _LIBAMANITA_SDL_AGRAPHICS_H
+#ifndef _LIBAMANITA_SDL_GRAPHICS_H
+#define _LIBAMANITA_SDL_GRAPHICS_H
+
+/**
+ * @file libamanita/sdl/aGraphics.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 
 #include <stdio.h>
@@ -88,4 +95,4 @@ public:
 extern aGraphics g;
 
 
-#endif /* _LIBAMANITA_SDL_AGRAPHICS_H */
+#endif /* _LIBAMANITA_SDL_GRAPHICS_H */

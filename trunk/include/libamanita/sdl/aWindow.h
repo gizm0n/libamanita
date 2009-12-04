@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SDL_AWINDOW_H
-#define _LIBAMANITA_SDL_AWINDOW_H
+#ifndef _LIBAMANITA_SDL_WINDOW_H
+#define _LIBAMANITA_SDL_WINDOW_H
+
+/**
+ * @file libamanita/sdl/aWindow.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <libamanita/sdl/aGraphics.h>
 #include <libamanita/sdl/aImage.h>
@@ -93,4 +100,4 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_AWINDOW_H */
+#endif /* _LIBAMANITA_SDL_WINDOW_H */

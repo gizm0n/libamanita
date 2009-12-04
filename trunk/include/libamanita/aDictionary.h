@@ -1,9 +1,21 @@
-#ifndef _LIBAMANITA_ADICTIONARY_H
-#define _LIBAMANITA_ADICTIONARY_H
+#ifndef _LIBAMANITA_DICTIONARY_H
+#define _LIBAMANITA_DICTIONARY_H
+
+/**
+ * @file libamanita/aDictionary.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <libamanita/aCollection.h>
 
 
+/** A quick lookup class.
+ * 
+ * The aDictionary class generated an indexed list of words with attached numerical values.
+ * @ingroup libamanita
+ */
 class aDictionary : public aCollection {
 RttiObjectInstance(aDictionary)
 
@@ -41,5 +53,5 @@ public:
 	const char *getKey(value_t v);
 };
 
-#endif /* _LIBAMANITA_ADICTIONARY_H */
+#endif /* _LIBAMANITA_DICTIONARY_H */
 

@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SDL_ASOCKET_H
-#define _LIBAMANITA_SDL_ASOCKET_H
+#ifndef _LIBAMANITA_SDL_SOCKET_H
+#define _LIBAMANITA_SDL_SOCKET_H
+
+/**
+ * @file libamanita/sdl/aSocket.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <stdarg.h>
 #include <SDL/SDL.h>
@@ -166,5 +173,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_ASOCKET_H */
+#endif /* _LIBAMANITA_SDL_SOCKET_H */
 

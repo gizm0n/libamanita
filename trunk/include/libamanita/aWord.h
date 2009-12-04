@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_AWORD_H
-#define _LIBAMANITA_AWORD_H
+#ifndef _LIBAMANITA_WORD_H
+#define _LIBAMANITA_WORD_H
+
+/**
+ * @file libamanita/aWord.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 class aRandom;
 
@@ -22,4 +29,4 @@ public:
 	char *generate(int minlen,int maxlen);
 };
 
-#endif /* _LIBAMANITA_AWORD_H */
+#endif /* _LIBAMANITA_WORD_H */

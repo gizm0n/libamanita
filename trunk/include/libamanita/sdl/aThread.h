@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SDL_ATHREAD_H
-#define _LIBAMANITA_SDL_ATHREAD_H
+#ifndef _LIBAMANITA_SDL_THREAD_H
+#define _LIBAMANITA_SDL_THREAD_H
+
+/**
+ * @file libamanita/sdl/aThread.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <stdint.h>
 #include <SDL/SDL.h>
@@ -23,4 +30,4 @@ public:
 	void pause(int millis) { SDL_Delay(millis); }
 };
 
-#endif /* _LIBAMANITA_SDL_ATHREAD_H */
+#endif /* _LIBAMANITA_SDL_THREAD_H */

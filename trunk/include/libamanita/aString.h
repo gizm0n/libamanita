@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_ASTRING_H
-#define _LIBAMANITA_ASTRING_H
+#ifndef _LIBAMANITA_STRING_H
+#define _LIBAMANITA_STRING_H
+
+/**
+ * @file libamanita/aString.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2003-11-30
+ */ 
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -9,7 +16,9 @@
 
 
 class aString : public aObject {
+/** @cond */
 RttiObjectInstance(aString)
+/** @endcond */
 
 private:
 	char *str;
@@ -165,8 +174,8 @@ public:
 
 	static size_t nextWord(const char **s,const char *c=whitespace);
 
-	static char toLower(const char c) { return (c>='A' && c<='Z')/* || (c!='×' && c>='À' && c<='Þ')*/? c+32 : c; }
-	static char toUpper(const char c) { return (c>='a' && c<='z')/* || (c!='÷' && c>='à' && c<='þ')*/? c-32 : c; }
+	static char toLower(const char c) { return (c>='A' && c<='Z')? c+32 : c; }
+	static char toUpper(const char c) { return (c>='a' && c<='z')? c-32 : c; }
 	static int fromHex(char c) { return c>='0' && c<='9'? c-'0' : (c>='a' && c<='f'? c-87 : (c>='A' && c<='F'? c-55 : 0)); }
 	static uint64_t fromHex(const char *str);
 	static char *toHex(char *h,uint64_t i);
@@ -179,8 +188,8 @@ public:
 	static char **split(char **list,char *str,const char *delim,bool cins=false);
 	static size_t trim(char *str);
 
-	static bool isLower(char c) { return (c>='a' && c<='z')/* || (c>='à' && c<='ÿ' && c!='÷')*/; }
-	static bool isUpper(char c) { return (c>='A' && c<='Z')/* || (c>='À' && c<='ß' && c!='×')*/; }
+	static bool isLower(char c) { return (c>='a' && c<='z'); }
+	static bool isUpper(char c) { return (c>='A' && c<='Z'); }
 	static bool isAlpha(unsigned char c) { return isLower(c) || isUpper(c); }
 	static bool isLatin(unsigned char c) { return (c>='a' && c<='z') || (c>='A' && c<='Z'); }
 	static bool isDigit(unsigned char c) { return c>='0' && c<='9'; }
@@ -222,5 +231,5 @@ aString operator+(aString &s,double d);
 aString operator+(double d,aString &s);
 
 
-#endif /* _LIBAMANITA_ASTRING_H */
+#endif /* _LIBAMANITA_STRING_H */
 

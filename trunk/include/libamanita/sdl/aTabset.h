@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SDL_ATABSET_H
-#define _LIBAMANITA_SDL_ATABSET_H
+#ifndef _LIBAMANITA_SDL_TABSET_H
+#define _LIBAMANITA_SDL_TABSET_H
+
+/**
+ * @file libamanita/sdl/aTabset.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <libamanita/sdl/aComponent.h>
 
@@ -88,4 +95,4 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_ATABSET_H */
+#endif /* _LIBAMANITA_SDL_TABSET_H */
