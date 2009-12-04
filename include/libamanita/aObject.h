@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_AOBJECT_H
-#define _LIBAMANITA_AOBJECT_H
+#ifndef _LIBAMANITA_OBJECT_H
+#define _LIBAMANITA_OBJECT_H
+
+/**
+ * @file libamanita/aObject.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <stddef.h>
 #include <stdint.h>
@@ -73,5 +80,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_AOBJECT_H */
+#endif /* _LIBAMANITA_OBJECT_H */
 

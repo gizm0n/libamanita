@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SDL_ATEXTFIELD_H
-#define _LIBAMANITA_SDL_ATEXTFIELD_H
+#ifndef _LIBAMANITA_SDL_TEXTFIELD_H
+#define _LIBAMANITA_SDL_TEXTFIELD_H
+
+/**
+ * @file libamanita/sdl/aTextfield.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <libamanita/sdl/aText.h>
 #include <libamanita/sdl/aComponent.h>
@@ -30,4 +37,4 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_ATEXTFIELD_H */
+#endif /* _LIBAMANITA_SDL_TEXTFIELD_H */

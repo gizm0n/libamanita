@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SDL_AICONBUTTON_H
-#define _LIBAMANITA_SDL_AICONBUTTON_H
+#ifndef _LIBAMANITA_SDL_ICONBUTTON_H
+#define _LIBAMANITA_SDL_ICONBUTTON_H
+
+/**
+ * @file libamanita/sdl/aIconButton.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <libamanita/sdl/aComponent.h>
 
@@ -42,4 +49,4 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_AICONBUTTON_H */
+#endif /* _LIBAMANITA_SDL_ICONBUTTON_H */

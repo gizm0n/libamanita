@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SDL_ASERVER_H
-#define _LIBAMANITA_SDL_ASERVER_H
+#ifndef _LIBAMANITA_SDL_SERVER_H
+#define _LIBAMANITA_SDL_SERVER_H
+
+/**
+ * @file libamanita/sdl/aServer.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <string.h>
 #include <libamanita/sdl/aSocket.h>
@@ -118,5 +125,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_ASERVER_H */
+#endif /* _LIBAMANITA_SDL_SERVER_H */
 

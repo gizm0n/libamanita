@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SDL_ACLIENT_H
-#define _LIBAMANITA_SDL_ACLIENT_H
+#ifndef _LIBAMANITA_SDL_CLIENT_H
+#define _LIBAMANITA_SDL_CLIENT_H
+
+/**
+ * @file libamanita/sdl/aClient.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <libamanita/sdl/aSocket.h>
 
@@ -36,5 +43,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_ACLIENT_H */
+#endif /* _LIBAMANITA_SDL_CLIENT_H */
 

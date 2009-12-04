@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SQLITE_ARECORD_H
-#define _LIBAMANITA_SQLITE_ARECORD_H
+#ifndef _LIBAMANITA_SQLITE_RECORD_H
+#define _LIBAMANITA_SQLITE_RECORD_H
+
+/**
+ * @file libamanita/sqlite/aRecord.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <stdlib.h>
 #include <string.h>
@@ -27,4 +34,4 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SQLITE_ARECORD_H */
+#endif /* _LIBAMANITA_SQLITE_RECORD_H */

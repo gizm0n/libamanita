@@ -1,9 +1,17 @@
-#ifndef _LIBAMANITA_SDL_AFONT_H
-#define _LIBAMANITA_SDL_AFONT_H
+#ifndef _LIBAMANITA_SDL_FONT_H
+#define _LIBAMANITA_SDL_FONT_H
+
+/**
+ * @file libamanita/sdl/aFont.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 #include <libamanita/aObject.h>
+#include <libamanita/aFontmetrics.h>
 
 
 enum {
@@ -17,19 +25,12 @@ enum {
 
 
 class aFont : public aObject {
-friend class aText;
-
 RttiObjectInstance(aFont)
 
 private:
-	struct glyph {
-		int minx,maxx,miny,maxy,advance;
-		SDL_Surface *surface;
-	};
-
 	char *name;
-	glyph glyphs[256];
-	int height,ascent,descent,lineskip,adjx,adjy,spacing;
+	aFontmetrics metrics;
+	SDL_Surface *glyphs[256];
 
 public:
 
@@ -37,14 +38,19 @@ public:
 	~aFont();
 
 	const char *getName() { return name; }
-	int getHeight() { return height; }
-	int getAscent() { return ascent; }
-	int getDescent() { return descent; }
-	int getLineSkip() { return lineskip; }
-	void setAdjust(int x,int y) { adjx = x,adjy = y; }
-	void setSpacing(int s) { spacing = s; }
+	SDL_Surface *getGlyphSurface(int c) { return glyphs[c]; }
+	const aFontmetrics &getFontMetrics() { return metrics; }
+	int getHeight() { return metrics.height; }
+	int getAscent() { return metrics.ascent; }
+	int getDescent() { return metrics.descent; }
+	int getLineSkip() { return metrics.lineskip; }
+
+	void setAdjust(int x,int y) { metrics.adjx = x,metrics.adjy = y; }
+	void setSpacing(int s) { metrics.spacing = s; }
+
 	int stringWidth(const char *str);
 	int stringWidth(const char *str,int i,int l);
+
 	void putchar(int x,int y,unsigned char c);
 	void print(int x,int y,const char *str);
 	void print(int x,int y,int a,const char *str);
@@ -55,5 +61,5 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_AFONT_H */
+#endif /* _LIBAMANITA_SDL_FONT_H */
 

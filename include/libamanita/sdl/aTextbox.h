@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SDL_ATEXTBOX_H
-#define _LIBAMANITA_SDL_ATEXTBOX_H
+#ifndef _LIBAMANITA_SDL_TEXTBOX_H
+#define _LIBAMANITA_SDL_TEXTBOX_H
+
+/**
+ * @file libamanita/sdl/aTextbox.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <libamanita/sdl/aFont.h>
 #include <libamanita/sdl/aWindow.h>
@@ -33,4 +40,4 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_ATEXTBOX_H */
+#endif /* _LIBAMANITA_SDL_TEXTBOX_H */

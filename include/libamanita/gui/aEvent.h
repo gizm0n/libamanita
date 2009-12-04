@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_GUI_AEVENT_H
-#define _LIBAMANITA_GUI_AEVENT_H
+#ifndef _LIBAMANITA_GUI_EVENT_H
+#define _LIBAMANITA_GUI_EVENT_H
+
+/**
+ * @file libamanita/gui/aEvent.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 
 #include <stdint.h>
@@ -65,4 +72,4 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_AEVENT_H */
+#endif /* _LIBAMANITA_GUI_EVENT_H */

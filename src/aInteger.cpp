@@ -509,7 +509,8 @@ void aInteger::print(FILE *fp) const {
 	} else if(len==1) printf("%" PRIu32,*num);
 	else for(long i=len-1; i>=0l; i--) fprintf(fp,i==(long)len-1? "%" PRIX32 : "%08" PRIX32,num[i]);
 	//fprintf(fp,"[%lu,%p:%p]",len*32,this,num);
-	fprintf(fp,"[%zu]",len);
+	//fprintf(fp,"[%zu]",len);
 	fflush(fp);
 }
+
 

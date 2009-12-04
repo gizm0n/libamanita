@@ -9,6 +9,7 @@ nobase_include_HEADERS = \
 	../include/libamanita/aCollection.h \
 	../include/libamanita/aDictionary.h \
 	../include/libamanita/aFlood.h \
+	../include/libamanita/aFontmetrics.h \
 	../include/libamanita/aHashtable.h \
 	../include/libamanita/aInteger.h \
 	../include/libamanita/aIterator.h \

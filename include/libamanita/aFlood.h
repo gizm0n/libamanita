@@ -1,8 +1,21 @@
-#ifndef _LIBAMANITA_AFLOOD_H
-#define _LIBAMANITA_AFLOOD_H
+#ifndef _LIBAMANITA_FLOOD_H
+#define _LIBAMANITA_FLOOD_H
+
+/**
+ * @file libamanita/aFlood.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 
 
+/** Flood fill 2D-vectors.
+ * 
+ * This class flood fills an area in a 2D vector. This can be useful, for example,
+ * when generating maps for games.
+ * @ingroup libamanita
+ */
 class aFlood {
 private:
 	int *table;
@@ -29,5 +42,5 @@ public:
 
 
 
-#endif /* _LIBAMANITA_AFLOOD_H */
+#endif /* _LIBAMANITA_FLOOD_H */
 

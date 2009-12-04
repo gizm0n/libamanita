@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SQLITE_ARESULTSET_H
-#define _LIBAMANITA_SQLITE_ARESULTSET_H
+#ifndef _LIBAMANITA_SQLITE_RESULTSET_H
+#define _LIBAMANITA_SQLITE_RESULTSET_H
+
+/**
+ * @file libamanita/sqlite/aResultset.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 
 #include <libamanita/aVector.h>
@@ -26,5 +33,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SQLITE_ARESULTSET_H */
+#endif /* _LIBAMANITA_SQLITE_RESULTSET_H */
 

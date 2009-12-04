@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_APATH_H
-#define _LIBAMANITA_APATH_H
+#ifndef _LIBAMANITA_PATH_H
+#define _LIBAMANITA_PATH_H
+
+/**
+ * @file libamanita/aPath.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <stdio.h>
 
@@ -90,5 +97,5 @@ public:
 
 
 
-#endif /* _LIBAMANITA_APATH_H */
+#endif /* _LIBAMANITA_PATH_H */
 

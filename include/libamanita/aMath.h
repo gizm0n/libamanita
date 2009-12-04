@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_AMATH_H
-#define _LIBAMANITA_AMATH_H
+#ifndef _LIBAMANITA_MATH_H
+#define _LIBAMANITA_MATH_H
+
+/**
+ * @file libamanita/aMath.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 
 #include <stdlib.h>
@@ -88,5 +95,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_AMATH_H */
+#endif /* _LIBAMANITA_MATH_H */
 

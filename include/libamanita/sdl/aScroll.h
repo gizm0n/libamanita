@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SDL_ASCROLL_H
-#define _LIBAMANITA_SDL_ASCROLL_H
+#ifndef _LIBAMANITA_SDL_SCROLL_H
+#define _LIBAMANITA_SDL_SCROLL_H
+
+/**
+ * @file libamanita/sdl/aScroll.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <libamanita/sdl/aComponent.h>
 
@@ -79,4 +86,4 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_ASCROLL_H */
+#endif /* _LIBAMANITA_SDL_SCROLL_H */

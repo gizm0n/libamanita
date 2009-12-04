@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SDL_AIMAGE_H
-#define _LIBAMANITA_SDL_AIMAGE_H
+#ifndef _LIBAMANITA_SDL_IMAGE_H
+#define _LIBAMANITA_SDL_IMAGE_H
+
+/**
+ * @file libamanita/sdl/aImage.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <string.h>
 #include <stdio.h>
@@ -70,5 +77,5 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_AIMAGE_H */
+#endif /* _LIBAMANITA_SDL_IMAGE_H */
 

@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SDL_ACOMPONENT_H
-#define _LIBAMANITA_SDL_ACOMPONENT_H
+#ifndef _LIBAMANITA_SDL_COMPONENT_H
+#define _LIBAMANITA_SDL_COMPONENT_H
+
+/**
+ * @file libamanita/sdl/aComponent.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <stdint.h>
 #include <libamanita/aObject.h>
@@ -148,4 +155,4 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_ACOMPONENT_H */
+#endif /* _LIBAMANITA_SDL_COMPONENT_H */

@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_SQLITE_ASQLITE_H
-#define _LIBAMANITA_SQLITE_ASQLITE_H
+#ifndef _LIBAMANITA_SQLITE_SQLITE_H
+#define _LIBAMANITA_SQLITE_SQLITE_H
+
+/**
+ * @file libamanita/sqlite/aSQLite.h  
+ * @author Per Löwgren
+ * @date Modified: 2009-12-02
+ * @date Created: 2008-09-07
+ */ 
 
 #include <libamanita/sqlite/aResultset.h>
 
@@ -30,4 +37,4 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SQLITE_ASQLITE_H */
+#endif /* _LIBAMANITA_SQLITE_SQLITE_H */

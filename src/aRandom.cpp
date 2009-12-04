@@ -12,8 +12,8 @@ const double n2p32 = 1.0/4294967295.0;
 aRandom rnd = aRandom();
 
 
-aRandom::aRandom(random_t n) { setSeed(n); }
 aRandom::aRandom() { setSeed(time(0)); }
+aRandom::aRandom(random_t n) { setSeed(n); }
 
 
 void aRandom::setSeed(random_t n) {
