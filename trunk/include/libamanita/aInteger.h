@@ -19,44 +19,57 @@
 class aInteger {
 private:
 	enum {
-		Plus,						/**< Sign of this is set to Plus if it is a positive number. */
-		Minus,					/**< Sign of this is set to Minus if it is a negative number. */
-		NaN,						/**< Sign of this is set to Minus if it is not a number. */
-		Infinite,				/**< Sign of this is set to Minus if it is an infinite number. */
+		Plus,									//!< Sign of this is set to Plus if it is a positive number.
+		Minus,								//!< Sign of this is set to Minus if it is a negative number.
+		NaN,									//!< Sign of this is set to Minus if it is not a number.
+		Infinite,							//!< Sign of this is set to Minus if it is an infinite number.
 	};
-	uint8_t sign;				/**< Sign tells what type of number this is. */
-	uint32_t *num;				/**< Num contains all data of this. */
-	size_t len;					/**< Len is the length of the number this is set to in number of 32 bit integers, it is always >= 1. */
-	size_t cap;					/**< Cap is the capacity of num, it is always >= 1, and len is always <= cap. */
 
+	uint8_t sign;							//!< Sign tells what type of number this is.
+	uint32_t *num;							//!< Num contains all data of this.
+	size_t len;								//!< Len is the length of the number this is set to in number of 32 bit integers, it is always >= 1.
+	size_t cap;								//!< Cap is the capacity of num, it is always >= 1, and len is always <= cap.
+
+	/** Increase capacity with n.
+	 * @param n Number of 32 bit integers to increace capacity with. */
 	void resize(int n);
 
-	void set32(int32_t n);				/**< Set this to n. */
-	void setu32(uint32_t n);			/**< Set this to n. */
-	void set64(int64_t n);				/**< Set this to n. */
-	void setu64(uint64_t n);			/**< Set this to n. */
-	void set(const char *n);			/**< Set this to n. */
-	void set(const aInteger &n);		/**< Set this to n. */
-	void inc(uint32_t n);				/**< Increase this with n. */
-	void dec(uint32_t n);				/**< Decrease this with n. */
-	void add(const aInteger &n);		/**< Add n to this. */
-	void sub(const aInteger &n);		/**< Subtract n from this. */
-	void mul(const aInteger &n);		/**< Multiply this with n. */
+	/** @name Set
+	 * @{ */
+	void set32(int32_t n);				//!< Set this to n.
+	void setu32(uint32_t n);			//!< Set this to n.
+	void set64(int64_t n);				//!< Set this to n.
+	void setu64(uint64_t n);			//!< Set this to n.
+	void set(const char *n);			//!< Set this to n.
+	void set(const aInteger &n);		//!< Set this to n.
+	/** @} */
+
+	/** @name Primitives
+	 * @{ */
+	void inc(uint32_t n);				//!< Increase this with n.
+	void dec(uint32_t n);				//!< Decrease this with n.
+	void add(const aInteger &n);		//!< Add n to this.
+	void sub(const aInteger &n);		//!< Subtract n from this.
+	void mul(const aInteger &n);		//!< Multiply this with n.
 
 	/** Divide this with n.
 	 * The quota and remainder is stored in q and r.
-	 * @param n aInteger to divide with.
-	 * @param q aInteger to store quota in.
-	 * @param r aInteger to store remainder in. */
+	 * @param n Value to divide with.
+	 * @param q Where to store quota in.
+	 * @param r Where to store remainder in. */
 	void div(const aInteger &n,aInteger *q,aInteger *r);
-	void lshift(size_t n);				/**< Shift this n bits left. */
-	void rshift(size_t n);				/**< Shift this n bits right. */
+	void lshift(size_t n);				//!< Shift this n bits left.
+	void rshift(size_t n);				//!< Shift this n bits right.
+	/** @} */
 
-	int cmp(int32_t n);					/**< Compare this with n. @return 0 if equal, <0 if less, and >0 if bigger. */
-	int cmp(uint32_t n);					/**< Compare this with n. @return 0 if equal, <0 if less, and >0 if bigger. */
-	int cmp(int64_t n);					/**< Compare this with n. @return 0 if equal, <0 if less, and >0 if bigger. */
-	int cmp(uint64_t n);					/**< Compare this with n. @return 0 if equal, <0 if less, and >0 if bigger. */
-	int cmp(const aInteger &n);		/**< Compare this with n. @return 0 if equal, <0 if less, and >0 if bigger. */
+	/** @name Compare
+	 * @{ */
+	int cmp(int32_t n);					//!< Compare this with n. @return 0 if equal, <0 if less, and >0 if bigger.
+	int cmp(uint32_t n);					//!< Compare this with n. @return 0 if equal, <0 if less, and >0 if bigger.
+	int cmp(int64_t n);					//!< Compare this with n. @return 0 if equal, <0 if less, and >0 if bigger.
+	int cmp(uint64_t n);					//!< Compare this with n. @return 0 if equal, <0 if less, and >0 if bigger.
+	int cmp(const aInteger &n);		//!< Compare this with n. @return 0 if equal, <0 if less, and >0 if bigger.
+	/** @} */
 
 //	void monpro(const aInteger &n,const aInteger &r);
 
@@ -136,6 +149,8 @@ public:
 	bool operator>=(const aInteger &n) { return cmp(n)>=0; }
 	/** @} */
 
+	/** @name Algorithms
+	 * @{ */
 	/** Sets the aInteger sign to Plus. */
 	aInteger &abs() { if(sign==Minus) sign = Plus;return *this; }
 
@@ -162,7 +177,10 @@ public:
 	/** Returns the log2 of this as an integer floor value.
 	 * @return log2 of this as an integer floor value. */
 	size_t log2() const;
+	/** @} */
 
+	/** @name Internal
+	 * @{ */
 	/** Returns number of bits in this.
 	 * @return Number of bits in this. */
 	size_t bits() const;
@@ -180,15 +198,19 @@ public:
 	 * @param n The index number of the bit to set.
 	 * @param i The value to set n to, either 1 or 0. */
 	void setBit(size_t n,int i);
+	/** @} */
 
-	bool isZero() const { return len==1 && !*num; }			/**< Returns true if this is zero. */
-	bool isNegative() const { return sign==Minus; }			/**< Returns true if sign of this is set to Minus. */
-	bool isNaN() const { return sign==NaN; }					/**< Returns true if sign of this is set to NaN. */
-	bool isInfinite() const { return sign==Infinite; }		/**< Returns true if sign of this is set to Infinite. */
-	bool isPrime();													/**< Returns true if this is a prime-number. */
-	bool isSafePrime();												/**< Returns true if this is a safe prime-number. */
-	bool isEven() { return (*num&1)==0; }						/**< Returns true if this is an even number. */
-	bool isOdd() { return (*num&1)==1; }						/**< Returns true if this is an odd number. */
+	/** @name Tests
+	 * @{ */
+	bool isZero() const { return len==1 && !*num; }			//!< Returns true if this is zero.
+	bool isNegative() const { return sign==Minus; }			//!< Returns true if sign of this is set to Minus.
+	bool isNaN() const { return sign==NaN; }					//!< Returns true if sign of this is set to NaN.
+	bool isInfinite() const { return sign==Infinite; }		//!< Returns true if sign of this is set to Infinite.
+	bool isPrime();													//!< Returns true if this is a prime-number.
+	bool isSafePrime();												//!< Returns true if this is a safe prime-number.
+	bool isEven() { return (*num&1)==0; }						//!< Returns true if this is an even number.
+	bool isOdd() { return (*num&1)==1; }						//!< Returns true if this is an odd number.
+	/** @} */
 
 	//operator long() const { return sign==Minus? -(long)*num : (long)*num; }
 	//operator unsigned long() const { return *num; }
@@ -196,10 +218,13 @@ public:
 	//operator long long() const;
 	//operator unsigned long long() const { return *num|((unsigned long long)num[1]<<32); }
 
+	/** @name Input and Output
+	 * @{ */
 	/** Print to file.
 	 * This method prints the integer as digital numbers.
 	 * @param fp File to write to, if ommited is set to stdout. */
 	void print(FILE *fp=stdout) const;
+	/** @} */
 };
 
 

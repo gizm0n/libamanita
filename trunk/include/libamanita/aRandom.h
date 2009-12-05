@@ -83,10 +83,10 @@ fclose(f);
  */
 class aRandom {
 private:
-	random_t seed;					/**< The initial seed from which the random sequence is generated. */
-	random_t num;					/**< The last random number in the sequence. */
-	random_t index;				/**< The index in the table. */
-	random_t table[256];			/**< The table used for random number generation. */
+	random_t seed;					//!< The initial seed from which the random sequence is generated.
+	random_t num;					//!< The last random number in the sequence.
+	random_t index;				//!< The index in the table.
+	random_t table[256];			//!< The table used for random number generation.
 
 public:
 	/** @name Constructors
@@ -216,22 +216,22 @@ public:
 	 * @return The result of the dice rolled.
 	 */
 	int roll(int d) { return uint32(d)+1; }
-	int rollD2() { return (uint32()&1)+1; }			/**< Rolls a D2 die. */
-	int rollD2(int n) { return roll(2,n); }			/**< Rolls n number of D2 dice. */
-	int rollD4() { return (uint32()&3)+1; }			/**< Rolls a D4 die. */
-	int rollD4(int n) { return roll(4,n); }			/**< Rolls n number of D4 dice. */
-	int rollD6() { return uint32(6)+1; }				/**< Rolls a D6 die. */
-	int rollD6(int n) { return roll(6,n); }			/**< Rolls n number of D6 dice. */
-	int rollD8() { return (uint32()&7)+1; }			/**< Rolls a D8 die. */
-	int rollD8(int n) { return roll(8,n); }			/**< Rolls n number of D8 dice. */
-	int rollD10() { return uint32(10)+1; }				/**< Rolls a D10 die. */
-	int rollD10(int n) { return roll(10,n); }			/**< Rolls n number of D10 dice. */
-	int rollD12() { return uint32(12)+1; }				/**< Rolls a D12 die. */
-	int rollD12(int n) { return roll(12,n); }			/**< Rolls n number of D12 dice. */
-	int rollD20() { return uint32(20)+1; }				/**< Rolls a D20 die. */
-	int rollD20(int n) { return roll(20,n); }			/**< Rolls n number of D20 dice. */
-	int rollD100() { return uint32(100)+1; }			/**< Rolls a D100 die. */
-	int rollD100(int n) { return roll(100,n); }		/**< Rolls n number of D100 dice. */
+	int rollD2() { return (uint32()&1)+1; }			//!< Rolls a D2 die.
+	int rollD2(int n) { return roll(2,n); }			//!< Rolls n number of D2 dice.
+	int rollD4() { return (uint32()&3)+1; }			//!< Rolls a D4 die.
+	int rollD4(int n) { return roll(4,n); }			//!< Rolls n number of D4 dice.
+	int rollD6() { return uint32(6)+1; }				//!< Rolls a D6 die.
+	int rollD6(int n) { return roll(6,n); }			//!< Rolls n number of D6 dice.
+	int rollD8() { return (uint32()&7)+1; }			//!< Rolls a D8 die.
+	int rollD8(int n) { return roll(8,n); }			//!< Rolls n number of D8 dice.
+	int rollD10() { return uint32(10)+1; }				//!< Rolls a D10 die.
+	int rollD10(int n) { return roll(10,n); }			//!< Rolls n number of D10 dice.
+	int rollD12() { return uint32(12)+1; }				//!< Rolls a D12 die.
+	int rollD12(int n) { return roll(12,n); }			//!< Rolls n number of D12 dice.
+	int rollD20() { return uint32(20)+1; }				//!< Rolls a D20 die.
+	int rollD20(int n) { return roll(20,n); }			//!< Rolls n number of D20 dice.
+	int rollD100() { return uint32(100)+1; }			//!< Rolls a D100 die.
+	int rollD100(int n) { return roll(100,n); }		//!< Rolls n number of D100 dice.
 
 	/** Rolls a number 0-(n-1) and returns the index number in the table t in the range 0-(l-1).
 	 * 
@@ -277,9 +277,9 @@ public:
 	 * @return The sum of the dice rolled.
 	 */
 	int oe(int d,int n);
-	int oeD4(int n);											/**< Open ended D4 rolls. */
-	int oeD6(int n) { return oe(6,n); }					/**< Open ended D6 rolls. */
-	int oeD8(int n);											/**< Open ended D8 rolls. */
+	int oeD4(int n);											//!< Open ended D4 rolls.
+	int oeD6(int n) { return oe(6,n); }					//!< Open ended D6 rolls.
+	int oeD8(int n);											//!< Open ended D8 rolls.
 	/** @} */
 
 	/** @name IO

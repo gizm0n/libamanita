@@ -12,7 +12,6 @@ nobase_include_HEADERS = \
 	../include/libamanita/aFontmetrics.h \
 	../include/libamanita/aHashtable.h \
 	../include/libamanita/aInteger.h \
-	../include/libamanita/aIterator.h \
 	../include/libamanita/aMath.h \
 	../include/libamanita/aObject.h \
 	../include/libamanita/aPath.h \

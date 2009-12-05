@@ -12,22 +12,39 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+/** A collection of mathematical functions.
+ * @ingroup libamanita
+ */
 class aMath {
 public:
-	static const double PI; /** < The PI constant 3.1415926535897932384626433832795 */
-	static const int prime[]; /** < The prime number serie from 2 to 499. */
-	static const int fibonacci[]; /** < The fibonacci number serie from 0 to 1'836'311'903. */
+	/** @name Constants
+	 * @{ */
+	static const double PI;				//!< The PI constant 3.1415926535897932384626433832795
+	static const int prime[];			//!< The prime number serie from 2 to 499.
+	static const int fibonacci[];		//!< The fibonacci number serie from 0 to 1'836'311'903.
+	/** @} */
 
-	static long floor(double d); /** < Round double d to floor integer. */
-	static long ceil(double d); /** < Round double d to ceil integer. */
-	static long round(double d); /** < Round double d to closest integer. */
+	/** @name Rounding
+	 * @{ */
+	static long floor(double d);		//!< Round double d to floor integer.
+	static long ceil(double d);		//!< Round double d to ceil integer.
+	static long round(double d);		//!< Round double d to closest integer.
+	/** @} */
 
-	static int min(int i1,int i2) { return i1<i2? i1 : i2; } /** < Return the smaller of the values. */
-	static int max(int i1,int i2) { return i1>i2? i1 : i2; } /** < Return the larger of the values. */
+	/** @name Minimum and Maximum
+	 * @{ */
+	static int min(int i1,int i2) { return i1<i2? i1 : i2; }		//!< Return the smaller of the values.
+	static int max(int i1,int i2) { return i1>i2? i1 : i2; }		//!< Return the larger of the values.
+	/** @} */
 
-	static int log10(long n); /** < Return integer common logarithm (base-10) for n. */
-	static int log10(long long n); /** < Return integer common logarithm (base-10) for n. */
+	/** @name Logarithms
+	 * @{ */
+	static int log10(long n);			//!< Return integer common logarithm (base-10) for n.
+	static int log10(long long n);	//!< Return integer common logarithm (base-10) for n.
+	/** @} */
 
+	/** @name Geometry
+	 * @{ */
 	static uint32_t pythagoras(int32_t x,int32_t y);
 	static double pythagoras(double x,double y);
 	static double pythagoras2(double kat,double tan);
@@ -39,20 +56,26 @@ public:
 	static double sphereArea(double radius) { return 4.*PI*radius*radius; }
 	static double sphereVolume(double radius) { return 4.*PI*radius*radius*radius/3.; }
 	static double radius(double volume) { return nrt((volume*3)/(4*PI),3.); }
+	/** @} */
 
-	static long sum(long min,long max); /** < The sum of numbers between (and including) min and max. */
-	static long sum(char *arr,long l); /** < The sum of l number of doubles in arr. */
-	static unsigned long sum(unsigned char *arr,long l); /** < The sum of l number of doubles in arr. */
-	static long sum(short *arr,long l); /** < The sum of l number of doubles in arr. */
-	static unsigned long sum(unsigned short *arr,long l); /** < The sum of l number of doubles in arr. */
-	static long sum(int *arr,long l); /** < The sum of l number of doubles in arr. */
-	static unsigned long sum(unsigned int *arr,long l); /** < The sum of l number of doubles in arr. */
-	static long sum(long *arr,long l); /** < The sum of l number of doubles in arr. */
-	static unsigned long sum(unsigned long *arr,long l); /** < The sum of l number of doubles in arr. */
-	static double sum(double *arr,long l); /** < The sum of l number of doubles in arr. */
+	/** @name Sum
+	 * @{ */
+	static long sum(long min,long max);								//!< The sum of numbers between (and including) min and max.
+	static long sum(char *arr,long l);								//!< The sum of l number of doubles in arr.
+	static unsigned long sum(unsigned char *arr,long l);		//!< The sum of l number of doubles in arr.
+	static long sum(short *arr,long l);								//!< The sum of l number of doubles in arr.
+	static unsigned long sum(unsigned short *arr,long l);		//!< The sum of l number of doubles in arr.
+	static long sum(int *arr,long l);								//!< The sum of l number of doubles in arr.
+	static unsigned long sum(unsigned int *arr,long l);		//!< The sum of l number of doubles in arr.
+	static long sum(long *arr,long l);								//!< The sum of l number of doubles in arr.
+	static unsigned long sum(unsigned long *arr,long l);		//!< The sum of l number of doubles in arr.
+	static double sum(double *arr,long l);							//!< The sum of l number of doubles in arr.
+	/** @} */
 
 	static size_t bits(long long n);
 
+	/** @name Euclidean
+	 * @{ */
 	/** Euclidean algorithm.
 	 * In number theory, the Euclidean algorithm (also called Euclid's algorithm) is an algorithm to determine
 	 * the greatest common divisor (GCD) of two elements of any Euclidean domain (for example, the integers).
@@ -68,13 +91,19 @@ public:
 	 */
 	static long gcd(long a,long b,long &x,long &y);
 	static long long gcd(long long a,long long b,long long &x,long long &y);
+	/** @} */
 
+	/** @name Exponentiation
+	 * @{ */
 	/** Modular exponentiation for long. */
 	static long modpow(long b,long e,long m);
 
 	/** Modular exponentiation for long long. */
 	static long long modpow(long long b,long long e,long long m);
+	/** @} */
 
+	/** @name Sum
+	 * @{ */
 	/** Integer Square Root for unsigned long. */
 	static unsigned short sqrt(unsigned long n);
 
@@ -83,7 +112,10 @@ public:
 
 	/** Nth Root for double. */
 	static double nrt(double i,double n);
+	/** @} */
 
+	/** @name Prime
+	 * @{ */
 	/** Returns the largest prime factor of unsigned long long n. */
 	static long long factor(long long n);
 
@@ -92,6 +124,7 @@ public:
 
 	static long long lastPrime(long long n);
 	static long long nextPrime(long long n);
+	/** @} */
 };
 
 

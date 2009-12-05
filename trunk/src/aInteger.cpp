@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include <inttypes.h>
-#include <SDL/SDL_endian.h>
+#include <byteswap.h>
 #include <libamanita/aMath.h>
 #include <libamanita/aString.h>
 #include <libamanita/aRandom.h>
@@ -84,7 +84,7 @@ void aInteger::set(const char *n) {
 			if(i-j>=0) /*{*/c |= aString::fromHex(n[i-j]);//putchar(n[i-j]);}
 			m = (m<<8)|c;
 		}
-		num[p++] = SDL_SwapBE32(m),m = 0,j = 8;
+		num[p++] = bswap_32(m),m = 0,j = 8;
 	}
 // printf("\")\n");
 }

@@ -14,11 +14,11 @@
 
 
 enum REGEX_MODIFIER {
-	REGEX_GLOBAL				= 0x00000001,		/**< g-modifier, global mode. */
-	REGEX_CASELESS				= 0x00000002,		/**< i-modifier, caseless mode. */
-	REGEX_MULTILINE			= 0x00000004,		/**< m-modifier, multiline mode. */
-	REGEX_DOTALL				= 0x00000004,		/**< s-modifier, singleline mode. */
-	REGEX_EXTENDED				= 0x00000004,		/**< x-modifier, freespacing mode */
+	REGEX_GLOBAL				= 0x00000001,		//!< g-modifier, global mode.
+	REGEX_CASELESS				= 0x00000002,		//!< i-modifier, caseless mode.
+	REGEX_MULTILINE			= 0x00000004,		//!< m-modifier, multiline mode.
+	REGEX_DOTALL				= 0x00000004,		//!< s-modifier, singleline mode.
+	REGEX_EXTENDED				= 0x00000004,		//!< x-modifier, freespacing mode.
 };
 
 
@@ -102,20 +102,20 @@ friend class REBlock;
 friend class REMatch;
 
 private:
-	uint32_t mod;				/**< Modifiers as flags. */
-	uint32_t flags;			/**< Flags. */
-	uint32_t depth;			/**< Depth of expression. */
-	uint32_t found;			/**< Number of found matches. */
-	uint32_t refs;				/**< Number of backreferences. */
-	uint32_t size;				/**< Size of text. */
-	char *exp;					/**< Expression. */
-	char *mods;					/**< Modifiers. */
-	char *data;					/**< Loaded data from file. */
-	char **strings;			/**< Backreferences as strings. */
-	const char *text;			/**< Text to be searched. */
-	REBlock *blocks;			/**< Compiled blocks of expression. */
-	REMatch *hits;				/**< Linked list of matches. */
-	REMatch **list;			/**< Vector containing all the matches. */
+	uint32_t mod;				//!< Modifiers as flags.
+	uint32_t flags;			//!< Flags.
+	uint32_t depth;			//!< Depth of expression.
+	uint32_t found;			//!< Number of found matches.
+	uint32_t refs;				//!< Number of backreferences.
+	uint32_t size;				//!< Size of text.
+	char *exp;					//!< Expression.
+	char *mods;					//!< Modifiers.
+	char *data;					//!< Loaded data from file.
+	char **strings;			//!< Backreferences as strings.
+	const char *text;			//!< Text to be searched.
+	REBlock *blocks;			//!< Compiled blocks of expression.
+	REMatch *hits;				//!< Linked list of matches.
+	REMatch **list;			//!< Vector containing all the matches.
 
 	/** Convert char depending on case-mode.
 	 * @param c Char to convert.
@@ -149,8 +149,8 @@ private:
 	const char *replace(const char *t,const char *r);
 
 public:
-	aRegex();		/**< Constructor. */
-	~aRegex();		/**< Destructor. */
+	aRegex();		//!< Constructor.
+	~aRegex();		//!< Destructor.
 
 	/** Search for a match.
 	 * @param t Text to search.
@@ -171,14 +171,14 @@ public:
 	 * Actually only interesting for developers of this class, to see how it works. */
 	void print();
 
-	void setText(const char *t);							/**< Set search text. */
-	const char *getText() { return text; }				/**< Get search text. */
-	long getTextLength() { return size; }				/**< Get length of text in bytes. */
-	unsigned long matches() { return found; }			/**< Get number of matches. */
-	const char **getMatches();								/**< Get found matches as char strings. */
-	const char *getMatch(int n);							/**< Get a match where n is the index of the match, staring with 0. */
-	unsigned long backrefs() { return refs; }			/**< Get number of backrefs. */
-	const char *getBackRef(int n,int r);				/**< Get a backref as a char string, where n is index in the table, and r is the number of the backref. */
+	void setText(const char *t);							//!< Set search text.
+	const char *getText() { return text; }				//!< Get search text.
+	long getTextLength() { return size; }				//!< Get length of text in bytes.
+	unsigned long matches() { return found; }			//!< Get number of matches.
+	const char **getMatches();								//!< Get found matches as char strings.
+	const char *getMatch(int n);							//!< Get a match where n is the index of the match, staring with 0.
+	unsigned long backrefs() { return refs; }			//!< Get number of backrefs.
+	const char *getBackRef(int n,int r);				//!< Get a backref as a char string, where n is index in the table, and r is the number of the backref.
 };
 
 

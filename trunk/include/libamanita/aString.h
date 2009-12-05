@@ -14,24 +14,40 @@
 #include <libamanita/aObject.h>
 
 
-
+/** A generic string class.
+ * 
+ * This string class is built to replace the standard C++ string class. It contains a great
+ * number of methods for string handling and conversion between formats.
+ * 
+ * Something that differs this string class from ordinary C strings is that it can contain
+ * any type of data, both binary data, text data, formatted data of any kind. The string is
+ * not ended with a '\0' char, but instead contains an integer value with the length of the
+ * string.
+ * @ingroup libamanita
+ */
 class aString : public aObject {
 /** @cond */
 RttiObjectInstance(aString)
 /** @endcond */
 
 private:
-	char *str;
-	size_t len,cap;
+	char *str;		//!< Char array containing the string data.
+	size_t len;		//!< Length of string. Len must always be >= 0 and <= cap.
+	size_t cap;		//!< Capacity of string, when len==cap it's time to increase size of capacity.
 
+	/** Increase capacity of string by n.
+	 * @param n Number of bytes to increase string capacity by. */
 	void resize(size_t n);
 
+	/** @name Append integer
+	 * @{ */
 #if __WORDSIZE < 64
-	aString &appendi32(int32_t i);
-	aString &appendu32(uint32_t i);
+	aString &appendi32(int32_t i);		//!< Append signed 32 bit integer.
+	aString &appendu32(uint32_t i);		//!< Append unsigned 32 bit integer.
 #endif
-	aString &appendi64(int64_t i);
-	aString &appendu64(uint64_t i);
+	aString &appendi64(int64_t i);		//!< Append signed 64 bit integer.
+	aString &appendu64(uint64_t i);		//!< Append unsigned 64 bit integer.
+	/** @} */
 
 public:
 	struct entity {
@@ -43,12 +59,17 @@ public:
 	static const char *endline;
 	static const char *whitespace;
 
+	/** @name Constructors and Destructors
+	 * @{ */
 	aString(size_t c=0);
 	aString(const char *s,size_t l=0);
 	aString(aString *s);
 	aString(aString &s);
 	~aString();
+	/** @} */
 
+	/** @name Operators
+	 * @{ */
 	operator const char *() const { return str; }
 	operator int() { return toInt(); }
 	aString &operator=(const aString *s) { clear();if(s) append(s->str,s->len);return *this; }
@@ -81,7 +102,10 @@ public:
 	aString &operator+=(unsigned long long int i) { return appendu64((uint64_t)i); }
 	aString &operator+=(float f) { return append(f); }
 	aString &operator+=(double d) { return append(d); }
+	/** @} */
 
+	/** @name Append
+	 * @{ */
 	aString &append(char c);
 	aString &append(char c,size_t n);
 	aString &append(aString *s) { if(s) append(s->str,s->len);return *this; }
@@ -123,15 +147,24 @@ public:
 	aString &appendLine(FILE *fp,bool uesc=true) { return appendUntil(fp,whitespace+2,whitespace+2,uesc); }
 	aString &appendUntil(const char *s,const char *end,bool uesc=true);
 	aString &appendUntil(FILE *fp,const char *end=0,const char *trim=0,bool uesc=true);
+	/** @} */
 
+	/** @name Input and Output
+	 * @{ */
 	aString &include(const char *fn);
 	aString &includef(const char *format, ...);
 
 	aString &print(FILE *fp);
 	aString &println(FILE *fp);
+	/** @} */
 
+	/** @name String formats
+	 * @{ */
 	static void printUTF8(char *d,const char *s,size_t offset,size_t len);
+	/** @} */
 
+	/** @name Compare
+	 * @{ */
 	long indexOf(aString *s) { return s? indexOf(s->str,s->len) : -1l; }
 	long indexOf(aString &s) { return indexOf(s.str,s.len); }
 	long indexOf(const char *s,size_t l=0ul);
@@ -144,12 +177,21 @@ public:
 	int compare(aString *s) { return s? compare(s->str) : 256; }
 	int compare(aString &s) { return compare(s.str); }
 	int compare(const char *s);
+	/** @} */
 
+	/** @name Count
+	 * @{ */
 	size_t count(char c);
 	size_t count(const char *s);
+	/** @} */
 
+	/** @name Replace
+	 * @{ */
 	aString &replace(const char *s,const char *r);
+	/** @} */
 
+	/** @name Encoding
+	 * @{ */
 	aString &escape();
 	aString &unescape();
 	aString &quote(const char c);
@@ -158,7 +200,10 @@ public:
 	aString &decodeURL();
 	aString &encodeHTML();
 	aString &decodeHTML();
+	/** @} */
 
+	/** @name Capacity
+	 * @{ */
 	aString &trim() { len = trim(str);return *this; }
 	aString &clear() { if(str) *str = '\0',len = 0ul;return *this; }
 	aString &free();
@@ -167,13 +212,22 @@ public:
 
 	size_t length() { return len; }
 	size_t capacity() { return cap; }
+	/** @} */
 
+	/** @name Types
+	 * @{ */
 	const char *toCharArray() { return str; }
 	int toInt();
 	size_t toIntArray(int *n,char c=',');
+	/** @} */
 
+	/** @name Tokens
+	 * @{ */
 	static size_t nextWord(const char **s,const char *c=whitespace);
+	/** @} */
 
+	/** @name Static functions
+	 * @{ */
 	static char toLower(const char c) { return (c>='A' && c<='Z')? c+32 : c; }
 	static char toUpper(const char c) { return (c>='a' && c<='z')? c-32 : c; }
 	static int fromHex(char c) { return c>='0' && c<='9'? c-'0' : (c>='a' && c<='f'? c-87 : (c>='A' && c<='F'? c-55 : 0)); }
@@ -187,7 +241,10 @@ public:
 	static int countTokens(char *str,const char *delim,bool cins=false);
 	static char **split(char **list,char *str,const char *delim,bool cins=false);
 	static size_t trim(char *str);
+	/** @} */
 
+	/** @name Test char
+	 * @{ */
 	static bool isLower(char c) { return (c>='a' && c<='z'); }
 	static bool isUpper(char c) { return (c>='A' && c<='Z'); }
 	static bool isAlpha(unsigned char c) { return isLower(c) || isUpper(c); }
@@ -204,8 +261,12 @@ public:
 	static bool isPrint(unsigned char c) { return c>='\x20' && c<='\x7e'; }
 	static bool isGraph(unsigned char c) { return c>='\x21' && c<='\x7e'; }
 	static bool isCntrl(unsigned char c) { return c<='\x1F' || c=='\x7f'; }
+	/** @} */
 };
 
+
+/** @name String addition operator
+ * @{ */
 aString operator+(aString &s,const char c);
 aString operator+(const char c,aString &s);
 aString operator+(aString &s,aString *s1);
@@ -229,6 +290,7 @@ aString operator+(aString &s,float f);
 aString operator+(float f,aString &s);
 aString operator+(aString &s,double d);
 aString operator+(double d,aString &s);
+/** @} */
 
 
 #endif /* _LIBAMANITA_STRING_H */
