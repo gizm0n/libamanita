@@ -59,8 +59,8 @@ public:
 	friend class aVector;
 
 	private:
-		aVector *vec;		/**< The vector this iterator is iterating through. */
-		long index;			/**< Index where the iterator is at. */
+		aVector *vec;		//!< The vector this iterator is iterating through.
+		long index;			//!< Index where the iterator is at.
 
 		/** Constructor
 		 * @param vec aVector to iterate. */

@@ -13,38 +13,38 @@
 
 /** Enumeration used by the iteration class and subclasses for extended iteration positions. */
 enum {
-	ITER_INDEX_EMPTY			= -4,	/**< Iteration points to an empty value. */
-	ITER_INDEX_START			= -3,	/**< Iteration points at the start of the aCollection. */
-	ITER_INDEX_AFTER_LAST	= -2,	/**< Iteration points at one step after last value in the aCollection. */
-	ITER_INDEX_BEFORE_FIRST	= -1,	/**< Iteration points at one step before first value in the aCollection. */
+	ITER_INDEX_EMPTY			= -4,		//!< Iteration points to an empty value.
+	ITER_INDEX_START			= -3,		//!< Iteration points at the start of the aCollection.
+	ITER_INDEX_AFTER_LAST	= -2,		//!< Iteration points at one step after last value in the aCollection.
+	ITER_INDEX_BEFORE_FIRST	= -1,		//!< Iteration points at one step before first value in the aCollection.
 };
 
 /** Enumeration used by all subclasses of the aCollection class to tell what type a value contains. */
 enum {
-	TYPE_EMPTY			= 0x00,	/**< Value is empty, meaning this position in the aCollection is not filled with a value.. */
-	TYPE_VOID_P,					/**< (void *) */
-	TYPE_INT8,						/**< (int8_t) */
-	TYPE_UINT8,						/**< (uint8_t) */
-	TYPE_INT16,						/**< (int16_t) */
-	TYPE_UINT16,					/**< (uint16_t) */
-	TYPE_INT32,						/**< (int32_t) */
-	TYPE_UINT32,					/**< (uint32_t) */
-	TYPE_INT64,						/**< (int64_t) */
-	TYPE_UINT64,					/**< (uint64_t) */
-	TYPE_PTRDIFF,					/**< (ptrdiff_t) */
-	TYPE_INTPTR,					/**< (intptr_t) */
-	TYPE_FLOAT,						/**< (float) */
-	TYPE_DOUBLE,					/**< (double) */
-	TYPE_LDOUBLE,					/**< (long double) */
-	TYPE_CHAR_P,					/**< (char *) */
-	TYPE_OBJECT_P,					/**< (aObject *) */
+	TYPE_EMPTY			= 0x00,	//!< Value is empty, meaning this position in the aCollection is not filled with a value..
+	TYPE_VOID_P,					//!< (void *)
+	TYPE_INT8,						//!< (int8_t)
+	TYPE_UINT8,						//!< (uint8_t)
+	TYPE_INT16,						//!< (int16_t)
+	TYPE_UINT16,					//!< (uint16_t)
+	TYPE_INT32,						//!< (int32_t)
+	TYPE_UINT32,					//!< (uint32_t)
+	TYPE_INT64,						//!< (int64_t)
+	TYPE_UINT64,					//!< (uint64_t)
+	TYPE_PTRDIFF,					//!< (ptrdiff_t)
+	TYPE_INTPTR,					//!< (intptr_t)
+	TYPE_FLOAT,						//!< (float)
+	TYPE_DOUBLE,					//!< (double)
+	TYPE_LDOUBLE,					//!< (long double)
+	TYPE_CHAR_P,					//!< (char *)
+	TYPE_OBJECT_P,					//!< (aObject *)
 
 	/** @name Type flags
 	 * Can be XOR:ed to any other type.
 	 * @{ */
-	TYPE_NAN			= 0x20,		/**< Not a Number */
-	TYPE_INF			= 0x40,		/**< Infinite (Generally a result of x/0) */
-	TYPE_NEG			= 0x80,		/**< Negative */
+	TYPE_NAN			= 0x20,		//!< Not a Number
+	TYPE_INF			= 0x40,		//!< Infinite (Generally a result of x/0)
+	TYPE_NEG			= 0x80,		//!< Negative
 	/** @} */
 };
 
@@ -103,8 +103,8 @@ RttiObjectInstance(aCollection)
 /** @endcond */
 
 protected:
-	size_t sz;	/**< Size of the collection. */
-	size_t cap;	/**< Capacity of the collection. */
+	size_t sz;	//!< Size of the collection.
+	size_t cap;	//!< Capacity of the collection.
 
 public:
 	/** Constructor. */

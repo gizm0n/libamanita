@@ -26,11 +26,14 @@ int aPath::deleted = 0;
 
 
 aPath::aPath(int w,int h,int s,void *m,void *o,
-		int (*a)(int,int,int,int,void *),
-		int (*t)(int,int,void *),
-		int (*c)(int,int,int,void *,void *))
-			: width(w),height(h),style(s),map(m),obj(o),areacmp(a),terraintype(t),movecost(c) {
-	move = moveIso;
+		path_area_compare a,
+		path_terrain_type t,
+		path_move_cost c)
+			: width(w),height(h),style(s),map(m),obj(o),
+					cb_area_compare(a),
+					cb_terrain_type(t),
+					cb_move_cost(c) {
+	cb_move = moveIso;
 	open = 0;
 	closed = 0,cap = 11,sz = 0,full = 0;
 }
@@ -46,12 +49,12 @@ fprintf(stderr,"aPath::search(x1=%d,y1=%d,x2=%d,y2=%d)\n",x1,y1,x2,y2);
 fflush(stderr);
 	aTrail *t = 0;
 	int cost = 0;
-	if(areacmp) while(areacmp(x1,y1,x2,y2,map)!=0) {
+	if(cb_area_compare) while(cb_area_compare(x1,y1,x2,y2,map)!=0) {
 //fprintf(stderr,"aPath::search(x1=%d,y1=%d,x2=%d,y2=%d)\n",x1,y1,x2,y2);
 //fflush(stderr);
-		move(*this,x2,y2,x2,y2,getDir(x2,y2,x1,y1));
+		cb_move(*this,x2,y2,x2,y2,getDir(x2,y2,x1,y1));
 	}
-	if(terraintype) cost = terraintype(x1,y1,map);
+	if(cb_terrain_type) cost = cb_terrain_type(x1,y1,map);
 
 //fprintf(stderr,"aPath::search(x1=%d,y1=%d,x2=%d,y2=%d)\n",x1,y1,x2,y2);
 //fflush(stderr);
@@ -72,8 +75,8 @@ fflush(stderr);
 //	p1->parent? p1->parent->x : -1,p1->parent? p1->parent->y : -1,p1->s,p1->g,p1->h,p1->f,size());
 //fflush(stderr);
 		if(!l || p1->s<l) for(i=0; i<=3; i++) {
-			move(*this,p1->x,p1->y,x,y,i);
-			c = movecost(x,y,cost,map,obj);															soutput("(%d",x)soutput(",%d)",y)
+			cb_move(*this,p1->x,p1->y,x,y,i);
+			c = cb_move_cost(x,y,cost,map,obj);														soutput("(%d",x)soutput(",%d)",y)
 			if(x==x2 && y==y2) {																			coutput('!');
 				if(c!=PATH_MOVE_COST_CANNOT_MOVE) {
 					p1 = new node(x,y,p1->g+c,0,p1);
@@ -208,6 +211,46 @@ void aPath::clear() {
 }
 
 
+void aPath::setParam(int type,void *param) {
+	switch(type) {
+		case PATH_MAP:
+			map = param;
+			break;
+		case PATH_CALLBACK_OBJECT:
+			obj = param;
+			break;
+		case PATH_CB_AREA_COMPARE:
+			cb_area_compare = (path_area_compare)param;
+			break;
+		case PATH_CB_TERRAIN_TYPE:
+			cb_terrain_type = (path_terrain_type)param;
+			break;
+		case PATH_CB_MOVE_COST:
+			cb_move_cost = (path_move_cost)param;
+			break;
+		case PATH_CB_MOVE:
+			cb_move = (path_move)param;
+			break;
+	}
+}
+
+void *aPath::getParam(int type) {
+	switch(type) {
+		case PATH_MAP:
+			return map;
+		case PATH_CALLBACK_OBJECT:
+			return obj;
+		case PATH_CB_AREA_COMPARE:
+			return (void *)cb_area_compare;
+		case PATH_CB_TERRAIN_TYPE:
+			return (void *)cb_terrain_type;
+		case PATH_CB_MOVE_COST:
+			return (void *)cb_move_cost;
+		case PATH_CB_MOVE:
+			return (void *)cb_move;
+	}
+	return 0;
+}
 
 int aPath::getHeuristic(int x1,int y1,int x2,int y2,int n) {
 	if(style&PATH_HWRAP) { if(x1+width-x2<x2-x1) x1 += width;else if(x2+width-x1<x1-x2) x2 += width; }

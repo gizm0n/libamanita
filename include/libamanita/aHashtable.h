@@ -16,9 +16,9 @@
 
 
 enum {
-	HASH_STYLE_CASE_SENSITIVE		= 0,			/**<  */
-	HASH_STYLE_CASE_INSENSITIVE	= 1,			/**<  */
-	HASH_STYLE_KEY_MULTIPLES		= 2,			/**<  */
+	HASH_STYLE_CASE_SENSITIVE		= 0,			//!< 
+	HASH_STYLE_CASE_INSENSITIVE	= 1,			//!< 
+	HASH_STYLE_KEY_MULTIPLES		= 2,			//!< 
 };
 
 /** @cond */
@@ -108,9 +108,9 @@ public:
 	friend class aHashtable;
 
 	private:
-		aHashtable *ht;		/**< The hashtable this iterator is iterating through. */
-		node *at;				/**< Node iterator is pointing at. */
-		long index;				/**< Index in table iterator is pointing at. */
+		aHashtable *ht;		//!< The hashtable this iterator is iterating through.
+		node *at;				//!< Node iterator is pointing at.
+		long index;				//!< Index in table iterator is pointing at.
 
 		/** Constructor.
 		 * Only used by aHashtable.
