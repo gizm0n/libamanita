@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include <inttypes.h>
-#include <byteswap.h>
+#include <endian.h>
 #include <libamanita/aMath.h>
 #include <libamanita/aString.h>
 #include <libamanita/aRandom.h>
@@ -82,9 +82,13 @@ void aInteger::set(const char *n) {
 			c = 0;
 			if(i-j-1>=0) /*{*/c |= aString::fromHex(n[i-j-1])<<4;//putchar(n[i-j-1]);}
 			if(i-j>=0) /*{*/c |= aString::fromHex(n[i-j]);//putchar(n[i-j]);}
+#if __BYTE_ORDER == __BIG_ENDIAN
 			m = (m<<8)|c;
+#else
+			m = (c<<24)|(m>>8);
+#endif
 		}
-		num[p++] = bswap_32(m),m = 0,j = 8;
+		num[p++] = m,m = 0,j = 8;
 	}
 // printf("\")\n");
 }
