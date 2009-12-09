@@ -10,17 +10,20 @@
 
 #include <stdarg.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #ifdef LIBAMANITA_SDL
 	#include <SDL/SDL.h>
 	#include <SDL/SDL_net.h>
 	#include <SDL/SDL_thread.h>
 
+	#define tcp_close(s) SDLNet_TCP_Close(s)
 	#define tcp_send(s,d,l) SDLNet_TCP_Send((s),(d),(l))
 	#define tcp_recv(s,d,l) SDLNet_TCP_Recv((s),(d),(l))
 
 	typedef TCPsocket tcp_socket_t;
 	typedef int thread_func_t;
+	typedef SDL_mutex *socket_mutex_t;
 
 #elif defined __linux__
 	#include <unistd.h>
@@ -32,11 +35,13 @@
 	#include <signal.h>
 	#include <endian.h>
 
+	#define tcp_close(s) ::close(s)
 	#define tcp_send(s,d,l) ::send((s),(d),(l),0)
 	#define tcp_recv(s,d,l) ::recv((s),(d),(l),0)
 
 	typedef int tcp_socket_t;
 	typedef void *thread_func_t;
+	typedef pthread_mutex_t *socket_mutex_t;
 
 #endif /* LIBAMANITA_SDL */
 
@@ -159,7 +164,8 @@ enum {
 };
 
 enum {
-	SOCK_ST_RUNNING				= 0x0001,
+	SOCK_ST_ALIEN_MUTEX			= 0x0001,
+	SOCK_ST_RUNNING,
 	SOCK_ST_STARTING,
 };
 
@@ -228,6 +234,7 @@ protected:
 	tcp_socket_t sock;
 	uint32_t ip;
 	uint16_t port;
+	socket_mutex_t mut;				//!< aSocket mutex.
 #ifdef LIBAMANITA_SDL
 	SDL_Thread *thread;
 	IPaddress address;
@@ -255,12 +262,21 @@ public:
 	static void XORcipher(uint8_t *d,const uint8_t *s,size_t l,const uint32_t *k,size_t kl);
 #endif /*SOCKET_NOCIPHER*/
 
+	/** @name Thread
+	 * @{ */
+	void setMutex(socket_mutex_t m);
+	void createMutex();
+	void deleteMutex();
+	int lock();				//!< Lock the mutext.
+	int unlock();			//!< Unlock the mutext.
 	bool isRunning() { return (status&SOCK_ST_RUNNING); }
 	bool isStarting() { return (status&SOCK_ST_STARTING); }
+	/** @} */
 
 	uint32_t getIP() { return ip; }
 	uint16_t getPort() { return port; }
 	const char *getHost() { return host; }
+	bool isLocalSocket(tcp_socket_t s) { return sock==s; }
 
 	void setMessageBuffer(size_t l);
 

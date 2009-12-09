@@ -50,6 +50,8 @@ enum {
 };
 
 
+
+
 /** Server connection.
  *
  * This class is used by aServer to handle connections to clients. It contains
@@ -69,6 +71,7 @@ private:
 	uint32_t *key;					//!< For encrypted connections, the encryption key.
 	size_t keylen;					//!< Length of key.
 #endif /*SOCKET_NOCIPHER*/
+	void *data;						//!< User defined data attached to this connection.
 
 	/** Constructor.
 	 * The constructor can only be called by aServer. */
@@ -88,11 +91,29 @@ private:
 			}
 
 public:
+	/** @name Socket
+	 * @{ */
 	const tcp_socket_t getSocket() { return sock; }				//!< Get TCP socket.
+	/** @] */
+
+	/** @name Client
+	 * @{ */
 	uint32_t getID() { return id; }									//!< Get ID.
 	/** Change nick for client. */
 	void setNick(const char *n) { free(nick);nick = strdup(n); }
 	const char *getNick() { return nick; }							//!< Get nick.
+	/** @} */
+
+	/** @name Data
+	 * User defined data. Can be any data, a struct, class, integer,
+	 * anything that can be stored as a pointer to void.
+	 * @{ */
+	void setData(void *d) { data = d; }								//!< Set user defined data.
+	void *getData() { return data; }									//!< Get user defined data.
+	/** @} */
+
+	/** @name Status
+	 * @{ */
 	/** Set whether connection is active. */
 	void setActive(bool a) { status |= CON_ACTIVE;if(!a) status ^= CON_ACTIVE; }
 	bool isPending() { return !(status&CON_ACTIVE); }			//!< True if connection is waiting to be inserted in queue by server.
@@ -100,6 +121,8 @@ public:
 	/** Set connection to be operator. */
 	void setOperator(bool o) { status |= CON_OPERATOR;if(!o) status ^= CON_OPERATOR; }
 	bool isOperator() { return status&CON_OPERATOR; }			//!< true if connection is operator.
+	/** @} */
+
 #ifndef SOCKET_NOCIPHER
 	void setKey(const uint32_t *k,size_t l);						//!< Set encryption key.
 #endif /*SOCKET_NOCIPHER*/
@@ -118,6 +141,17 @@ typedef aServerConnection *aConnection;
 
 
 
+enum {
+	/** Handle client's ID internally, this means server ignores ID that clients send
+	 * and instead sends the client a generated ID. */
+	SERVER_ST_INTERNAL_CLIENT_ID		= 0x0100,
+	/** If set encrypts and decrypts all messages. */
+	SERVER_ST_ENCRYPT_MESSAGES			= 0x0200,
+};
+
+
+
+
 
 /** A server class for TCP networking.
  *
@@ -127,11 +161,11 @@ typedef aServerConnection *aConnection;
  */
 class aServer : public aSocket {
 private:
+	static uint32_t id_index;
+
 #ifdef LIBAMANITA_SDL
 	size_t setsz;				//!< SDL_SocketSet set, allocated size.
-	SDL_mutex *mut;			//!< aServer mutex.
 #elif defined __linux__
-	pthread_mutex_t mut;
 #endif /* LIBAMANITA_SDL */
 	aHashtable sockets;		//!< All sockets connected to this server. Stored as socket=>aConnection.
 	aHashtable clients;		//!< All clients connected to this server. Stored as ID=>aConnection.
@@ -163,20 +197,16 @@ public:
 	~aServer();
 	/** @} */
 
+	/** @name Status
+	 * @{ */
+	/** Set status for server. This method only accepts status flags for aServer, not for aSocket.
+	 * @param s Status flags.
+	 * @param b Set if true, else remove status flags. */
+	void setStatus(int s,bool b) { s &= 0xff00,status = (b? (status|s) : (status&~s)); }
+	/** @} */
+
 	/** @name Thread
 	 * @{ */
-#ifdef LIBAMANITA_SDL
-	/** Lock the mutext. */
-	int lock() { return SDL_mutexP(mut); }
-	/** Unlock the mutext. */
-	int unlock() { return SDL_mutexV(mut); }
-#elif defined __linux__
-	/** @cond */
-	int lock() { return pthread_mutex_lock(&mut); }
-	int unlock() { return pthread_mutex_unlock(&mut); }
-	/** @endcond */
-#endif /* LIBAMANITA_SDL */
-
 	bool start(const char *con);
 	bool start(uint16_t p);
 	void stop(bool kill=true);
@@ -185,6 +215,7 @@ public:
 	/** @name Client
 	 * @{ */
 	aConnection getClient(uint32_t id) { return (aConnection)clients.get(id); }
+	aHashtable::iterator getClients() { return clients.iterate(); }
 	void changeNick(uint32_t id,const char *nick);
 	/** @} */
 
