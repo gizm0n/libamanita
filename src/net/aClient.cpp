@@ -9,8 +9,11 @@
 
 
 
-aClient::aClient(socket_event_handler seh,uint32_t id,const char *nick) : aSocket(seh),id(id),nick(0) {
-	if(nick && *nick) setNick(nick);
+aClient::aClient(socket_event_handler seh) : aSocket(seh) {
+	host = 0;
+	port = 0;
+	id = 0;
+	nick = 0;
 #ifndef SOCKET_NOCIPHER
 	key = 0;
 	keylen = 0;
@@ -26,24 +29,28 @@ aClient::~aClient() {
 }
 
 bool aClient::start(const char *con) {
-	char host[16],nick[32];
+	char h[16],n[33];
+	uint32_t i,d;
+	uint16_t p;
 fprintf(stderr,"start()\n");
 fflush(stderr);
-	resolveConnection(con,ip,port,id,nick,32);
-	sprintf(host,"%d.%d.%d.%d",ip>>24,(ip>>16)&0xff,(ip>>8)&0xff,ip&0xff);
-	if(*nick) setNick(nick);
-fprintf(stderr,"start(\"%s\",%x,%d,%d,%s)\n",host,ip,port,id,nick);
+	resolveConnection(con,i,p,d,n,32);
+	sprintf(h,"%d.%d.%d.%d",i>>24,(i>>16)&0xff,(i>>8)&0xff,i&0xff);
+fprintf(stderr,"start(\"%s\",%x,%d,%d,%s)\n",h,i,p,d,n);
 fflush(stderr);
-	return start(host,port);
+	return start(h,p,d,n);
 }
 
 
-bool aClient::start(const char *h,uint16_t p) {
+bool aClient::start(const char *h,uint16_t p,uint32_t i,const char *n) {
 fprintf(stderr,"start(\"%s\",%d)\n",h,p);
 fflush(stderr);
 
+	if(host) free(host);
 	host = strdup(h);
 	port = swap_be_16(p);
+	id = i;
+	setNick(n);
 
 #ifdef LIBAMANITA_SDL
 	if(!(set=SDLNet_AllocSocketSet(1))) stateChanged(SM_ERR_ALLOC_SOCKETSET,0,0,0);
@@ -104,16 +111,14 @@ void aClient::stop(bool kill) {
 			else SDL_WaitThread(thread,0);
 			thread = 0;
 		}
-		setRunning(false);
-		SDLNet_TCP_Close(sock);
 
 #elif defined __linux__
 		if(kill) pthread_kill(thread,0);
 		else pthread_join(thread,0);
-		setRunning(false);
-		close(sock);
 #endif /* LIBAMANITA_SDL */
 
+		setRunning(false);
+		tcp_close(sock);
 		sock = 0;
 	}
 }

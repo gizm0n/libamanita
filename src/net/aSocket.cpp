@@ -11,6 +11,7 @@ aSocket::aSocket(socket_event_handler seh) : event_handler(seh) {
 	host = 0;
 	status = 0;
 	sock = 0;
+	mut = 0;
 #ifdef LIBAMANITA_SDL
 	thread = 0;
 	address = (IPaddress){0,0};
@@ -24,6 +25,7 @@ aSocket::aSocket(socket_event_handler seh) : event_handler(seh) {
 }
 
 aSocket::~aSocket() {
+	if(mut) deleteMutex();
 	if(host) { free(host);host = 0; }
 	if(buf) { free(buf);buf = 0,len = 0; }
 }
@@ -52,6 +54,57 @@ void aSocket::resolveConnection(const char *con,uint32_t &ip,uint16_t &port,uint
 	ip = i;
 	port = p;
 	id = d;
+}
+
+void aSocket::setMutex(socket_mutex_t m) {
+	if(mut) deleteMutex();
+	status |= SOCK_ST_ALIEN_MUTEX;
+	mut = m;
+}
+
+void aSocket::createMutex() {
+	if(mut) deleteMutex();
+	status = (status&~SOCK_ST_ALIEN_MUTEX);
+#ifdef LIBAMANITA_SDL
+	mut = SDL_CreateMutex();
+#elif defined __linux__
+	mut = (socket_mutex_t)malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_init(mut,0);
+#endif /* LIBAMANITA_SDL */
+}
+
+void aSocket::deleteMutex() {
+	if(!mut) return;
+	if(status&SOCK_ST_ALIEN_MUTEX) mut = 0;
+	else {
+#ifdef LIBAMANITA_SDL
+		SDL_DestroyMutex(mut);
+		mut = 0;
+#elif defined __linux__
+		pthread_mutex_destroy(mut);
+		free(mut);
+		mut = 0;
+#endif /* LIBAMANITA_SDL */
+	}
+}
+
+
+int aSocket::lock() {
+	if(!mut) return 0;
+#ifdef LIBAMANITA_SDL
+	return SDL_mutexP(mut);
+#elif defined __linux__
+	return pthread_mutex_lock(mut);
+#endif /* LIBAMANITA_SDL */
+}
+
+int aSocket::unlock() {
+	if(!mut) return 0;
+#ifdef LIBAMANITA_SDL
+	return SDL_mutexV(mut);
+#elif defined __linux__
+	return pthread_mutex_unlock(mut);
+#endif /* LIBAMANITA_SDL */
 }
 
 void aSocket::setMessageBuffer(size_t l) {

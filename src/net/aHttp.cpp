@@ -4,8 +4,39 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_net.h>
+
+
+#ifdef LIBAMANITA_SDL
+	#include <SDL/SDL.h>
+	#include <SDL/SDL_net.h>
+
+	#define http_close(s) SDLNet_TCP_Close(s)
+	#define http_send(s,d,l) SDLNet_TCP_Send((s),(d),(l))
+	#define http_recv(s,d,l) SDLNet_TCP_Recv((s),(d),(l))
+	#define http_clock SDL_GetTicks
+
+	typedef TCPsocket http_socket_t;
+	typedef int http_clock_t;
+
+#elif defined __linux__
+	#include <unistd.h>
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <netdb.h>
+	#include <signal.h>
+	#include <time.h>
+
+	#define http_close(s) ::close(s)
+	#define http_send(s,d,l) ::send((s),(d),(l),0)
+	#define http_recv(s,d,l) ::recv((s),(d),(l),0)
+	#define http_clock clock
+
+	typedef int http_socket_t;
+	typedef clock_t http_clock_t;
+
+#endif /* LIBAMANITA_SDL */
+
 #include <libamanita/aString.h>
 #include <libamanita/aRandom.h>
 #include <libamanita/net/aHttp.h>
@@ -267,18 +298,39 @@ fprintf(stderr,"aHttp::request(host=%s,url=%s)\n",host,url);
 fflush(stderr);
 
 	int error = 0;
+	http_clock_t t1 = http_clock(),t2 = t1,t3 = t1,t4 = t1,t5 = t1;
+
+#ifdef LIBAMANITA_SDL
 	IPaddress ip;
 	TCPsocket sock = 0;
 	SDLNet_SocketSet set = 0;
-	int t1 = SDL_GetTicks(),t2 = t1,t3 = t1,t4 = t1,t5 = t1;
 	if(!(set=SDLNet_AllocSocketSet(1))) error = 1;
 	else if(SDLNet_ResolveHost(&ip,host,80)==-1) error = 2;
 	else {
 		if(!(sock=SDLNet_TCP_Open(&ip))) error = 3;
 		else if(SDLNet_TCP_AddSocket(set,sock)==-1) error = 4;
 		else {
+
+#elif defined __linux__
+	int sock;
+	hostent *hostinfo;
+	sockaddr_in address;
+	fd_set set,test;
+	if((sock=socket(AF_INET,SOCK_STREAM,0))==-1) error = 1;
+	else if(!(hostinfo=gethostbyname(host))) error = 2;
+	else {
+		address.sin_addr = *(in_addr *)*hostinfo->h_addr_list;
+		address.sin_family = AF_INET;
+		address.sin_port = htons(80);
+
+		if(connect(sock,(sockaddr *)&address,sizeof(address))<0) error = 3;
+		else {
+			FD_ZERO(&set);
+			FD_SET(sock,&set);
+#endif /* LIBAMANITA_SDL */
+
 			char buf[2049];
-			t2 = SDL_GetTicks();
+			t2 = http_clock();
 			{
 				if(!headers.contains(http_headers[HTTP_HOST])) headers.put(http_headers[HTTP_HOST],host);
 				if(!headers.contains(http_headers[HTTP_CONNECTION])) headers.put(http_headers[HTTP_CONNECTION],"close");
@@ -296,16 +348,26 @@ fflush(stderr);
 				if(data && len) {
 fprintf(stderr,"aHttp::request(data=\"%s\",len=%zu)\n",data,len);
 fflush(stderr);
-					SDLNet_TCP_Send(sock,header.toCharArray(),header.length());
-					SDLNet_TCP_Send(sock,data,len+1);
-				} else SDLNet_TCP_Send(sock,header.toCharArray(),header.length()+1);
+					http_send(sock,header.toCharArray(),header.length());
+					http_send(sock,data,len+1);
+				} else http_send(sock,header.toCharArray(),header.length()+1);
 			}
 
-			t3 = SDL_GetTicks();
+			t3 = http_clock();
+
+#ifdef LIBAMANITA_SDL
 			if(SDLNet_CheckSockets(set,(uint32_t)-1)<=0) error = 5;
 			else {
-				t4 = SDL_GetTicks();
-				int r = SDLNet_TCP_Recv(sock,buf,2048);
+
+#elif defined __linux__
+			test = set;
+			select(FD_SETSIZE,&test,0,0,0);
+			if(!FD_ISSET(sock,&test)) error = 5;
+			else {
+#endif /* LIBAMANITA_SDL */
+
+				t4 = http_clock();
+				int r = http_recv(sock,buf,2048);
 fprintf(stderr,"aHttp::request(response=\"%s\",r=%d)\n",buf,r);
 fflush(stderr);
 				if(r<=0) error = 6;
@@ -383,7 +445,7 @@ fflush(stderr);
 									if(r<32) {
 										if(r>0) memmove(buf,pb,r);
 										pb = buf;
-										i = SDLNet_TCP_Recv(sock,pb+r,2048-r);
+										i = http_recv(sock,pb+r,2048-r);
 										if(i<0) break;
 										r += i;
 										pb[r] = '\0';
@@ -403,7 +465,7 @@ fflush(stderr);
 							if(n>0 && r==0) {
 								pb = buf;
 								while(n>0) {
-									r = SDLNet_TCP_Recv(sock,pb,2048);
+									r = http_recv(sock,pb,2048);
 									if(r<=0) break;
 									pb[r] = '\0';
 									if(n>2048) {
@@ -432,7 +494,7 @@ fflush(stderr);
 							for(n=len-n; 1; n-=r) {
 								if(n<=0) {
 									if(chunked) {
-										r = SDLNet_TCP_Recv(sock,buf,1024);
+										r = http_recv(sock,buf,1024);
 										if(r<=0) break;
 										len = aString::fromHex(&buf[2]);
 										p2 = strstr(&buf[2],"\r\n")+2;
@@ -442,7 +504,7 @@ fflush(stderr);
 										n = len-n;
 									} else break;
 								}
-								r = SDLNet_TCP_Recv(sock,buf,n>1024? 1024 : n);
+								r = http_recv(sock,buf,n>1024? 1024 : n);
 								if(r<=0) break;
 fprintf(stderr,"aHttp::request(r=%d)\n",r);
 fflush(stderr);
@@ -451,18 +513,25 @@ fflush(stderr);
 						}
 */
 						if(r<0) error = 8;
-						t5 = SDL_GetTicks();
+						t5 = http_clock();
 					}
 				}
 			}
 
 		}
-		if(sock) SDLNet_TCP_Close(sock);
+		if(sock) http_close(sock);
 	}
+#ifdef LIBAMANITA_SDL
 	if(set) SDLNet_FreeSocketSet(set);
+#elif defined __linux__
+#endif /* LIBAMANITA_SDL */
 	if(error>0) {
 		body.clear();
-		fprintf(stderr,"Error %d: %s\n",error,SDLNet_GetError());
+#ifdef LIBAMANITA_SDL
+		fprintf(stderr,"HTTP Error %d: %s\n",error,SDLNet_GetError());
+#elif defined __linux__
+		perror("HTTP Error");
+#endif /* LIBAMANITA_SDL */
 		fflush(stderr);
 		body.free();
 	}
@@ -471,7 +540,7 @@ fflush(stderr);
 
 fprintf(stderr,"Time alltogether: %d\nTime to init: %d\nTime to send: %d\nTime until response: %d\nTime to download: %d\n"
 	"header[%s]\nlen=%zu\nver=%.1f\nstatus=%d\n",
-	t5-t1,t2-t1,t3-t2,t4-t3,t5-t4,response.getString("Header"),body.length(),ver,status);
+	(int)(t5-t1),(int)(t2-t1),(int)(t3-t2),(int)(t4-t3),(int)(t5-t4),response.getString("Header"),body.length(),ver,status);
 fflush(stderr);
 	return body.toCharArray();
 }

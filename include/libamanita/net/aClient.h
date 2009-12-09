@@ -30,15 +30,16 @@ private:
 	void run();
 
 public:
-	aClient(socket_event_handler seh,uint32_t id=0,const char *nick=0);
+	aClient(socket_event_handler seh);
 	~aClient();
 
 	bool start(const char *con);
-	bool start(const char *h,uint16_t p);
+	bool start(const char *h,uint16_t p,uint32_t i,const char *n);
 	void stop(bool kill=true);
 
 	int send(uint8_t *d,size_t l);
 
+	void setID(uint32_t i) { id = i; }
 	uint32_t getID() { return id; }
 	void setNick(const char *n);
 	const char *getNick() { return nick; }
