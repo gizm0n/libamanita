@@ -18,6 +18,7 @@ nobase_include_HEADERS = \
 	../include/libamanita/aRandom.h \
 	../include/libamanita/aRegex.h \
 	../include/libamanita/aString.h \
+	../include/libamanita/aThread.h \
 	../include/libamanita/aVector.h \
 	../include/libamanita/aWord.h \
 	../include/libamanita/gui/aEvent.h \
@@ -39,7 +40,6 @@ nobase_include_HEADERS = \
 	../include/libamanita/sdl/aTextfield.h \
 	../include/libamanita/sdl/aTooltip.h \
 	../include/libamanita/sdl/aWindow.h \
-	../include/libamanita/sdl/aThread.h \
 	../include/libamanita/sqlite/aRecord.h \
 	../include/libamanita/sqlite/aResultset.h \
 	../include/libamanita/sqlite/aSQLite.h
@@ -57,6 +57,7 @@ libamanita_a_SOURCES = \
 	../src/aRegex.cpp \
 	../src/aString.cpp \
 	../src/aString_HTMLentities.cpp \
+	../src/aThread.cpp \
 	../src/aVector.cpp \
 	../src/aWord.cpp \
 	../src/config.cpp \
@@ -87,6 +88,7 @@ libamanita_sdl_a_SOURCES = \
 	../src/aRegex.cpp \
 	../src/aString.cpp \
 	../src/aString_HTMLentities.cpp \
+	../src/aThread.cpp \
 	../src/aVector.cpp \
 	../src/aWord.cpp \
 	../src/config.cpp \
@@ -107,7 +109,6 @@ libamanita_sdl_a_SOURCES = \
 	../src/sdl/aText.cpp \
 	../src/sdl/aTextbox.cpp \
 	../src/sdl/aTextfield.cpp \
-	../src/sdl/aThread.cpp \
 	../src/sdl/aTooltip.cpp \
 	../src/sdl/aWindow.cpp \
 	../src/sqlite/aRecord.cpp \
