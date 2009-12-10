@@ -118,26 +118,28 @@ uint8_t *aSocket::receive(tcp_socket_t s,size_t &l) {
 	int r;
 	size_t i = 0;
 	do {
-		r =tcp_recv(s,b+i,SOCKET_HD-i);
+		r =tcp_recv(s,b+i,SOCKET_HEADER-i);
 		if(r>0) i += r;
-	} while(r>0 && i<SOCKET_HD);
+	} while(r>0 && i<SOCKET_HEADER);
 
-fprintf(stderr,"aSocket::receive(0,r=%d,cmd=%d,len=%d)\n",r,(int)*b,SOCKET_SWAP(*SOCKET_TYPE(b+SOCKET_OFFSET)));
+fprintf(stderr,"aSocket::receive(0,r=%d,cmd=%d,len=%d)\n",
+		r,(int)*b,SOCKET_HEADER_LEN_SWAP(*SOCKET_HEADER_LEN_TYPE(b+SOCKET_OFFSET)));
 fflush(stderr);
 
-	if(i==SOCKET_HD && (i=SOCKET_SWAP(*SOCKET_TYPE(b+SOCKET_OFFSET)))>0) {
+	if(i==SOCKET_HEADER &&
+			(i=SOCKET_HEADER_LEN_SWAP(*SOCKET_HEADER_LEN_TYPE(b+SOCKET_OFFSET)))>0) {
 fprintf(stderr,"aSocket::receive(1,r=%d,i=%zu)\n",r,i);
 fflush(stderr);
-#ifdef SOCKET_LENINCL
-		l = SOCKET_HD;
+#ifdef SOCKET_HEADER_INCLUDED
+		l = SOCKET_HEADER;
 		if(i>len) {
 			b = (uint8_t *)malloc(i);
-			memcpy(b,buf,SOCKET_HD);
+			memcpy(b,buf,SOCKET_HEADER);
 		}
-#else /*SOCKET_LENINCL*/
+#else /*SOCKET_HEADER_INCLUDED*/
 		l = 0;
 		if((uint32_t)i>len) b = (char *)malloc(i);
-#endif /*SOCKET_LENINCL*/
+#endif /*SOCKET_HEADER_INCLUDED*/
 		while(r>0 && l<i) {
 			r = tcp_recv(s,b+l,i-l);
 			l += r;
@@ -193,14 +195,14 @@ size_t aSocket::send(tcp_socket_t s,uint8_t *d,size_t l) {
 	if(d && l>0) {
 fprintf(stderr,"aSocket::send(0,s=%p,l=%zu)\n",(void *)s,l);
 fflush(stderr);
-#ifdef SOCKET_LENINCL
+#ifdef SOCKET_HEADER_INCLUDED
 		int n;
-		*SOCKET_TYPE(d+SOCKET_OFFSET) = SOCKET_SWAP(l);
+		*SOCKET_HEADER_LEN_TYPE(d+SOCKET_OFFSET) = SOCKET_HEADER_LEN_SWAP(l);
 		if((n=tcp_send(s,d,l))==(int)l) return n;
-#else /*SOCKET_LENINCL*/
-		TCPsockHeader n = SOCKET_SWAP(l);
-		if(tcp_send(s,&n,SOCKET_HD)==SOCKET_HD && (n=tcp_send(s,d,l))==(int)l) return n;
-#endif /*SOCKET_LENINCL*/
+#else /*SOCKET_HEADER_INCLUDED*/
+		TCPsockHeader n = SOCKET_HEADER_LEN_SWAP(l);
+		if(tcp_send(s,&n,SOCKET_HEADER)==SOCKET_HEADER && (n=tcp_send(s,d,l))==(int)l) return n;
+#endif /*SOCKET_HEADER_INCLUDED*/
 fprintf(stderr,"aSocket::send(1,l=%zu)\n",l);
 fflush(stderr);
 	}

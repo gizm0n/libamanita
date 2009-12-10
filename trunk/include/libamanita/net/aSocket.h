@@ -74,66 +74,58 @@
  * defined parameters during compiletime using the -D compile parameter it is possible to include the
  * packagelength in the sent data so to just send one package instead to cut down some bandwidth.
  *
- * SOCKET_LENINCL - If this is defined length of the sent data must be included in the packages sent and that
+ * SOCKET_HEADER_INCLUDED - If this is defined length of the sent data must be included in the packages sent and that
  *		it should be within the first four bytes of the package. This data should be ignored when sending, it will be
  *		handled internally.
- * SOCKET_LEN==32 - This means the length of the packages sent is 32 bits.
- * SOCKET_LEN==16 - Default, no need to define.
- * SOCKET_OFFSET==16 - Must not be set with SOCKET_LEN==32.
- * SOCKET_OFFSET==8 - Must not be set with SOCKET_LEN==32.
- * SOCKET_OFFSET==0 - Default, no need to define.
- *
+ * SOCKET_LEN - Number of bytes the length parameter in the header is. Can be 2 or 4. Default is 2.
+ * SOCKET_OFFSET - Number of bytes before the length parameter in the header. Default is 0.
+ * SOCKET_HEADER - Number of bytes the header is. Accept 2 to 8 bytes, other values are ignored.
  */
 
 
-#undef SOCKET_LENINCL
+#undef SOCKET_HEADER_INCLUDED
+#undef SOCKET_HEADER
 #undef SOCKET_LEN
 #undef SOCKET_OFFSET
 #undef SOCKET_NOCIPHER
-#undef SOCKET_HD
 
-#ifdef LIBAMANITA_SOCKET_LENINCL
-	#define SOCKET_LENINCL
+#if LIBAMANITA_SOCKET_HEADER>=3 && LIBAMANITA_SOCKET_HEADER<8
+	#define SOCKET_HEADER_INCLUDED
+	#define SOCKET_HEADER LIBAMANITA_SOCKET_HEADER
+	#if SOCKET_HEADER<=4
+		#define SOCKET_LEN 2
+		#if SOCKET_HEADER==3
+			#define SOCKET_OFFSET 1
+		#else
+			#define SOCKET_OFFSET 2
+		#endif
+	#else
+		#define SOCKET_LEN 4
+		#if SOCKET_HEADER==5
+			#define SOCKET_OFFSET 1
+		#elif SOCKET_HEADER==6
+			#define SOCKET_OFFSET 2
+		#elif SOCKET_HEADER==7
+			#define SOCKET_OFFSET 3
+		#else
+			#define SOCKET_OFFSET 4
+		#endif
+	#endif
+#else
+	#define SOCKET_LEN 2
+	#define SOCKET_OFFSET 0
+	#define SOCKET_HEADER 2
 #endif
 
-#if LIBAMANITA_SOCKET_LEN==32
-	#define SOCKET_LEN 4
-	#define SOCKET_TYPE(v) ((uint32_t *)(v))
-	#define SOCKET_SWAP(v) swap_be_32(((uint32_t)(v)))
-	typedef uint32_t socket_header_t;
-#else /* LIBAMANITA_SOCKET_LEN */
-	#define SOCKET_LEN 2
-	#define SOCKET_TYPE(v) ((uint16_t *)(v))
-	#define SOCKET_SWAP(v) swap_be_16(((uint16_t)(v)))
-	typedef uint16_t socket_header_t;
-#endif /* LIBAMANITA_SOCKET_LEN */
-
-#if LIBAMANITA_SOCKET_OFFSET==16
-	#define SOCKET_OFFSET 2
-#elif LIBAMANITA_SOCKET_OFFSET==8
-	#define SOCKET_OFFSET 1
+#if SOCKET_LEN==4
+	#define SOCKET_HEADER_LEN_TYPE(v) ((uint32_t *)(v))
+	#define SOCKET_HEADER_LEN_SWAP(v) swap_be_32(((uint32_t)(v)))
+	typedef uint32_t socket_header_len_t;
 #else
-	#define SOCKET_OFFSET 0
-#endif /* SOCKET_OFFSET16 */
-
-#if LIBAMANITA_SOCKET_LEN==32
-	#if LIBAMANITA_SOCKET_OFFSET==16
-		#define SOCKET_HD 6
-	#elif LIBAMANITA_SOCKET_OFFSET==8
-		#define SOCKET_HD 5
-	#else
-		#define SOCKET_HD 4
-	#endif
-#else /* LIBAMANITA_SOCKET_LEN */
-	#if LIBAMANITA_SOCKET_OFFSET==16
-		#define SOCKET_HD 4
-	#elif LIBAMANITA_SOCKET_OFFSET==8
-		#define SOCKET_HD 3
-	#else
-		#define SOCKET_HD 2
-	#endif
-#endif /* LIBAMANITA_SOCKET_LEN */
-
+	#define SOCKET_HEADER_LEN_TYPE(v) ((uint16_t *)(v))
+	#define SOCKET_HEADER_LEN_SWAP(v) swap_be_16(((uint16_t)(v)))
+	typedef uint16_t socket_header_len_t;
+#endif
 
 #ifdef LIBAMANITA_SOCKET_NOCIPHER
 	#define SOCKET_NOCIPHER

@@ -48,6 +48,7 @@ fflush(stderr);
 bool aServer::start(uint16_t p) {
 	if(isRunning() || isStarting()) return false;
 	bool ret = false;
+	if(!mut) createMutex();
 	lock();
 	setStarting(true);
 	port = swap_be_16(p);
@@ -152,11 +153,11 @@ fflush(stderr);
 				b = receive(c->sock,l);
 				if(l>0) {
 #ifndef SOCKET_NOCIPHER
-#ifdef SOCKET_LENINCL
-					if(c->key) XORcipher(&b[SOCKET_HD],&b[SOCKET_HD],l-SOCKET_HD,c->key,c->keylen);
-#else /*SOCKET_LENINCL*/
+#ifdef SOCKET_HEADER_INCLUDED
+					if(c->key) XORcipher(&b[SOCKET_HEADER],&b[SOCKET_HEADER],l-SOCKET_HEADER,c->key,c->keylen);
+#else /*SOCKET_HEADER_INCLUDED*/
 					if(c->key) XORcipher(b,b,l,c->key,c->keylen);
-#endif /*SOCKET_LENINCL*/
+#endif /*SOCKET_HEADER_INCLUDED*/
 #endif /*SOCKET_NOCIPHER*/
 					stateChanged(SM_GET_MESSAGE,(intptr_t)c,(intptr_t)b,(intptr_t)l);
 				} else killClient(c->id);
@@ -191,11 +192,11 @@ fflush(stderr);
 				b = receive(c->sock,l);
 				if(l>0) {
 #ifndef SOCKET_NOCIPHER
-#ifdef SOCKET_LENINCL
-					if(c->key) XORcipher(&b[SOCKET_HD],&b[SOCKET_HD],l-SOCKET_HD,c->key,c->keylen);
-#else /*SOCKET_LENINCL*/
+#ifdef SOCKET_HEADER_INCLUDED
+					if(c->key) XORcipher(&b[SOCKET_HEADER],&b[SOCKET_HEADER],l-SOCKET_HEADER,c->key,c->keylen);
+#else /*SOCKET_HEADER_INCLUDED*/
 					if(c->key) XORcipher(b,b,l,c->key,c->keylen);
-#endif /*SOCKET_LENINCL*/
+#endif /*SOCKET_HEADER_INCLUDED*/
 #endif /*SOCKET_NOCIPHER*/
 					stateChanged(SM_GET_MESSAGE,(intptr_t)c,(intptr_t)b,(intptr_t)l);
 				} else killClient(c->id);
@@ -255,14 +256,14 @@ fflush(stderr);
 
 
 aConnection aServer::addClient(tcp_socket_t s,uint8_t *d,size_t l) {
-	d += SOCKET_HD;
+	d += SOCKET_HEADER;
 	uint32_t id;
 	if(status&SERVER_ST_INTERNAL_CLIENT_ID) id = ++id_index;
 	else id = swap_be_32(*(uint32_t *)d);
 	char *nick = (char *)(d+4);
 fprintf(stderr,"aServer::addClient(id=%" PRIu32 ",nick=%s)\n",id,nick);
 fflush(stderr);
-	stateChanged(SM_CHECK_NICK,(intptr_t)nick,0,0);
+	stateChanged(SM_CHECK_NICK,(intptr_t)&nick,0,0);
 	if(!uniqueID(id)) stateChanged(SM_DUPLICATE_ID,id,(intptr_t)nick,0);
 	else {
 		aServerConnection *c = new aServerConnection(s,id,nick);
@@ -308,6 +309,8 @@ fflush(stderr);
 void aServer::killAllClients() {
 	if(!clients.size()) return;
 	lock();
+fprintf(stderr,"aServer::killAllClients()\n");
+fflush(stderr);
 	aConnection client;
 	for(int i=main.size()-1; i>=0; i--) {
 		client = (aConnection)main[i];
@@ -320,8 +323,10 @@ void aServer::killAllClients() {
 	main.clear();
 	aHashtable::iterator iter = channels.iterate();
 	aChannel ch;
-	while((ch=(aChannel)iter.next())) delete ch;
+	while((ch=(aChannel)iter.next()))
+		if(ch!=&main) delete ch;
 	channels.removeAll();
+	channels.put(main.getName(),&main);
 #ifdef LIBAMANITA_SDL
 	createSocketSet(16);
 #elif defined __linux__
@@ -365,12 +370,12 @@ int aServer::send(aConnection c,uint8_t *d,size_t l) {
 #ifndef SOCKET_NOCIPHER
 	if(c->key) {
 		uint8_t dc[l];
-#ifdef SOCKET_LENINCL
-		memcpy(dc,d,SOCKET_HD);
-		XORcipher(&dc[SOCKET_HD],&d[SOCKET_HD],l-SOCKET_HD,c->key,c->keylen);
-#else /*SOCKET_LENINCL*/
+#ifdef SOCKET_HEADER_INCLUDED
+		memcpy(dc,d,SOCKET_HEADER);
+		XORcipher(&dc[SOCKET_HEADER],&d[SOCKET_HEADER],l-SOCKET_HEADER,c->key,c->keylen);
+#else /*SOCKET_HEADER_INCLUDED*/
 		XORcipher(dc,d,l,c->key,c->keylen);
-#endif /*SOCKET_LENINCL*/
+#endif /*SOCKET_HEADER_INCLUDED*/
 		return aSocket::send(c->sock,dc,l);
 	} else
 #endif /*SOCKET_NOCIPHER*/
@@ -386,17 +391,17 @@ void aServer::send(aChannel channel,uint8_t *d,size_t l) {
 #else /*SOCKET_NOCIPHER*/
 #define SOCKET_P d
 #endif /*SOCKET_NOCIPHER*/
-#ifdef SOCKET_LENINCL
-	*SOCKET_TYPE(d+SOCKET_OFFSET) = SOCKET_SWAP(l);
+#ifdef SOCKET_HEADER_INCLUDED
+	*SOCKET_HEADER_LEN_TYPE(d+SOCKET_OFFSET) = SOCKET_HEADER_LEN_SWAP(l);
 #ifndef SOCKET_NOCIPHER
-	memcpy(p,d,SOCKET_HD);
+	memcpy(p,d,SOCKET_HEADER);
 #endif /*SOCKET_NOCIPHER*/
-#else /*SOCKET_LENINCL*/
-	TCPsockType n = SOCKET_SWAP(l);
-#endif /*SOCKET_LENINCL*/
+#else /*SOCKET_HEADER_INCLUDED*/
+	TCPsockType n = SOCKET_HEADER_LEN_SWAP(l);
+#endif /*SOCKET_HEADER_INCLUDED*/
 	aConnection c;
 fprintf(stderr,"aServer::send(l=%zu,cmd=%d,len=%d)\n",
-		l,(int)*d,SOCKET_SWAP(*SOCKET_TYPE(d+SOCKET_OFFSET)));
+		l,(int)*d,SOCKET_HEADER_LEN_SWAP(*SOCKET_HEADER_LEN_TYPE(d+SOCKET_OFFSET)));
 fflush(stderr);
 	lock();
 	for(size_t i=0; i<channel->size(); i++)
@@ -404,20 +409,20 @@ fflush(stderr);
 #ifndef SOCKET_NOCIPHER
 			if(c->key) {
 				dc = p;
-#ifdef SOCKET_LENINCL
-				XORcipher(&dc[SOCKET_HD],&d[SOCKET_HD],l-SOCKET_HD,c->key,c->keylen);
-#else /*SOCKET_LENINCL*/
+#ifdef SOCKET_HEADER_INCLUDED
+				XORcipher(&dc[SOCKET_HEADER],&d[SOCKET_HEADER],l-SOCKET_HEADER,c->key,c->keylen);
+#else /*SOCKET_HEADER_INCLUDED*/
 				XORcipher(dc,d,l,c->key,c->keylen);
-#endif /*SOCKET_LENINCL*/
+#endif /*SOCKET_HEADER_INCLUDED*/
 			} else dc = d;
 #endif /*SOCKET_NOCIPHER*/
 
-#ifdef SOCKET_LENINCL
+#ifdef SOCKET_HEADER_INCLUDED
 			if(tcp_send(c->sock,SOCKET_P,l)<(int)l) {
-#else /*SOCKET_LENINCL*/
-			if(tcp_send(c->sock,&n,SOCKET_HD)!=SOCKET_HD
+#else /*SOCKET_HEADER_INCLUDED*/
+			if(tcp_send(c->sock,&n,SOCKET_HEADER)!=SOCKET_HEADER
 					|| tcp_send(c->sock,SOCKET_P,l)<(int)l) {
-#endif /*SOCKET_LENINCL*/
+#endif /*SOCKET_HEADER_INCLUDED*/
 				killClient(c);
 				i--;
 			}
