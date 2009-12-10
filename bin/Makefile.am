@@ -71,7 +71,7 @@ libamanita_a_SOURCES = \
 	../src/sqlite/aSQLite.cpp
 
 libamanita_a_CPPFLAGS = \
-	-DLIBAMANITA_SOCKET_HEADER=3
+	-DLIBAMANITA
 
 
 libamanita_sdl_a_SOURCES = \
@@ -115,7 +115,7 @@ libamanita_sdl_a_SOURCES = \
 	../src/sqlite/aSQLite.cpp
 
 libamanita_sdl_a_CPPFLAGS = \
-	-DLIBAMANITA_SDL \
-	-DLIBAMANITA_SOCKET_HEADER=3
+	-DLIBAMANITA \
+	-DLIBAMANITA_SDL
 
 

@@ -7,7 +7,7 @@
 
 uint32_t aClass::id_index = 0;
 
-aClass::aClass(const char *nm,aClass *s) : name(nm),super(s) {
+aClass::aClass(const char *nm,aClass *s) : name(nm),super(s),nsub(0),sub(0) {
 	id = aClass::id_index++;
 	if(super) {
 		if(!super->sub) super->sub = (aClass **)malloc(sizeof(aClass *));
@@ -29,7 +29,7 @@ if(super) {
 
 aClass::~aClass() {
 	if(sub) free(sub);
-	sub = 0,nsub = 0ul;
+	sub = 0,nsub = 0;
 }
 
 bool aClass::instanceOf(aClass &c) {
@@ -42,7 +42,7 @@ bool aClass::instanceOf(aClass &c) {
 
 void aClass::setDepth(int n) {
 	d = n;
-	if(nsub) for(size_t i=0ul; i<nsub; i++) if(sub[i]->d!=d+1) sub[i]->setDepth(d+1);
+	if(nsub) for(size_t i=0; i<nsub; i++) if(sub[i]->d!=d+1) sub[i]->setDepth(d+1);
 }
 
 void aClass::print(char *ind) {
