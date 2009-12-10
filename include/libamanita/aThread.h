@@ -4,7 +4,7 @@
 /**
  * @file libamanita/aThread.h
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2009-12-09
  * @date Created: 2008-09-07
  */ 
 
@@ -20,12 +20,6 @@
 #endif /* LIBAMANITA_SDL */
 
 
-/** Callback function used by aSocket to handle events.
- *
- * This function is one of the most important in this interface, because it makes it possible
- * for the program to intercept all communication over the network. It also sends error messages
- * and warnings.
- */
 #ifdef LIBAMANITA_SDL
 typedef int (*thread_function)(void *);
 #elif defined __linux__

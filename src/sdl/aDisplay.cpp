@@ -2,7 +2,6 @@
 #include "../config.h"
 #include <stdio.h>
 #include <libamanita/sdl/aGraphics.h>
-#include <libamanita/sdl/aThread.h>
 #include <libamanita/sdl/aDisplay.h>
 
 
@@ -23,7 +22,10 @@ aDisplay::~aDisplay() {
 }
 
 void aDisplay::setScreen(int x,int y,int w,int h) {
-	screen.x = x,screen.y = y,screen.w = w,screen.h = h;
+	screen.x = x;
+	screen.y = y;
+	screen.w = w;
+	screen.h = h;
 }
 
 

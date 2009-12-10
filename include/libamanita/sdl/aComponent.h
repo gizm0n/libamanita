@@ -12,7 +12,6 @@
 #include <libamanita/aObject.h>
 #include <libamanita/aVector.h>
 #include <libamanita/gui/aEvent.h>
-#include <libamanita/sdl/aThread.h>
 
 
 class aTooltip;

@@ -76,18 +76,18 @@ fflush(stderr);
 			FD_SET(sock,&set);
 #endif /* LIBAMANITA_SDL */
 
-#ifdef SOCKET_LENINCL
-fprintf(stderr,"start(SOCKET_LENINCL)\n");
+#ifdef SOCKET_HEADER_INCLUDED
+fprintf(stderr,"start(SOCKET_HEADER_INCLUDED)\n");
 fflush(stderr);
-			uint8_t d[strlen(nick)+SOCKET_HD+5];
-			*SOCKET_TYPE(d+SOCKET_OFFSET) = SOCKET_SWAP(sizeof(d));
-			*(uint32_t *)((void *)&d[SOCKET_HD]) = swap_be_32(id);
-			strcpy((char *)&d[SOCKET_HD+4],nick);
-#else /*SOCKET_LENINCL*/
+			uint8_t d[strlen(nick)+SOCKET_HEADER+5];
+			*SOCKET_HEADER_LEN_TYPE(d+SOCKET_OFFSET) = SOCKET_HEADER_LEN_SWAP(sizeof(d));
+			*(uint32_t *)((void *)&d[SOCKET_HEADER]) = swap_be_32(id);
+			strcpy((char *)&d[SOCKET_HEADER+4],nick);
+#else /*SOCKET_HEADER_INCLUDED*/
 			uint8_t d[strlen(nick)+5];
 			*(uint32_t *)d = swap_be_32(id);
 			strcpy(&d[4],nick);
-#endif /*SOCKET_LENINCL*/
+#endif /*SOCKET_HEADER_INCLUDED*/
 			if(aSocket::send(sock,d,sizeof(d))) {
 				stateChanged(SM_STARTING_CLIENT,0,0,0);
 #ifdef LIBAMANITA_SDL
@@ -161,11 +161,11 @@ fprintf(stderr,"aClient::run(l=%zu)\n",l);
 fflush(stderr);
 			if(l>0) {
 #ifndef SOCKET_NOCIPHER
-	#ifdef SOCKET_LENINCL
-				if(key) XORcipher(&d[SOCKET_HD],&d[SOCKET_HD],l-SOCKET_HD,key,keylen);
-#else /*SOCKET_LENINCL*/
+	#ifdef SOCKET_HEADER_INCLUDED
+				if(key) XORcipher(&d[SOCKET_HEADER],&d[SOCKET_HEADER],l-SOCKET_HEADER,key,keylen);
+#else /*SOCKET_HEADER_INCLUDED*/
 				if(key) XORcipher(d,d,l,key,keylen);
-#endif /*SOCKET_LENINCL*/
+#endif /*SOCKET_HEADER_INCLUDED*/
 #endif /*SOCKET_NOCIPHER*/
 				stateChanged(SM_GET_MESSAGE,0,(intptr_t)d,(intptr_t)l);
 			} else setRunning(false);
@@ -178,12 +178,12 @@ int aClient::send(uint8_t *d,size_t l) {
 #ifndef SOCKET_NOCIPHER
 	if(key) {
 		uint8_t dc[l];
-#ifdef SOCKET_LENINCL
-		memcpy(dc,d,SOCKET_HD);
-		XORcipher(&dc[SOCKET_HD],&d[SOCKET_HD],l-SOCKET_HD,key,keylen);
-#else /*SOCKET_LENINCL*/
+#ifdef SOCKET_HEADER_INCLUDED
+		memcpy(dc,d,SOCKET_HEADER);
+		XORcipher(&dc[SOCKET_HEADER],&d[SOCKET_HEADER],l-SOCKET_HEADER,key,keylen);
+#else /*SOCKET_HEADER_INCLUDED*/
 		XORcipher(dc,d,l,key,keylen);
-#endif /*SOCKET_LENINCL*/
+#endif /*SOCKET_HEADER_INCLUDED*/
 		return aSocket::send(sock,dc,l);
 	} else
 #endif /*SOCKET_NOCIPHER*/
