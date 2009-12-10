@@ -12,10 +12,16 @@
 #include <stdint.h>
 
 
+
+
 /** A class for handling RTTI.
  * 
  * All classes that inherit the aObject class get by default a static instance of the
  * aClass that specifically defines that class and place it in a treelike hierarchy.
+ *
+ * When instantiated statically with aObject, the aClass object is created before
+ * main is called and therefore it can be used safely itn the code except for in
+ * other static code.
  * @ingroup libamanita
  */
 class aClass {
@@ -41,12 +47,20 @@ public:
 	bool instanceOf(aClass &c);						//!< Test if this is an instance of c, that is, if this is the same or inherit c.
 	uint32_t getID() { return id; }					//!< Get ID for class.
 	const char *getName() { return name; }			//!< Get class name.
-	aClass *getSuperClass() { return super; }		//!< Get class that this class inherit from.
+	/** Get class that this class inherit from. */
+	aClass *getSuperClass() { return super; }
+	size_t subClasses() { return nsub; }			//!< Get number of inheriting classes.
+	/** Get the class inheriting this class with index n. */
+	aClass *getSubClass(int n) { return n>=0 && n<(int)nsub? sub[n] : 0; }
 	operator uint32_t() const { return id; }		//!< Get ID for class.
 };
 
+
+
 /** Is used by the aHashtable class to store a hash-values, and to get a hash-value from the aObject-class. */
 typedef intptr_t hash_t;
+
+
 
 /** @name RTTI Macros
  * These macros are very important for classes that inherit the aObject class.
@@ -79,6 +93,8 @@ private:\
 public:\
 	static aClass &getClass() { return class_name::instance; }
 
+
+
 /** This macro must be somewhere in the file containing the code for the class.
  * For example:
  * @code
@@ -94,11 +110,19 @@ RttiObjectInheritance(A,aObject)
 aClass class_name::instance(#class_name,&super_name::getClass())
 /** @} */
 
-/** The aObject-class is the top-class of all objects that need to be defined within a class-structure with
- * a simple RTTI-interface.
+
+
+
+/** The aObject-class implements a smple RTTI-interface. Any class inheriting this class
+ * must also implement a certain structure, which is managed with two very simple to
+ * use macros.
  * 
- * When inheriting this class, it is very important that you include the RttiObjectInheritance macro in
- * your class definition and the other one in the source file somewhere.
+ * Note that at the moment multiple inheritance if not supported. It's possible though
+ * to have multiple inheritance with classes not inheriting the aObject class.
+ *
+ * When inheriting this class, it is very important that you include the
+ * RttiObjectInstance macro in your class definition and the RttiObjectInheritance macro
+ * in the source file somewhere.
  * 
  * All classes that inherit the aObject class and adds these macros will have one ststic aClass instance
  * attached to the class, and one virtual method that returns the static aClass instance specific for
@@ -108,6 +132,88 @@ aClass class_name::instance(#class_name,&super_name::getClass())
  * So, whenever you need to make some test to see if one class inherits another or similar,
  * all you need to do is call a virtual method that returns a static aClass instance. As you see
  * it's pretty quick.
+ *
+ * Here's an example of how you can check inheritance and even get the name of the class
+ * or the name of the class this class inherits from, and all classes inheriting from this class:
+ * @code
+// File: rtti.cpp
+#include <stdio.h>
+#include <libamanita/aObject.h>
+
+class A : public aObject {
+RttiObjectInstance(A) // Note that this macro must not be ended with a semicolon.
+public:
+	int a;
+	A() : aObject() { a = 0; }
+	virtual ~A() {}
+};
+
+class B : public A {
+RttiObjectInstance(B)
+public:
+	int b;
+	B() : A() { b = 0; }
+	virtual ~B() {}
+};
+
+class C {
+public:
+	int c;
+	C() { c = 0; }
+	virtual ~C() {}
+};
+
+class D : public B, public C {
+RttiObjectInstance(D)
+public:
+	int d;
+	D() : B(),C() { d = 0; }
+	virtual ~D() {}
+};
+
+RttiObjectInheritance(A,aObject); // Note that this macro must be ended with a semicolon.
+RttiObjectInheritance(B,A);
+RttiObjectInheritance(D,B);
+
+int main(int argc,char *argv[]) {
+	B b;
+	D d;
+	if(b.instanceOf(d)) printf("%s is instance of %s.\n",
+		b.getClass().getName(),d.getClass().getName());
+	if(d.instanceOf(b)) printf("%s is instance of %s.\n",
+		d.getClass().getName(),b.getClass().getName());
+	// Note that at present time you cannot test instance of the aObject class
+	// itself, but must use the static method getClass().
+	if(b.instanceOf(A::getClass())) printf("%s is instance of %s.\n",
+		b.getClass().getName(),A::getClass().getName());
+	printf("d is of class %s and inherits %s.\n",
+		d.getClass().getName(),d.getClass().getSuperClass()->getName());
+	printf("This/these class(es) inherit b:\n");
+	for(int i=0,n=b.getClass().subClasses(); i<n; i++)
+		printf(" %d. %s\n",i+1,b.getClass().getSubClass(i)->getName());
+	printf("class %s inherits %s.\n",
+		A::getClass().getName(),A::getClass().getSuperClass()->getName());
+	printf("This/these class(es) inherit the class A:\n");
+	for(int i=0,n=A::getClass().subClasses(); i<n; i++)
+		printf(" %d. %s\n",i+1,A::getClass().getSubClass(i)->getName());
+}
+
+ * @endcode
+ * Compile the above code like this:
+ * @code
+ * g++ -o rtti rtti.cpp -lamanita
+ * @endcode
+ * It will generate the following output:
+ * @code
+D is instance of B.
+B is instance of A.
+d is of class D and inherits B.
+This/these class(es) inherit b:
+ 1. D
+class A inherits aObject.
+This/these class(es) inherit the class A:
+ 1. B
+ * @endcode
  * @see RttiObjectInstance(class_name)
  * @see RttiObjectInheritance(class_name,super_name)
  * @ingroup libamanita

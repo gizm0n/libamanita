@@ -12,6 +12,32 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+/** Set LIBAMANITA_SOCKET_HEADER to the sizeof the header in number of bytes.
+ * Is can be 2 to 8 bytes and defines the size of the length parameter in the
+ * header and the offset the lenth parameter is placed. I.e. if it's set to
+ * 3, the length parameter is placed 1 byte in and has the size of 16 bits.
+ * For the value of 6 the length parameter will be 32 bits and positioned 2
+ * bytes in. This is the configuration for the different sizes of the header
+ * where '.'=offset and '*'=length parameter.
+ * 2: [**]
+ * 3: [.**] <- 1 byte for command, and 2 bytes tell the size of the packet.
+ * 4: [..**]
+ * 5: [.****]
+ * 6: [..****] <- 2 byte for command, and 4 bytes tell the size of the packet.
+ * 7: [...****]
+ * 8: [....****]
+ */
+#define LIBAMANITA_SOCKET_HEADER 3
+
+/** Uncomment this if you don't want to include the minor overhead
+ * and extra memory of encryption in messages, or if encryption is
+ * handled elsewhere.
+ */
+#if 0
+#define LIBAMANITA_NOCIPHER
+#endif
+
+
 #ifdef LIBAMANITA_SDL
 	#include <SDL/SDL.h>
 	#include <SDL/SDL_net.h>
@@ -117,6 +143,16 @@
 	#define SOCKET_HEADER 2
 #endif
 
+#if SOCKET_OFFSET>=4
+	#define SOCKET_HEADER_CMD(v) swap_be_32(*(uint32_t *)(v))
+#elif SOCKET_OFFSET>=2
+	#define SOCKET_HEADER_CMD(v) swap_be_16(*(uint16_t *)(v))
+#elif SOCKET_OFFSET==1
+	#define SOCKET_HEADER_CMD(v) (*(uint8_t *)(v))
+#else
+	#define SOCKET_HEADER_CMD(v) 0
+#endif
+
 #if SOCKET_LEN==4
 	#define SOCKET_HEADER_LEN_TYPE(v) ((uint32_t *)(v))
 	#define SOCKET_HEADER_LEN_SWAP(v) swap_be_32(((uint32_t)(v)))
@@ -130,7 +166,6 @@
 #ifdef LIBAMANITA_SOCKET_NOCIPHER
 	#define SOCKET_NOCIPHER
 #endif
-
 
 enum {
 	SM_ERR_RESOLVE_HOST			= 0x0011,
@@ -271,6 +306,9 @@ public:
 	bool isLocalSocket(tcp_socket_t s) { return sock==s; }
 
 	void setMessageBuffer(size_t l);
+	static int getPacketHeaderSize() { return SOCKET_HEADER; }
+	static int getPacketHeader(uint8_t *data) { return SOCKET_HEADER_CMD(data); }
+	static int getPacketSize(uint8_t *data) { return SOCKET_HEADER_LEN_SWAP(*SOCKET_HEADER_LEN_TYPE(data+SOCKET_OFFSET)); }
 
 	size_t send(tcp_socket_t s,uint8_t *d,size_t l);
 };
