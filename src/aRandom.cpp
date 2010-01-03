@@ -121,7 +121,7 @@ int aRandom::oeD8(int n) {
 	return v;
 }
 
-uint32_t aRandom::rollTable(uint32_t *t,uint32_t n,uint32_t l) {
+uint32_t aRandom::rollTable(int *t,int n,int l) {
 	if(!t || !*t) return 0;
 	if(!n) {
 		if(!l) for(; t[l]>0; l++);
