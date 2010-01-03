@@ -37,7 +37,7 @@ class aVector : public aCollection {
 friend class aHashtable;
 
 /** @cond */
-RttiObjectInstance(aVector)
+aObject_Instance(aVector)
 /** @endcond */
 
 private:

@@ -7,7 +7,7 @@
 
 
 
-RttiObjectInheritance(aTextbox,aWindow);
+aObject_Inheritance(aTextbox,aWindow);
 
 
 char aTextbox::yes[16];

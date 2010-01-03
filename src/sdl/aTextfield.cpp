@@ -7,7 +7,7 @@
 
 
 
-RttiObjectInheritance(aTextfield,aComponent);
+aObject_Inheritance(aTextfield,aComponent);
 
 
 aTextfield::_settings aTextfield::_s = { 0 };

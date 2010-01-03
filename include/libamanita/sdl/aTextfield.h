@@ -14,7 +14,7 @@
 class aFont;
 
 class aTextfield : public aComponent,public aText,public aKeyListener {
-RttiObjectInstance(aTextfield)
+aObject_Instance(aTextfield)
 
 private:
 	struct _settings {

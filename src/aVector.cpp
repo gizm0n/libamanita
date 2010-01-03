@@ -64,7 +64,7 @@ value_t aVector::iterator::remove() {
 
 
 
-RttiObjectInheritance(aVector,aCollection);
+aObject_Inheritance(aVector,aCollection);
 
 
 aVector::aVector() : aCollection(),inc(0),list(0) {}

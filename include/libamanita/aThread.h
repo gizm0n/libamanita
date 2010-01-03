@@ -1,5 +1,5 @@
-#ifndef _LIBAMANITA_SDL_THREAD_H
-#define _LIBAMANITA_SDL_THREAD_H
+#ifndef _LIBAMANITA_THREAD_H
+#define _LIBAMANITA_THREAD_H
 
 /**
  * @file libamanita/aThread.h
@@ -16,26 +16,34 @@
 #elif defined __linux__
 	#include <pthread.h>
 	#include <unistd.h>
-	#include <time.h>
 #endif /* LIBAMANITA_SDL */
 
 
-#ifdef LIBAMANITA_SDL
-typedef int (*thread_function)(void *);
-#elif defined __linux__
-typedef void *(*thread_function)(void *);
-#endif /* LIBAMANITA_SDL */
+typedef void (*thread_function)(void *);
 
 
 class aThread {
 private:
 #ifdef LIBAMANITA_SDL
-	uint32_t t;
-	SDL_Thread *h;
+	SDL_Thread *thread;
+	SDL_mutex *mutex;
+	uint32_t timer;
 #elif defined __linux__
-	clock_t t;
-	pthread_t *h;
+	pthread_t *thread;
+	pthread_mutex_t *mutex;
+	timeval time;
 #endif /* LIBAMANITA_SDL */
+	thread_function function;
+	void *data;
+
+#ifdef LIBAMANITA_SDL
+	static int _run(void *d);
+#elif defined __linux__
+	static void *_run(void *d);
+#endif /* LIBAMANITA_SDL */
+
+	void createMutex();
+	void deleteMutex();
 
 public:
 	aThread();
@@ -44,7 +52,10 @@ public:
 	void start(thread_function f,void *d=0);
 	void stop();
 	void kill();
-	bool isRunning() { return h!=0; }
+	bool isRunning() { return thread!=0; }
+
+	void lock();
+	void unlock();
 
 	void pauseFPS(int fps);
 	void pause(int millis) {
@@ -56,4 +67,4 @@ public:
 	}
 };
 
-#endif /* _LIBAMANITA_SDL_THREAD_H */
+#endif /* _LIBAMANITA_THREAD_H */

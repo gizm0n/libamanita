@@ -7,13 +7,61 @@
 #include <libamanita/net/aSocket.h>
 
 
+
+const char *aSocket::message_names[] = {0,
+	"SM_ERR_RESOLVE_HOST",
+	"SM_ERR_OPEN_SOCKET",
+	"SM_ERR_CONNECT",
+	"SM_ERR_BIND",
+	"SM_ERR_LISTEN",
+	"SM_ERR_ADD_SOCKET",
+	"SM_ERR_ALLOC_SOCKETSET",
+	"SM_ERR_CHECK_SOCKETS",
+	"SM_ERR_GET_MESSAGE",
+	"SM_ERR_PUT_MESSAGE",
+
+	"SM_RESOLVE_HOST",
+	"SM_STARTING_SERVER",
+	"SM_STOPPING_SERVER",
+	"SM_STARTING_CLIENT",
+	"SM_STOPPING_CLIENT",
+	"SM_CHECK_NICK",
+	"SM_DUPLICATE_ID",
+	"SM_ADD_CLIENT",
+	"SM_KILL_CLIENT",
+	"SM_GET_MESSAGE",
+};
+
+
+void aSocket::print_packet(const uint8_t *data,size_t l) {
+	fputc('[',stderr);
+	for(int n=0,n1,n2; n<SOCKET_HEADER; n++) {
+		n2 = data[n],n1 = n2>>4,n2 &= 0xf;
+		fputc(n1<10? '0'+n1 : 'A'+n1-10,stderr);
+		fputc(n2<10? '0'+n2 : 'A'+n2-10,stderr);
+	}
+	fputc(']',stderr);
+	fputc('[',stderr);
+	for(int n=SOCKET_HEADER,n1,n2; n<(int)l && n<32; n++) {
+		n2 = data[n];
+		if(n2>=32 && n2<=127) fputc(n2,stderr);
+		else {
+			n1 = n2>>4,n2 &= 0xf;
+			fputc(n1<10? '0'+n1 : 'A'+n1-10,stderr);
+			fputc(n2<10? '0'+n2 : 'A'+n2-10,stderr);
+		}
+	}
+	fputc(']',stderr);
+}
+
+
 aSocket::aSocket(socket_event_handler seh) : event_handler(seh) {
 	host = 0;
 	status = 0;
 	sock = 0;
-	mut = 0;
+	ip = 0;
+	port = 0;
 #ifdef LIBAMANITA_SDL
-	thread = 0;
 	address = (IPaddress){0,0};
 	set = 0;
 #elif defined __linux__
@@ -25,8 +73,11 @@ aSocket::aSocket(socket_event_handler seh) : event_handler(seh) {
 }
 
 aSocket::~aSocket() {
-	if(mut) deleteMutex();
 	if(host) { free(host);host = 0; }
+#ifdef LIBAMANITA_SDL
+	if(set) { SDLNet_FreeSocketSet(set);set = 0; }
+#elif defined __linux__
+#endif /* LIBAMANITA_SDL */
 	if(buf) { free(buf);buf = 0,len = 0; }
 }
 
@@ -54,57 +105,7 @@ void aSocket::resolveConnection(const char *con,uint32_t &ip,uint16_t &port,uint
 	ip = i;
 	port = p;
 	id = d;
-}
-
-void aSocket::setMutex(socket_mutex_t m) {
-	if(mut) deleteMutex();
-	status |= SOCK_ST_ALIEN_MUTEX;
-	mut = m;
-}
-
-void aSocket::createMutex() {
-	if(mut) deleteMutex();
-	status = (status&~SOCK_ST_ALIEN_MUTEX);
-#ifdef LIBAMANITA_SDL
-	mut = SDL_CreateMutex();
-#elif defined __linux__
-	mut = (socket_mutex_t)malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(mut,0);
-#endif /* LIBAMANITA_SDL */
-}
-
-void aSocket::deleteMutex() {
-	if(!mut) return;
-	if(status&SOCK_ST_ALIEN_MUTEX) mut = 0;
-	else {
-#ifdef LIBAMANITA_SDL
-		SDL_DestroyMutex(mut);
-		mut = 0;
-#elif defined __linux__
-		pthread_mutex_destroy(mut);
-		free(mut);
-		mut = 0;
-#endif /* LIBAMANITA_SDL */
-	}
-}
-
-
-int aSocket::lock() {
-	if(!mut) return 0;
-#ifdef LIBAMANITA_SDL
-	return SDL_mutexP(mut);
-#elif defined __linux__
-	return pthread_mutex_lock(mut);
-#endif /* LIBAMANITA_SDL */
-}
-
-int aSocket::unlock() {
-	if(!mut) return 0;
-#ifdef LIBAMANITA_SDL
-	return SDL_mutexV(mut);
-#elif defined __linux__
-	return pthread_mutex_unlock(mut);
-#endif /* LIBAMANITA_SDL */
+printf("aSocket::resolveConnection(ip=%x,port=%d,id=%d)\n",ip,port,id);
 }
 
 void aSocket::setMessageBuffer(size_t l) {
@@ -148,21 +149,13 @@ fflush(stderr);
 		}
 		if(l==i) {
 fprintf(stderr,"aSocket::receive(");
-for(i=3; i<l && i<20; i++) {
-	r = b[i];
-	fputc(((r>>4)&0xf)<=9? '0'+((r>>4)&0xf) : 'a'+((r>>4)&0xf)-9,stderr);
-	fputc((r&0xf)<=9? '0'+(r&0xf) : 'a'+(r&0xf)-9,stderr);
-}
+print_packet(b,l);
 fprintf(stderr,")\n");
 fflush(stderr);
 			return b;
 		}
 		if(r==-1) {
-#ifdef LIBAMANITA_SDL
-fprintf(stderr,"aSocket::receive(SDL_Error=%s)\n",SDL_GetError());
-#elif defined __linux__
-perror("aSocket::receive");
-#endif /* LIBAMANITA_SDL */
+fprintf(stderr,"aSocket::receive(error=%s)\n",getError());
 fflush(stderr);
 		}
 		if(b!=buf) free(b);
@@ -200,8 +193,8 @@ fflush(stderr);
 		*SOCKET_HEADER_LEN_TYPE(d+SOCKET_OFFSET) = SOCKET_HEADER_LEN_SWAP(l);
 		if((n=tcp_send(s,d,l))==(int)l) return n;
 #else /*SOCKET_HEADER_INCLUDED*/
-		TCPsockHeader n = SOCKET_HEADER_LEN_SWAP(l);
-		if(tcp_send(s,&n,SOCKET_HEADER)==SOCKET_HEADER && (n=tcp_send(s,d,l))==(int)l) return n;
+		tcp_socket_header_len_t n = SOCKET_HEADER_LEN_SWAP(l);
+		if(tcp_send(s,&n,sizeof(n))==sizeof(n) && (n=tcp_send(s,d,l))==(int)l) return n;
 #endif /*SOCKET_HEADER_INCLUDED*/
 fprintf(stderr,"aSocket::send(1,l=%zu)\n",l);
 fflush(stderr);

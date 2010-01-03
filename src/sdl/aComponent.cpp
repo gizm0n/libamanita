@@ -9,7 +9,7 @@
 #include <libamanita/sdl/aDisplay.h>
 
 
-RttiObjectInheritance(aComponent,aObject);
+aObject_Inheritance(aComponent,aObject);
 
 
 aComponent *aComponent::componentFocus = 0;

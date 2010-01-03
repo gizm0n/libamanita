@@ -99,7 +99,7 @@ typedef uint32_t style_t;
  */
 class aCollection : public aObject {
 /** @cond */
-RttiObjectInstance(aCollection)
+aObject_Instance(aCollection)
 /** @endcond */
 
 protected:

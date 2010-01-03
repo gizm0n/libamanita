@@ -8,7 +8,7 @@
 #include <libamanita/sdl/aGraphics.h>
 
 
-RttiObjectInheritance(aImage,aObject);
+aObject_Inheritance(aImage,aObject);
 
 
 int aImage::created = 0;

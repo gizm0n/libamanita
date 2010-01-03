@@ -7,8 +7,11 @@
 #include <libamanita/aString.h>
 
 
-RttiObjectInheritance(aString,aObject);
+aObject_Inheritance(aString,aObject);
 
+
+const char aString::upper_hex[17] = "0123456789ABCDEF";
+const char aString::lower_hex[17] = "0123456789abcdef";
 
 const char *aString::blank = "";
 
@@ -133,7 +136,25 @@ aString &aString::appendu64(uint64_t i) {
 	return append(p+1);
 }
 
-aString &aString::append(int64_t i,int base) {
+aString &aString::append(double f,int n,char c) {
+	int64_t n1 = (int64_t)f;
+	uint32_t n2,m = 1;
+	if(n>10) n = 10;
+	while(0<n--) m *= 10;
+	n2 = (uint32_t)round(fabs(f-n1)*m);
+	return append(n1).append(c).append(n2);
+}
+
+aString &aString::appendHex(uint64_t i,bool upper) {
+	if(i==0) return append('0');
+	char h[17],*p = h+16;
+	const char *s = upper? upper_hex : lower_hex;
+	*p-- = '\0';
+	for(; i; i>>=4) *p-- = s[i&0xf];
+	return append(p+1);
+}
+
+aString &aString::appendBase(int64_t i,int base) {
 	if(i==0) return append('0');
 	char s[22],*p = s+21,c = 0,n;
 	*p-- = '\0';
@@ -143,13 +164,12 @@ aString &aString::append(int64_t i,int base) {
 	return append(p+1);
 }
 
-aString &aString::append(double f,int n,char c) {
-	int64_t n1 = (int64_t)f;
-	uint32_t n2,m = 1;
-	if(n>10) n = 10;
-	while(0<n--) m *= 10;
-	n2 = (uint32_t)round(fabs(f-n1)*m);
-	return append(n1).append(c).append(n2);
+aString &aString::appendBase(uint64_t i,int base) {
+	if(i==0) return append('0');
+	char s[22],*p = s+21,n;
+	*p-- = '\0';
+	for(; i; i/=base) n = i%base,*p-- = n<=9? '0'+n : 'A'+n-10;
+	return append(p+1);
 }
 
 aString &aString::appendUntil(const char *s,const char *end,bool uesc) {
@@ -274,6 +294,18 @@ fflush(stderr);
 					unsigned int n = va_arg(list,unsigned int);
 					append(n);
 				}
+				break;
+			}
+			case 'x':
+			case 'X':
+			{
+				uint64_t n = 0;
+				if(flags&F_PLUS) append('+');
+				if(flags&F_z) n = (uint64_t)va_arg(list,size_t);
+				else if(flags&F_ll) n = (uint64_t)va_arg(list,unsigned long long);
+				else if(flags&F_l) n = (uint64_t)va_arg(list,unsigned long);
+				else n = (uint64_t)va_arg(list,unsigned int);
+				appendHex(n,16);
 				break;
 			}
 			case 'f':
@@ -697,10 +729,11 @@ uint64_t aString::fromHex(const char *str) {
 	return n;
 }
 
-char *aString::toHex(char *h,uint64_t i) {
+char *aString::toHex(char *h,uint64_t i,bool upper) {
 	int u = 0;
+	const char *s = upper? upper_hex : lower_hex;
 	for(uint64_t n=i; n; n>>=4) u++;
-	for(h+=u,*h='\0'; i; i>>=4) *--h = "0123456789ABCDEF"[i&0xf];//(u=(i&0xf))<10? '0'+u : 'a'+(u-10);
+	for(h+=u,*h='\0'; i; i>>=4) *--h = s[i&0xf];//(u=(i&0xf))<10? '0'+u : 'a'+(u-10);
 	return h;
 }
 

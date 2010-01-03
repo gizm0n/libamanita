@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <libamanita/aThread.h>
 
 /** Set LIBAMANITA_SOCKET_HEADER to the sizeof the header in number of bytes.
  * Is can be 2 to 8 bytes and defines the size of the length parameter in the
@@ -48,8 +49,6 @@
 	#define tcp_recv(s,d,l) SDLNet_TCP_Recv((s),(d),(l))
 
 	typedef TCPsocket tcp_socket_t;
-	typedef int thread_func_t;
-	typedef SDL_mutex *socket_mutex_t;
 
 #elif defined __linux__
 	#include <unistd.h>
@@ -57,17 +56,15 @@
 	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include <netdb.h>
-	#include <pthread.h>
-	#include <signal.h>
 	#include <endian.h>
+	#include <string.h>
+	#include <errno.h>
 
 	#define tcp_close(s) ::close(s)
 	#define tcp_send(s,d,l) ::send((s),(d),(l),0)
 	#define tcp_recv(s,d,l) ::recv((s),(d),(l),0)
 
 	typedef int tcp_socket_t;
-	typedef void *thread_func_t;
-	typedef pthread_mutex_t *socket_mutex_t;
 
 #endif /* LIBAMANITA_SDL */
 
@@ -115,32 +112,34 @@
 #undef SOCKET_OFFSET
 #undef SOCKET_NOCIPHER
 
-#if LIBAMANITA_SOCKET_HEADER>=3 && LIBAMANITA_SOCKET_HEADER<8
+#ifdef LIBAMANITA_SOCKET_HEADER
 	#define SOCKET_HEADER_INCLUDED
-	#define SOCKET_HEADER LIBAMANITA_SOCKET_HEADER
-	#if SOCKET_HEADER<=4
-		#define SOCKET_LEN 2
-		#if SOCKET_HEADER==3
-			#define SOCKET_OFFSET 1
+	#if LIBAMANITA_SOCKET_HEADER>=3 && LIBAMANITA_SOCKET_HEADER<8
+		#define SOCKET_HEADER LIBAMANITA_SOCKET_HEADER
+		#if SOCKET_HEADER<=4
+			#define SOCKET_LEN 2
+			#if SOCKET_HEADER==3
+				#define SOCKET_OFFSET 1
+			#else
+				#define SOCKET_OFFSET 2
+			#endif
 		#else
-			#define SOCKET_OFFSET 2
+			#define SOCKET_LEN 4
+			#if SOCKET_HEADER==5
+				#define SOCKET_OFFSET 1
+			#elif SOCKET_HEADER==6
+				#define SOCKET_OFFSET 2
+			#elif SOCKET_HEADER==7
+				#define SOCKET_OFFSET 3
+			#else
+				#define SOCKET_OFFSET 4
+			#endif
 		#endif
 	#else
-		#define SOCKET_LEN 4
-		#if SOCKET_HEADER==5
-			#define SOCKET_OFFSET 1
-		#elif SOCKET_HEADER==6
-			#define SOCKET_OFFSET 2
-		#elif SOCKET_HEADER==7
-			#define SOCKET_OFFSET 3
-		#else
-			#define SOCKET_OFFSET 4
-		#endif
+		#define SOCKET_LEN 2
+		#define SOCKET_OFFSET 0
+		#define SOCKET_HEADER 2
 	#endif
-#else
-	#define SOCKET_LEN 2
-	#define SOCKET_OFFSET 0
-	#define SOCKET_HEADER 2
 #endif
 
 #if SOCKET_OFFSET>=4
@@ -156,11 +155,11 @@
 #if SOCKET_LEN==4
 	#define SOCKET_HEADER_LEN_TYPE(v) ((uint32_t *)(v))
 	#define SOCKET_HEADER_LEN_SWAP(v) swap_be_32(((uint32_t)(v)))
-	typedef uint32_t socket_header_len_t;
+	typedef uint32_t tcp_socket_header_len_t;
 #else
 	#define SOCKET_HEADER_LEN_TYPE(v) ((uint16_t *)(v))
 	#define SOCKET_HEADER_LEN_SWAP(v) swap_be_16(((uint16_t)(v)))
-	typedef uint16_t socket_header_len_t;
+	typedef uint16_t tcp_socket_header_len_t;
 #endif
 
 #ifdef LIBAMANITA_SOCKET_NOCIPHER
@@ -168,66 +167,85 @@
 #endif
 
 enum {
-	SM_ERR_RESOLVE_HOST			= 0x0011,
-	SM_RESOLVE_HOST				= 0x0021,
-	SM_ERR_OPEN_SOCKET			= 0x0031,
-	SM_ERR_CONNECT					= 0x0032,
-	SM_ERR_BIND						= 0x0033,
-	SM_ERR_LISTEN					= 0x0034,
-	SM_ERR_ADD_SOCKET				= 0x0035,
-	SM_STARTING_SERVER			= 0x0041,
-	SM_STOPPING_SERVER			= 0x0042,
-	SM_STARTING_CLIENT			= 0x0043,
-	SM_STOPPING_CLIENT			= 0x0044,
-	SM_ERR_ALLOC_SOCKETSET		= 0x0051,
-	SM_ERR_CHECK_SOCKETS			= 0x0052,
-	SM_CHECK_NICK					= 0x0061,
-	SM_DUPLICATE_ID				= 0x0063,
-	SM_ADD_CLIENT					= 0x0071,
-	SM_KILL_CLIENT					= 0x0072,
-	SM_GET_MESSAGE					= 0x0081,
-	SM_ERR_GET_MESSAGE			= 0x0091,
-	SM_ERR_PUT_MESSAGE			= 0x0092,
+	SM_ERR_RESOLVE_HOST			= 1,
+	SM_ERR_OPEN_SOCKET,
+	SM_ERR_CONNECT,
+	SM_ERR_BIND,
+	SM_ERR_LISTEN,
+	SM_ERR_ADD_SOCKET,
+	SM_ERR_ALLOC_SOCKETSET,
+	SM_ERR_CHECK_SOCKETS,
+	SM_ERR_GET_MESSAGE,
+	SM_ERR_PUT_MESSAGE,
+
+	SM_RESOLVE_HOST,
+	SM_STARTING_SERVER,
+	SM_STOPPING_SERVER,
+	SM_STARTING_CLIENT,
+	SM_STOPPING_CLIENT,
+	SM_CHECK_NICK,
+	SM_DUPLICATE_ID,
+	SM_ADD_CLIENT,
+	SM_KILL_CLIENT,
+	SM_GET_MESSAGE,
 };
 
 enum {
-	SOCK_ST_ALIEN_MUTEX			= 0x0001,
-	SOCK_ST_RUNNING,
-	SOCK_ST_STARTING,
+	SOCK_ST_STARTING				= 1,
+	SOCK_ST_RUNNING				= 2,
+	SOCK_ST_STOPPING				= 4,
 };
 
 
-inline void pack_int8(uint8_t **data,int8_t i) { *(int8_t *)((void *)*data) = i;*data++; }
-inline void unpack_int8(uint8_t **data,int8_t &i) { i = *(int8_t *)((void *)data);*data++; }
+#if SOCKET_OFFSET==4
+inline void pack_header(uint8_t **data,uint32_t i) { *(uint32_t *)((void *)*data) = swap_be_32(i);*data += SOCKET_HEADER; }
+inline void unpack_header(uint8_t **data,uint32_t &i) { i = swap_be_32(*(uint32_t *)((void *)*data));*data += SOCKET_HEADER; }
+inline uint32_t get_unpack_header(uint8_t *data) { return swap_be_32(*(uint32_t *)((void *)data)); }
+#elif SOCKET_OFFSET>=2
+inline void pack_header(uint8_t **data,uint16_t i) { *(uint16_t *)((void *)*data) = swap_be_16(i);*data += SOCKET_HEADER; }
+inline void unpack_header(uint8_t **data,uint16_t &i) { i = swap_be_16(*(uint16_t *)((void *)*data));*data += SOCKET_HEADER; }
+inline uint16_t get_unpack_header(uint8_t *data) { return swap_be_16(*(uint16_t *)((void *)data)); }
+#elif SOCKET_OFFSET==1
+inline void pack_header(uint8_t **data,uint8_t i) { *(*data) = i;*data += SOCKET_HEADER; }
+inline void unpack_header(uint8_t **data,uint8_t &i) { i = *(*data);*data += SOCKET_HEADER; }
+inline uint8_t get_unpack_header(uint8_t *data) { return *data; }
+#elif SOCKET_OFFSET==0
+inline void pack_header(uint8_t **data,int i) { *data += SOCKET_HEADER; }
+inline void unpack_header(uint8_t **data,int &i) { *data += SOCKET_HEADER; }
+inline uint16_t get_unpack_header(uint8_t *data) { return 0; }
+#endif
+
+inline void pack_int8(uint8_t **data,int8_t i) { *(int8_t *)((void *)*data) = i;*data += 1; }
+inline void unpack_int8(uint8_t **data,int8_t &i) { i = *(int8_t *)((void *)*data);*data += 1; }
 inline int8_t get_unpack_int8(uint8_t *data) { return *(int8_t *)((void *)data); }
 
-inline void pack_uint8(uint8_t **data,uint8_t i) { *(uint8_t *)((void *)*data) = i;*data++; }
-inline void unpack_uint8(uint8_t **data,uint8_t &i) { i = *(uint8_t *)((void *)data);*data++; }
-inline uint8_t get_unpack_uint8(uint8_t *data) { return *(uint8_t *)((void *)data); }
+inline void pack_uint8(uint8_t **data,uint8_t i) { *(*data) = i;*data += 1; }
+inline void unpack_uint8(uint8_t **data,uint8_t &i) { i = *(*data);*data += 1; }
+inline uint8_t get_unpack_uint8(uint8_t *data) { return *data; }
 
-inline void pack_int16(uint8_t **data,int16_t i) { *(int16_t *)((void *)*data) = i;*data += 2; }
-inline void unpack_int16(uint8_t **data,int16_t &i) { i = *(int16_t *)((void *)data);*data += 2; }
-inline int16_t get_unpack_int16(uint8_t *data) { return *(int16_t *)((void *)data); }
+inline void pack_int16(uint8_t **data,int16_t i) { *(int16_t *)((void *)*data) = swap_be_16(i);*data += 2; }
+inline void unpack_int16(uint8_t **data,int16_t &i) { i = swap_be_16(*(int16_t *)((void *)*data));*data += 2; }
+inline int16_t get_unpack_int16(uint8_t *data) { return swap_be_16(*(int16_t *)((void *)data)); }
 
-inline void pack_uint16(uint8_t **data,uint16_t i) { *(uint16_t *)((void *)*data) = i;*data += 2; }
-inline void unpack_uint16(uint8_t **data,uint16_t &i) { i = *(uint16_t *)((void *)data);*data += 2; }
-inline uint16_t get_unpack_uint16(uint8_t *data) { return *(uint16_t *)((void *)data); }
+inline void pack_uint16(uint8_t **data,uint16_t i) { *(uint16_t *)((void *)*data) = swap_be_16(i);*data += 2; }
+inline void unpack_uint16(uint8_t **data,uint16_t &i) { i = swap_be_16(*(uint16_t *)((void *)*data));*data += 2; }
+inline uint16_t get_unpack_uint16(uint8_t *data) { return swap_be_16(*(uint16_t *)((void *)data)); }
 
-inline void pack_int32(uint8_t **data,int32_t i) { *(int32_t *)((void *)*data) = i;*data += 4; }
-inline void unpack_int32(uint8_t **data,int32_t &i) { i = *(int32_t *)((void *)data);*data += 4; }
-inline int32_t get_unpack_int32(uint8_t *data) { return *(int32_t *)((void *)data); }
+inline void pack_int32(uint8_t **data,int32_t i) { *(int32_t *)((void *)*data) = swap_be_32(i);*data += 4; }
+inline void unpack_int32(uint8_t **data,int32_t &i) { i = swap_be_32(*(int32_t *)((void *)*data));*data += 4; }
+inline int32_t get_unpack_int32(uint8_t *data) { return swap_be_32(*(int32_t *)((void *)data)); }
 
-inline void pack_uint32(uint8_t **data,uint32_t i) { *(uint32_t *)((void *)*data) = i;*data += 4; }
-inline void unpack_uint32(uint8_t **data,uint32_t &i) { i = *(uint32_t *)((void *)data);*data += 4; }
-inline uint32_t get_unpack_uint32(uint8_t *data) { return *(uint32_t *)((void *)data); }
+inline void pack_uint32(uint8_t **data,uint32_t i) { *(uint32_t *)((void *)*data) = swap_be_32(i);*data += 4; }
+inline void unpack_uint32(uint8_t **data,uint32_t &i) { i = swap_be_32(*(uint32_t *)((void *)*data));*data += 4; }
+inline uint32_t get_unpack_uint32(uint8_t *data) { return swap_be_32(*(uint32_t *)((void *)data)); }
 
-inline void pack_int64(uint8_t **data,int64_t i) { *(int64_t *)((void *)*data) = i;*data += 8; }
-inline void unpack_int64(uint8_t **data,int64_t &i) { i = *(int64_t *)((void *)data);*data += 8; }
-inline int64_t get_unpack_int64(uint8_t *data) { return *(int64_t *)((void *)data); }
+inline void pack_int64(uint8_t **data,int64_t i) { *(int64_t *)((void *)*data) = swap_be_64(i);*data += 8; }
+inline void unpack_int64(uint8_t **data,int64_t &i) { i = swap_be_64(*(int64_t *)((void *)*data));*data += 8; }
+inline int64_t get_unpack_int64(uint8_t *data) { return swap_be_64(*(int64_t *)((void *)data)); }
 
-inline void pack_uint64(uint8_t **data,uint64_t i) { *(uint64_t *)((void *)*data) = i;*data += 8; }
-inline void unpack_uint64(uint8_t **data,uint64_t &i) { i = *(uint64_t *)((void *)data);*data += 8; }
-inline uint64_t get_unpack_uint64(uint8_t *data) { return *(uint64_t *)((void *)data); }
+inline void pack_uint64(uint8_t **data,uint64_t i) { *(uint64_t *)((void *)*data) = swap_be_64(i);*data += 8; }
+inline void unpack_uint64(uint8_t **data,uint64_t &i) { i = swap_be_64(*(uint64_t *)((void *)*data));*data += 8; }
+inline uint64_t get_unpack_uint64(uint8_t *data) { return swap_be_64(*(uint64_t *)((void *)data)); }
 
 
 class aSocket;
@@ -261,43 +279,53 @@ protected:
 	tcp_socket_t sock;
 	uint32_t ip;
 	uint16_t port;
-	socket_mutex_t mut;				//!< aSocket mutex.
 #ifdef LIBAMANITA_SDL
-	SDL_Thread *thread;
 	IPaddress address;
 	SDLNet_SocketSet set;
 #elif defined __linux__
-	pthread_t thread;
 	fd_set set;
 	hostent *hostinfo;
 	sockaddr_in address;
 #endif /* LIBAMANITA_SDL */
+	aThread thread;
 
-	void setRunning(bool b) { status |= SOCK_ST_RUNNING;if(!b) status ^= SOCK_ST_RUNNING; }
 	void setStarting(bool b) { status |= SOCK_ST_STARTING;if(!b) status ^= SOCK_ST_STARTING; }
+	void setRunning(bool b) { status |= SOCK_ST_RUNNING;if(!b) status ^= SOCK_ST_RUNNING; }
+	void setStopping(bool b) { status |= SOCK_ST_STOPPING;if(!b) status ^= SOCK_ST_STOPPING; }
 
 	uint32_t stateChanged(uint32_t state,intptr_t p1,intptr_t p2,intptr_t p3) { return (*event_handler)(this,state,p1,p2,p3); }
 	uint8_t *receive(tcp_socket_t s,size_t &l);
 	void releaseMessageBuffer(uint8_t *b) { if(b!=buf) free(b); }
 
-public:
+	const char *getError() {
+#ifdef LIBAMANITA_SDL
+		return SDL_GetError();
+#elif defined __linux__
+		return strerror(errno);
+#endif /* LIBAMANITA_SDL */
+	}
+
+protected:
 	aSocket(socket_event_handler seh);
 	~aSocket();
 
-	static void resolveConnection(const char *con,uint32_t &ip,uint16_t &port,uint32_t &id,char *nick,int nlen);
+	void resolveConnection(const char *con,uint32_t &ip,uint16_t &port,uint32_t &id,char *nick,int nlen);
 #ifndef SOCKET_NOCIPHER
-	static void XORcipher(uint8_t *d,const uint8_t *s,size_t l,const uint32_t *k,size_t kl);
+	void XORcipher(uint8_t *d,const uint8_t *s,size_t l,const uint32_t *k,size_t kl);
 #endif /*SOCKET_NOCIPHER*/
+
+public:
+	static const char *message_names[];
+
+	static void print_packet(const uint8_t *data,size_t l);
 
 	/** @name Thread
 	 * @{ */
-	void setMutex(socket_mutex_t m);
-	void createMutex();
-	void deleteMutex();
-	int lock();				//!< Lock the mutext.
-	int unlock();			//!< Unlock the mutext.
-	bool isRunning() { return (status&SOCK_ST_RUNNING); }
+	void lock() { thread.lock(); }
+	void unlock() { thread.unlock(); }
 	bool isStarting() { return (status&SOCK_ST_STARTING); }
+	bool isRunning() { return (status&SOCK_ST_RUNNING); }
+	bool isStopping() { return (status&SOCK_ST_STOPPING); }
 	/** @} */
 
 	uint32_t getIP() { return ip; }
@@ -306,9 +334,6 @@ public:
 	bool isLocalSocket(tcp_socket_t s) { return sock==s; }
 
 	void setMessageBuffer(size_t l);
-	static int getPacketHeaderSize() { return SOCKET_HEADER; }
-	static int getPacketHeader(uint8_t *data) { return SOCKET_HEADER_CMD(data); }
-	static int getPacketSize(uint8_t *data) { return SOCKET_HEADER_LEN_SWAP(*SOCKET_HEADER_LEN_TYPE(data+SOCKET_OFFSET)); }
 
 	size_t send(tcp_socket_t s,uint8_t *d,size_t l);
 };

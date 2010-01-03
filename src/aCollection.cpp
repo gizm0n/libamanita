@@ -3,6 +3,6 @@
 #include <libamanita/aCollection.h>
 
 
-RttiObjectInheritance(aCollection,aObject);
+aObject_Inheritance(aCollection,aObject);
 
 

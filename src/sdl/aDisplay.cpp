@@ -5,7 +5,7 @@
 #include <libamanita/sdl/aDisplay.h>
 
 
-RttiObjectInheritance(aDisplay,aComponent);
+aObject_Inheritance(aDisplay,aComponent);
 
 
 aDisplay *aDisplay::activeDisplay = 0;

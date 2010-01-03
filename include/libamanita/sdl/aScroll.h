@@ -24,7 +24,7 @@ class aImage;
 class aIconButton;
 
 class aScroll : public aComponent,public aMouseMotionListener,public aActionListener {
-RttiObjectInstance(aScroll)
+aObject_Instance(aScroll)
 
 private:
 	struct _settings {

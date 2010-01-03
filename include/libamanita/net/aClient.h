@@ -26,7 +26,7 @@ private:
 	int keylen;
 #endif /*SOCKET_NOCIPHER*/
 
-	static thread_func_t _run(void *p) { ((aClient *)p)->run();return 0; }
+	static void _run(void *p) { ((aClient *)p)->run(); }
 	void run();
 
 public:

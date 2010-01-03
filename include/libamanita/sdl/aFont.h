@@ -25,7 +25,7 @@ enum {
 
 
 class aFont : public aObject {
-RttiObjectInstance(aFont)
+aObject_Instance(aFont)
 
 private:
 	char *name;

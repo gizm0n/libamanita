@@ -17,7 +17,7 @@
  * @ingroup libamanita
  */
 class aDictionary : public aCollection {
-RttiObjectInstance(aDictionary)
+aObject_Instance(aDictionary)
 
 public:
 	struct word {

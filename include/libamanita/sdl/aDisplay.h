@@ -13,7 +13,7 @@
 
 
 class aDisplay : public aComponent,public aKeyListener,public aMouseListener,public aMouseMotionListener,public aActionListener {
-RttiObjectInstance(aDisplay)
+aObject_Instance(aDisplay)
 
 private:
 	static aDisplay *activeDisplay;

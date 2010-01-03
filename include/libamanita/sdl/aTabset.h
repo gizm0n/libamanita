@@ -20,7 +20,7 @@ class aImage;
 class aFont;
 
 class aTabset : public aComponent,public aMouseListener {
-RttiObjectInstance(aTabset)
+aObject_Instance(aTabset)
 
 private:
 	struct _settings {

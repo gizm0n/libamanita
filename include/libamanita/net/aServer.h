@@ -66,21 +66,21 @@ private:
 	uint32_t id;					//!< Client's unique id.
 	char *nick;						//!< Client's nick.
 	uint8_t status;				//!< Status of connection.
-	aVector channels;				//!< Channels client is in.
+	aVector _channels;			//!< Channels client is in.
+	void *data;						//!< User defined data attached to this connection.
 #ifndef SOCKET_NOCIPHER
 	uint32_t *key;					//!< For encrypted connections, the encryption key.
 	size_t keylen;					//!< Length of key.
 #endif /*SOCKET_NOCIPHER*/
-	void *data;						//!< User defined data attached to this connection.
 
 	/** Constructor.
 	 * The constructor can only be called by aServer. */
 	aServerConnection(tcp_socket_t sock,uint32_t id,const char *n)
-			: sock(sock),id(id),status(0),channels()
+			: sock(sock),id(id),status(0),_channels(),data(0)
 #ifndef SOCKET_NOCIPHER
 					,key(0),keylen(0)
 #endif /*SOCKET_NOCIPHER*/
-						{ nick = strdup(n); }
+		{ nick = strdup(n); }
 
 	/** Destructor.
 	 * The destructor can only be called by aServer. */
@@ -88,7 +88,7 @@ private:
 #ifndef SOCKET_NOCIPHER
 		if(key) free(key);
 #endif /*SOCKET_NOCIPHER*/
-			}
+	}
 
 public:
 	/** @name Socket
@@ -127,9 +127,9 @@ public:
 	void setKey(const uint32_t *k,size_t l);						//!< Set encryption key.
 #endif /*SOCKET_NOCIPHER*/
 
-	void joinChannel(aChannel c) { if(c) channels += c; }		//!< Join a channel.
-	void leaveChannel(aChannel c) { if(c) channels -= c; }	//!< Leave a channel.
-	aVector &getChannels() { return channels; }					//!< Get channels client is in.
+	void joinChannel(aChannel c) { if(c) _channels += c; }		//!< Join a channel.
+	void leaveChannel(aChannel c) { if(c) _channels -= c; }	//!< Leave a channel.
+	aVector &getChannels() { return _channels; }					//!< Get channels client is in.
 };
 
 
@@ -167,14 +167,14 @@ private:
 	size_t setsz;				//!< SDL_SocketSet set, allocated size.
 #elif defined __linux__
 #endif /* LIBAMANITA_SDL */
-	aHashtable sockets;		//!< All sockets connected to this server. Stored as socket=>aConnection.
-	aHashtable clients;		//!< All clients connected to this server. Stored as ID=>aConnection.
-	aServerChannel main;		//!< Main channel, contains all clients connected to this server.
-	aHashtable channels;		//!< All channels in this server.
+	aHashtable _sockets;		//!< All sockets connected to this server. Stored as socket=>aConnection.
+	aHashtable _clients;		//!< All clients connected to this server. Stored as ID=>aConnection.
+	aServerChannel _main;		//!< Main channel, contains all clients connected to this server.
+	aHashtable _channels;		//!< All channels in this server.
 
 	/** Static method called by the thread and in turn calls run().
 	 * @see run */
-	static thread_func_t _run(void *p) { ((aServer *)p)->run();return 0; }
+	static void _run(void *p) { ((aServer *)p)->run(); }
 	/** Called by the thread, and handles all incomming messages. */
 	void run();
 
@@ -183,9 +183,10 @@ private:
 	void createSocketSet(int n=0);
 #elif defined __linux__
 #endif /* LIBAMANITA_SDL */
-	bool uniqueID(uint32_t id) { return clients.get(id)==0; }
-	void killClient(aConnection c) { killClient(c->id); }
-	void killClient(uint32_t id);
+	bool uniqueID(uint32_t id) { return _clients.get(id)==0; }
+	void killClient(uint32_t id) { killClient((aConnection)_clients.get(id)); }
+	void killClient(const char *nick) { killClient((aConnection)_clients.get(nick)); }
+	void killClient(aConnection c);
 	void killAllClients();
 
 public:
@@ -214,8 +215,10 @@ public:
 
 	/** @name Client
 	 * @{ */
-	aConnection getClient(uint32_t id) { return (aConnection)clients.get(id); }
-	aHashtable::iterator getClients() { return clients.iterate(); }
+	aConnection getClient(uint32_t id) { return (aConnection)_clients.get(id); }
+	aConnection getClient(const char *nick) { return (aConnection)_clients.get(nick); }
+	size_t clients() { return _sockets.size(); }
+	aHashtable::iterator getClients() { return _sockets.iterate(); }
 	void changeNick(uint32_t id,const char *nick);
 	/** @} */
 
@@ -223,18 +226,19 @@ public:
 	 * @{ */
 	aChannel createChannel(const char *ch);
 	void deleteChannel(const char *ch);
-	aChannel getChannel(const char *ch) { return ch && *ch? (aChannel)channels.get(ch) : 0; }
+	aChannel getChannel(const char *ch) { return ch && *ch? (aChannel)_channels.get(ch) : 0; }
 	void joinChannel(const char *ch,aConnection c) { if(c) joinChannel(createChannel(ch),c); }
 	void joinChannel(aChannel ch,aConnection c) { if(ch && c && !ch->contains(c)) { *ch += c;c->joinChannel(ch); } }
 	void leaveChannel(const char *ch,aConnection c) { if(c) leaveChannel(getChannel(ch),c); }
 	void leaveChannel(aChannel ch,aConnection c);
-	aHashtable::iterator getChannels() { return channels.iterate(); }
+	size_t channels() { return _channels.size(); }
+	aHashtable::iterator getChannels() { return _channels.iterate(); }
 	/** @} */
 
 	/** @name Send
 	 * @{ */
 	int send(aConnection c,uint8_t *d,size_t l);
-	void send(uint8_t *d,size_t l) { send((aChannel)0,d,l); }
+	void send(uint8_t *d,size_t l) { send(&_main,d,l); }
 	void send(aChannel channel,uint8_t *d,size_t l);
 	/** @} */
 };
