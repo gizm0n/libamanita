@@ -8,7 +8,7 @@
 #include <libamanita/aString.h>
 
 
-RttiObjectInheritance(aDictionary,aCollection);
+aObject_Inheritance(aDictionary,aCollection);
 
 
 aDictionary::aDictionary(const char **ws,const value_t *vs,size_t l,bool c) : aCollection(),words(0),values(0) {

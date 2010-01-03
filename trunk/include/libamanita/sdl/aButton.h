@@ -26,7 +26,7 @@ class aImage;
 class aFont;
 
 class aButton : public aComponent,public aMouseListener {
-RttiObjectInstance(aButton)
+aObject_Instance(aButton)
 
 private:
 	struct _settings {

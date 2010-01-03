@@ -10,7 +10,7 @@
 #include <libamanita/sdl/aTooltip.h>
 
 
-RttiObjectInheritance(aWindow,aComponent);
+aObject_Inheritance(aWindow,aComponent);
 
 
 extern char indent[32];

@@ -10,9 +10,6 @@
 
 
 aClient::aClient(socket_event_handler seh) : aSocket(seh) {
-	host = 0;
-	port = 0;
-	id = 0;
 	nick = 0;
 #ifndef SOCKET_NOCIPHER
 	key = 0;
@@ -46,32 +43,38 @@ bool aClient::start(const char *h,uint16_t p,uint32_t i,const char *n) {
 fprintf(stderr,"start(\"%s\",%d)\n",h,p);
 fflush(stderr);
 
+	setStarting(true);
 	if(host) free(host);
 	host = strdup(h);
-	port = swap_be_16(p);
-	id = i;
-	setNick(n);
+	port = p;
 
 #ifdef LIBAMANITA_SDL
-	if(!(set=SDLNet_AllocSocketSet(1))) stateChanged(SM_ERR_ALLOC_SOCKETSET,0,0,0);
-	else if(SDLNet_ResolveHost(&address,host,port)==-1) stateChanged(SM_ERR_RESOLVE_HOST,0,0,0);
+	if(!(set=SDLNet_AllocSocketSet(1)))
+		stateChanged(SM_ERR_ALLOC_SOCKETSET,0,(intptr_t)getError(),0);
+	else if(SDLNet_ResolveHost(&address,host,swap_be_16(p))==-1)
+		stateChanged(SM_ERR_RESOLVE_HOST,0,(intptr_t)getError(),0);
 	else {
 		stateChanged(SM_RESOLVE_HOST,0,0,0);
-		if(!(sock=SDLNet_TCP_Open(&address))) stateChanged(SM_ERR_OPEN_SOCKET,0,0,0);
-		else if(SDLNet_TCP_AddSocket(set,sock)==-1) stateChanged(SM_ERR_ADD_SOCKET,0,0,0);
+		if(!(sock=SDLNet_TCP_Open(&address)))
+			stateChanged(SM_ERR_OPEN_SOCKET,0,(intptr_t)getError(),0);
+		else if(SDLNet_TCP_AddSocket(set,sock)==-1)
+			stateChanged(SM_ERR_ADD_SOCKET,0,(intptr_t)getError(),0);
 		else {
-			ip = address.host;
+			ip = swap_be_32(address.host);
 
 #elif defined __linux__
-	if((sock=socket(AF_INET,SOCK_STREAM,0))==-1) stateChanged(SM_ERR_OPEN_SOCKET,0,0,0);
-	else if(!(hostinfo=gethostbyname(host))) stateChanged(SM_ERR_RESOLVE_HOST,0,0,0);
+	if((sock=socket(AF_INET,SOCK_STREAM,0))==-1)
+		stateChanged(SM_ERR_OPEN_SOCKET,0,(intptr_t)getError(),0);
+	else if(!(hostinfo=gethostbyname(host)))
+		stateChanged(SM_ERR_RESOLVE_HOST,0,(intptr_t)getError(),0);
 	else {
 		address.sin_addr = *(in_addr *)*hostinfo->h_addr_list;
 		address.sin_family = AF_INET;
-		address.sin_port = port;
-		if(connect(sock,(sockaddr *)&address,sizeof(address))<0) stateChanged(SM_ERR_CONNECT,0,0,0);
+		address.sin_port = swap_be_16(p);
+		if(connect(sock,(sockaddr *)&address,sizeof(address))<0)
+			stateChanged(SM_ERR_CONNECT,0,(intptr_t)getError(),0);
 		else {
-			ip = address.sin_addr.s_addr;
+			ip = swap_be_32(address.sin_addr.s_addr);
 			FD_ZERO(&set);
 			FD_SET(sock,&set);
 #endif /* LIBAMANITA_SDL */
@@ -79,47 +82,36 @@ fflush(stderr);
 #ifdef SOCKET_HEADER_INCLUDED
 fprintf(stderr,"start(SOCKET_HEADER_INCLUDED)\n");
 fflush(stderr);
-			uint8_t d[strlen(nick)+SOCKET_HEADER+5];
+			uint8_t d[strlen(n)+SOCKET_HEADER+5];
 			*SOCKET_HEADER_LEN_TYPE(d+SOCKET_OFFSET) = SOCKET_HEADER_LEN_SWAP(sizeof(d));
-			*(uint32_t *)((void *)&d[SOCKET_HEADER]) = swap_be_32(id);
-			strcpy((char *)&d[SOCKET_HEADER+4],nick);
+			*(uint32_t *)((void *)&d[SOCKET_HEADER]) = swap_be_32(i);
+			strcpy((char *)&d[SOCKET_HEADER+4],n);
 #else /*SOCKET_HEADER_INCLUDED*/
-			uint8_t d[strlen(nick)+5];
-			*(uint32_t *)d = swap_be_32(id);
-			strcpy(&d[4],nick);
+			uint8_t d[strlen(n)+5];
+			*(uint32_t *)d = swap_be_32(i);
+			strcpy(&d[4],n);
 #endif /*SOCKET_HEADER_INCLUDED*/
 			if(aSocket::send(sock,d,sizeof(d))) {
 				stateChanged(SM_STARTING_CLIENT,0,0,0);
-#ifdef LIBAMANITA_SDL
-				thread = SDL_CreateThread(_run,this);
-				if(thread) return true;
-#elif defined __linux__
-				if(pthread_create(&thread,0,_run,this)==0) return true;
-#endif /* LIBAMANITA_SDL */
+				thread.start(_run,this);
+				return true;
 			}
 		}
 	}
+	setStarting(false);
 	return false;
 }
 
 void aClient::stop(bool kill) {
-	if(isRunning()) {
+	if(isRunning() && !isStopping()) {
+		setStopping(true);
 		stateChanged(SM_STOPPING_CLIENT,0,0,0);
-#ifdef LIBAMANITA_SDL
-		if(thread) {
-			if(kill) SDL_KillThread(thread);
-			else SDL_WaitThread(thread,0);
-			thread = 0;
-		}
-
-#elif defined __linux__
-		if(kill) pthread_kill(thread,0);
-		else pthread_join(thread,0);
-#endif /* LIBAMANITA_SDL */
-
 		setRunning(false);
+		if(kill) thread.kill();
+		else thread.stop();
 		tcp_close(sock);
 		sock = 0;
+		setStopping(false);
 	}
 }
 
@@ -139,7 +131,7 @@ void aClient::run() {
 fprintf(stderr,"aClient::run(n=%d)\n",n);
 fflush(stderr);
 		if(n==-1) {
-			stateChanged(SM_ERR_CHECK_SOCKETS,0,0,0);
+			stateChanged(SM_ERR_CHECK_SOCKETS,0,(intptr_t)getError(),0);
 			break;
 		}
 		if(n && SDLNet_SocketReady(sock)) {
@@ -148,7 +140,7 @@ fflush(stderr);
 		test = set;
 		n = select(FD_SETSIZE,&test,0,0,0);
 		if(n==-1) {
-			stateChanged(SM_ERR_CHECK_SOCKETS,0,0,0);
+			stateChanged(SM_ERR_CHECK_SOCKETS,0,(intptr_t)getError(),0);
 			break;
 		}
 		if(!n) continue;
@@ -156,18 +148,29 @@ fflush(stderr);
 			if(!FD_ISSET(s,&test)) continue;
 #endif /* LIBAMANITA_SDL */
 
+fprintf(stderr,"aClient::run(receive)\n");
+fflush(stderr);
 			d = receive(sock,l);
 fprintf(stderr,"aClient::run(l=%zu)\n",l);
 fflush(stderr);
 			if(l>0) {
+				if(isStarting()) {
+					uint8_t *p = d+SOCKET_HEADER;
+					unpack_uint32(&p,id);
+					setNick((char *)p);
+fprintf(stderr,"start(received id=%d,nick=%s)\n",getID(),getNick());
+fflush(stderr);
+					setStarting(false);
+				} else {
 #ifndef SOCKET_NOCIPHER
 	#ifdef SOCKET_HEADER_INCLUDED
-				if(key) XORcipher(&d[SOCKET_HEADER],&d[SOCKET_HEADER],l-SOCKET_HEADER,key,keylen);
+					if(key) XORcipher(&d[SOCKET_HEADER],&d[SOCKET_HEADER],l-SOCKET_HEADER,key,keylen);
 #else /*SOCKET_HEADER_INCLUDED*/
-				if(key) XORcipher(d,d,l,key,keylen);
+					if(key) XORcipher(d,d,l,key,keylen);
 #endif /*SOCKET_HEADER_INCLUDED*/
 #endif /*SOCKET_NOCIPHER*/
-				stateChanged(SM_GET_MESSAGE,0,(intptr_t)d,(intptr_t)l);
+					stateChanged(SM_GET_MESSAGE,0,(intptr_t)d,(intptr_t)l);
+				}
 			} else setRunning(false);
 			releaseMessageBuffer(d);
 		}

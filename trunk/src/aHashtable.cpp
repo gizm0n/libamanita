@@ -24,7 +24,7 @@ value_t aHashtable::iterator::next() {
 	else if(index!=ITER_INDEX_AFTER_LAST) {
 		if(index<0) index = ITER_INDEX_BEFORE_FIRST;
 		if(index>=0 && at && at->next) return (at=at->next)->value;
-		for(index++; index<(long)ht->cap; index++)
+		while((++index)<(long)ht->cap)
 			if((at=ht->table[index])) return at->value;
 		index = ITER_INDEX_AFTER_LAST;
 	}
@@ -37,9 +37,9 @@ value_t aHashtable::iterator::next(type_t kt,type_t vt) {
 		if(index<0) index = ITER_INDEX_BEFORE_FIRST;
 		if(index>=0 && at && at->next)
 			while((at=at->next)) if(COMPARE(kt,vt,at)) return at->value;
-		for(index++; index<(long)ht->cap; index++) if((at=ht->table[index])) do {
-			if(COMPARE(kt,vt,at)) return at->value;
-		} while((at=at->next));
+		while((++index)<(long)ht->cap)
+			if((at=ht->table[index]))
+				do if(COMPARE(kt,vt,at)) return at->value;while((at=at->next));
 		index = ITER_INDEX_AFTER_LAST;
 	}
 	return 0;
@@ -94,7 +94,7 @@ value_t aHashtable::iterator::remove() {
 
 
 
-RttiObjectInheritance(aHashtable,aCollection);
+aObject_Inheritance(aHashtable,aCollection);
 
 
 aHashtable::aHashtable(size_t c,float l,style_t st) : aCollection(),table(0),full(0),style(st),ld(l) { cap = c; }

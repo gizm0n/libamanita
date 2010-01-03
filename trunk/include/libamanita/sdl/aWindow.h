@@ -23,7 +23,7 @@ enum {
 };
 
 class aWindow : public aComponent,public aFocusListener,public aMouseListener,public aActionListener {
-RttiObjectInstance(aWindow)
+aObject_Instance(aWindow)
 
 protected:
 	struct _settings {

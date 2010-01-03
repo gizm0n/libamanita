@@ -67,13 +67,13 @@ typedef intptr_t hash_t;
  * Be careful to read their instructions.
  * @{ */
 /** In the class definition for every class inheriting the aObject class must be
- * a RttiObjectInstance macro somewhere. For example:
+ * a aObject_Instance macro somewhere. For example:
  * @code
 // File: A.h
 #include <libamanita/aObject.h>
 
 class A : public aObject {
-RttiObjectInstance(A)
+aObject_Instance(A)
 
 private:
 	int a;
@@ -86,7 +86,7 @@ public:
  * 
  * Note, it should not be ended with a semicolon.
  * @param class_name This must be the name of the class, as it is. No quotes or anything. */
-#define RttiObjectInstance(class_name) \
+#define aObject_Instance(class_name) \
 private:\
 	static aClass instance;\
 	virtual aClass &getInstance() { return class_name::instance; }\
@@ -101,13 +101,25 @@ public:\
 // File: A.cpp
 #include "A.h"
 
-RttiObjectInheritance(A,aObject)
+aObject_Inheritance(A,aObject)
  * @endcode
  * Note, this should end with a semicolon.
  * @param class_name This must be the name of the class, as it is. No quotes or anything.
  * @param super_name This must be the name of the class that this class inherit. */
-#define RttiObjectInheritance(class_name,super_name) \
+#define aObject_Inheritance(class_name,super_name) \
 aClass class_name::instance(#class_name,&super_name::getClass())
+
+/* Work in progress: These macros will implement capability for multiple inheritance. */
+/*#define aObject_SuperClass(class_name) \
+	&class_name::getClass(),
+#define aObject_MultipleInheritance(class_name,super_names) \
+aClass class_name::instance(#class_name,super_names,0) */
+
+/* Work in progress: This macro is planned to replace aObject_Inheritance. It will
+ * take a complete declaration of the class as a string and extract metadata for the
+ * class to implement reflection for the class. */
+/*#define aObject_Declaration(class_name,declaration) \
+aClass class_name::instance(#class_name,declaration) */
 /** @} */
 
 
@@ -121,7 +133,7 @@ aClass class_name::instance(#class_name,&super_name::getClass())
  * to have multiple inheritance with classes not inheriting the aObject class.
  *
  * When inheriting this class, it is very important that you include the
- * RttiObjectInstance macro in your class definition and the RttiObjectInheritance macro
+ * aObject_Instance macro in your class definition and the aObject_Inheritance macro
  * in the source file somewhere.
  * 
  * All classes that inherit the aObject class and adds these macros will have one ststic aClass instance
@@ -141,7 +153,7 @@ aClass class_name::instance(#class_name,&super_name::getClass())
 #include <libamanita/aObject.h>
 
 class A : public aObject {
-RttiObjectInstance(A) // Note that this macro must not be ended with a semicolon.
+aObject_Instance(A) // Note that this macro must not be ended with a semicolon.
 public:
 	int a;
 	A() : aObject() { a = 0; }
@@ -149,7 +161,7 @@ public:
 };
 
 class B : public A {
-RttiObjectInstance(B)
+aObject_Instance(B)
 public:
 	int b;
 	B() : A() { b = 0; }
@@ -164,16 +176,16 @@ public:
 };
 
 class D : public B, public C {
-RttiObjectInstance(D)
+aObject_Instance(D)
 public:
 	int d;
 	D() : B(),C() { d = 0; }
 	virtual ~D() {}
 };
 
-RttiObjectInheritance(A,aObject); // Note that this macro must be ended with a semicolon.
-RttiObjectInheritance(B,A);
-RttiObjectInheritance(D,B);
+aObject_Inheritance(A,aObject); // Note that this macro must be ended with a semicolon.
+aObject_Inheritance(B,A);
+aObject_Inheritance(D,B);
 
 int main(int argc,char *argv[]) {
 	B b;
@@ -214,8 +226,8 @@ class A inherits aObject.
 This/these class(es) inherit the class A:
  1. B
  * @endcode
- * @see RttiObjectInstance(class_name)
- * @see RttiObjectInheritance(class_name,super_name)
+ * @see aObject_Instance(class_name)
+ * @see aObject_Inheritance(class_name,super_name)
  * @ingroup libamanita
  */
 class aObject {

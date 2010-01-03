@@ -5,7 +5,7 @@
 #include <libamanita/sdl/aTabset.h>
 
 
-RttiObjectInheritance(aTabset,aComponent);
+aObject_Inheritance(aTabset,aComponent);
 
 
 aTabset::_settings aTabset::_s = { 0 };

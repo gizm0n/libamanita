@@ -264,7 +264,7 @@ public:
 	 * values in t until it reaches a 0 and set l to this.
 	 * @return The index of the rolled values in the table, ranging from 0-(l-1).
 	 */
-	uint32_t rollTable(uint32_t *t,uint32_t l=0,uint32_t n=0);
+	uint32_t rollTable(uint32_t *t,uint32_t n=0,uint32_t l=0);
 	/** @} */
 
 	/** @name Open ended roll methods

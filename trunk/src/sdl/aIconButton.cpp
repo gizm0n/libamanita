@@ -6,7 +6,7 @@
 #include <libamanita/sdl/aIconButton.h>
 
 
-RttiObjectInheritance(aIconButton,aComponent);
+aObject_Inheritance(aIconButton,aComponent);
 
 
 extern char indent[32];

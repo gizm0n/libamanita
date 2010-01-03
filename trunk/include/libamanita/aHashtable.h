@@ -50,7 +50,7 @@ class aHashtable : public aCollection {
 friend class iterator;
 
 /** @cond */
-RttiObjectInstance(aHashtable)
+aObject_Instance(aHashtable)
 /** @endcond */
 
 protected:

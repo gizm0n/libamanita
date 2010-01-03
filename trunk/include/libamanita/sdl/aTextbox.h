@@ -21,7 +21,7 @@ enum {
 
 
 class aTextbox : public aWindow {
-RttiObjectInstance(aTextbox)
+aObject_Instance(aTextbox)
 
 private:
 	unsigned int style;

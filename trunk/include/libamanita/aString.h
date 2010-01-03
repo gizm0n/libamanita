@@ -27,10 +27,13 @@
  */
 class aString : public aObject {
 /** @cond */
-RttiObjectInstance(aString)
+aObject_Instance(aString)
 /** @endcond */
 
 private:
+	static const char upper_hex[17];
+	static const char lower_hex[17];
+
 	char *str;		//!< Char array containing the string data.
 	size_t len;		//!< Length of string. Len must always be >= 0 and <= cap.
 	size_t cap;		//!< Capacity of string, when len==cap it's time to increase size of capacity.
@@ -131,10 +134,13 @@ public:
 #endif
 	aString &append(long long int i) { return appendi64((int64_t)i); }
 	aString &append(unsigned long long int i) { return appendu64((uint64_t)i); }
-	aString &append(int64_t i,int base);
 	aString &append(double f,int n=2,char c='.');
 	aString &append(FILE *fp,bool uesc=true) { return appendUntil(fp,0,0,uesc); }
 	aString &appendln() { return append(endline); }
+
+	aString &appendHex(uint64_t i,bool upper=true);
+	aString &appendBase(int64_t i,int base);
+	aString &appendBase(uint64_t i,int base);
 
 	aString &appendf(const char *f, ...);
 	aString &vappendf(const char *f,va_list list);
@@ -232,7 +238,7 @@ public:
 	static char toUpper(const char c) { return (c>='a' && c<='z')? c-32 : c; }
 	static int fromHex(char c) { return c>='0' && c<='9'? c-'0' : (c>='a' && c<='f'? c-87 : (c>='A' && c<='F'? c-55 : 0)); }
 	static uint64_t fromHex(const char *str);
-	static char *toHex(char *h,uint64_t i);
+	static char *toHex(char *h,uint64_t i,bool upper=true);
 	static char *toLower(char *str);
 	static char *toUpper(char *str);
 	static int stricmp(const char *str1,const char *str2);

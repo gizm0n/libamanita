@@ -18,7 +18,7 @@
 class aImage : public aObject {
 friend class aGraphics;
 
-RttiObjectInstance(aImage)
+aObject_Instance(aImage)
 
 protected:
 	char *name,*file;

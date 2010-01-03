@@ -19,7 +19,7 @@ struct SDL_Rect;
 
 
 class aComponent : public aObject {
-RttiObjectInstance(aComponent)
+aObject_Instance(aComponent)
 
 private:
 	enum {
