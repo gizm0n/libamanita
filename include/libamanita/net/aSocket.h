@@ -28,7 +28,7 @@
  * 7: [...****]
  * 8: [....****]
  */
-#define LIBAMANITA_SOCKET_HEADER 3
+#define LIBAMANITA_SOCKET_HEADER 5
 
 /** Uncomment this if you don't want to include the minor overhead
  * and extra memory of encryption in messages, or if encryption is

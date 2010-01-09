@@ -6,8 +6,10 @@ lib_LIBRARIES = libamanita.a libamanita-sdl.a
 
 
 nobase_include_HEADERS = \
+	../include/libamanita/aApplication.h \
 	../include/libamanita/aCollection.h \
 	../include/libamanita/aDictionary.h \
+	../include/libamanita/aFile.h \
 	../include/libamanita/aFlood.h \
 	../include/libamanita/aFontmetrics.h \
 	../include/libamanita/aHashtable.h \
@@ -45,8 +47,10 @@ nobase_include_HEADERS = \
 	../include/libamanita/sqlite/aSQLite.h
 
 libamanita_a_SOURCES = \
+	../src/aApplication.cpp \
 	../src/aCollection.cpp \
 	../src/aDictionary.cpp \
+	../src/aFile.cpp \
 	../src/aFlood.cpp \
 	../src/aHashtable.cpp \
 	../src/aInteger.cpp \
@@ -72,11 +76,14 @@ libamanita_a_SOURCES = \
 
 libamanita_a_CPPFLAGS = \
 	-DLIBAMANITA
+libamanita_a_CXXFLAGS = `pkg-config --cflags gtk+-2.0`
 
 
 libamanita_sdl_a_SOURCES = \
+	../src/aApplication.cpp \
 	../src/aCollection.cpp \
 	../src/aDictionary.cpp \
+	../src/aFile.cpp \
 	../src/aFlood.cpp \
 	../src/aHashtable.cpp \
 	../src/aInteger.cpp \
@@ -117,5 +124,6 @@ libamanita_sdl_a_SOURCES = \
 libamanita_sdl_a_CPPFLAGS = \
 	-DLIBAMANITA \
 	-DLIBAMANITA_SDL
+libamanita_sdl_a_CXXFLAGS = `pkg-config --cflags gtk+-2.0`
 
 
