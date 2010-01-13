@@ -6,22 +6,25 @@
 #if defined __linux__
 #include <glib.h>
 #include <glib/gstdio.h>
+#elif defined WIN32
+#include <windows.h>
 #endif
 
 #include <libamanita/aFile.h>
 
 
-const char *getHomeDir() {
-	return g_get_home_dir();
-}
-
 
 bool aFile::exists(const char *fn) {
-/*	FILE *fp = fopen(fn,"r");
+#if defined __linux__
+	return g_file_test(fn,G_FILE_TEST_EXISTS);
+#elif defined WIN32
+	return GetFileAttributes(fn)!=INVALID_FILE_ATTRIBUTES;
+#else
+	FILE *fp = fopen(fn,"r");
 	if(!fp) return false;
 	fclose(fp);
-	return true;*/
-	return g_file_test(fn,G_FILE_TEST_EXISTS);
+	return true;
+#endif
 }
 
 time_t aFile::accessed(const char *fn) {
@@ -61,12 +64,27 @@ long aFile::copy(FILE *s,FILE *d) {
 
 
 bool aFile::remove(const char *fn) {
-	return g_remove(fn)==0;
+#if defined __linux__
+	return ::g_remove(fn)==0;
+#elif defined WIN32
+	int n = GetFileAttributes(fn);
+	if(n&FILE_ATTRIBUTE_READONLY) return false;
+	if(n&FILE_ATTRIBUTE_DIRECTORY) return RemoveDirectory((LPCTSTR)fn)!=0;
+	else return DeleteFile((LPCTSTR)fn)==TRUE;
+#else
+	return ::remove(fn)==0;
+#endif
 }
 
 
 bool aFile::mkdir(const char *dn,int p) {
-	return g_mkdir(dn,p)==0;
+#if defined __linux__
+	return ::g_mkdir(dn,p)==0;
+#elif defined WIN32
+	return CreateDirectory((LPCTSTR)dn,NULL)==TRUE;
+#else
+	return ::mkdir(dn,p)==0;
+#endif
 }
 
 

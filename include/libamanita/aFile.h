@@ -5,12 +5,19 @@
 #include <time.h>
 
 
+#if defined __linux__
+#define FILE_DIRSEP "/"
+#elif defined WIN32
+#define FILE_DIRSEP "\\"
+#else
+#define FILE_DIRSEP "/"
+#endif
+
+
 /** aFile is a class with static methods for handling files and directories.
  */
 class aFile {
 public:
-	static const char *getHomeDir();
-
 	static bool exists(const char *fn);
 	static time_t accessed(const char *fn);
 	static time_t modified(const char *fn);

@@ -16,6 +16,7 @@
 #elif defined __linux__
 	#include <pthread.h>
 	#include <unistd.h>
+	#include <sys/time.h>
 #endif /* LIBAMANITA_SDL */
 
 
