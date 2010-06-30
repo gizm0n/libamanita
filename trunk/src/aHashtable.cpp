@@ -457,19 +457,21 @@ size_t aHashtable::load(FILE *fp) {
 //fprintf(stderr,"aHashtable::load()\n");
 //fflush(stderr);
 	aString key(64),val(256);
-	size_t s = 0;
+	size_t n = 0;
 	while(!feof(fp)) {
 //fprintf(stderr,"aHashtable::load(readPair)\n");
 //fflush(stderr);
-		readPair(fp,key.clear(),val.clear());
-		if(key.length()>0 && val.length()>0) {
+		key.clear().appendUntil(fp,"=:",aString::whitespace);
+		val.clear();
+		if(!feof(fp)) val.appendUntil(fp,aString::whitespace+2,aString::whitespace);
+		if(key.length()>0) {
 			put(key,val);
-			s++;
+			n++;
 //fprintf(stderr,"aHashtable::load(key='%s',val='%s')\n",key.toCharArray(),val.toCharArray());
 //fflush(stderr);
 		}
 	}
-	return s;
+	return n;
 }
 
 size_t aHashtable::save(const char *fn) {
@@ -514,9 +516,29 @@ size_t aHashtable::save(FILE *fp) {
 	return sz;
 }
 
-void aHashtable::readPair(FILE *fp,aString &key,aString &value) {
-	key.appendUntil(fp,"=:",aString::whitespace);
-	if(!feof(fp)) value.appendUntil(fp,aString::whitespace+2,aString::whitespace);
+
+size_t aHashtable::merge(const char *str) {
+	const char *s = str;
+	aString key(64),val(256);
+	size_t n = 0;
+	while(*s!='\0') {
+		key.clear().appendUntil(&s,"=:",aString::whitespace);
+		val.clear();
+		if(*s!='\0') val.appendUntil(&s,aString::whitespace+2,aString::whitespace);
+		if(key.length()>0) {
+			put(key,val);
+			n++;
+		}
+	}
+	return n;
+}
+
+size_t merge(aHashtable &ht) {
+	return 0;
+}
+
+size_t merge(aVector &vec) {
+	return 0;
 }
 
 

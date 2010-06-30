@@ -172,25 +172,6 @@ aString &aString::appendBase(uint64_t i,int base) {
 	return append(p+1);
 }
 
-aString &aString::appendUntil(const char *s,const char *end,bool uesc) {
-	if(!s || !*s) return *this;
-	char c;
-	while((c=*s++)) {
-		if(c=='\\' && uesc) {
-			c = *s++;
-			if(c=='n') c = '\n';
-			else if(c=='t') c = '\t';
-			else if(!c) break;
-		}
-		if(strchr(end,c)) break;
-		if(len==cap) resize(0);
-		str[len++] = c;
-	}
-	str[len] = '\0';
-	return *this;
-}
-
-
 aString &aString::appendf(const char *f, ...) {
 	va_list list;
 	va_start(list,f);
@@ -334,6 +315,69 @@ fflush(stderr);
 		}
 	}
 	str[len] = '\0';
+	return *this;
+}
+
+aString &aString::appendUntil(const char **s,const char *end,const char *trim,bool uesc) {
+	if(!s || !*s || !**s) return *this;
+	if(!trim) trim = end;
+	if(!end || !*end) {
+		append(*s);
+		*s += strlen(*s);
+		return *this;
+	}
+	const char *s2 = *s;
+	int c,c2 = -1,t = trim && *trim? 0 : 1;
+	unsigned long l2 = 0;
+//fprintf(stderr,"aString::appendUntil: ");
+	while((c=*s2++)!='\0') {
+//fputc(c,stderr);
+		if(uesc) {
+			if(c=='/') {
+				c = *s2++;
+				if(c=='/') {
+					while((c=*s2++)!='\0' && c!='\r' && c!='\n');
+					if(c=='\0') break;
+					s2--;
+					continue;
+				} else if(c=='*') {
+					c2 = -1;
+					while((c=*s2++)!='\0') { if(c=='/' && c2=='*') break;c2 = c; }
+					c2 = -1;
+					continue;
+				} else s2--,c = '/';
+			} else if(c=='\\') {
+				if((c=*s2++)=='\0') break;
+				else if(c=='\\') c2 = '\\';
+				else if(c=='n') c2 = '\n';
+				else if(c=='t') c2 = '\t';
+				else if(c=='r') c2 = '\r';
+				else if(c=='f') c2 = '\f';
+				else if(c=='v') c2 = '\v';
+				else if(c=='b') c2 = '\b';
+				else if(c=='a') c2 = '\a';
+				else if(c=='0') c2 = '\0';
+				else if(c=='\n' || c=='\r') {
+					if((c2=*s2++)=='\0') break;
+					else if((c=='\n' && c2!='\r') || (c=='\r' && c2!='\n')) s2--;
+					c2 = -1;
+					continue;
+				}
+				else c2 = c;
+			}
+		}
+		if(!t && !strchr(trim,c)) t = 1;
+		if(t) {
+			if(end && strchr(end,c)) break;
+			if(len==cap) resize(0);
+			if(c2!=-1) str[len++] = (char)c2,c2 = -1,l2 = len;
+			else str[len++] = (char)c;
+		}
+	}
+	if(trim && *trim!='\0') while(len>l2 && strchr(trim,str[len-1])) len--;
+	str[len] = '\0';
+//fprintf(stderr,"[%s]\n",str);
+	*s = s2;
 	return *this;
 }
 
