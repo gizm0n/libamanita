@@ -161,33 +161,42 @@ fflush(stderr);
 	return n;
 }
 
+static const char *properties_file = "%s%s.cfg";
+static const char *language_file = "%slang.txt";
+
 void aApplication::loadProperties() {
-	const char *str = getHomeDir();
-	if(!str) return;
-	char fn[257];
-	sprintf(fn,"%s%s.cfg",str,app_name);
-	app_properties.load(fn);
-	if(!(str=getProperty(property_key[APP_LANG]))) str = "en";
-	setLanguage(str);
+	const char *home = getHomeDir();
+	if(home) {
+		char fn[257];
+		sprintf(fn,properties_file,home,app_name);
+		if(!aFile::exists(fn)) {
+			const char *data = getDataDir();
+			sprintf(fn,properties_file,data,app_name);
+		}
+		app_properties.load(fn);
+	}
+	const char *lang = getProperty(property_key[APP_LANG]);
+	if(!lang) lang = "en";
+	setLanguage(lang);
 }
 
 void aApplication::saveProperties() {
-	const char *str = getHomeDir();
-	if(!str) return;
+	const char *home = getHomeDir();
+	if(!home) return;
 	char fn[257];
-	sprintf(fn,"%s%s.cfg",str,app_name);
+	sprintf(fn,properties_file,home,app_name);
 	app_properties.save(fn);
 }
 
 void aApplication::setLanguage(const char *l) {
 	char dir[257],fn[257];
-	const char *langdir = getLanguageDir();
+	const char *data = getDataDir();
 	const char *lang = getProperty(property_key[APP_LANG]);
 	strncpy(app_lang,l,3);
 	if(!lang || strcmp(lang,app_lang)) setProperty(property_key[APP_LANG],app_lang);
-	sprintf(dir,"%s%s/",langdir,app_lang);
+	sprintf(dir,"%slang/%s/",data,app_lang);
 	setProperty(property_key[APP_DIR_LANG],dir);
-	sprintf(fn,"%slang.txt",dir);
+	sprintf(fn,language_file,dir);
 	app_lang_data.removeAll();
 	app_lang_data.load(fn);
 printf("aApplication::loadLanguage(%s)",fn);
@@ -215,9 +224,9 @@ void aApplication::printf(const char *format, ...) {
 	char buf[275];
 	sprintf(buf,"[%" PRIu32 "]%" PRIu64 ": ",app_local_id,(uint64_t)app_local_time);
 	va_list args;
-   va_start(args,format);
+	va_start(args,format);
 	vsnprintf(&buf[strlen(buf)],256,format,args);
-   va_end(args);
+	va_end(args);
 	strcat(buf,"\n");
 	fputs(buf,app_out);
 	fflush(app_out);

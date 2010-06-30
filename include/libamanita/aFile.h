@@ -17,6 +17,11 @@
 /** aFile is a class with static methods for handling files and directories.
  */
 class aFile {
+private:
+	char *dir;
+	char *name;
+	FILE *file;
+
 public:
 	static bool exists(const char *fn);
 	static time_t accessed(const char *fn);
@@ -25,6 +30,19 @@ public:
 	static long copy(FILE *s,FILE *d);
 	static bool remove(const char *dn);
 	static bool mkdir(const char *dn,int p=0700);
+
+	aFile() : dir(0),name(0),file(0) {}
+	~aFile() { close(); }
+
+	const char *getDirectory() { return dir; }
+	const char *getName() { return name; }
+	const FILE *getFile() { return file; }
+
+	aFile &open(const char *a,const char *fn, ...);
+	aFile &close();
+	aFile &read(char **data,size_t &len);
+	aFile &write(const char *data,size_t len);
+	size_t size();
 };
 
 
