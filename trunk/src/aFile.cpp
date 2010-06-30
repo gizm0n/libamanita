@@ -88,4 +88,57 @@ bool aFile::mkdir(const char *dn,int p) {
 }
 
 
+aFile &aFile::open(const char *a,const char *fn, ...) {
+	char buf[257];
+	va_list args;
+   va_start(args,fn);
+	vsnprintf(buf,256,fn,args);
+   va_end(args);
+	if(name) free(name);
+	if(file) fclose(file);
+	file = fopen(buf,a);
+	if(file) {
+		dir = strdup(buf);
+		char *p1 = strrchr(dir,'/');
+		char *p2 = strrchr(dir,'\\');
+		name = p1>p2? p1 : p2;
+		if(name) *name = '\0',name++;
+	}
+	return *this;
+}
+
+aFile &aFile::close() {
+	if(dir) { free(dir);dir = 0,name = 0; }
+	if(file) { fclose(file);file = 0; }
+	return *this;
+}
+
+aFile &aFile::read(char **data,size_t &len) {
+	*data = 0;
+	len = 0;
+	if(file) {
+		len = size();
+		if(len>0) {
+			*data = (char *)malloc(len);
+			size_t n;
+			n = fread(*data,len,1,file);
+		}
+	}
+	return *this;
+}
+
+aFile &aFile::write(const char *data,size_t len) {
+	if(file) fwrite(data,len,1,file);
+	return *this;
+}
+
+size_t aFile::size() {
+	if(!file) return 0;
+	long n1 = ftell(file);
+	fseek(file,0,SEEK_END);
+	long n2 = ftell(file);
+	fseek(file,n1,SEEK_SET);
+	return n2>0? (size_t)n2 : 0;
+}
+
 
