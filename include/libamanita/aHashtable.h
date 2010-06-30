@@ -866,7 +866,25 @@ public:
 	size_t load(FILE *fp);
 	size_t save(const char *fn);
 	size_t save(FILE *fp);
-	static void readPair(FILE *file,aString &key,aString &value);
+	/** @} */
+
+	/** Parse and merge a string of text-data.
+	 * @see merge(const char *str) */
+	size_t parse(const char *str) { return merge(str); }
+
+	/** @name Merge methods
+	 * @{ */
+	/** Parse and merge a string of text-data.
+	 * @param str String of data to be parsed and joined with the hashtable. Each element is separated
+	 * by a new line, and key and value separated with a '=' or a ':'. Excess whitespace is stripped.
+	 * Values are read similar to c-strings, and accept backslash codes ('\n' for new line), and
+	 * additional lines can be added with a backslash.
+	 * @return Number of items added to the table. */
+	size_t merge(const char *str);
+	size_t merge(aHashtable *ht) { return ht? merge(*ht) : 0; }
+	size_t merge(aHashtable &ht);
+	size_t merge(aVector *vec) { return vec? merge(*vec) : 0; }
+	size_t merge(aVector &vec);
 	/** @} */
 };
 

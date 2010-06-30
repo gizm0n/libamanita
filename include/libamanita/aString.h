@@ -145,13 +145,13 @@ public:
 	aString &appendf(const char *f, ...);
 	aString &vappendf(const char *f,va_list list);
 
-	aString &appendWord(const char *s,bool uesc=true) { return appendUntil(s,whitespace,uesc); }
+	aString &appendWord(const char **s,bool uesc=true) { return appendUntil(s,whitespace,whitespace,uesc); }
 	aString &appendWord(FILE *fp,bool uesc=true) { return appendUntil(fp,whitespace,whitespace,uesc); }
-	aString &appendTab(const char *s,bool uesc=true) { return appendUntil(s,whitespace+1,uesc); }
+	aString &appendTab(const char **s,bool uesc=true) { return appendUntil(s,whitespace+1,whitespace+1,uesc); }
 	aString &appendTab(FILE *fp,bool uesc=true) { return appendUntil(fp,whitespace+1,whitespace+1,uesc); }
-	aString &appendLine(const char *s,bool uesc=true) { return appendUntil(s,whitespace+2,uesc); }
+	aString &appendLine(const char **s,bool uesc=true) { return appendUntil(s,whitespace+2,whitespace+2,uesc); }
 	aString &appendLine(FILE *fp,bool uesc=true) { return appendUntil(fp,whitespace+2,whitespace+2,uesc); }
-	aString &appendUntil(const char *s,const char *end,bool uesc=true);
+	aString &appendUntil(const char **s,const char *end,const char *trim=0,bool uesc=true);
 	aString &appendUntil(FILE *fp,const char *end=0,const char *trim=0,bool uesc=true);
 	/** @} */
 
