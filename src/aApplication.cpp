@@ -25,17 +25,18 @@
 
 
 const char *aApplication::property_key[] = {
-	"app_exe","app_dir_home","app_dir_data","app_dir_fonts","app_dir_lang","lang"
+	"_app_exe","_app_dir_home","_app_dir_data","_app_dir_fonts","_app_dir_lang",0,"lang",0,
 };
 
 
-aApplication::aApplication(const char *nm) : app_lang_data(),app_properties() {
+aApplication::aApplication(const char *prj,const char *nm) : app_lang_data(),app_properties() {
 	FILE *fp;
 	char str[257],home[257],data[257];
 	int n;
 
-	app_name = strdup(nm);
-	app_agent = app_name;
+	app_project = strdup(prj);
+	app_name = nm? strdup(nm) : app_project;
+	app_user_agent = app_project;
 	app_local_id = 0;
 	app_local_time = 0;
 
@@ -46,7 +47,7 @@ fflush(stderr);
 
 	getHomeDir(str,256);
 #if defined __linux__
-	sprintf(home,"%s/.%s/",str,app_name);
+	sprintf(home,"%s/.%s/",str,app_project);
 #elif defined WIN32
 	sprintf(home,"%s\\",str);
 #endif
@@ -57,13 +58,13 @@ fflush(stderr);
 
 #if defined __linux__
 	n = 0;
-	snprintf(data,256,"/usr/share/%s/",app_name);
+	snprintf(data,256,"/usr/share/%s/",app_project);
 	if(!aFile::exists(data)) {
 		n = 1;
-		snprintf(data,256,"/usr/local/share/%s/",app_name);
+		snprintf(data,256,"/usr/local/share/%s/",app_project);
 		if(!aFile::exists(data)) {
 			n = 2;
-			snprintf(data,256,"%s/.local/share/%s/",home,app_name);
+			snprintf(data,256,"%s/.local/share/%s/",home,app_project);
 			if(!aFile::exists(data)) {
 				n = 3;
 				strcpy(data,home);
@@ -105,13 +106,30 @@ printf("aApplication::aApplication()");
 
 }
 
+
 aApplication::~aApplication() {
 printf("aApplication::~aApplication()");
-	if(app_agent && app_agent!=app_name) { free(app_agent);app_agent = 0; }
-	if(app_name) { free(app_name);app_name = 0; }
+	if(app_user_agent && app_user_agent!=app_project) free(app_user_agent);
+	app_user_agent = 0;
+	if(app_name && app_name!=app_project) free(app_name);
+	app_name = 0;
+	if(app_project) { free(app_project);app_project = 0; }
 printf("Completely finalized, could not have gone better! You the Man!");
 	fclose(app_out);
 }
+
+
+void aApplication::init() {
+	loadProperties();
+}
+
+void aApplication::exit() {
+	int i;
+	for(i=0; i<APP_TEMP_PROPERTIES; i++)
+		if(property_key[i]) app_properties.remove(property_key[i]);
+	saveProperties();
+}
+
 
 int aApplication::install(const char *host,const char *path,const char **files) {
 	int i,n,f,pl = path? strlen(path) : 0;
@@ -119,8 +137,7 @@ int aApplication::install(const char *host,const char *path,const char **files) 
 	const char *fonts = getFontsDir();
 	const char *file,*p,*e,*dest;
 	char str[256];
-	aHttp http;
-	http.setUserAgent(app_agent);
+	aHttp http(*this);
 	FILE *fp;
 	size_t sz;
 	for(i=0,n=0,f=0; files[i]; i++) {
@@ -159,6 +176,11 @@ fflush(stderr);
 	}
 #endif
 	return n;
+}
+
+void aApplication::setUserAgent(const char *a) {
+	if(app_user_agent && app_user_agent!=app_project) free(app_user_agent);
+	app_user_agent = strdup(a);
 }
 
 static const char *properties_file = "%s%s.cfg";

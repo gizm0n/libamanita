@@ -37,6 +37,7 @@
 
 #endif /* LIBAMANITA_SDL */
 
+#include <libamanita/aApplication.h>
 #include <libamanita/aString.h>
 #include <libamanita/aRandom.h>
 #include <libamanita/net/aHttp.h>
@@ -110,11 +111,10 @@ const char *http_mimes[] = {
 };
 
 
-aHttp::aHttp() {
-	timeout = -1;
-	multipart = 0;
-	ver = .0f;
-	status = 0;
+aHttp::aHttp() : timeout(-1),multipart(0),ver(.0f),status(0) {}
+
+aHttp::aHttp(aApplication &a) : timeout(-1),multipart(0),ver(.0f),status(0) {
+	setUserAgent(a.getUserAgent());
 }
 
 aHttp::~aHttp() {

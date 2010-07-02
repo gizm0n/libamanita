@@ -10,6 +10,10 @@
 
 #include <libamanita/aHashtable.h>
 
+
+class aApplication;
+
+
 enum HTTP_METHOD {
 	HTTP_METHOD_HEADER,
 	HTTP_METHOD_GET,
@@ -134,6 +138,7 @@ private:
 
 public:
 	aHttp();
+	aHttp(aApplication &a);
 	~aHttp();
 
 	
