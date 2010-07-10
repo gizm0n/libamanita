@@ -1,4 +1,5 @@
 
+#include "../config.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
@@ -40,8 +41,7 @@ void aSQLite::open(const char *nm) {
 }
 
 void aSQLite::close() {
-fprintf(stdout,"aSQLite::close()\n");
-fflush(stdout);
+debug_output("aSQLite::close()\n");
 	if(db) { sqlite3_close(db);db = 0; }
 }
 
@@ -53,13 +53,11 @@ void aSQLite::error(int msg,char *err) {
 }
 
 void aSQLite::exec(const char *sql) {
-fprintf(stdout,"aSQLite::exec(sql=%s)\n",sql);
-fflush(stdout);
+debug_output("aSQLite::exec(sql=%s)\n",sql);
 	int msg = 0;
 	char *err = 0;
 	if(db && (msg=sqlite3_exec(db,sql,0,0,&err))!=SQLITE_OK) error(msg,err);
-fprintf(stdout,"aSQLite::exec(done)\n");
-fflush(stdout);
+debug_output("aSQLite::exec(done)\n");
 }
 
 void aSQLite::execf(const char *sql, ...) {
@@ -72,14 +70,12 @@ void aSQLite::execf(const char *sql, ...) {
 }
 
 void aSQLite::query(aResultset &rs,const char *sql) {
-fprintf(stdout,"aSQLite::query(sql=%s)\n",sql);
-fflush(stdout);
+debug_output("aSQLite::query(sql=%s)\n",sql);
 	int msg = 0;
 	char *err = 0;
 	rs.db = this;
 	if(db && (msg=sqlite3_exec(db,sql,callback,&rs,&err))!=SQLITE_OK) error(msg,err);
-fprintf(stdout,"aSQLite::query(done)\n");
-fflush(stdout);
+debug_output("aSQLite::query(done)\n");
 }
 
 void aSQLite::queryf(aResultset &rs,const char *sql, ...) {

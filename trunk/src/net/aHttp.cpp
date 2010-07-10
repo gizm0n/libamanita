@@ -238,7 +238,7 @@ const char *aHttp::post(const char *host,const char *url) {
 			" boundary="," name=\""," filename=\"","form-data",
 			"Content-Transfer-Encoding: binary",
 		};
-fprintf(stderr,"Boundary 1: %s\n",boundary.toCharArray());
+debug_output("Boundary 1: %s\n",boundary.toCharArray());
 		while((p=(void *)iter.next())) {
 			if(iter.valueType()==TYPE_VOID_P) p1 = (char *)((packet *)p)->data;
 			else p1 = (char *)p;
@@ -277,15 +277,13 @@ fprintf(stderr,"Boundary 1: %s\n",boundary.toCharArray());
 }
 
 const char *aHttp::postf(const char *host,const char *url, ...) {
-fprintf(stderr,"aHttp::postf(host=%s,url=%s)\n",host,url);
-fflush(stderr);
+debug_output("aHttp::postf(host=%s,url=%s)\n",host,url);
 	aString str;
 	va_list args;
 	va_start(args,url);
 	str.vappendf(url,args);
 	va_end(args);
-fprintf(stderr,"aHttp::postf(2: host=%s,url=%s)\n",host,str.toCharArray());
-fflush(stderr);
+debug_output("aHttp::postf(2: host=%s,url=%s)\n",host,str.toCharArray());
 	return post(host,str.toCharArray());
 }
 
@@ -294,8 +292,7 @@ const char *aHttp::request(const char *host,const char *url,HTTP_METHOD method,c
 	response.removeAll();
 	body.clear();
 
-fprintf(stderr,"aHttp::request(host=%s,url=%s)\n",host,url);
-fflush(stderr);
+debug_output("aHttp::request(host=%s,url=%s)\n",host,url);
 
 	int error = 0;
 	http_clock_t t1 = http_clock(),t2 = t1,t3 = t1,t4 = t1,t5 = t1;
@@ -343,11 +340,9 @@ fflush(stderr);
 				while(iter.next())
 					header.append((const char *)iter.key()).append(": ").append((const char *)iter.value()).append("\r\n");
 				header.append("\r\n");
-fprintf(stderr,"aHttp::request(header=\"%s\",len=%zu)\n",header.toCharArray(),header.length());
-fflush(stderr);
+debug_output("aHttp::request(header=\"%s\",len=%zu)\n",header.toCharArray(),header.length());
 				if(data && len) {
-fprintf(stderr,"aHttp::request(data=\"%s\",len=%zu)\n",data,len);
-fflush(stderr);
+debug_output("aHttp::request(data=\"%s\",len=%zu)\n",data,len);
 					http_send(sock,header.toCharArray(),header.length());
 					http_send(sock,data,len+1);
 				} else http_send(sock,header.toCharArray(),header.length()+1);
@@ -368,22 +363,19 @@ fflush(stderr);
 
 				t4 = http_clock();
 				int r = http_recv(sock,buf,2048);
-fprintf(stderr,"aHttp::request(response=\"%s\",r=%d)\n",buf,r);
-fflush(stderr);
+debug_output("aHttp::request(response=\"%s\",r=%d)\n",buf,r);
 				if(r<=0) error = 6;
 				else {
 					int i,n;
 					char *p1 = strstr(buf,"\r\n\r\n"),*p2,*p3,*pb;
-//fprintf(stderr,"aHttp::request(p1=\"%s\")\n",p1);
-//fflush(stderr);
+//debug_output("aHttp::request(p1=\"%s\")\n",p1);
 					if(!p1) error = 7;
 					else {
 						bool chunked;
 						p1[2] = '\0',pb = p1+4;
 						response.put("Header",buf);
 
-fprintf(stderr,"aHttp::request(split header: %s)\n",buf);
-fflush(stderr);
+debug_output("aHttp::request(split header: %s)\n",buf);
 
 						{ // Split header
 							p1 = strstr(buf,"\r\n");
@@ -394,8 +386,7 @@ fflush(stderr);
 									p3 = strstr(p2,"\r\n");
 									if(p3) {
 										*p2 = '\0',p2 += 2,*p3 = '\0';
-fprintf(stderr,"aHttp::request(header: %s = %s)\n",p1,p2);
-fflush(stderr);
+debug_output("aHttp::request(header: %s = %s)\n",p1,p2);
 										response.put(p1,p2);
 									}
 								}
@@ -406,24 +397,19 @@ fflush(stderr);
 						}
 
 						p1 = response.getString(http_headers[HTTP_TRANSFER_ENCODING]);
-fprintf(stderr,"aHttp::request(encoding: %s)\n",p1);
-fflush(stderr);
+debug_output("aHttp::request(encoding: %s)\n",p1);
 						//chunked = p1? strcmp(p1,"identity")!=0 : true;
 						p2 = response.getString(http_headers[HTTP_CONTENT_LENGTH]);
-fprintf(stderr,"aHttp::request(content length: %s)\n",p2);
-fflush(stderr);
+debug_output("aHttp::request(content length: %s)\n",p2);
 						n = p2? atol(p2) : 0;
 						chunked = p2? false : true;
 
 						r -= (int)(pb-buf);
-fprintf(stderr,"aHttp::request(n=%d,r=%d,chunked=%d)\n",n,r,chunked);
-fflush(stderr);
+debug_output("aHttp::request(n=%d,r=%d,chunked=%d)\n",n,r,chunked);
 						for(int chunks=1; 1;) {
-//fprintf(stderr,"aHttp::request(loop: n=%d,r=%d,len=%d)\n",n,r,body.length());
-//fflush(stderr);
+//debug_output("aHttp::request(loop: n=%d,r=%d,len=%d)\n",n,r,body.length());
 							if(n>0 && r>0) {
-//fprintf(stderr,"aHttp::request(append_data[1]: n=%d,r=%d,len=%d)\n",n,r,body.length());
-//fflush(stderr);
+//debug_output("aHttp::request(append_data[1]: n=%d,r=%d,len=%d)\n",n,r,body.length());
 								if(n>r) {
 									body.append((const char *)pb,(size_t)r);
 									n -= r;
@@ -435,12 +421,10 @@ fflush(stderr);
 									pb += n;
 									n = 0;
 								}
-//fprintf(stderr,"aHttp::request(append_data[2]: n=%d,r=%d,len=%d)\n",n,r,body.length());
-//fflush(stderr);
+//debug_output("aHttp::request(append_data[2]: n=%d,r=%d,len=%d)\n",n,r,body.length());
 							}
 							if(n==0) {
-//fprintf(stderr,"aHttp::request(read_length[1]: n=%d,r=%d,len=%d)\n",n,r,body.length());
-//fflush(stderr);
+//debug_output("aHttp::request(read_length[1]: n=%d,r=%d,len=%d)\n",n,r,body.length());
 								if(chunked) {
 									if(r<32) {
 										if(r>0) memmove(buf,pb,r);
@@ -452,8 +436,7 @@ fflush(stderr);
 									}
 									if(chunks>1) pb += 2;
 									n = aString::fromHex(pb);
-//fprintf(stderr,"aHttp::request(read_length: n=%d,r=%d,len=%d)\n",n,r,body.length());
-//fflush(stderr);
+//debug_output("aHttp::request(read_length: n=%d,r=%d,len=%d)\n",n,r,body.length());
 									if(n==0) break;
 									p1 = strstr(pb,"\r\n")+2;
 									r -= p1-pb;
@@ -469,13 +452,11 @@ fflush(stderr);
 									if(r<=0) break;
 									pb[r] = '\0';
 									if(n>2048) {
-//fprintf(stderr,"aHttp::request(read_data[1]: n=%d,r=%d,len=%d)\n",n,r,body.length());
-//fflush(stderr);
+//debug_output("aHttp::request(read_data[1]: n=%d,r=%d,len=%d)\n",n,r,body.length());
 										body.append((const char *)pb,(size_t)r);
 										n -= r;
 										r = 0;
-//fprintf(stderr,"aHttp::request(read_data[2]: n=%d,r=%d,len=%d)\n",n,r,body.length());
-//fflush(stderr);
+//debug_output("aHttp::request(read_data[2]: n=%d,r=%d,len=%d)\n",n,r,body.length());
 									} else break;
 								}
 								if(r<0) break;
@@ -486,8 +467,7 @@ fflush(stderr);
 						body.setCapacity(len);
 						n = (uint64_t)(r-(pb-buf));
 						if(n>0) body.append(pb,n);
-fprintf(stderr,"aHttp::request(len=%lu),n=%d\n",len,n);
-fflush(stderr);
+debug_output("aHttp::request(len=%lu),n=%d\n",len,n);
 
 						if(len-n<=0) body.append('\0');
 						else {
@@ -506,8 +486,7 @@ fflush(stderr);
 								}
 								r = http_recv(sock,buf,n>1024? 1024 : n);
 								if(r<=0) break;
-fprintf(stderr,"aHttp::request(r=%d)\n",r);
-fflush(stderr);
+debug_output("aHttp::request(r=%d)\n",r);
 								body.append(buf,r);
 							}
 						}
@@ -538,10 +517,10 @@ fflush(stderr);
 	headers.remove(http_headers[HTTP_HOST]);
 	clearForm();
 
-fprintf(stderr,"Time alltogether: %d\nTime to init: %d\nTime to send: %d\nTime until response: %d\nTime to download: %d\n"
+fprintf(stdout,"Time alltogether: %d\nTime to init: %d\nTime to send: %d\nTime until response: %d\nTime to download: %d\n"
 	"header[%s]\nlen=%zu\nver=%.1f\nstatus=%d\n",
 	(int)(t5-t1),(int)(t2-t1),(int)(t3-t2),(int)(t4-t3),(int)(t5-t4),response.getString("Header"),body.length(),ver,status);
-fflush(stderr);
+fflush(stdout);
 	return body.toCharArray();
 }
 

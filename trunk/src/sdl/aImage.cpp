@@ -20,6 +20,7 @@ inline bool _space(char c) { return c==' ' || c=='\n' || c=='\t' || c=='\r' || c
 aImage::aImage() : aObject(),name(0),file(0),surface(0),map(0),mapSize(0),mapRow(0) {
 	created++;
 }
+
 aImage::aImage(int w,int h) : aObject(),name(0),file(0),surface(0),map(0) {
 	created++;
 	SDL_PixelFormat *f = g.getScreenFormat();
@@ -28,6 +29,7 @@ aImage::aImage(int w,int h) : aObject(),name(0),file(0),surface(0),map(0) {
 	surface = s;
 	createMap(1);
 }
+
 aImage::aImage(const char *fn) : aObject(),name(0),file(0),surface(0),map(0) {
 	created++;
 	name = strdup(fn);
@@ -35,6 +37,7 @@ aImage::aImage(const char *fn) : aObject(),name(0),file(0),surface(0),map(0) {
 	load(fn);
 	createMap(1);
 }
+
 aImage::~aImage() {
 	deleted++;
 	if(name) { free(name);name = 0; }
@@ -86,11 +89,13 @@ void aImage::load(const char *fn) {
 }
 
 
-aImage **aImage::readXIM(const char *fn,int &n) {
+aImage **aImage::readXIM(const char *p,const char *fn,int &n) {
 	n = 0;
 printf("aImage::readXIM(fn=%s)\n",fn);
 fflush(stdout);
-	FILE *fp = fopen(fn,"r");
+	char str[1024];
+	sprintf(str,"%s%s",p,fn);
+	FILE *fp = fopen(str,"r");
 	if(!fp) return 0;
 // printf("aImage::readXIM()\n");
 // fflush(stdout);
@@ -177,7 +182,7 @@ fflush(stdout);
 			if(f==1) lines[b++] = p1,f = 0;
 			else if(*p1=='\0') f = 1;
 		}
-		images = parseXIM(lines,nlines);
+		images = parseXIM(p,lines,nlines);
 		free(lines);
 		n = nlines;
 	}
@@ -186,7 +191,7 @@ fflush(stdout);
 }
 
 
-aImage **aImage::parseXIM(const char *lines[],int &n) {
+aImage **aImage::parseXIM(const char *p,const char *lines[],int &n) {
 	struct mapping {
 		int sz,rw,rh;
 		SDL_Rect *r;
@@ -361,7 +366,7 @@ fflush(stdout);
 		img = images[i] = new aImage();
 		if(m==t->to) t = &templates[++j],m = t->from;
 
-		formatString(path,t->path,m);
+		formatString(path,p,t->path,m);
 		if((s=IMG_Load(path))==0) {
 printf("aImage::parseXIM(IMG_Load(%s))\n",SDL_GetError());
 fflush(stdout);
@@ -414,7 +419,7 @@ fflush(stdout);
 // fflush(stdout);
 			while(r<b) img->map[v++] = d[f].r[r++];
 		}
-		formatString(name,t->name,m);
+		formatString(name,0,t->name,m);
 		img->name = strdup(name);
 		img->file = strdup(path);
 // for(f=0; f<img->mapSize; f++) {
@@ -435,8 +440,9 @@ fflush(stdout);
 	return images;
 }
 
-void aImage::formatString(char *str,const char *format,int num) {
+void aImage::formatString(char *str,const char *p,const char *format,int num) {
 	if(!str) return;
+	if(p && *p) str = strcpy(str,p)+strlen(p);
 	if(format) while(*format)
 		if(*format=='#') {
 			sprintf(str,"%d",num);

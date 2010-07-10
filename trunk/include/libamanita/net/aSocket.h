@@ -71,22 +71,36 @@
 #undef swap_be_16
 #undef swap_be_32
 #undef swap_be_64
+#undef swap_le_16
+#undef swap_le_32
+#undef swap_le_64
 
 #ifdef LIBAMANITA_SDL
 	#define swap_be_16 SDL_SwapBE16
 	#define swap_be_32 SDL_SwapBE32
 	#define swap_be_64 SDL_SwapBE64
-
-#elif __BYTE_ORDER == __BIG_ENDIAN
-	#define swap_be_16(n) n
-	#define swap_be_32(n) n
-	#define swap_be_64(n) n
+	#define swap_le_16 SDL_SwapLE16
+	#define swap_le_32 SDL_SwapLE32
+	#define swap_le_64 SDL_SwapLE64
 
 #else
 	#include <byteswap.h>
-	#define swap_be_16(n) bswap_16(n)
-	#define swap_be_32(n) bswap_32(n)
-	#define swap_be_64(n) bswap_64(n)
+	#if __BYTE_ORDER == __BIG_ENDIAN
+		#define swap_be_16(n) n
+		#define swap_be_32(n) n
+		#define swap_be_64(n) n
+		#define swap_le_16(n) bswap_16(n)
+		#define swap_le_32(n) bswap_32(n)
+		#define swap_le_64(n) bswap_64(n)
+
+	#else
+		#define swap_be_16(n) bswap_16(n)
+		#define swap_be_32(n) bswap_32(n)
+		#define swap_be_64(n) bswap_64(n)
+		#define swap_le_16(n) n
+		#define swap_le_32(n) n
+		#define swap_le_64(n) n
+	#endif /* __BYTE_ORDER == __BIG_ENDIAN */
 #endif /* LIBAMANITA_SDL */
 
 
@@ -200,18 +214,33 @@ enum {
 #if SOCKET_OFFSET==4
 inline void pack_header(uint8_t **data,uint32_t i) { *(uint32_t *)((void *)*data) = swap_be_32(i);*data += SOCKET_HEADER; }
 inline void unpack_header(uint8_t **data,uint32_t &i) { i = swap_be_32(*(uint32_t *)((void *)*data));*data += SOCKET_HEADER; }
+inline void unpack_header(uint8_t **data,uint32_t &i,uint32_t &l) { i = swap_be_32(*(uint32_t *)((void *)*data));*data += SOCKET_OFFSET;l = swap_be_32(*(uint32_t *)((void *)*data));*data += 4; }
 inline uint32_t get_unpack_header(uint8_t *data) { return swap_be_32(*(uint32_t *)((void *)data)); }
+
 #elif SOCKET_OFFSET>=2
 inline void pack_header(uint8_t **data,uint16_t i) { *(uint16_t *)((void *)*data) = swap_be_16(i);*data += SOCKET_HEADER; }
 inline void unpack_header(uint8_t **data,uint16_t &i) { i = swap_be_16(*(uint16_t *)((void *)*data));*data += SOCKET_HEADER; }
+	#if SOCKET_LEN==4
+inline void unpack_header(uint8_t **data,uint16_t &i,uint32_t &l) { i = swap_be_16(*(uint16_t *)((void *)*data));*data += SOCKET_OFFSET;l = swap_be_32(*(uint32_t *)((void *)*data));*data += 4; }
+	#else
+inline void unpack_header(uint8_t **data,uint16_t &i,uint16_t &l) { i = swap_be_16(*(uint16_t *)((void *)*data));*data += SOCKET_OFFSET;l = swap_be_16(*(uint16_t *)((void *)*data));*data += 2; }
+	#endif
 inline uint16_t get_unpack_header(uint8_t *data) { return swap_be_16(*(uint16_t *)((void *)data)); }
+
 #elif SOCKET_OFFSET==1
 inline void pack_header(uint8_t **data,uint8_t i) { *(*data) = i;*data += SOCKET_HEADER; }
 inline void unpack_header(uint8_t **data,uint8_t &i) { i = *(*data);*data += SOCKET_HEADER; }
+	#if SOCKET_LEN==4
+inline void unpack_header(uint8_t **data,uint8_t &i,uint32_t &l) { i = *(*data);*data += SOCKET_OFFSET;l = swap_be_32(*(uint32_t *)((void *)*data));*data += 4; }
+	#else
+inline void unpack_header(uint8_t **data,uint8_t &i,uint16_t &l) { i = *(*data);*data += SOCKET_OFFSET;l = swap_be_16(*(uint16_t *)((void *)*data));*data += 2; }
+	#endif
 inline uint8_t get_unpack_header(uint8_t *data) { return *data; }
+
 #elif SOCKET_OFFSET==0
 inline void pack_header(uint8_t **data,int i) { *data += SOCKET_HEADER; }
 inline void unpack_header(uint8_t **data,int &i) { *data += SOCKET_HEADER; }
+inline void unpack_header(uint8_t **data,int &i,uint16_t &l) { l = swap_be_16(*(uint16_t *)((void *)*data));*data += SOCKET_HEADER; }
 inline uint16_t get_unpack_header(uint8_t *data) { return 0; }
 #endif
 

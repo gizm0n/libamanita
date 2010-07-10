@@ -37,11 +37,9 @@ bool aServer::start(const char *con) {
 	if(isRunning() || isStarting()) return false;
 	uint32_t id;
 	char nick[32];
-fprintf(stderr,"start()\n");
-fflush(stderr);
+debug_output("start()\n");
 	resolveConnection(con,ip,port,id,nick,32);
-fprintf(stderr,"start(ip=%x,port=%d,id=%d,nick=%s)\n",ip,port,id,nick);
-fflush(stderr);
+debug_output("start(ip=%x,port=%d,id=%d,nick=%s)\n",ip,port,id,nick);
 	return start(port);
 }
 
@@ -97,15 +95,12 @@ void aServer::stop(bool kill) {
 		setStopping(true);
 		stateChanged(SM_STOPPING_SERVER,0,0,0);
 		setRunning(false);
-fprintf(stderr,"aServer::stop(kill=%d)\n",kill);
-fflush(stderr);
+debug_output("aServer::stop(kill=%d)\n",kill);
 		if(kill) thread.kill();
 		else thread.stop();
-fprintf(stderr,"aServer::stop(killAllClients)\n");
-fflush(stderr);
+debug_output("aServer::stop(killAllClients)\n");
 		killAllClients();
-fprintf(stderr,"aServer::stop(tcp_close)\n");
-fflush(stderr);
+debug_output("aServer::stop(tcp_close)\n");
 		tcp_close(sock);
 		sock = 0;
 		setStopping(false);
@@ -144,12 +139,10 @@ void aServer::run() {
 				releaseMessageBuffer(b);
 			}
 		}
-fprintf(stderr,"aServer::run(clients=%zu,n=%d)\n",_sockets.size(),n);
-fflush(stderr);
+debug_output("aServer::run(clients=%zu,n=%d)\n",_sockets.size(),n);
 		for(i=_main.size()-1; n>0 && i>=0; i--) {
 			c = (aConnection)_main[i];
-fprintf(stderr,"aServer::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),c->sock);
-fflush(stderr);
+debug_output("aServer::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),c->sock);
 			if(SDLNet_SocketReady(c->sock)) {
 				n--;
 				b = receive(c->sock,l);
@@ -187,8 +180,7 @@ fflush(stderr);
 					tcp_close(s);
 					continue;
 				}
-fprintf(stderr,"aServer::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),(void *)c->sock);
-fflush(stderr);
+debug_output("aServer::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),(void *)c->sock);
 				b = receive(c->sock,l);
 				if(l>0) {
 #ifndef SOCKET_NOCIPHER
@@ -228,8 +220,7 @@ aChannel aServer::createChannel(const char *ch) {
 }
 
 void aServer::deleteChannel(const char *ch) {
-fprintf(stderr,"aServer::deleteChannel(name=%s)\n",ch);
-fflush(stderr);
+debug_output("aServer::deleteChannel(name=%s)\n",ch);
 	aChannel channel = (aChannel)_channels.remove(ch);
 	if(channel && channel!=&_main) {
 		if(channel->size()>0) {
@@ -245,12 +236,10 @@ fflush(stderr);
 
 void aServer::leaveChannel(aChannel ch,aConnection c) {
 	if(ch && c) {
-fprintf(stderr,"aServer::leaveChannel(1,name=%s,size(%zu))\n",ch->getName(),ch->size());
-fflush(stderr);
+debug_output("aServer::leaveChannel(1,name=%s,size(%zu))\n",ch->getName(),ch->size());
 		*ch -= c;
 		c->leaveChannel(ch);
-fprintf(stderr,"aServer::leaveChannel(2,size(%zu))\n",ch->size());
-fflush(stderr);
+debug_output("aServer::leaveChannel(2,size(%zu))\n",ch->size());
 		if(ch->size()==0) deleteChannel(ch->getName());
 	}
 }
@@ -263,8 +252,7 @@ aConnection aServer::addClient(tcp_socket_t s,uint8_t *d,size_t l) {
 	if(status&SERVER_ST_INTERNAL_CLIENT_ID) id = ++id_index;
 	else id = swap_be_32(*(uint32_t *)d);
 	char *nick = (char *)(d+4);
-fprintf(stderr,"aServer::addClient(id=%" PRIu32 ",nick=%s)\n",id,nick);
-fflush(stderr);
+debug_output("aServer::addClient(id=%" PRIu32 ",nick=%s)\n",id,nick);
 	stateChanged(SM_CHECK_NICK,(intptr_t)&nick,0,0);
 	if(!uniqueID(id)) stateChanged(SM_DUPLICATE_ID,id,(intptr_t)nick,0);
 	else {
@@ -280,8 +268,7 @@ fflush(stderr);
 		FD_SET(s,&set);
 #endif /* LIBAMANITA_SDL */
 		{ // Respond directly with ID and nick.
-fprintf(stderr,"aServer::addClient(respond)\n");
-fflush(stderr);
+debug_output("aServer::addClient(respond)\n");
 			uint8_t data[SOCKET_HEADER+5+strlen(nick)],*p = data;
 			pack_header(&p,0);
 			pack_uint32(&p,id);
@@ -295,8 +282,7 @@ fflush(stderr);
 
 void aServer::killClient(aConnection c) {
 	if(!c) return;
-fprintf(stderr,"aServer::killClient(id=%" PRIu32 ")\n",c->id);
-fflush(stderr);
+debug_output("aServer::killClient(id=%" PRIu32 ")\n",c->id);
 	_sockets.remove(c->sock);
 	_clients.remove(c->id);
 	_clients.remove(c->nick);
@@ -312,14 +298,12 @@ fflush(stderr);
 	tcp_close(c->sock);
 	stateChanged(SM_KILL_CLIENT,(intptr_t)c,0,0);
 	delete c;
-fprintf(stderr,"aServer::killClient(done)\n");
-fflush(stderr);
+debug_output("aServer::killClient(done)\n");
 }
 
 void aServer::killAllClients() {
 	if(!_sockets.size()) return;
-fprintf(stderr,"aServer::killAllClients()\n");
-fflush(stderr);
+debug_output("aServer::killAllClients()\n");
 	aConnection client;
 	for(int i=_main.size()-1; i>=0; i--) {
 		client = (aConnection)_main[i];
@@ -348,8 +332,7 @@ void aServer::createSocketSet(int n) {
 	setsz = n;
 	if(set) SDLNet_FreeSocketSet(set);
 	if(_main.size()+1>setsz) setsz = (_main.size()+1)*2;
-fprintf(stderr,"aServer::createSocketSet(setsz=%zu)\n",setsz);
-fflush(stderr);
+debug_output("aServer::createSocketSet(setsz=%zu)\n",setsz);
 	set = SDLNet_AllocSocketSet(setsz);
 	if(!set) stateChanged(SM_ERR_ALLOC_SOCKETSET,0,(intptr_t)getError(),0);
 	else {
@@ -358,12 +341,10 @@ fflush(stderr);
 		int n;
 		for(size_t i=0; i<_main.size(); i++) {
 			client = (aConnection)_main[i];
-fprintf(stderr,"aServer::createSocketSet(id=%" PRIu32 ",nick=%s)\n",client->getID(),client->getNick());
-fflush(stderr);
+debug_output("aServer::createSocketSet(id=%" PRIu32 ",nick=%s)\n",client->getID(),client->getNick());
 			n = SDLNet_TCP_AddSocket(set,client->sock);
 if(n==-1) {
-fprintf(stderr,"aServer::createSocketSet(error=%s)\n",SDLNet_GetError());
-fflush(stderr);
+debug_output("aServer::createSocketSet(error=%s)\n",SDLNet_GetError());
 }
 		}
 	}
@@ -373,7 +354,7 @@ fflush(stderr);
 
 
 int aServer::send(aConnection c,uint8_t *d,size_t l) {
-//fprintf(stderr,"aServer::send(c=%p)\n",c);
+//debug_output("aServer::send(c=%p)\n",c);
 	if(!c) {
 		send(&_main,d,l);
 		return l;
@@ -411,18 +392,14 @@ void aServer::send(aChannel channel,uint8_t *d,size_t l) {
 	tcp_socket_header_len_t n = SOCKET_HEADER_LEN_SWAP(l);
 #endif /*SOCKET_HEADER_INCLUDED*/
 	aConnection c;
-fprintf(stderr,"aServer::send(l=%zu,cmd=%d,len=%d)\n",
+debug_output("aServer::send(l=%zu,cmd=%d,len=%d)\n",
 		l,(int)*d,SOCKET_HEADER_LEN_SWAP(*SOCKET_HEADER_LEN_TYPE(d+SOCKET_OFFSET)));
-fflush(stderr);
-fprintf(stderr,"aServer::send(lock)\n");
-fflush(stderr);
+debug_output("aServer::send(lock)\n");
 	lock();
-fprintf(stderr,"aServer::send(channel->size=%d)\n",(int)channel->size());
-fflush(stderr);
+debug_output("aServer::send(channel->size=%d)\n",(int)channel->size());
 	for(size_t i=0; i<channel->size(); i++)
 		if((c=(aConnection)(*channel)[i])->isActive()) {
-fprintf(stderr,"aServer::send(c=%p)\n",c);
-fflush(stderr);
+debug_output("aServer::send(c=%p)\n",c);
 #ifndef SOCKET_NOCIPHER
 			if(c->key) {
 				dc = p;
@@ -434,22 +411,19 @@ fflush(stderr);
 			} else dc = d;
 #endif /*SOCKET_NOCIPHER*/
 
-fprintf(stderr,"aServer::send(tcp_send)\n");
-fflush(stderr);
+debug_output("aServer::send(tcp_send)\n");
 #ifdef SOCKET_HEADER_INCLUDED
 			if(tcp_send(c->sock,SOCKET_P,l)<(int)l) {
 #else /*SOCKET_HEADER_INCLUDED*/
 			if(tcp_send(c->sock,&n,sizeof(n))!=sizeof(n)
 					|| tcp_send(c->sock,SOCKET_P,l)<(int)l) {
 #endif /*SOCKET_HEADER_INCLUDED*/
-fprintf(stderr,"aServer::send(killClient)\n");
-fflush(stderr);
+debug_output("aServer::send(killClient)\n");
 				killClient(c);
 				i--;
 			}
 		}
-fprintf(stderr,"aServer::send(unlock)\n");
-fflush(stderr);
+debug_output("aServer::send(unlock)\n");
 	unlock();
 }
 

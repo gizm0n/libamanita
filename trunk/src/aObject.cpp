@@ -17,8 +17,7 @@ aClass::aClass(const char *nm,aClass *s) : name(nm),super(s),nsub(0),sub(0) {
 		while(c->super) c->d = 0,c = c->super;
 		c->setDepth(0);
 	}
-printf("aClass::aClass(name=%s,id=%" PRIu32 ",d=%d)\n",name,id,d);
-fflush(stdout);
+debug_output("aClass::aClass(name=%s,id=%" PRIu32 ",d=%d)\n",name,id,d);
 if(super) {
 	aClass *c = super;
 	char ind[64] = "";

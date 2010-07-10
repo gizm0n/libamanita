@@ -8,6 +8,18 @@
 #include <libamanita/aThread.h>
 
 
+/** Callback function to receive installation progress, i.e. for updating a progressbar.
+ * @param obj The "obj" value used when calling install.
+ * @param file Name of the file that has been installed.
+ * @param n Index number of the file in the list.
+ * @param max The highest number n can be.
+ * @param st Status flags. 1=font(s) installed (on Linux call updateFontCache).
+ * @see int nstall(const char *,const char *,aVector &,install_function,void *)
+ * @see void updateFontCache()
+ */
+typedef void (*install_function)(void *obj,const char *file,int n,int max,int st);
+
+
 class aApplication {
 private:
 	void getExecutable(char *dir,int l);
@@ -42,17 +54,20 @@ protected:
 	aHashtable app_lang_data;			//!< Hashtable containing textstrings in the loaded language.
 	aHashtable app_properties;			//!< Hashtable containing configuration and settings property values.
 
-	virtual void init();
-	virtual void exit();
-
-	int install(const char *host,const char *path,const char *files[]);
-
 	void loadProperties();
 	void saveProperties();
 
 public:
 	aApplication(const char *prj,const char *nm=0);
 	virtual ~aApplication();
+
+	virtual void init();
+	virtual void exit();
+
+	int install(const char *host,const char *path,aVector &files,install_function func=0,void *obj=0);
+#if defined __linux__
+	void updateFontCache();
+#endif
 
 	void lock() { app_thread.lock(); }
 	void unlock() { app_thread.unlock(); }
@@ -76,9 +91,10 @@ public:
 
 	void setProperties(const char *s) { app_properties.merge(s); }
 	const char *getProperty(const char *key) { return (const char *)app_properties.get(key); }
+	void setPropertyf(const char *key,const char *value, ...);
 	void setProperty(const char *key,const char *value) { app_properties.put(key,value); }
 
-	virtual void setLanguage(const char *l);
+	virtual void setLanguage(const char *l=0);
 	const char *getLanguage() { return app_lang; }
 	const char *getf(const char *format, ...);
 	const char *get(const char *key);

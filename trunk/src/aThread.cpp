@@ -1,5 +1,5 @@
 
-#include "../config.h"
+#include "config.h"
 
 #ifdef LIBAMANITA_SDL
 #elif defined __linux__

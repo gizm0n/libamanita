@@ -1,6 +1,6 @@
 
 
-CXXFLAGS = -Wall -Werror -O2 -Os -I../include/
+CXXFLAGS = -Wall -Werror -O2 -g -I../include/
 
 lib_LIBRARIES = libamanita.a libamanita-sdl.a
 
@@ -75,7 +75,8 @@ libamanita_a_SOURCES = \
 	../src/sqlite/aSQLite.cpp
 
 libamanita_a_CPPFLAGS = \
-	-DLIBAMANITA
+	-DLIBAMANITA \
+	-DLIBAMANITA_DEBUG
 libamanita_a_CXXFLAGS = `pkg-config --cflags gtk+-2.0`
 
 
@@ -123,7 +124,8 @@ libamanita_sdl_a_SOURCES = \
 
 libamanita_sdl_a_CPPFLAGS = \
 	-DLIBAMANITA \
-	-DLIBAMANITA_SDL
+	-DLIBAMANITA_SDL \
+	-DLIBAMANITA_DEBUG
 libamanita_sdl_a_CXXFLAGS = `pkg-config --cflags gtk+-2.0`
 
 

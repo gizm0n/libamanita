@@ -3,7 +3,7 @@
 
 
 #ifdef __linux__
-#	include "../config.h"
+#include "../config.h"
 #endif
 
 
@@ -31,6 +31,15 @@
 #		define PRIll		"I64l"
 #	endif
 #		define PRIlf		"L"
+#endif
+
+
+#ifdef LIBAMANITA_DEBUG
+#	define debug_output(...) {fprintf(stderr,__VA_ARGS__);fflush(stderr);}
+#	define debug_putc(c) {fputc(c,stderr);fflush(stderr);}
+#else
+#	define debug_output(...)
+#	define debug_putc(c)
 #endif
 
 

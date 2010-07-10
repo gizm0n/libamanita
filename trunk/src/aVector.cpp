@@ -180,8 +180,7 @@ aVector &aVector::split(const char *str,const char *delim,bool trim) {
 					s2++;
 				}
 				if(trim) aString::trim(s1);
-//fprintf(stderr,"s1=\"%s\"\n",s1);
-//fflush(stderr);
+//debug_output("s1=\"%s\"\n",s1);
 				if(*s1) insert((value_t)s1,sz,TYPE_CHAR_P);
 				s1 = s2;
 			}
@@ -271,12 +270,11 @@ size_t aVector::load(FILE *fp) {
 	if(!fp) return 0;
 	aString line("",256);
 	for(size_t i=0; !feof(fp); i++) {
-//fprintf(stderr,"aHashtable::load(readPair)\n");
+//debug_output("aHashtable::load(readPair)\n");
 		line.clear().appendUntil(fp,"\r\n");
 		if(line.length()>0) {
 			insert(line,sz);
-//fprintf(stderr,"aHashtable::load(key='%s',val='%s')\n",key.array(),val.array());
-//fflush(stderr);
+//debug_output("aHashtable::load(key='%s',val='%s')\n",key.array(),val.array());
 		}
 	}
 	return sz;
