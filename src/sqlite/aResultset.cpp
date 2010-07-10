@@ -1,5 +1,5 @@
 
-
+#include "../config.h"
 #include <libamanita/sqlite/aResultset.h>
 
 

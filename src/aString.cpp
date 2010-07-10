@@ -198,8 +198,7 @@ aString &aString::vappendf(const char *f,va_list list) {
 	uint32_t flags,*w,w1,w2,w2default,l;
 	char pad;
 	while(1) {
-fprintf(stderr,"aString::vappendf(f=%s)\n",f);
-fflush(stderr);
+debug_output("aString::vappendf(f=%s)\n",f);
 		while((c=*f++) && c!='%') {
 			if(len==cap) resize(0);
 			str[len++] = c;
@@ -293,8 +292,7 @@ fflush(stderr);
 			case 'F':
 			{
 				double n = va_arg(list,double);
-fprintf(stderr,"n=%f,flags=%" PRIx32 "\n",n,flags);
-fflush(stderr);
+debug_output("n=%f,flags=%" PRIx32 "\n",n,flags);
 				if((flags&F_PLUS) && n>=0.) append('+');
 				append(n,(int)(w2default? ((flags&F_L)? 6 : w2default) : w2));
 				break;
@@ -303,8 +301,7 @@ fflush(stderr);
 			case 'S':
 			{
 				char *s = va_arg(list,char *);
-fprintf(stderr,"s=%s\n",s);
-fflush(stderr);
+debug_output("s=%s\n",s);
 				l = strlen(s);
 				if(w2 && l>w2) l = w2;
 				if(w1 && !(flags&F_MINUS) && l<w1) append(pad,w1-l);
@@ -329,9 +326,9 @@ aString &aString::appendUntil(const char **s,const char *end,const char *trim,bo
 	const char *s2 = *s;
 	int c,c2 = -1,t = trim && *trim? 0 : 1;
 	unsigned long l2 = 0;
-//fprintf(stderr,"aString::appendUntil: ");
+//debug_output("aString::appendUntil: ");
 	while((c=*s2++)!='\0') {
-//fputc(c,stderr);
+//debug_putc(c);
 		if(uesc) {
 			if(c=='/') {
 				c = *s2++;
@@ -376,7 +373,7 @@ aString &aString::appendUntil(const char **s,const char *end,const char *trim,bo
 	}
 	if(trim && *trim!='\0') while(len>l2 && strchr(trim,str[len-1])) len--;
 	str[len] = '\0';
-//fprintf(stderr,"[%s]\n",str);
+//debug_output("[%s]\n",str);
 	*s = s2;
 	return *this;
 }
@@ -396,9 +393,9 @@ aString &aString::appendUntil(FILE *fp,const char *end,const char *trim,bool ues
 	}
 	int c,c2 = -1,t = trim && *trim? 0 : 1;
 	unsigned long l2 = 0;
-//fprintf(stderr,"aString::appendUntil: ");
+//debug_output("aString::appendUntil: ");
 	while((c=fgetc(fp)) && c!=EOF) {
-//fputc(c,stderr);
+//debug_putc(c);
 		if(uesc) {
 			if(c=='/') {
 				c = fgetc(fp);
@@ -443,7 +440,7 @@ aString &aString::appendUntil(FILE *fp,const char *end,const char *trim,bool ues
 	}
 	if(trim && *trim!='\0') while(len>l2 && strchr(trim,str[len-1])) len--;
 	str[len] = '\0';
-//fprintf(stderr,"[%s]\n",str);
+//debug_output("[%s]\n",str);
 	return *this;
 }
 
@@ -720,8 +717,7 @@ void aString::resize(size_t n) {
 	if(!str) str = (char *)malloc(cap+1);
 	else str = (char *)realloc(str,cap+1);
 	str[cap] = '\0';
-//fprintf(stderr,"aString::resize(len=%d,n=%d,cap=%d)\n",len,n,cap);
-//fflush(stderr);
+//debug_output("aString::resize(len=%d,n=%d,cap=%d)\n",len,n,cap);
 }
 
 void aString::setCapacity(size_t n) {
@@ -730,8 +726,7 @@ void aString::setCapacity(size_t n) {
 	if(!str) str = (char *)malloc(cap+1);
 	else str = (char *)realloc(str,cap+1);
 	str[cap] = '\0';
-//fprintf(stderr,"aString::resize(len=%d,n=%d,cap=%d)\n",len,n,cap);
-//fflush(stderr);
+//debug_output("aString::resize(len=%d,n=%d,cap=%d)\n",len,n,cap);
 }
 
 int aString::toInt() {

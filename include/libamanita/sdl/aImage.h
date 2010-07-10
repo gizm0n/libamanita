@@ -32,9 +32,9 @@ protected:
 public:
 	static int created,deleted;
 
-	static aImage **readXIM(const char *fn,int &n);
-	static aImage **parseXIM(const char *lines[],int &n);
-	static void formatString(char *str,const char *format,int num);
+	static aImage **readXIM(const char *p,const char *fn,int &n);
+	static aImage **parseXIM(const char *p,const char *lines[],int &n);
+	static void formatString(char *str,const char *p,const char *format,int num);
 
 	static bool save(const char *fn,SDL_Surface *s);
 	bool save(const char *fn) { return save(fn,surface); }

@@ -45,19 +45,16 @@ aPath::~aPath() {
 #define soutput(s,d) //{fprintf(stderr,s,d);fflush(stderr);}
 
 aTrail *aPath::search(int x1,int y1,int x2,int y2,int l) {
-fprintf(stderr,"aPath::search(x1=%d,y1=%d,x2=%d,y2=%d)\n",x1,y1,x2,y2);
-fflush(stderr);
+debug_output("aPath::search(x1=%d,y1=%d,x2=%d,y2=%d)\n",x1,y1,x2,y2);
 	aTrail *t = 0;
 	int cost = 0;
 	if(cb_area_compare) while(cb_area_compare(x1,y1,x2,y2,map)!=0) {
-//fprintf(stderr,"aPath::search(x1=%d,y1=%d,x2=%d,y2=%d)\n",x1,y1,x2,y2);
-//fflush(stderr);
+//debug_output("aPath::search(x1=%d,y1=%d,x2=%d,y2=%d)\n",x1,y1,x2,y2);
 		cb_move(*this,x2,y2,x2,y2,getDir(x2,y2,x1,y1));
 	}
 	if(cb_terrain_type) cost = cb_terrain_type(x1,y1,map);
 
-//fprintf(stderr,"aPath::search(x1=%d,y1=%d,x2=%d,y2=%d)\n",x1,y1,x2,y2);
-//fflush(stderr);
+//debug_output("aPath::search(x1=%d,y1=%d,x2=%d,y2=%d)\n",x1,y1,x2,y2);
 	node *p1 = 0,*p2 = 0;
 	if(x1!=x2 || y1!=y2) {
 		cap = getHeuristic(x1,y1,x2,y2,0)*8+1;
@@ -65,15 +62,13 @@ fflush(stderr);
 		put(p1);
 		push(p1);
 	}
-//fprintf(stderr,"aPath::search(x1=%d,y1=%d,x2=%d,y2=%d)\n",x1,y1,x2,y2);
-//fflush(stderr);
+//debug_output("aPath::search(x1=%d,y1=%d,x2=%d,y2=%d)\n",x1,y1,x2,y2);
 
 	int i,x,y,c;
 	while(open) {
 		p1 = pop();
-//fprintf(stderr,"key=%04x\tx1=%d\ty1=%d\tx2=%d\ty2=%d\ts=%d\tg=%d\th=%d\tf=%d\tsz=%d ",p1->key,p1->x,p1->y,
+//debug_output("key=%04x\tx1=%d\ty1=%d\tx2=%d\ty2=%d\ts=%d\tg=%d\th=%d\tf=%d\tsz=%d ",p1->key,p1->x,p1->y,
 //	p1->parent? p1->parent->x : -1,p1->parent? p1->parent->y : -1,p1->s,p1->g,p1->h,p1->f,size());
-//fflush(stderr);
 		if(!l || p1->s<l) for(i=0; i<=3; i++) {
 			cb_move(*this,p1->x,p1->y,x,y,i);
 			c = cb_move_cost(x,y,cost,map,obj);														soutput("(%d",x)soutput(",%d)",y)
@@ -106,32 +101,27 @@ fflush(stderr);
 
 	if(p1 && p1->g) {
 		t = new aTrail();
-//fprintf(stderr,"aPath::search(p.x=%d,p.y=%d,p.g=%d)\n",p1->x,p1->y,p1->g);
-//fflush(stderr);
+//debug_output("aPath::search(p.x=%d,p.y=%d,p.g=%d)\n",p1->x,p1->y,p1->g);
 		for(t->len=1,p1->open=0; p1->parent && p1->parent!=p1; t->len++,p1=p1->parent)
 			p1->parent->open = p1;
-//fprintf(stderr,"aPath::search(trail.lenght=%d)\n",t->len);
-//fflush(stderr);
+//debug_output("aPath::search(trail.lenght=%d)\n",t->len);
 		if(t->len>1) {
 			t->trail = (aTrail::trailstep *)malloc(sizeof(aTrail::trailstep)*t->len);
 			for(i=0,c='a'; p1; i++,p1=p2) {
 				p2 = p1->open;
-//fprintf(stderr,"key=%04x\tx1=%d\ty1=%d\tx2=%d\ty2=%d\tdir=%d\n",
+//debug_output("key=%04x\tx1=%d\ty1=%d\tx2=%d\ty2=%d\tdir=%d\n",
 //p1->key,p1->x,p1->y,p2? p2->x : -1,p2? p2->y : -1,p2? getDir(p1->x,p1->y,p2->x,p2->y) : 5);
-//fflush(stderr);
 				t->trail[i] = (aTrail::trailstep){ p1->x,p1->y,p2? getDir(p1->x,p1->y,p2->x,p2->y) : 5 };
 //				mem[p1->y][p1->x] = (char)c++;
 //				if(c=='z'+1) c = 'A';
 //				else if(c=='Z'+1) c = 'a';
 			}
-//fprintf(stderr,"aPath::search()\n");
-//fflush(stderr);
+//debug_output("aPath::search()\n");
 		}
 	}
 //for(int y=0; y<height; y++) {
 //for(int x=0; x<width; x++) putc(mem[y][x],stderr);
 //fputc('\n',stderr);
-//fflush(stderr);
 //}
 	clear();
 	return t;
@@ -270,8 +260,7 @@ int aPath::getDir(int x1,int y1,int x2,int y2) {
 void aPath::moveIso(aPath &p,int x1,int y1,int &x2,int &y2,int dir) {
 	static const int xcoords[4] = {  0, 0,-1,-1 };
 	static const int ycoords[4] = { -1, 1, 1,-1 };
-//fprintf(stderr,"aPath::moveIso(x=%d,y=%d,dir=%d)\n",x1,y1,dir);
-//fflush(stderr);
+//debug_output("aPath::moveIso(x=%d,y=%d,dir=%d)\n",x1,y1,dir);
 	x1 += xcoords[dir]+(y1&1),y1 += ycoords[dir];
 	if(p.style&PATH_HWRAP) { if(x1<0) x1 += p.width;else if(x1>=p.width) x1 -= p.width; }
 	else { if(x1<0) x1 = 0;else if(x1>=p.width) x1 = p.width-1; }

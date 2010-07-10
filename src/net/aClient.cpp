@@ -29,19 +29,16 @@ bool aClient::start(const char *con) {
 	char h[16],n[33];
 	uint32_t i,d;
 	uint16_t p;
-fprintf(stderr,"start()\n");
-fflush(stderr);
+debug_output("start()\n");
 	resolveConnection(con,i,p,d,n,32);
 	sprintf(h,"%d.%d.%d.%d",i>>24,(i>>16)&0xff,(i>>8)&0xff,i&0xff);
-fprintf(stderr,"start(\"%s\",%x,%d,%d,%s)\n",h,i,p,d,n);
-fflush(stderr);
+debug_output("start(\"%s\",%x,%d,%d,%s)\n",h,i,p,d,n);
 	return start(h,p,d,n);
 }
 
 
 bool aClient::start(const char *h,uint16_t p,uint32_t i,const char *n) {
-fprintf(stderr,"start(\"%s\",%d)\n",h,p);
-fflush(stderr);
+debug_output("start(\"%s\",%d)\n",h,p);
 
 	setStarting(true);
 	if(host) free(host);
@@ -51,7 +48,7 @@ fflush(stderr);
 #ifdef LIBAMANITA_SDL
 	if(!(set=SDLNet_AllocSocketSet(1)))
 		stateChanged(SM_ERR_ALLOC_SOCKETSET,0,(intptr_t)getError(),0);
-	else if(SDLNet_ResolveHost(&address,host,swap_be_16(p))==-1)
+	else if(SDLNet_ResolveHost(&address,host,p)==-1)
 		stateChanged(SM_ERR_RESOLVE_HOST,0,(intptr_t)getError(),0);
 	else {
 		stateChanged(SM_RESOLVE_HOST,0,0,0);
@@ -80,8 +77,7 @@ fflush(stderr);
 #endif /* LIBAMANITA_SDL */
 
 #ifdef SOCKET_HEADER_INCLUDED
-fprintf(stderr,"start(SOCKET_HEADER_INCLUDED)\n");
-fflush(stderr);
+debug_output("start(SOCKET_HEADER_INCLUDED)\n");
 			uint8_t d[strlen(n)+SOCKET_HEADER+5];
 			*SOCKET_HEADER_LEN_TYPE(d+SOCKET_OFFSET) = SOCKET_HEADER_LEN_SWAP(sizeof(d));
 			*(uint32_t *)((void *)&d[SOCKET_HEADER]) = swap_be_32(i);
@@ -128,8 +124,7 @@ void aClient::run() {
 	while(isRunning()) {
 #ifdef LIBAMANITA_SDL
 		n = SDLNet_CheckSockets(set,(uint32_t)-1);
-fprintf(stderr,"aClient::run(n=%d)\n",n);
-fflush(stderr);
+debug_output("aClient::run(n=%d)\n",n);
 		if(n==-1) {
 			stateChanged(SM_ERR_CHECK_SOCKETS,0,(intptr_t)getError(),0);
 			break;
@@ -148,18 +143,15 @@ fflush(stderr);
 			if(!FD_ISSET(s,&test)) continue;
 #endif /* LIBAMANITA_SDL */
 
-fprintf(stderr,"aClient::run(receive)\n");
-fflush(stderr);
+debug_output("aClient::run(receive)\n");
 			d = receive(sock,l);
-fprintf(stderr,"aClient::run(l=%zu)\n",l);
-fflush(stderr);
+debug_output("aClient::run(l=%zu)\n",l);
 			if(l>0) {
 				if(isStarting()) {
 					uint8_t *p = d+SOCKET_HEADER;
 					unpack_uint32(&p,id);
 					setNick((char *)p);
-fprintf(stderr,"start(received id=%d,nick=%s)\n",getID(),getNick());
-fflush(stderr);
+debug_output("start(received id=%d,nick=%s)\n",getID(),getNick());
 					setStarting(false);
 				} else {
 #ifndef SOCKET_NOCIPHER

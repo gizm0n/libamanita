@@ -105,7 +105,7 @@ void aSocket::resolveConnection(const char *con,uint32_t &ip,uint16_t &port,uint
 	ip = i;
 	port = p;
 	id = d;
-printf("aSocket::resolveConnection(ip=%x,port=%d,id=%d)\n",ip,port,id);
+debug_output("aSocket::resolveConnection(ip=%x,port=%d,id=%d)\n",ip,port,id);
 }
 
 void aSocket::setMessageBuffer(size_t l) {
@@ -123,14 +123,12 @@ uint8_t *aSocket::receive(tcp_socket_t s,size_t &l) {
 		if(r>0) i += r;
 	} while(r>0 && i<SOCKET_HEADER);
 
-fprintf(stderr,"aSocket::receive(0,r=%d,cmd=%d,len=%d)\n",
+debug_output("aSocket::receive(0,r=%d,cmd=%d,len=%d)\n",
 		r,(int)*b,SOCKET_HEADER_LEN_SWAP(*SOCKET_HEADER_LEN_TYPE(b+SOCKET_OFFSET)));
-fflush(stderr);
 
 	if(i==SOCKET_HEADER &&
 			(i=SOCKET_HEADER_LEN_SWAP(*SOCKET_HEADER_LEN_TYPE(b+SOCKET_OFFSET)))>0) {
-fprintf(stderr,"aSocket::receive(1,r=%d,i=%zu)\n",r,i);
-fflush(stderr);
+debug_output("aSocket::receive(1,r=%d,i=%zu)\n",r,i);
 #ifdef SOCKET_HEADER_INCLUDED
 		l = SOCKET_HEADER;
 		if(i>len) {
@@ -144,19 +142,18 @@ fflush(stderr);
 		while(r>0 && l<i) {
 			r = tcp_recv(s,b+l,i-l);
 			l += r;
-fprintf(stderr,"aSocket::receive(3,r=%d,l=%zu)\n",r,l);
-fflush(stderr);
+debug_output("aSocket::receive(3,r=%d,l=%zu)\n",r,l);
 		}
 		if(l==i) {
-fprintf(stderr,"aSocket::receive(");
+debug_output("aSocket::receive(");
+#ifdef LIBAMANITA_DEBUG
 print_packet(b,l);
-fprintf(stderr,")\n");
-fflush(stderr);
+#endif
+debug_output(")\n");
 			return b;
 		}
 		if(r==-1) {
-fprintf(stderr,"aSocket::receive(error=%s)\n",getError());
-fflush(stderr);
+debug_output("aSocket::receive(error=%s)\n",getError());
 		}
 		if(b!=buf) free(b);
 	}
@@ -186,8 +183,7 @@ void aSocket::XORcipher(uint8_t *d,const uint8_t *s,size_t l,const uint32_t *k,s
 
 size_t aSocket::send(tcp_socket_t s,uint8_t *d,size_t l) {
 	if(d && l>0) {
-fprintf(stderr,"aSocket::send(0,s=%p,l=%zu)\n",(void *)s,l);
-fflush(stderr);
+debug_output("aSocket::send(0,s=%p,l=%zu)\n",(void *)s,l);
 #ifdef SOCKET_HEADER_INCLUDED
 		int n;
 		*SOCKET_HEADER_LEN_TYPE(d+SOCKET_OFFSET) = SOCKET_HEADER_LEN_SWAP(l);
@@ -196,8 +192,7 @@ fflush(stderr);
 		tcp_socket_header_len_t n = SOCKET_HEADER_LEN_SWAP(l);
 		if(tcp_send(s,&n,sizeof(n))==sizeof(n) && (n=tcp_send(s,d,l))==(int)l) return n;
 #endif /*SOCKET_HEADER_INCLUDED*/
-fprintf(stderr,"aSocket::send(1,l=%zu)\n",l);
-fflush(stderr);
+debug_output("aSocket::send(1,l=%zu)\n",l);
 	}
 //	stateChanged(SM_ERR_PUT_MESSAGE,(uint32_t)buf,(uint32_t)l,0);
 	return 0;

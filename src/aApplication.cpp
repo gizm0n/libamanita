@@ -16,6 +16,7 @@
 
 #include <libamanita/aApplication.h>
 #include <libamanita/aFile.h>
+#include <libamanita/aVector.h>
 #include <libamanita/net/aHttp.h>
 
 
@@ -42,8 +43,7 @@ aApplication::aApplication(const char *prj,const char *nm) : app_lang_data(),app
 
 	getExecutable(str,256);
 	setProperty(property_key[APP_EXE],str);
-fprintf(stderr,"app_exe=%s\n",getExecutable());
-fflush(stderr);
+debug_output("app_exe=%s\n",getExecutable());
 
 	getHomeDir(str,256);
 #if defined __linux__
@@ -53,8 +53,7 @@ fflush(stderr);
 #endif
 	setProperty(property_key[APP_DIR_HOME],home);
 	if(!aFile::exists(home)) aFile::mkdir(home);
-fprintf(stderr,"app_dir_home=%s\n",getHomeDir());
-fflush(stderr);
+debug_output("app_dir_home=%s\n",getHomeDir());
 
 #if defined __linux__
 	n = 0;
@@ -77,44 +76,40 @@ fflush(stderr);
 #endif
 	setProperty(property_key[APP_DIR_DATA],data);
 	if(n==3 && !aFile::exists(data)) aFile::mkdir(data);
-fprintf(stderr,"app_dir_data=%s\n",getDataDir());
-fflush(stderr);
+debug_output("app_dir_data=%s\n",getDataDir());
 
 	char fonts[257];
 	getFontsDir(str,256);
 	sprintf(fonts,"%s" FILE_DIRSEP,str);
 	setProperty(property_key[APP_DIR_FONTS],fonts);
 	if(!aFile::exists(fonts)) aFile::mkdir(fonts);
-fprintf(stderr,"app_dir_fonts=%s\n",getFontsDir());
-fflush(stderr);
+debug_output("app_dir_fonts=%s\n",getFontsDir());
 
 	sprintf(str,"%slang" FILE_DIRSEP,data);
 	setProperty(property_key[APP_DIR_LANG],str);
 	if(n==3 && !aFile::exists(str)) aFile::mkdir(str);
-fprintf(stderr,"app_dir_lang=%s\n",getLanguageDir());
-fflush(stderr);
+debug_output("app_dir_lang=%s\n",getLanguageDir());
 
 	sprintf(str,"%s%s.log",home,app_name);
-	app_last_access = aFile::accessed(str);
-fprintf(stderr,"logfile=%s\nlast_access=%" PRIu64 "\n\n",str,(uint64_t)app_last_access);
-fflush(stderr);
+	app_last_access = aFile::modified(str);
+debug_output("logfile=%s\nlast_access=%" PRIu64 "\n\n",str,(uint64_t)app_last_access);
 	app_out = fopen(str,"w");
 	fp = freopen(str,"a",app_out);
 	fp = freopen(str,"a",stdout);
 	fp = freopen(str,"a",stderr);
-printf("aApplication::aApplication()");
+debug_output("aApplication::aApplication()");
 
 }
 
 
 aApplication::~aApplication() {
-printf("aApplication::~aApplication()");
+debug_output("aApplication::~aApplication()");
 	if(app_user_agent && app_user_agent!=app_project) free(app_user_agent);
 	app_user_agent = 0;
 	if(app_name && app_name!=app_project) free(app_name);
 	app_name = 0;
 	if(app_project) { free(app_project);app_project = 0; }
-printf("Completely finalized, could not have gone better! You the Man!");
+debug_output("Completely finalized, could not have gone better! You the Man!");
 	fclose(app_out);
 }
 
@@ -124,15 +119,13 @@ void aApplication::init() {
 }
 
 void aApplication::exit() {
-	int i;
-	for(i=0; i<APP_TEMP_PROPERTIES; i++)
-		if(property_key[i]) app_properties.remove(property_key[i]);
 	saveProperties();
 }
 
 
-int aApplication::install(const char *host,const char *path,const char **files) {
-	int i,n,f,pl = path? strlen(path) : 0;
+int aApplication::install(const char *host,const char *path,aVector &files,install_function func,void *obj) {
+debug_output("aApplication::install(host=\"%s\",path=\"%s\")\n",host,path);
+	int i,n,f,pl = path? strlen(path) : 0,st = 0;
 	const char *home = getHomeDir();
 	const char *fonts = getFontsDir();
 	const char *file,*p,*e,*dest;
@@ -140,43 +133,45 @@ int aApplication::install(const char *host,const char *path,const char **files) 
 	aHttp http(*this);
 	FILE *fp;
 	size_t sz;
-	for(i=0,n=0,f=0; files[i]; i++) {
-		p = files[i];
-		if(pl && strncmp(p,path,pl)==0) p += pl;
-		else if(*p=='/') p++;
+	for(i=0,n=0,f=0; i<(int)files.size(); i++) {
+		p = (const char *)files[i];
+debug_output("file=%s\n",p);
+		if(pl && strncmp(path,p,pl)==0) p += pl;
+		if(*p=='/') p++;
 		e = &p[strlen(p)-1];
-		if(strncmp(e-3,".ttf",4)==0) dest = fonts,f++;
-		else dest = home;
+		if(e-3>=p && strncmp(e-3,".ttf",4)==0) {
+			dest = fonts,f++,st |= 1;
+			if(strchr(p,'/')) p = strrchr(p,'/');
+			else if(strchr(p,'\\')) p = strrchr(p,'\\');
+		} else dest = home;
 		sprintf(str,"%s%s",dest,p);
-fprintf(stderr,"str=%s\n",str);
-fflush(stderr);
+debug_output("str=%s\n",str);
 		if(*e=='/') {
 			if(!aFile::exists(str)) aFile::mkdir(str);
 			continue;
 		}
-fprintf(stderr,"http.get(%s,%s)\n",host,files[i]);
-fflush(stderr);
-		file = http.get(host,files[i]);
-fprintf(stderr,"http.get()\n");
-fflush(stderr);
+debug_output("http.get(%s,%s)\n",host,(const char *)files[i]);
+		file = http.get(host,(const char *)files[i]);
+debug_output("http.get()\n");
 		sz = http.getFileSize();
-fprintf(stderr,"sz=%zu\n",sz);
-fflush(stderr);
+debug_output("sz=%zu\n",sz);
 		fp = fopen(str,"wb");
 		if(sz) sz = fwrite(file,sz,1,fp);
 		fclose(fp);
+		if(func) func(obj,(const char *)files[i],i,files.size()-1,st);
 		n++;
 	}
-#if defined __linux__
-	if(f>0) {
-		gchar *so,*se;
-		g_spawn_command_line_sync(p="fc-cache -f -v",&so,&se,NULL,NULL);
-fprintf(stderr,"spawn: %s\nstdout:\n%sstderr:\n\n%s",p,so,se);
-fflush(stderr);
-	}
-#endif
 	return n;
 }
+
+#if defined __linux__
+void aApplication::updateFontCache() {
+	const char *p;
+	gchar *so,*se;
+	g_spawn_command_line_sync(p="fc-cache -f -v",&so,&se,NULL,NULL);
+debug_output("spawn: %s\nstdout:\n%sstderr:\n\n%s",p,so,se);
+}
+#endif
 
 void aApplication::setUserAgent(const char *a) {
 	if(app_user_agent && app_user_agent!=app_project) free(app_user_agent);
@@ -184,16 +179,16 @@ void aApplication::setUserAgent(const char *a) {
 }
 
 static const char *properties_file = "%s%s.cfg";
-static const char *language_file = "%slang.txt";
+static const char *language_file = "%s%s.txt";
 
 void aApplication::loadProperties() {
 	const char *home = getHomeDir();
 	if(home) {
 		char fn[257];
-		sprintf(fn,properties_file,home,app_name);
+		sprintf(fn,properties_file,home,app_project);
 		if(!aFile::exists(fn)) {
 			const char *data = getDataDir();
-			sprintf(fn,properties_file,data,app_name);
+			sprintf(fn,properties_file,data,app_project);
 		}
 		app_properties.load(fn);
 	}
@@ -205,23 +200,36 @@ void aApplication::loadProperties() {
 void aApplication::saveProperties() {
 	const char *home = getHomeDir();
 	if(!home) return;
+	int i;
 	char fn[257];
-	sprintf(fn,properties_file,home,app_name);
+	sprintf(fn,properties_file,home,app_project);
+	for(i=0; i<APP_TEMP_PROPERTIES; i++)
+		if(property_key[i]) app_properties.remove(property_key[i]);
 	app_properties.save(fn);
+}
+
+void aApplication::setPropertyf(const char *key,const char *value, ...) {
+	if(!key || !*key || !value || !*value) return;
+	char v[1025];
+	va_list args;
+   va_start(args,value);
+	vsnprintf(v,1024,value,args);
+   va_end(args);
+	app_properties.put(key,v);
 }
 
 void aApplication::setLanguage(const char *l) {
 	char dir[257],fn[257];
 	const char *data = getDataDir();
 	const char *lang = getProperty(property_key[APP_LANG]);
-	strncpy(app_lang,l,3);
+	if(l) strncpy(app_lang,l,3);
 	if(!lang || strcmp(lang,app_lang)) setProperty(property_key[APP_LANG],app_lang);
 	sprintf(dir,"%slang/%s/",data,app_lang);
 	setProperty(property_key[APP_DIR_LANG],dir);
-	sprintf(fn,language_file,dir);
+	sprintf(fn,language_file,dir,app_project);
 	app_lang_data.removeAll();
 	app_lang_data.load(fn);
-printf("aApplication::loadLanguage(%s)",fn);
+debug_output("aApplication::loadLanguage(%s)",fn);
 }
 
 const char *aApplication::getf(const char *format, ...) {
