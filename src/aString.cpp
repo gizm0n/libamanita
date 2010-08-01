@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <inttypes.h>
-#include <libamanita/aString.h>
+#include <amanita/aString.h>
 
 
 aObject_Inheritance(aString,aObject);

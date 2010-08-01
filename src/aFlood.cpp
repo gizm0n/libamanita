@@ -2,7 +2,7 @@
 #include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <libamanita/aFlood.h>
+#include <amanita/aFlood.h>
 
 
 aFlood::aFlood(int wr) : size(0),stack(0),wrap(wr) {}

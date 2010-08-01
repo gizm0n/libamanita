@@ -2,8 +2,8 @@
 #include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <libamanita/sdl/aImage.h>
-#include <libamanita/sdl/aIconButton.h>
+#include <amanita/sdl/aImage.h>
+#include <amanita/sdl/aIconButton.h>
 
 
 aObject_Inheritance(aIconButton,aComponent);

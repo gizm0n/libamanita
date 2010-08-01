@@ -10,7 +10,7 @@
 #include <windows.h>
 #endif
 
-#include <libamanita/aFile.h>
+#include <amanita/aFile.h>
 
 
 

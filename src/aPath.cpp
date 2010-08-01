@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <libamanita/aPath.h>
+#include <amanita/aPath.h>
 
 
 

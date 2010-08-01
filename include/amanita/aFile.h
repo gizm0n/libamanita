@@ -1,5 +1,12 @@
-#ifndef _LIBAMANITA_FILE_H
-#define _LIBAMANITA_FILE_H
+#ifndef _AMANITA_FILE_H
+#define _AMANITA_FILE_H
+
+/**
+ * @file amanita/aFile.h  
+ * @author Per Löwgren
+ * @date Modified: 2010-08-01
+ * @date Created: 2010-01-09
+ */ 
 
 #include <stdio.h>
 #include <time.h>
@@ -14,7 +21,10 @@
 #endif
 
 
-/** aFile is a class with static methods for handling files and directories.
+/** A filehandling class.
+ * 
+ * Contains methods for handling the filesystem.
+ * @ingroup amanita
  */
 class aFile {
 private:
@@ -46,5 +56,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_FILE_H */
+#endif /* _AMANITA_FILE_H */
 

@@ -2,10 +2,10 @@
 #include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <libamanita/sdl/aImage.h>
-#include <libamanita/sdl/aFont.h>
-#include <libamanita/sdl/aText.h>
-#include <libamanita/sdl/aButton.h>
+#include <amanita/sdl/aImage.h>
+#include <amanita/sdl/aFont.h>
+#include <amanita/sdl/aText.h>
+#include <amanita/sdl/aButton.h>
 
 
 aObject_Inheritance(aButton,aComponent);

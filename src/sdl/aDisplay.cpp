@@ -1,8 +1,8 @@
 
 #include "../config.h"
 #include <stdio.h>
-#include <libamanita/sdl/aGraphics.h>
-#include <libamanita/sdl/aDisplay.h>
+#include <amanita/sdl/aGraphics.h>
+#include <amanita/sdl/aDisplay.h>
 
 
 aObject_Inheritance(aDisplay,aComponent);

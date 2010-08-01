@@ -1,9 +1,9 @@
 
 #include "../config.h"
-#include <libamanita/sdl/aTextfield.h>
-#include <libamanita/sdl/aTextbox.h>
-#include <libamanita/sdl/aButton.h>
-#include <libamanita/sdl/aDisplay.h>
+#include <amanita/sdl/aTextfield.h>
+#include <amanita/sdl/aTextbox.h>
+#include <amanita/sdl/aButton.h>
+#include <amanita/sdl/aDisplay.h>
 
 
 

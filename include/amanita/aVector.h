@@ -1,17 +1,17 @@
-#ifndef _LIBAMANITA_VECTOR_H
-#define _LIBAMANITA_VECTOR_H
+#ifndef _AMANITA_VECTOR_H
+#define _AMANITA_VECTOR_H
 
 /**
- * @file libamanita/aVector.h  
+ * @file amanita/aVector.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2004-03-22
  */ 
 
 #include <stdint.h>
-#include <libamanita/aCollection.h>
-#include <libamanita/aObject.h>
-#include <libamanita/aString.h>
+#include <amanita/aCollection.h>
+#include <amanita/aObject.h>
+#include <amanita/aString.h>
 
 /** @cond */
 class aHashtable;
@@ -32,6 +32,7 @@ class aHashtable;
  * All these overloaded methods are actually inline methods, most of them, so no need for panic,
  * the compiled file is not very large, and there is very little overhead to handle all these
  * different types in reality.
+ * @ingroup amanita
  */
 class aVector : public aCollection {
 friend class aHashtable;
@@ -288,7 +289,7 @@ public:
 	/** @} */
 };
 
-#endif /* _LIBAMANITA_VECTOR_H */
+#endif /* _AMANITA_VECTOR_H */
 
 
 

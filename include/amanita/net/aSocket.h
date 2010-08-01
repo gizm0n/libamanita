@@ -1,17 +1,17 @@
-#ifndef _LIBAMANITA_NET_SOCKET_H
-#define _LIBAMANITA_NET_SOCKET_H
+#ifndef _AMANITA_NET_SOCKET_H
+#define _AMANITA_NET_SOCKET_H
 
 /**
- * @file libamanita/net/aSocket.h  
+ * @file amanita/net/aSocket.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <libamanita/aThread.h>
+#include <amanita/aThread.h>
 
 /** Set LIBAMANITA_SOCKET_HEADER to the sizeof the header in number of bytes.
  * Is can be 2 to 8 bytes and defines the size of the length parameter in the
@@ -295,6 +295,7 @@ typedef uint32_t (*socket_event_handler)(aSocket *s,uint32_t st,intptr_t p1,intp
  * considered abstract. Instead, use it's subclasses; aClient and aServer.
  * @see aClient
  * @see aServer
+ * @ingroup net
  */
 class aSocket {
 private:
@@ -368,5 +369,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_NET_SOCKET_H */
+#endif /* _AMANITA_NET_SOCKET_H */
 

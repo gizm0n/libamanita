@@ -1,10 +1,10 @@
-#ifndef _LIBAMANITA_FLOOD_H
-#define _LIBAMANITA_FLOOD_H
+#ifndef _AMANITA_FLOOD_H
+#define _AMANITA_FLOOD_H
 
 /**
- * @file libamanita/aFlood.h  
+ * @file amanita/aFlood.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
@@ -14,7 +14,7 @@
  * 
  * This class flood fills an area in a 2D vector. This can be useful, for example,
  * when generating maps for games.
- * @ingroup libamanita
+ * @ingroup amanita
  */
 class aFlood {
 private:
@@ -42,5 +42,5 @@ public:
 
 
 
-#endif /* _LIBAMANITA_FLOOD_H */
+#endif /* _AMANITA_FLOOD_H */
 

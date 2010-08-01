@@ -1,20 +1,23 @@
-#ifndef _LIBAMANITA_SDL_IMAGE_H
-#define _LIBAMANITA_SDL_IMAGE_H
+#ifndef _AMANITA_SDL_IMAGE_H
+#define _AMANITA_SDL_IMAGE_H
 
 /**
- * @file libamanita/sdl/aImage.h  
+ * @file amanita/sdl/aImage.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
 #include <string.h>
 #include <stdio.h>
 #include <SDL/SDL.h>
-#include <libamanita/aObject.h>
+#include <amanita/aObject.h>
 
 
 
+/** A generic image class, for loading and handling images.
+ * @ingroup sdl
+ */
 class aImage : public aObject {
 friend class aGraphics;
 
@@ -77,5 +80,5 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_IMAGE_H */
+#endif /* _AMANITA_SDL_IMAGE_H */
 

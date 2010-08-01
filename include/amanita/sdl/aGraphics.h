@@ -1,10 +1,10 @@
-#ifndef _LIBAMANITA_SDL_GRAPHICS_H
-#define _LIBAMANITA_SDL_GRAPHICS_H
+#ifndef _AMANITA_SDL_GRAPHICS_H
+#define _AMANITA_SDL_GRAPHICS_H
 
 /**
- * @file libamanita/sdl/aGraphics.h  
+ * @file amanita/sdl/aGraphics.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
@@ -12,10 +12,13 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <SDL/SDL.h>
-#include <libamanita/sdl/aImage.h>
+#include <amanita/sdl/aImage.h>
 
 class aFont;
 
+/** This class loads and handles graphics, like java.awt.Graphics in the java language.
+ * @ingroup sdl
+ */
 class aGraphics {
 private:
 	SDL_Rect cl;
@@ -95,4 +98,4 @@ public:
 extern aGraphics g;
 
 
-#endif /* _LIBAMANITA_SDL_GRAPHICS_H */
+#endif /* _AMANITA_SDL_GRAPHICS_H */

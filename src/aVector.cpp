@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#include <libamanita/aVector.h>
+#include <amanita/aVector.h>
 
 
 value_t aVector::iterator::first(type_t type) {

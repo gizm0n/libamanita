@@ -37,10 +37,10 @@
 
 #endif /* LIBAMANITA_SDL */
 
-#include <libamanita/aApplication.h>
-#include <libamanita/aString.h>
-#include <libamanita/aRandom.h>
-#include <libamanita/net/aHttp.h>
+#include <amanita/aApplication.h>
+#include <amanita/aString.h>
+#include <amanita/aRandom.h>
+#include <amanita/net/aHttp.h>
 
 
 const char *http_methods[] = {

@@ -1,20 +1,20 @@
-#ifndef _LIBAMANITA_DICTIONARY_H
-#define _LIBAMANITA_DICTIONARY_H
+#ifndef _AMANITA_DICTIONARY_H
+#define _AMANITA_DICTIONARY_H
 
 /**
- * @file libamanita/aDictionary.h  
+ * @file amanita/aDictionary.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
-#include <libamanita/aCollection.h>
+#include <amanita/aCollection.h>
 
 
 /** A quick lookup class.
  * 
- * The aDictionary class generated an indexed list of words with attached numerical values.
- * @ingroup libamanita
+ * The aDictionary class generates an indexed list of words with attached numerical values.
+ * @ingroup amanita
  */
 class aDictionary : public aCollection {
 aObject_Instance(aDictionary)
@@ -53,5 +53,5 @@ public:
 	const char *getKey(value_t v);
 };
 
-#endif /* _LIBAMANITA_DICTIONARY_H */
+#endif /* _AMANITA_DICTIONARY_H */
 

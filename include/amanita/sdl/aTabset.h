@@ -1,14 +1,14 @@
-#ifndef _LIBAMANITA_SDL_TABSET_H
-#define _LIBAMANITA_SDL_TABSET_H
+#ifndef _AMANITA_SDL_TABSET_H
+#define _AMANITA_SDL_TABSET_H
 
 /**
- * @file libamanita/sdl/aTabset.h  
+ * @file amanita/sdl/aTabset.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
-#include <libamanita/sdl/aComponent.h>
+#include <amanita/sdl/aComponent.h>
 
 
 enum {
@@ -19,6 +19,9 @@ enum {
 class aImage;
 class aFont;
 
+/** A class for handling tabs, only horizontal.
+ * @ingroup sdl
+ */
 class aTabset : public aComponent,public aMouseListener {
 aObject_Instance(aTabset)
 
@@ -95,4 +98,4 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_TABSET_H */
+#endif /* _AMANITA_SDL_TABSET_H */

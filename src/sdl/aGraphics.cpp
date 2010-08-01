@@ -1,8 +1,8 @@
 
 #include "../config.h"
-#include <libamanita/aMath.h>
-#include <libamanita/sdl/aGraphics.h>
-#include <libamanita/sdl/aFont.h>
+#include <amanita/aMath.h>
+#include <amanita/sdl/aGraphics.h>
+#include <amanita/sdl/aFont.h>
 
 
 aGraphics g;

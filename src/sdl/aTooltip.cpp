@@ -2,10 +2,10 @@
 #include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <libamanita/sdl/aGraphics.h>
-#include <libamanita/sdl/aFont.h>
-#include <libamanita/sdl/aImage.h>
-#include <libamanita/sdl/aTooltip.h>
+#include <amanita/sdl/aGraphics.h>
+#include <amanita/sdl/aFont.h>
+#include <amanita/sdl/aImage.h>
+#include <amanita/sdl/aTooltip.h>
 
 
 extern char indent[32];

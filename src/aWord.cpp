@@ -2,8 +2,8 @@
 #include "config.h"
 #include <stdlib.h>
 #include <string.h>
-#include <libamanita/aWord.h>
-#include <libamanita/aRandom.h>
+#include <amanita/aWord.h>
+#include <amanita/aRandom.h>
 
 
 const char *aWord::vowels = "aaaaaeeeeeiiiiooouuuyy";

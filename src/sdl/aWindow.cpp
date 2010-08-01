@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
-#include <libamanita/sdl/aFont.h>
-#include <libamanita/sdl/aWindow.h>
-#include <libamanita/sdl/aButton.h>
-#include <libamanita/sdl/aIconButton.h>
-#include <libamanita/sdl/aTooltip.h>
+#include <amanita/sdl/aFont.h>
+#include <amanita/sdl/aWindow.h>
+#include <amanita/sdl/aButton.h>
+#include <amanita/sdl/aIconButton.h>
+#include <amanita/sdl/aTooltip.h>
 
 
 aObject_Inheritance(aWindow,aComponent);

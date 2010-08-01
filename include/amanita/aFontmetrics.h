@@ -1,10 +1,10 @@
-#ifndef _LIBAMANITA_FONTMETRICS_H
-#define _LIBAMANITA_FONTMETRICS_H
+#ifndef _AMANITA_FONTMETRICS_H
+#define _AMANITA_FONTMETRICS_H
 
 /**
- * @file libamanita/aFontmetrics.h  
+ * @file amanita/aFontmetrics.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-03
+ * @date Modified: 2010-08-01
  * @date Created: 2009-12-03
  */ 
 
@@ -30,5 +30,5 @@ struct aFontmetrics {
 };
 
 
-#endif /* _LIBAMANITA_FONTMETRICS_H */
+#endif /* _AMANITA_FONTMETRICS_H */
 

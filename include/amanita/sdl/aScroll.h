@@ -1,28 +1,31 @@
-#ifndef _LIBAMANITA_SDL_SCROLL_H
-#define _LIBAMANITA_SDL_SCROLL_H
+#ifndef _AMANITA_SDL_SCROLL_H
+#define _AMANITA_SDL_SCROLL_H
 
 /**
- * @file libamanita/sdl/aScroll.h  
+ * @file amanita/sdl/aScroll.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
-#include <libamanita/sdl/aComponent.h>
+#include <amanita/sdl/aComponent.h>
 
 
 enum {
-	SCROLL_VERT			= 0,		// aScroll vertically, default
-	SCROLL_HORIZ		= 1,		// aScroll horizontally
-	SCROLL_LEFT			= 2,		// Place vertical scrollbar on left
-	SCROLL_TOP			= 4,		// Place vertical scrollbar on top
-	SCROLL_RIGHT		= 0,		// Place vertical scrollbar on right, default
-	SCROLL_BOTTOM		= 0,		// Place vertical scrollbar on bottom, default
+	SCROLL_VERT			= 0,		//!< Scroll vertically, default
+	SCROLL_HORIZ		= 1,		//!< Scroll horizontally
+	SCROLL_LEFT			= 2,		//!< Place vertical scrollbar on left
+	SCROLL_TOP			= 4,		//!< Place vertical scrollbar on top
+	SCROLL_RIGHT		= 0,		//!< Place vertical scrollbar on right, default
+	SCROLL_BOTTOM		= 0,		//!< Place vertical scrollbar on bottom, default
 };
 
 class aImage;
 class aIconButton;
 
+/** A class for handling scrolling of content.
+ * @ingroup sdl
+ */
 class aScroll : public aComponent,public aMouseMotionListener,public aActionListener {
 aObject_Instance(aScroll)
 
@@ -86,4 +89,4 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_SCROLL_H */
+#endif /* _AMANITA_SDL_SCROLL_H */

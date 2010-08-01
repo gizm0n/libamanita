@@ -1,10 +1,10 @@
-#ifndef _LIBAMANITA_THREAD_H
-#define _LIBAMANITA_THREAD_H
+#ifndef _AMANITA_THREAD_H
+#define _AMANITA_THREAD_H
 
 /**
- * @file libamanita/aThread.h
+ * @file amanita/aThread.h
  * @author Per Löwgren
- * @date Modified: 2009-12-09
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
@@ -23,6 +23,9 @@
 typedef void (*thread_function)(void *);
 
 
+/** A generic thread class.
+ * @ingroup amanita
+ */
 class aThread {
 private:
 #ifdef LIBAMANITA_SDL
@@ -68,4 +71,4 @@ public:
 	}
 };
 
-#endif /* _LIBAMANITA_THREAD_H */
+#endif /* _AMANITA_THREAD_H */

@@ -1,10 +1,10 @@
-#ifndef _LIBAMANITA_RANDOM_H
-#define _LIBAMANITA_RANDOM_H
+#ifndef _AMANITA_RANDOM_H
+#define _AMANITA_RANDOM_H
 
 /**
- * @file libamanita/aRandom.h  
+ * @file amanita/aRandom.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
@@ -45,7 +45,7 @@ index = index +1;
  * but even a smaller amount of data places aRandom at a good spot.
  * 
  * How to use the class is extremely simple. There is a global instance of aRandom that may
- * be used anywhere where libamanita/aRandom.h is included. It is named "rnd". You may also
+ * be used anywhere where amanita/aRandom.h is included. It is named "rnd". You may also
  * instantiate aRandom as an object to keep track of the number sequence, and to make certain
  * it's not affected somewhere else in the program, because this could easily happen with the
  * global rnd.
@@ -80,6 +80,7 @@ f = fopen("random.dat","rb");
 r.read(f); // Reads r to be exactly the same as when saved.
 fclose(f);
  * @endcode
+ * @ingroup amanita
  */
 class aRandom {
 private:
@@ -301,10 +302,10 @@ public:
 };
 
 /** @var rnd The global instance of aRandom.
- * To use rnd, all you need to do is include libamanita/aRandom.h and link to libamanita.*/
+ * To use rnd, all you need to do is include amanita/aRandom.h and link to libamanita.*/
 extern aRandom rnd;
 
 
 
-#endif /* _LIBAMANITA_RANDOM_H */
+#endif /* _AMANITA_RANDOM_H */
 

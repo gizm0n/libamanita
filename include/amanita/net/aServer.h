@@ -1,17 +1,17 @@
-#ifndef _LIBAMANITA_NET_SERVER_H
-#define _LIBAMANITA_NET_SERVER_H
+#ifndef _AMANITA_NET_SERVER_H
+#define _AMANITA_NET_SERVER_H
 
 /**
- * @file libamanita/net/aServer.h  
+ * @file amanita/net/aServer.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
 #include <string.h>
-#include <libamanita/aHashtable.h>
-#include <libamanita/aVector.h>
-#include <libamanita/net/aSocket.h>
+#include <amanita/aHashtable.h>
+#include <amanita/aVector.h>
+#include <amanita/net/aSocket.h>
 
 
 
@@ -57,6 +57,7 @@ enum {
  * This class is used by aServer to handle connections to clients. It contains
  * all client data and which channels the client is in.
  * @see aServer
+ * @ingroup net
  */
 class aServerConnection {
 friend class aServer;
@@ -158,6 +159,7 @@ enum {
  * This server can handle a large number of clients and use it's own built in protocol.
  * @see aSocket
  * @see aClient
+ * @ingroup net
  */
 class aServer : public aSocket {
 private:
@@ -244,5 +246,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_NET_SERVER_H */
+#endif /* _AMANITA_NET_SERVER_H */
 

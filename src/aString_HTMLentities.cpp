@@ -1,6 +1,6 @@
 
 #include "config.h"
-#include <libamanita/aString.h>
+#include <amanita/aString.h>
 
 
 const aString::entity aString::HTMLentities[256] = {

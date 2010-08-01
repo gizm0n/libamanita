@@ -1,16 +1,16 @@
-#ifndef _LIBAMANITA_SDL_WINDOW_H
-#define _LIBAMANITA_SDL_WINDOW_H
+#ifndef _AMANITA_SDL_WINDOW_H
+#define _AMANITA_SDL_WINDOW_H
 
 /**
- * @file libamanita/sdl/aWindow.h  
+ * @file amanita/sdl/aWindow.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
-#include <libamanita/sdl/aGraphics.h>
-#include <libamanita/sdl/aImage.h>
-#include <libamanita/sdl/aComponent.h>
+#include <amanita/sdl/aGraphics.h>
+#include <amanita/sdl/aImage.h>
+#include <amanita/sdl/aComponent.h>
 
 class aFont;
 class aIconButton;
@@ -22,6 +22,9 @@ enum {
 	CLOSE_BUTTON		= 4,
 };
 
+/** Base widow class, and all windows and dialogs inherit this class.
+ * @ingroup sdl
+ */
 class aWindow : public aComponent,public aFocusListener,public aMouseListener,public aActionListener {
 aObject_Instance(aWindow)
 
@@ -100,4 +103,4 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_WINDOW_H */
+#endif /* _AMANITA_SDL_WINDOW_H */

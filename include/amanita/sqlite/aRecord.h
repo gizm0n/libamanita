@@ -1,10 +1,10 @@
-#ifndef _LIBAMANITA_SQLITE_RECORD_H
-#define _LIBAMANITA_SQLITE_RECORD_H
+#ifndef _AMANITA_SQLITE_RECORD_H
+#define _AMANITA_SQLITE_RECORD_H
 
 /**
- * @file libamanita/sqlite/aRecord.h  
+ * @file amanita/sqlite/aRecord.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
@@ -15,6 +15,9 @@
 class aResultset;
 
 
+/** Record.
+ * @ingroup sqlite
+ */
 class aRecord {
 private:
 	char **data;
@@ -34,4 +37,4 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SQLITE_RECORD_H */
+#endif /* _AMANITA_SQLITE_RECORD_H */

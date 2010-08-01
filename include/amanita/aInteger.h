@@ -1,10 +1,10 @@
-#ifndef _LIBAMANITA_INTEGER_H
-#define _LIBAMANITA_INTEGER_H
+#ifndef _AMANITA_INTEGER_H
+#define _AMANITA_INTEGER_H
 
 /**
- * @file libamanita/aInteger.h  
+ * @file amanita/aInteger.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-04
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
@@ -14,7 +14,7 @@
 
 
 /** A class for calculating big integers.
- * @ingroup libamanita
+ * @ingroup amanita
  */
 class aInteger {
 private:
@@ -228,5 +228,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_INTEGER_H */
+#endif /* _AMANITA_INTEGER_H */
 

@@ -7,7 +7,7 @@
 	#include <sys/time.h>
 #endif /* LIBAMANITA_SDL */
 
-#include <libamanita/aThread.h>
+#include <amanita/aThread.h>
 
 
 

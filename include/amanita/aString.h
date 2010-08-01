@@ -1,17 +1,17 @@
-#ifndef _LIBAMANITA_STRING_H
-#define _LIBAMANITA_STRING_H
+#ifndef _AMANITA_STRING_H
+#define _AMANITA_STRING_H
 
 /**
- * @file libamanita/aString.h  
+ * @file amanita/aString.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2003-11-30
  */ 
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
-#include <libamanita/aObject.h>
+#include <amanita/aObject.h>
 
 
 /** A generic string class.
@@ -23,7 +23,7 @@
  * any type of data, both binary data, text data, formatted data of any kind. The string is
  * not ended with a '\0' char, but instead contains an integer value with the length of the
  * string.
- * @ingroup libamanita
+ * @ingroup amanita
  */
 class aString : public aObject {
 /** @cond */
@@ -299,5 +299,5 @@ aString operator+(double d,aString &s);
 /** @} */
 
 
-#endif /* _LIBAMANITA_STRING_H */
+#endif /* _AMANITA_STRING_H */
 

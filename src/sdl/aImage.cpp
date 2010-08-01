@@ -4,8 +4,8 @@
 #include <string.h>
 #include <SDL/SDL_image.h>
 #include <png.h>
-#include <libamanita/sdl/aImage.h>
-#include <libamanita/sdl/aGraphics.h>
+#include <amanita/sdl/aImage.h>
+#include <amanita/sdl/aGraphics.h>
 
 
 aObject_Inheritance(aImage,aObject);

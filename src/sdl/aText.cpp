@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <libamanita/sdl/aGraphics.h>
-#include <libamanita/sdl/aText.h>
+#include <amanita/sdl/aGraphics.h>
+#include <amanita/sdl/aText.h>
 
 
 

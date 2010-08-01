@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <libamanita/aMath.h>
-#include <libamanita/aRandom.h>
+#include <amanita/aMath.h>
+#include <amanita/aRandom.h>
 
 const double aMath::PI = 3.1415926535897932384626433832795;
 

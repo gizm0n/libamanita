@@ -1,14 +1,14 @@
-#ifndef _LIBAMANITA_NET_CLIENT_H
-#define _LIBAMANITA_NET_CLIENT_H
+#ifndef _AMANITA_NET_CLIENT_H
+#define _AMANITA_NET_CLIENT_H
 
 /**
- * @file libamanita/net/aClient.h  
+ * @file amanita/net/aClient.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
-#include <libamanita/net/aSocket.h>
+#include <amanita/net/aSocket.h>
 
 
 
@@ -16,6 +16,7 @@
  *
  * This class connects to a server over the network and handles communication. It uses
  * a simple built in protocol for communication.
+ * @ingroup net
  */
 class aClient : public aSocket {
 private:
@@ -49,5 +50,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_NET_CLIENT_H */
+#endif /* _AMANITA_NET_CLIENT_H */
 

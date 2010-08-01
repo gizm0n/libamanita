@@ -1,8 +1,8 @@
 
 #include "../config.h"
-#include <libamanita/sdl/aImage.h>
-#include <libamanita/sdl/aFont.h>
-#include <libamanita/sdl/aTabset.h>
+#include <amanita/sdl/aImage.h>
+#include <amanita/sdl/aFont.h>
+#include <amanita/sdl/aTabset.h>
 
 
 aObject_Inheritance(aTabset,aComponent);

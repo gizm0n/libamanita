@@ -14,10 +14,10 @@
 #include <windows.h>
 #endif
 
-#include <libamanita/aApplication.h>
-#include <libamanita/aFile.h>
-#include <libamanita/aVector.h>
-#include <libamanita/net/aHttp.h>
+#include <amanita/aApplication.h>
+#include <amanita/aFile.h>
+#include <amanita/aVector.h>
+#include <amanita/net/aHttp.h>
 
 
 
