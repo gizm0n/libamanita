@@ -1,10 +1,10 @@
-#ifndef _LIBAMANITA_MATH_H
-#define _LIBAMANITA_MATH_H
+#ifndef _AMANITA_MATH_H
+#define _AMANITA_MATH_H
 
 /**
- * @file libamanita/aMath.h  
+ * @file amanita/aMath.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
@@ -13,7 +13,7 @@
 #include <stdint.h>
 
 /** A collection of mathematical functions.
- * @ingroup libamanita
+ * @ingroup amanita
  */
 class aMath {
 public:
@@ -128,5 +128,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_MATH_H */
+#endif /* _AMANITA_MATH_H */
 

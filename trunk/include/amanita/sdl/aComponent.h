@@ -1,23 +1,26 @@
-#ifndef _LIBAMANITA_SDL_COMPONENT_H
-#define _LIBAMANITA_SDL_COMPONENT_H
+#ifndef _AMANITA_SDL_COMPONENT_H
+#define _AMANITA_SDL_COMPONENT_H
 
 /**
- * @file libamanita/sdl/aComponent.h  
+ * @file amanita/sdl/aComponent.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
 #include <stdint.h>
-#include <libamanita/aObject.h>
-#include <libamanita/aVector.h>
-#include <libamanita/gui/aEvent.h>
+#include <amanita/aObject.h>
+#include <amanita/aVector.h>
+#include <amanita/gui/aEvent.h>
 
 
 class aTooltip;
 struct SDL_Rect;
 
 
+/** Baseclass for all components.
+ * @ingroup sdl
+ */
 class aComponent : public aObject {
 aObject_Instance(aComponent)
 
@@ -32,16 +35,16 @@ private:
 		MODAL				= 0x00001000,
 	};
 	struct component {
-		size_t cnt;							/**< Counter for number of bindings to component. When 0 component is deleted. */
-		uint32_t id;						/**< ID. */
-		uint32_t status;					/**< Status. */
-		short x;								/**< X-coordinate. */
-		short y;								/**< Y-coordinate. */
-		short w;								/**< Width. */
-		short h;								/**< Height. */
-		aComponent *p;						/**< Parent. */
-		aVector *ch;						/**< Children. */
-		aTooltip *tt;						/**< Tooltip message. */
+		size_t cnt;							//!< Counter for number of bindings to component. When 0 component is deleted.
+		uint32_t id;						//!< ID.
+		uint32_t status;					//!< Status.
+		short x;								//!< X-coordinate.
+		short y;								//!< Y-coordinate.
+		short w;								//!< Width.
+		short h;								//!< Height.
+		aComponent *p;						//!< Parent.
+		aVector *ch;						//!< Children.
+		aTooltip *tt;						//!< Tooltip message.
 	};
 	component com;
 
@@ -154,4 +157,4 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_COMPONENT_H */
+#endif /* _AMANITA_SDL_COMPONENT_H */

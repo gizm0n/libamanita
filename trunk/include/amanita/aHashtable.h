@@ -1,18 +1,18 @@
-#ifndef _LIBAMANITA_HASHTABLE_H
-#define _LIBAMANITA_HASHTABLE_H
+#ifndef _AMANITA_HASHTABLE_H
+#define _AMANITA_HASHTABLE_H
 
 /**
- * @file libamanita/aHashtable.h  
+ * @file amanita/aHashtable.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2004-09-30
  */ 
 
 #include <string.h>
 #include <stdlib.h>
-#include <libamanita/aCollection.h>
-#include <libamanita/aObject.h>
-#include <libamanita/aString.h>
+#include <amanita/aCollection.h>
+#include <amanita/aObject.h>
+#include <amanita/aString.h>
 
 
 enum {
@@ -44,7 +44,7 @@ class aVector;
  * All these overloaded methods are actually inline methods, most of them, so no need for panic,
  * the compiled file is not very large, and there is very little overhead to handle all these
  * different types in reality.
- * @ingroup libamanita
+ * @ingroup amanita
  */
 class aHashtable : public aCollection {
 friend class iterator;
@@ -889,5 +889,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_HASHTABLE_H */
+#endif /* _AMANITA_HASHTABLE_H */
 

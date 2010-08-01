@@ -5,7 +5,7 @@
 #include <string.h>
 #include <time.h>
 #include <inttypes.h>
-#include <libamanita/aRegex.h>
+#include <amanita/aRegex.h>
 
 
 #define REGEX_RNDBR			'('

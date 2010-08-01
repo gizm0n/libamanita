@@ -1,17 +1,19 @@
-#ifndef _LIBAMANITA_SDL_DISPLAY_H
-#define _LIBAMANITA_SDL_DISPLAY_H
+#ifndef _AMANITA_SDL_DISPLAY_H
+#define _AMANITA_SDL_DISPLAY_H
 
 /**
- * @file libamanita/sdl/aDisplay.h  
+ * @file amanita/sdl/aDisplay.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
-#include <libamanita/sdl/aGraphics.h>
-#include <libamanita/sdl/aComponent.h>
+#include <amanita/sdl/aGraphics.h>
+#include <amanita/sdl/aComponent.h>
 
-
+/** The aDisplay class is like a desktop in which all other windows, dialogs and components are placed.
+ * @ingroup sdl
+ */
 class aDisplay : public aComponent,public aKeyListener,public aMouseListener,public aMouseMotionListener,public aActionListener {
 aObject_Instance(aDisplay)
 
@@ -42,5 +44,5 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_DISPLAY_H */
+#endif /* _AMANITA_SDL_DISPLAY_H */
 

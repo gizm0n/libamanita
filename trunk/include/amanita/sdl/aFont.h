@@ -1,17 +1,17 @@
-#ifndef _LIBAMANITA_SDL_FONT_H
-#define _LIBAMANITA_SDL_FONT_H
+#ifndef _AMANITA_SDL_FONT_H
+#define _AMANITA_SDL_FONT_H
 
 /**
- * @file libamanita/sdl/aFont.h  
+ * @file amanita/sdl/aFont.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
-#include <libamanita/aObject.h>
-#include <libamanita/aFontmetrics.h>
+#include <amanita/aObject.h>
+#include <amanita/aFontmetrics.h>
 
 
 enum {
@@ -24,6 +24,9 @@ enum {
 };
 
 
+/** A class for handling fonts.
+ * @ingroup sdl
+ */
 class aFont : public aObject {
 aObject_Instance(aFont)
 
@@ -61,5 +64,5 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_FONT_H */
+#endif /* _AMANITA_SDL_FONT_H */
 

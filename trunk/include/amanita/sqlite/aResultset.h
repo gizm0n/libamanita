@@ -1,21 +1,24 @@
-#ifndef _LIBAMANITA_SQLITE_RESULTSET_H
-#define _LIBAMANITA_SQLITE_RESULTSET_H
+#ifndef _AMANITA_SQLITE_RESULTSET_H
+#define _AMANITA_SQLITE_RESULTSET_H
 
 /**
- * @file libamanita/sqlite/aResultset.h  
+ * @file amanita/sqlite/aResultset.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
 
-#include <libamanita/aVector.h>
-#include <libamanita/sqlite/aRecord.h>
+#include <amanita/aVector.h>
+#include <amanita/sqlite/aRecord.h>
 
 
 class aSQLite;
 
 
+/** Resultset.
+ * @ingroup sqlite
+ */
 class aResultset : protected aVector {
 private:
 	aSQLite *db;
@@ -33,5 +36,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SQLITE_RESULTSET_H */
+#endif /* _AMANITA_SQLITE_RESULTSET_H */
 

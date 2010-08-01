@@ -1,15 +1,15 @@
-#ifndef _LIBAMANITA_SDL_TEXTBOX_H
-#define _LIBAMANITA_SDL_TEXTBOX_H
+#ifndef _AMANITA_SDL_TEXTBOX_H
+#define _AMANITA_SDL_TEXTBOX_H
 
 /**
- * @file libamanita/sdl/aTextbox.h  
+ * @file amanita/sdl/aTextbox.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
-#include <libamanita/sdl/aFont.h>
-#include <libamanita/sdl/aWindow.h>
+#include <amanita/sdl/aFont.h>
+#include <amanita/sdl/aWindow.h>
 
 
 enum {
@@ -20,6 +20,9 @@ enum {
 };
 
 
+/** The aTextbox is a modal dialog that shows a message.
+ * @ingroup sdl
+ */
 class aTextbox : public aWindow {
 aObject_Instance(aTextbox)
 
@@ -40,4 +43,4 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_TEXTBOX_H */
+#endif /* _AMANITA_SDL_TEXTBOX_H */

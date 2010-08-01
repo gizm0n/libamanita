@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <libamanita/net/aClient.h>
+#include <amanita/net/aClient.h>
 
 
 

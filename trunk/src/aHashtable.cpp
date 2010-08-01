@@ -2,8 +2,8 @@
 #include "config.h"
 #include <stdio.h>
 #include <inttypes.h>
-#include <libamanita/aHashtable.h>
-#include <libamanita/aVector.h>
+#include <amanita/aHashtable.h>
+#include <amanita/aVector.h>
 
 
 

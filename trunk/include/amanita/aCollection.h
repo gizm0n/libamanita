@@ -1,15 +1,15 @@
-#ifndef _LIBAMANITA_COLLECTION_H
-#define _LIBAMANITA_COLLECTION_H
+#ifndef _AMANITA_COLLECTION_H
+#define _AMANITA_COLLECTION_H
 
 /**
- * @file libamanita/aCollection.h  
+ * @file amanita/aCollection.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
 #include <stdint.h>
-#include <libamanita/aObject.h>
+#include <amanita/aObject.h>
 
 /** Enumeration used by the iteration class and subclasses for extended iteration positions. */
 enum {
@@ -95,7 +95,7 @@ typedef uint32_t style_t;
  * It extends the aObject-class so it can be implemented in the class-hierarchy of that class. All subclasses of
  * aCollection obviously has to implement the aObject-class style to maintain rtti-structure, though not doing so
  * only means pointing to the super-class aClass instead.
- * @ingroup libamanita
+ * @ingroup amanita
  */
 class aCollection : public aObject {
 /** @cond */
@@ -119,5 +119,5 @@ public:
 	size_t capacity() { return cap; }
 };
 
-#endif /* _LIBAMANITA_COLLECTION_H */
+#endif /* _AMANITA_COLLECTION_H */
 

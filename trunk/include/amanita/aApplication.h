@@ -1,11 +1,18 @@
-#ifndef _LIBAMANITA_APPLICATION_H
-#define _LIBAMANITA_APPLICATION_H
+#ifndef _AMANITA_APPLICATION_H
+#define _AMANITA_APPLICATION_H
+
+/**
+ * @file amanita/aApplication.h  
+ * @author Per Löwgren
+ * @date Modified: 2010-08-01
+ * @date Created: 2008-12-01
+ */ 
 
 #include <stdio.h>
 #include <time.h>
 #include <inttypes.h>
-#include <libamanita/aHashtable.h>
-#include <libamanita/aThread.h>
+#include <amanita/aHashtable.h>
+#include <amanita/aThread.h>
 
 
 /** Callback function to receive installation progress, i.e. for updating a progressbar.
@@ -20,6 +27,14 @@
 typedef void (*install_function)(void *obj,const char *file,int n,int max,int st);
 
 
+/** A baseclass for applications.
+ * 
+ * Any application may use this class as a baseclass and inherit some main application
+ * structure from it. It contains methods for setting up an environment, downloading
+ * and installing files from a webserver. Loading and language files and to get textstrings,
+ * supporting multilanguage applications etc.
+ * @ingroup amanita
+ */
 class aApplication {
 private:
 	void getExecutable(char *dir,int l);
@@ -103,5 +118,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_APPLICATION_H */
+#endif /* _AMANITA_APPLICATION_H */
 

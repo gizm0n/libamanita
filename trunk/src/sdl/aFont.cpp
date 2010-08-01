@@ -2,8 +2,8 @@
 #include "../config.h"
 #include <string.h>
 #include <stdlib.h>
-#include <libamanita/sdl/aGraphics.h>
-#include <libamanita/sdl/aFont.h>
+#include <amanita/sdl/aGraphics.h>
+#include <amanita/sdl/aFont.h>
 
 
 aObject_Inheritance(aFont,aObject);

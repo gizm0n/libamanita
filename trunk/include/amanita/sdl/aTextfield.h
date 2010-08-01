@@ -1,18 +1,21 @@
-#ifndef _LIBAMANITA_SDL_TEXTFIELD_H
-#define _LIBAMANITA_SDL_TEXTFIELD_H
+#ifndef _AMANITA_SDL_TEXTFIELD_H
+#define _AMANITA_SDL_TEXTFIELD_H
 
 /**
- * @file libamanita/sdl/aTextfield.h  
+ * @file amanita/sdl/aTextfield.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
-#include <libamanita/sdl/aText.h>
-#include <libamanita/sdl/aComponent.h>
+#include <amanita/sdl/aText.h>
+#include <amanita/sdl/aComponent.h>
 
 class aFont;
 
+/** The aTextfield class inherits the aText class to handle multiline text, and show within a frame.
+ * @ingroup sdl
+ */
 class aTextfield : public aComponent,public aText,public aKeyListener {
 aObject_Instance(aTextfield)
 
@@ -37,4 +40,4 @@ public:
 
 
 
-#endif /* _LIBAMANITA_SDL_TEXTFIELD_H */
+#endif /* _AMANITA_SDL_TEXTFIELD_H */

@@ -1,6 +1,6 @@
 
 #include "config.h"
-#include <libamanita/aCollection.h>
+#include <amanita/aCollection.h>
 
 
 aObject_Inheritance(aCollection,aObject);

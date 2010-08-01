@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <sqlite3.h>
-#include <libamanita/sqlite/aSQLite.h>
+#include <amanita/sqlite/aSQLite.h>
 
 
 int aSQLite::callback(void *source,int argc,char **argv,char **azColName) {

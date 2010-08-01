@@ -1,16 +1,21 @@
-#ifndef _LIBAMANITA_SDL_TEXT_H
-#define _LIBAMANITA_SDL_TEXT_H
+#ifndef _AMANITA_SDL_TEXT_H
+#define _AMANITA_SDL_TEXT_H
 
 /**
- * @file libamanita/sdl/aText.h  
+ * @file amanita/sdl/aText.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
-#include <libamanita/sdl/aFont.h>
+#include <amanita/sdl/aFont.h>
 
 
+/** A class for handling multiline text.
+ * 
+ * aText insert linebreaks to adjust to the width and height of a frame.
+ * @ingroup sdl
+ */
 class aText {
 private:
 	struct text_line {
@@ -98,4 +103,4 @@ public:
 	void drawText(int x,int y,int a=(ALIGN_LEFT|ALIGN_TOP),bool showCaret=0);
 };
 
-#endif /* _LIBAMANITA_SDL_TEXT_H */
+#endif /* _AMANITA_SDL_TEXT_H */

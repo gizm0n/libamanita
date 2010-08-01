@@ -1,8 +1,8 @@
 
 #include "../config.h"
-#include <libamanita/sdl/aImage.h>
-#include <libamanita/sdl/aScroll.h>
-#include <libamanita/sdl/aIconButton.h>
+#include <amanita/sdl/aImage.h>
+#include <amanita/sdl/aScroll.h>
+#include <amanita/sdl/aIconButton.h>
 
 
 

@@ -1,10 +1,10 @@
-#ifndef _LIBAMANITA_PATH_H
-#define _LIBAMANITA_PATH_H
+#ifndef _AMANITA_PATH_H
+#define _AMANITA_PATH_H
 
 /**
- * @file libamanita/aPath.h  
+ * @file amanita/aPath.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
@@ -67,7 +67,7 @@ typedef void (*path_move)(aPath &,int,int,int &,int &,int);
 
 
 /** A class for storing a path-trail, with step coordinates.
- * @ingroup libamanita
+ * @ingroup amanita
  */
 class aTrail {
 friend class aPath;
@@ -112,7 +112,7 @@ public:
 /** A class for making path searches.
  * 
  * The class implements the A* algorithm.
- * @ingroup libamanita
+ * @ingroup amanita
  */
 class aPath {
 protected:
@@ -198,5 +198,5 @@ public:
 
 
 
-#endif /* _LIBAMANITA_PATH_H */
+#endif /* _AMANITA_PATH_H */
 

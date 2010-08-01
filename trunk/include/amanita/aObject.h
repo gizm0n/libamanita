@@ -1,10 +1,10 @@
-#ifndef _LIBAMANITA_OBJECT_H
-#define _LIBAMANITA_OBJECT_H
+#ifndef _AMANITA_OBJECT_H
+#define _AMANITA_OBJECT_H
 
 /**
- * @file libamanita/aObject.h  
+ * @file amanita/aObject.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
@@ -22,7 +22,7 @@
  * When instantiated statically with aObject, the aClass object is created before
  * main is called and therefore it can be used safely itn the code except for in
  * other static code.
- * @ingroup libamanita
+ * @ingroup amanita
  */
 class aClass {
 friend class aObject;
@@ -70,7 +70,7 @@ typedef intptr_t hash_t;
  * a aObject_Instance macro somewhere. For example:
  * @code
 // File: A.h
-#include <libamanita/aObject.h>
+#include <amanita/aObject.h>
 
 class A : public aObject {
 aObject_Instance(A)
@@ -150,7 +150,7 @@ aClass class_name::instance(#class_name,declaration) */
  * @code
 // File: rtti.cpp
 #include <stdio.h>
-#include <libamanita/aObject.h>
+#include <amanita/aObject.h>
 
 class A : public aObject {
 aObject_Instance(A) // Note that this macro must not be ended with a semicolon.
@@ -228,7 +228,7 @@ This/these class(es) inherit the class A:
  * @endcode
  * @see aObject_Instance(class_name)
  * @see aObject_Inheritance(class_name,super_name)
- * @ingroup libamanita
+ * @ingroup amanita
  */
 class aObject {
 private:
@@ -280,5 +280,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_OBJECT_H */
+#endif /* _AMANITA_OBJECT_H */
 

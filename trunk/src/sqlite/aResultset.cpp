@@ -1,6 +1,6 @@
 
 #include "../config.h"
-#include <libamanita/sqlite/aResultset.h>
+#include <amanita/sqlite/aResultset.h>
 
 
 aResultset::~aResultset() {

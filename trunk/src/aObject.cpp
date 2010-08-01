@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
-#include <libamanita/aObject.h>
+#include <amanita/aObject.h>
 
 uint32_t aClass::id_index = 0;
 

@@ -1,18 +1,21 @@
-#ifndef _LIBAMANITA_SDL_ICONBUTTON_H
-#define _LIBAMANITA_SDL_ICONBUTTON_H
+#ifndef _AMANITA_SDL_ICONBUTTON_H
+#define _AMANITA_SDL_ICONBUTTON_H
 
 /**
- * @file libamanita/sdl/aIconButton.h  
+ * @file amanita/sdl/aIconButton.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
-#include <libamanita/sdl/aComponent.h>
+#include <amanita/sdl/aComponent.h>
 
 class aImage;
 class aFont;
 
+/** A button that uses images instead of a label.
+ * @ingroup sdl
+ */
 class aIconButton : public aComponent,public aMouseListener {
 aObject_Instance(aIconButton)
 
@@ -49,4 +52,4 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_ICONBUTTON_H */
+#endif /* _AMANITA_SDL_ICONBUTTON_H */

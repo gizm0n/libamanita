@@ -1,18 +1,21 @@
-#ifndef _LIBAMANITA_SDL_TOOLTIP_H
-#define _LIBAMANITA_SDL_TOOLTIP_H
+#ifndef _AMANITA_SDL_TOOLTIP_H
+#define _AMANITA_SDL_TOOLTIP_H
 
 /**
- * @file libamanita/sdl/aTooltip.h  
+ * @file amanita/sdl/aTooltip.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */ 
 
-#include <libamanita/sdl/aComponent.h>
+#include <amanita/sdl/aComponent.h>
 
 class aImage;
 class aFont;
 
+/** Tooltip.
+ * @ingroup sdl
+ */
 class aTooltip {
 friend class aComponent;
 protected:
@@ -62,4 +65,4 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_TOOLTIP_H */
+#endif /* _AMANITA_SDL_TOOLTIP_H */

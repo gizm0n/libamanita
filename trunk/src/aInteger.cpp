@@ -5,10 +5,10 @@
 #include <math.h>
 #include <inttypes.h>
 #include <endian.h>
-#include <libamanita/aMath.h>
-#include <libamanita/aString.h>
-#include <libamanita/aRandom.h>
-#include <libamanita/aInteger.h>
+#include <amanita/aMath.h>
+#include <amanita/aString.h>
+#include <amanita/aRandom.h>
+#include <amanita/aInteger.h>
 
 
 

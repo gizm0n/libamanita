@@ -1,14 +1,14 @@
-#ifndef _LIBAMANITA_NET_HTTP_H
-#define _LIBAMANITA_NET_HTTP_H
+#ifndef _AMANITA_NET_HTTP_H
+#define _AMANITA_NET_HTTP_H
 /**
- * @file libamanita/net/aHttp.h  
+ * @file amanita/net/aHttp.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-04-09
  */ 
 
 
-#include <libamanita/aHashtable.h>
+#include <amanita/aHashtable.h>
 
 
 class aApplication;
@@ -116,6 +116,7 @@ int main(int argc, char *argv[]) {
 	SDL_Quit();
 }
  * @endcode
+ * @ingroup net
  */
 class aHttp {
 private:
@@ -271,5 +272,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_NET_HTTP_H */
+#endif /* _AMANITA_NET_HTTP_H */
 

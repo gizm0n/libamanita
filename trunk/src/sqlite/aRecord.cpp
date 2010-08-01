@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <libamanita/sqlite/aRecord.h>
-#include <libamanita/sqlite/aResultset.h>
-#include <libamanita/sqlite/aSQLite.h>
+#include <amanita/sqlite/aRecord.h>
+#include <amanita/sqlite/aResultset.h>
+#include <amanita/sqlite/aSQLite.h>
 
 
 aRecord::aRecord(aResultset &rs,char **d,unsigned int s) {

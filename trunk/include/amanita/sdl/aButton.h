@@ -1,30 +1,33 @@
-#ifndef _LIBAMANITA_SDL_BUTTON_H
-#define _LIBAMANITA_SDL_BUTTON_H
+#ifndef _AMANITA_SDL_BUTTON_H
+#define _AMANITA_SDL_BUTTON_H
 
 /**
- * @file libamanita/sdl/aButton.h  
+ * @file amanita/sdl/aButton.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-02
+ * @date Modified: 2010-08-01
  * @date Created: 2008-09-07
  */
 
-#include <libamanita/sdl/aComponent.h>
+#include <amanita/sdl/aComponent.h>
 
 enum {
-	COM_ID_CLOSE			= 0x00008021,		/**< Close button ID, for aWindow class */
-	COM_ID_UP				= 0x00008031,		/**< Up button, for aScroll */
-	COM_ID_DOWN				= 0x00008032,		/**< Down button, for aScroll */
-	COM_ID_LEFT				= 0x00008033,		/**< Left button, for aScroll */
-	COM_ID_RIGHT			= 0x00008034,		/**< Right button, for aScroll */
-	COM_ID_YES				= 0x00008051,		/**< Yes button,for aTextbox */
-	COM_ID_NO				= 0x00008052,		/**< No button,for aTextbox */
-	COM_ID_OK				= 0x00008053,		/**< OK button,for aTextbox */
-	COM_ID_CANCEL			= 0x00008054,		/**< Cancel button,for aTextbox */
+	COM_ID_CLOSE			= 0x00008021,		//!< Close button ID, for aWindow class
+	COM_ID_UP				= 0x00008031,		//!< Up button, for aScroll
+	COM_ID_DOWN				= 0x00008032,		//!< Down button, for aScroll
+	COM_ID_LEFT				= 0x00008033,		//!< Left button, for aScroll
+	COM_ID_RIGHT			= 0x00008034,		//!< Right button, for aScroll
+	COM_ID_YES				= 0x00008051,		//!< Yes button,for aTextbox
+	COM_ID_NO				= 0x00008052,		//!< No button,for aTextbox
+	COM_ID_OK				= 0x00008053,		//!< OK button,for aTextbox
+	COM_ID_CANCEL			= 0x00008054,		//!< Cancel button,for aTextbox
 };
 
 class aImage;
 class aFont;
 
+/** Button.
+ * @ingroup sdl
+ */
 class aButton : public aComponent,public aMouseListener {
 aObject_Instance(aButton)
 
@@ -43,10 +46,13 @@ private:
 			aImage *img;
 			short index;
 		} ic;
-		char *text,align;		// aText and textalign
-		short tw,tx,ty;		// aText width and text coordinates
-		aFont *font;				// aText font
-		SDL_Rect ins;			// aText insets
+		char *text;					//!< Button text
+		char align;					//!< Button align
+		short tw;					//!< Text width
+		short tx;					//!< X-coordinate of text
+		short ty;					//!< Y-coordinate of text
+		aFont *font;				//!< Button text font
+		SDL_Rect ins;				//!< Button insets
 	} bt;
 
 public:
@@ -108,4 +114,4 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_SDL_BUTTON_H */
+#endif /* _AMANITA_SDL_BUTTON_H */

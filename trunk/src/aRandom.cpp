@@ -1,8 +1,8 @@
 
 #include "config.h"
 #include <time.h>
-#include <libamanita/aMath.h>
-#include <libamanita/aRandom.h>
+#include <amanita/aMath.h>
+#include <amanita/aRandom.h>
 
 
 #define GENERATE_NUMBER (num=(1812433253*((num^(num>>30))+(index++))))

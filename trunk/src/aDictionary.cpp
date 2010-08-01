@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#include <libamanita/aDictionary.h>
-#include <libamanita/aString.h>
+#include <amanita/aDictionary.h>
+#include <amanita/aString.h>
 
 
 aObject_Inheritance(aDictionary,aCollection);

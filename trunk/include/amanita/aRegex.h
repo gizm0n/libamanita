@@ -1,16 +1,16 @@
-#ifndef _LIBAMANITA_REGEX_H
-#define _LIBAMANITA_REGEX_H
+#ifndef _AMANITA_REGEX_H
+#define _AMANITA_REGEX_H
 
 /**
- * @file libamanita/aRegex.h  
+ * @file amanita/aRegex.h  
  * @author Per Löwgren
- * @date Modified: 2009-12-03
+ * @date Modified: 2010-08-01
  * @date Created: 2004-12-30
  */ 
 
 
 #include <stdint.h>
-#include <libamanita/aString.h>
+#include <amanita/aString.h>
 
 
 enum REGEX_MODIFIER {
@@ -37,7 +37,7 @@ class REMatch;
  * @code
 #include <stdlib.h>
 #include <stdio.h>
-#include <libamanita/aRegex.h>
+#include <amanita/aRegex.h>
 
 int main(int argc, char *argv[]) {
 	aRegex r;
@@ -96,6 +96,7 @@ int main(int argc, char *argv[]) {
  * http://en.wikipedia.org/wiki/Regular_expression
  * 
  * 
+ * @ingroup amanita
  */
 class aRegex {
 friend class REBlock;
@@ -182,5 +183,5 @@ public:
 };
 
 
-#endif /* _LIBAMANITA_REGEX_H */
+#endif /* _AMANITA_REGEX_H */
 
