@@ -1,6 +1,6 @@
 
 
-CXXFLAGS = -Wall -Werror -O2 -g -I../include/
+CXXFLAGS = -Wall -Werror -O2 -fno-strict-aliasing -Wno-unused-but-set-variable -g -I../include/
 
 lib_LIBRARIES = libamanita.a libamanita-sdl.a
 
