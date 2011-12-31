@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.61)
+AC_PREREQ(2.68)
 AC_INIT([Amanita Library],[0.01],[per.lowgren@gmail.com],[libamanita])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([src/config.h])
@@ -37,7 +37,6 @@ AC_FUNC_REALLOC
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([floor memset pow sqrt strchr strdup strpbrk strstr strnicmp])
 
-AC_CONFIG_FILES([Makefile bin/Makefile])
-AC_OUTPUT
+AC_OUTPUT([Makefile bin/Makefile])
 
 
