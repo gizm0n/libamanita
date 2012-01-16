@@ -404,7 +404,7 @@ size_t aHashtable::print(FILE *fp) {
 	size_t i,s = sz;
 	node *n;
 	for(i=0; i<cap; i++) {
-		fprintf(fp,"Table[%zu]",i);
+		fprintf(fp,"Table[%lu]",(unsigned long)i);
 		if((n=table[i])) while(n) {
 			switch(n->k_type) {
 				case TYPE_VOID_P:fprintf(fp," %p",(void *)n->key);break;
@@ -437,7 +437,7 @@ size_t aHashtable::print(FILE *fp) {
 		}
 		fprintf(fp,"\n");
 	}
-	fprintf(fp,"Size=%zu,Full=%zu,Capacity=%zu,Spread=%f\n",sz,full,cap,100.0f*((float)s/(float)sz));
+	fprintf(fp,"Size=%lu,Full=%lu,Capacity=%lu,Spread=%f\n",(unsigned long)sz,(unsigned long)full,(unsigned long)cap,100.0f*((float)s/(float)sz));
 	fflush(fp);
 	return sz;
 }

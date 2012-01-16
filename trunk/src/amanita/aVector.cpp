@@ -235,7 +235,7 @@ size_t aVector::print(const char *fn) {
 size_t aVector::print(FILE *fp) {
 	if(!fp) return 0;
 	for(size_t i=0; i<sz; i++) {
-		fprintf(fp,"List[%zu,%u]",i,list[i].type);
+		fprintf(fp,"List[%lu,%u]",(unsigned long)i,list[i].type);
 		fflush(fp);
 		if(list[i].value) {
 			switch(list[i].type) {
@@ -253,7 +253,7 @@ size_t aVector::print(FILE *fp) {
 		fprintf(fp,"\n");
 		fflush(fp);
 	}
-	fprintf(fp,"Size=%zu,Capacity=%zu\n",sz,cap);
+	fprintf(fp,"Size=%lu,Capacity=%lu\n",(unsigned long)sz,(unsigned long)cap);
 	fflush(fp);
 	return sz;
 }

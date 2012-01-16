@@ -13,11 +13,14 @@
 #ifdef LIBAMANITA_SDL
 	#include <SDL/SDL.h>
 	#include <SDL/SDL_thread.h>
-#elif defined __linux__
+#elif defined(__linux__)
 	#include <pthread.h>
 	#include <unistd.h>
 	#include <sys/time.h>
-#endif /* LIBAMANITA_SDL */
+#elif defined(WIN32)
+	#include <windows.h>
+	#include <sys/time.h>
+#endif
 
 
 typedef void (*thread_function)(void *);
@@ -32,19 +35,25 @@ private:
 	SDL_Thread *thread;
 	SDL_mutex *mutex;
 	uint32_t timer;
-#elif defined __linux__
+#elif defined(__linux__)
 	pthread_t *thread;
 	pthread_mutex_t *mutex;
 	timeval time;
-#endif /* LIBAMANITA_SDL */
+#elif defined(WIN32)
+	HANDLE thread;
+	HANDLE mutex;
+	timeval time;
+#endif
 	thread_function function;
 	void *data;
 
 #ifdef LIBAMANITA_SDL
 	static int _run(void *d);
-#elif defined __linux__
+#elif defined(__linux__)
 	static void *_run(void *d);
-#endif /* LIBAMANITA_SDL */
+#elif defined(WIN32)
+	static DWORD WINAPI _run(void *d);
+#endif
 
 	void createMutex();
 	void deleteMutex();
@@ -65,9 +74,11 @@ public:
 	void pause(int millis) {
 #ifdef LIBAMANITA_SDL
 		SDL_Delay(millis);
-#elif defined __linux__
+#elif defined(__linux__)
 		usleep(millis*1000);
-#endif /* LIBAMANITA_SDL */
+#elif defined(WIN32)
+		Sleep(millis);
+#endif
 	}
 };
 

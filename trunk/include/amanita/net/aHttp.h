@@ -9,6 +9,7 @@
 
 
 #include <amanita/aHashtable.h>
+#include <amanita/net/aSocket.h>
 
 
 class aApplication;
@@ -90,15 +91,11 @@ enum HTTP_MIMES {
  * Code to demonstrate how this class can be used:
  * @code
 #include <stdio.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_net.h>
-#include "sdl/aHttp.h"
+#include "amanita/net/aHttp.h"
 
 int main(int argc, char *argv[]) {
-	if(SDL_Init(0)<0) exit(1);
-	if(SDLNet_Init()==-1) exit(2);
-
 	aHttp http;
+	aSocket::init();
 	http.setUserAgent("aHttp Class User-Agent, v.0.1");
 
 	http.setFormValue("test1","test1");
@@ -109,11 +106,9 @@ int main(int argc, char *argv[]) {
 	http.post("www.host.com","script.php");
 
 	FILE *fp = fopen("response.txt","w");
-	fwrite(http.getFile(),http.fileSize(),1,fp);
+	fwrite(http.getFile(),http.getFileSize(),1,fp);
 	fclose(fp);
-	
-	SDLNet_Quit();
-	SDL_Quit();
+	aSocket::close();
 }
  * @endcode
  * @ingroup net
@@ -204,7 +199,7 @@ public:
 	 *
 	 * @code
 	 * aHttp http;
-	 * http.get("www.host.com","script.php?param1=%s&param2=%d",param1,param2);
+	 * http.get("www.host.com","document.html");
 	 * @endcode
 	 */
 	const char *get(const char *host,const char *url);

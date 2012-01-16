@@ -1,12 +1,15 @@
 
 
-CXXFLAGS = -Wall -Werror -O2 -fno-strict-aliasing -Wno-unused-but-set-variable -g -I../include/
+CXXFLAGS =  @AM_CXXFLAGS@ -I../include/
+LDFLAGS = @AM_LDFLAGS@
+
 
 lib_LIBRARIES = libamanita.a libamanita-sdl.a
 
 
 nobase_include_HEADERS = \
 	../include/amanita/aApplication.h \
+	../include/amanita/aBytes.h \
 	../include/amanita/aCollection.h \
 	../include/amanita/aDictionary.h \
 	../include/amanita/aFile.h \
@@ -77,7 +80,7 @@ libamanita_a_SOURCES = \
 libamanita_a_CPPFLAGS = \
 	-DLIBAMANITA \
 	-DLIBAMANITA_DEBUG
-libamanita_a_CXXFLAGS = `pkg-config --cflags gtk+-2.0`
+libamanita_a_CXXFLAGS = $(DEPS_CFLAGS)
 
 
 libamanita_sdl_a_SOURCES = \
@@ -126,6 +129,6 @@ libamanita_sdl_a_CPPFLAGS = \
 	-DLIBAMANITA \
 	-DLIBAMANITA_SDL \
 	-DLIBAMANITA_DEBUG
-libamanita_sdl_a_CXXFLAGS = `pkg-config --cflags gtk+-2.0`
+libamanita_sdl_a_CXXFLAGS = $(DEPS_CFLAGS)
 
 

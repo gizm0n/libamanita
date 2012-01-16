@@ -2,10 +2,9 @@
 #include "config.h"
 
 #ifdef LIBAMANITA_SDL
-#elif defined __linux__
+#else
 	#include <stdlib.h>
-	#include <sys/time.h>
-#endif /* LIBAMANITA_SDL */
+#endif
 
 #include <amanita/aThread.h>
 
@@ -17,7 +16,7 @@ int aThread::_run(void *d) {
 	t.function(t.data);
 	return 0;
 }
-#elif defined __linux__
+#elif defined(__linux__)
 void *aThread::_run(void *d) {
 	aThread &t = *(aThread *)d;
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE,0);
@@ -26,7 +25,13 @@ void *aThread::_run(void *d) {
 	pthread_exit(0);
 	return 0;
 }
-#endif /* LIBAMANITA_SDL */
+#elif defined(WIN32)
+DWORD WINAPI aThread::_run(void *d) {
+	aThread &t = *(aThread *)d;
+	t.function(t.data);
+	return 0;
+}
+#endif
 
 
 
@@ -48,22 +53,27 @@ void aThread::start(thread_function f,void *d) {
 #ifdef LIBAMANITA_SDL
 	timer = SDL_GetTicks();
 	thread = SDL_CreateThread(_run,this);
-#elif defined __linux__
+#elif defined(__linux__)
 	gettimeofday(&time,0);
 	thread = (pthread_t *)malloc(sizeof(pthread_t));
 	pthread_create(thread,0,_run,this);
-#endif /* LIBAMANITA_SDL */
+#elif defined(WIN32)
+	gettimeofday(&time,0);
+	CreateThread(NULL,0,_run,this,0,NULL);
+#endif
 }
 
 void aThread::stop() {
 #ifdef LIBAMANITA_SDL
 	if(thread) SDL_WaitThread(thread,0);
-#elif defined __linux__
+#elif defined(__linux__)
 	if(thread) {
 		pthread_join(*thread,0);
 		free(thread);
 	}
-#endif /* LIBAMANITA_SDL */
+#elif defined(WIN32)
+	if(thread) WaitForSingleObject(thread,INFINITE);
+#endif
 	thread = 0;
 	function = 0;
 	data = 0;
@@ -72,12 +82,14 @@ void aThread::stop() {
 void aThread::kill() {
 #ifdef LIBAMANITA_SDL
 	if(thread) SDL_KillThread(thread);
-#elif defined __linux__
+#elif defined(__linux__)
 	if(thread) {
 		pthread_cancel(*thread);
 		free(thread);
 	}
-#endif /* LIBAMANITA_SDL */
+#elif defined(WIN32)
+	if(thread) TerminateThread(thread,0);
+#endif
 	thread = 0;
 	function = 0;
 	data = 0;
@@ -88,22 +100,25 @@ void aThread::createMutex() {
 	if(mutex) deleteMutex();
 #ifdef LIBAMANITA_SDL
 	mutex = SDL_CreateMutex();
-#elif defined __linux__
+#elif defined(__linux__)
 	mutex = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
 	pthread_mutex_init(mutex,0);
-#endif /* LIBAMANITA_SDL */
+#elif defined(WIN32)
+	mutex = CreateMutex(0,false,0);
+#endif
 }
 
 void aThread::deleteMutex() {
 	if(!mutex) return;
 #ifdef LIBAMANITA_SDL
 	SDL_DestroyMutex(mutex);
-	mutex = 0;
-#elif defined __linux__
+#elif defined(__linux__)
 	pthread_mutex_destroy(mutex);
 	free(mutex);
+#elif defined(WIN32)
+	CloseHandle(mutex);
+#endif
 	mutex = 0;
-#endif /* LIBAMANITA_SDL */
 }
 
 void aThread::lock() {
@@ -111,9 +126,11 @@ void aThread::lock() {
 	int n;
 #ifdef LIBAMANITA_SDL
 	n =  SDL_mutexP(mutex);
-#elif defined __linux__
+#elif defined(__linux__)
 	n =  pthread_mutex_lock(mutex);
-#endif /* LIBAMANITA_SDL */
+#elif defined(WIN32)
+	n = WaitForSingleObject(mutex,INFINITE);
+#endif
 }
 
 void aThread::unlock() {
@@ -121,12 +138,14 @@ void aThread::unlock() {
 	int n;
 #ifdef LIBAMANITA_SDL
 	n = SDL_mutexV(mutex);
-#elif defined __linux__
+#elif defined(__linux__)
 	n = pthread_mutex_unlock(mutex);
-#endif /* LIBAMANITA_SDL */
+#elif defined(WIN32)
+	n = ReleaseMutex(mutex);
+#endif
 }
 
-#include <stdio.h>
+//#include <stdio.h>
 
 void aThread::pauseFPS(int fps) {
 #ifdef LIBAMANITA_SDL
@@ -136,7 +155,7 @@ void aThread::pauseFPS(int fps) {
 	if(pause>0) SDL_Delay(pause);
 	timer = ticks+pause+(1000/fps);
 
-#elif defined __linux__
+#elif defined(WIN32) || defined(WIN32)
 	timeval now;
 	gettimeofday(&now,0);
 	fps = 1000000/fps;
@@ -145,9 +164,13 @@ void aThread::pauseFPS(int fps) {
 	if(delay2>fps) delay2 = fps;
 //printf("aThread::pauseFPS(time=%d,now=%d,delay=%d,usleep=%d)\n",
 //		(int)(time.tv_sec*1000000+time.tv_usec),(int)(now.tv_sec*1000000+now.tv_usec),delay,delay2);
+#ifdef __linux__
 	if(delay2>0) usleep(delay2);
+#else
+	if(delay2>0) Sleep(delay2/1000);
+#endif
 	time = now;
-#endif /* LIBAMANITA_SDL */
+#endif
 }
 
 

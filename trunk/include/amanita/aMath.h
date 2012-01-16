@@ -33,8 +33,8 @@ public:
 
 	/** @name Minimum and Maximum
 	 * @{ */
-	static int min(int i1,int i2) { return i1<i2? i1 : i2; }		//!< Return the smaller of the values.
-	static int max(int i1,int i2) { return i1>i2? i1 : i2; }		//!< Return the larger of the values.
+	static int minimum(int i1,int i2) { return i1<i2? i1 : i2; }	//!< Return the smaller of the values.
+	static int maximum(int i1,int i2) { return i1>i2? i1 : i2; }	//!< Return the larger of the values.
 	/** @} */
 
 	/** @name Logarithms
@@ -52,10 +52,10 @@ public:
 	static int32_t distance(int32_t x1,int32_t y1,int32_t x2,int32_t y2);
 	static double distance(double x1,double y1,double x2,double y2);
 	static double distance(double x1,double y1,double z1,double x2,double y2,double z2);
-	static double circleArea(double radius) { return PI*radius*radius; }
-	static double sphereArea(double radius) { return 4.*PI*radius*radius; }
-	static double sphereVolume(double radius) { return 4.*PI*radius*radius*radius/3.; }
-	static double radius(double volume) { return nrt((volume*3)/(4*PI),3.); }
+	static double circleArea(double radius);
+	static double sphereArea(double radius);
+	static double sphereVolume(double radius);
+	static double radius(double volume);
 	/** @} */
 
 	/** @name Sum
