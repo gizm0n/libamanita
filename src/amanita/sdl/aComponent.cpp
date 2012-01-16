@@ -62,8 +62,8 @@ char indent[32] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 int indentn = 0;
 
 aComponent::~aComponent() {
-printf("%saComponent::~aComponent(parent=%p,%" PRIx32 ",instance=%p,%" PRIx32 ",x=%d,y=%d,w=%d,h=%d,size=%zu)\n",
-indent,com.p,com.p? ((aClass &)*com.p).getID() : 0,this,((aClass &)*this).getID(),com.x,com.y,com.w,com.h,com.ch? com.ch->size() : 0);
+printf("%saComponent::~aComponent(parent=%p,%" PRIx32 ",instance=%p,%" PRIx32 ",x=%d,y=%d,w=%d,h=%d,size=%lu)\n",
+indent,com.p,com.p? ((aClass &)*com.p).getID() : 0,this,((aClass &)*this).getID(),com.x,com.y,com.w,com.h,(unsigned long)(com.ch? com.ch->size() : 0));
 indent[indentn++] = '\t';
 	if(com.ch) {
 		aComponent *c;

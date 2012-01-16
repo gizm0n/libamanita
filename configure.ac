@@ -7,12 +7,29 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([src/config.h])
 AC_CONFIG_HEADER([config.h])
 
+case "${host}" in
+	*linux*)
+		AM_CXXFLAGS="$AM_CFLAGS -g -Wall -Werror -O0 -fno-strict-aliasing -Wno-uninitialized -Wno-unused-but-set-variable"
+		AM_LDFLAGS="$AM_LDFLAGS"
+		;;
+	i[[3456789]]86-mingw32*)
+		AM_CXXFLAGS="$AM_CFLAGS -g -Wall -Werror -O0 -fno-strict-aliasing -Wno-uninitialized -mms-bitfields"
+		AM_LDFLAGS="$AM_LDFLAGS -Wl,-subsystem,windows"
+		;;
+	*cygwin*)
+		;;
+	*)
+		;;
+esac
+AC_SUBST([AM_CXXFLAGS])
+AC_SUBST([AM_LDFLAGS])
+
 # Checks for programs.
 AC_PROG_CXX
-AC_PROG_CC
 AC_PROG_RANLIB
 
 # Checks for libraries.
+PKG_CHECK_MODULES([DEPS], [gtk+-2.0])
 
 # Checks for header files.
 AC_HEADER_STDC

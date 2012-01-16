@@ -50,15 +50,15 @@
 
 	typedef TCPsocket tcp_socket_t;
 
-#elif defined __linux__
+#elif defined(__linux__)
 	#include <unistd.h>
 	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include <netdb.h>
-	#include <endian.h>
 	#include <string.h>
 	#include <errno.h>
+	#include <amanita/aBytes.h>
 
 	#define tcp_close(s) ::close(s)
 	#define tcp_send(s,d,l) ::send((s),(d),(l),0)
@@ -66,7 +66,16 @@
 
 	typedef int tcp_socket_t;
 
-#endif /* LIBAMANITA_SDL */
+#elif defined(WIN32)
+	#include <winsock2.h>
+	#include <amanita/aBytes.h>
+
+	#define tcp_close(s) ::closesocket(s)
+	#define tcp_send(s,d,l) ::send((s),(const char *)(d),(l),0)
+	#define tcp_recv(s,d,l) ::recv((s),(char *)(d),(l),0)
+
+	typedef SOCKET tcp_socket_t;
+#endif
 
 #undef swap_be_16
 #undef swap_be_32
@@ -84,7 +93,6 @@
 	#define swap_le_64 SDL_SwapLE64
 
 #else
-	#include <byteswap.h>
 	#if __BYTE_ORDER == __BIG_ENDIAN
 		#define swap_be_16(n) n
 		#define swap_be_32(n) n
@@ -312,11 +320,15 @@ protected:
 #ifdef LIBAMANITA_SDL
 	IPaddress address;
 	SDLNet_SocketSet set;
-#elif defined __linux__
+#elif defined(__linux__) || defined(WIN32)
 	fd_set set;
 	hostent *hostinfo;
+#ifdef __linux__
 	sockaddr_in address;
-#endif /* LIBAMANITA_SDL */
+#else
+	SOCKADDR_IN address;
+#endif
+#endif
 	aThread thread;
 
 	void setStarting(bool b) { status |= SOCK_ST_STARTING;if(!b) status ^= SOCK_ST_STARTING; }
@@ -327,13 +339,13 @@ protected:
 	uint8_t *receive(tcp_socket_t s,size_t &l);
 	void releaseMessageBuffer(uint8_t *b) { if(b!=buf) free(b); }
 
-	const char *getError() {
 #ifdef LIBAMANITA_SDL
-		return SDL_GetError();
-#elif defined __linux__
-		return strerror(errno);
-#endif /* LIBAMANITA_SDL */
-	}
+	const char *getError() { return SDL_GetError(); }
+#elif defined(__linux__)
+	const char *getError() { return strerror(errno); }
+#elif defined(WIN32)
+	const char *getError();
+#endif
 
 protected:
 	aSocket(socket_event_handler seh);
@@ -346,6 +358,11 @@ protected:
 
 public:
 	static const char *message_names[];
+
+	/** Initialize network functions. */
+	static void init();
+	/** Close network functions. */
+	static void close();
 
 	static void print_packet(const uint8_t *data,size_t l);
 

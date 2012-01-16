@@ -154,7 +154,7 @@ debug_output("http.get(%s,%s)\n",host,(const char *)files[i]);
 		file = http.get(host,(const char *)files[i]);
 debug_output("http.get()\n");
 		sz = http.getFileSize();
-debug_output("sz=%zu\n",sz);
+debug_output("sz=%lu\n",(unsigned long)sz);
 		fp = fopen(str,"wb");
 		if(sz) sz = fwrite(file,sz,1,fp);
 		fclose(fp);

@@ -24,12 +24,18 @@ uint32_t aServer::id_index = 0;
 aServer::aServer(socket_event_handler seh) : aSocket(seh),_sockets(),_clients(),_main("main"),_channels() {
 #ifdef LIBAMANITA_SDL
 	setsz = 0;
-#elif defined __linux__
-#endif /* LIBAMANITA_SDL */
+#elif defined(__linux__) || defined(WIN32)
+	sockets_n = sockets_cap = 0,sockets = 0;
+#endif
 	_channels.put(_main.getName(),&_main);
 }
 
 aServer::~aServer() {
+#ifdef LIBAMANITA_SDL
+#elif defined(__linux__) || defined(WIN32)
+	if(sockets) free(sockets);
+	sockets_n = sockets_cap = 0,sockets = 0;
+#endif
 	stop();
 }
 
@@ -65,17 +71,33 @@ bool aServer::start(uint16_t p) {
 		}
 	}
 
-#elif defined __linux__
-	if((sock=socket(AF_INET,SOCK_STREAM,0))==-1) stateChanged(SM_ERR_OPEN_SOCKET,0,(intptr_t)getError(),0);
+#elif defined(__linux__) || defined(WIN32)
+#if defined(__linux__)
+	if((sock=socket(AF_INET,SOCK_STREAM,0))==-1)
+#else
+	if((sock=WSASocket(AF_INET,SOCK_STREAM,0,0,0,WSA_FLAG_OVERLAPPED))==INVALID_SOCKET)
+#endif
+		stateChanged(SM_ERR_OPEN_SOCKET,0,(intptr_t)getError(),0);
 	else {
 		address.sin_family = AF_INET;
 		address.sin_addr.s_addr = swap_be_32(INADDR_ANY);
 		address.sin_port = swap_be_16(p);
+#ifdef __linux__
 		int y = 1;
-		if(setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&y,sizeof(int))==-1 ||
+		if(setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,(const char *)&y,sizeof(int))==-1 ||
 				bind(sock,(sockaddr *)&address,sizeof(address))==-1)
+#else
+		int y = 1,n;
+		if(setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,(const char *)&y,sizeof(int))==SOCKET_ERROR ||
+				bind(sock,(SOCKADDR *)&address,sizeof(address))==SOCKET_ERROR)
+#endif
 			stateChanged(SM_ERR_BIND,(intptr_t)&address,(intptr_t)getError(),0);
-		else if(listen(sock,1)==-1)
+#ifdef __linux__
+		else if(listen(sock,SOMAXCONN)==-1)
+#else
+		else if(listen(sock,SOMAXCONN)==SOCKET_ERROR ||
+				ioctlsocket(sock,FIONBIO,(u_long *)&n)==SOCKET_ERROR)
+#endif
 			stateChanged(SM_ERR_LISTEN,(intptr_t)&address,(intptr_t)getError(),0);
 		else {
 			stateChanged(SM_STARTING_SERVER,0,0,0);
@@ -83,7 +105,7 @@ bool aServer::start(uint16_t p) {
 			ret = true;
 		}
 	}
-#endif /* LIBAMANITA_SDL */
+#endif
 
 	setStarting(false);
 	return ret;
@@ -107,19 +129,42 @@ debug_output("aServer::stop(tcp_close)\n");
 	}
 }
 
+#ifdef LIBAMANITA_SDL
+#elif defined(__linux__) || defined(WIN32)
+void aServer::addSocket(tcp_socket_t s) {
+	if(!sockets) sockets_cap = 8,sockets = (tcp_socket_t *)malloc(sizeof(tcp_socket_t)*sockets_cap);
+	else if(sockets_n+1==sockets_cap) sockets_cap <<= 1,sockets = (tcp_socket_t *)realloc(sockets,sockets_cap);
+	sockets[sockets_n++] = s;
+	FD_SET(s,&set);
+}
+
+void aServer::removeSocket(tcp_socket_t s) {
+	size_t i,j;
+	for(i=0; i<sockets_n; i++) if(sockets[i]==s) {
+		for(j=i+1; j<sockets_n; j++) sockets[j-1] = sockets[j];
+		sockets_n--;
+		break;
+	}
+	tcp_close(s);
+	FD_CLR(s,&set);
+}
+#endif
+
+
 void aServer::run() {
 	tcp_socket_t s;
 	aConnection c;
 	uint8_t *b;
 	size_t l;
 #ifdef LIBAMANITA_SDL
-	int n,i;
+	int i,n;
 	createSocketSet(16);
-#elif defined __linux__
+#elif defined(__linux__) || defined(WIN32)
+	size_t i;
 	fd_set test;
 	FD_ZERO(&set);
 	FD_SET(sock,&set);
-#endif /* LIBAMANITA_SDL */
+#endif
 	setRunning(true);
 	while(isRunning()) {
 
@@ -139,7 +184,7 @@ void aServer::run() {
 				releaseMessageBuffer(b);
 			}
 		}
-debug_output("aServer::run(clients=%zu,n=%d)\n",_sockets.size(),n);
+debug_output("aServer::run(clients=%lu,n=%d)\n",(unsigned long)_sockets.size(),n);
 		for(i=_main.size()-1; n>0 && i>=0; i--) {
 			c = (aConnection)_main[i];
 debug_output("aServer::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),c->sock);
@@ -160,29 +205,29 @@ debug_output("aServer::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),c->sock);
 			}
 		}
 
-#elif defined __linux__
+#elif defined(__linux__) || defined(WIN32)
+debug_output("aServer::run(1)\n");
 		test = set;
 		select(FD_SETSIZE,&test,0,0,0);
 
-		for(s=0; s<FD_SETSIZE; s++) {
+		if(FD_ISSET(sock,&test)) {
+debug_output("aServer::run(2)\n");
+			s = accept(sock,0,0);
+			addSocket(s);
+debug_output("aServer::run(3,n=%d,cap=%d)\n",sockets_n,sockets_cap);
+		} else for(i=0; i<sockets_n; i++) {
+			s = sockets[i];
+debug_output("aServer::run(4,i=%d,s=%d (sock=%d))\n",i,s,sock);
 			if(FD_ISSET(s,&test)) {
-				if(s==sock) {
-					s = accept(sock,0,0);
-					b = receive(s,l);
-					if(l>0) c = addClient(s,b,l);
-					else tcp_close(s);
-					releaseMessageBuffer(b);
-					continue;
-				}
+debug_output("aServer::run(5)\n");
+				b = receive(s,l);
 				c = (aConnection)_sockets.get(s);
 				if(!c) {
-					FD_CLR(s,&set);
-					tcp_close(s);
-					continue;
-				}
+debug_output("aServer::run(6,s=%d (sock=%d))\n",s,sock);
+					if(l>0) c = addClient(s,b,l);
+					else removeSocket(s);
+				} else if(l>0) {
 debug_output("aServer::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),(void *)c->sock);
-				b = receive(c->sock,l);
-				if(l>0) {
 #ifndef SOCKET_NOCIPHER
 #ifdef SOCKET_HEADER_INCLUDED
 					if(c->key) XORcipher(&b[SOCKET_HEADER],&b[SOCKET_HEADER],l-SOCKET_HEADER,c->key,c->keylen);
@@ -196,8 +241,12 @@ debug_output("aServer::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),(void *)c->sock
 			}
 		}
 
-#endif /* LIBAMANITA_SDL */
+#endif
 	}
+#ifdef LIBAMANITA_SDL
+#elif defined(__linux__) || defined(WIN32)
+	free(sockets);
+#endif
 }
 
 void aServer::changeNick(uint32_t id,const char *nick) {
@@ -236,10 +285,10 @@ debug_output("aServer::deleteChannel(name=%s)\n",ch);
 
 void aServer::leaveChannel(aChannel ch,aConnection c) {
 	if(ch && c) {
-debug_output("aServer::leaveChannel(1,name=%s,size(%zu))\n",ch->getName(),ch->size());
+debug_output("aServer::leaveChannel(1,name=%s,size(%lu))\n",ch->getName(),(unsigned long)ch->size());
 		*ch -= c;
 		c->leaveChannel(ch);
-debug_output("aServer::leaveChannel(2,size(%zu))\n",ch->size());
+debug_output("aServer::leaveChannel(2,size(%lu))\n",(unsigned long)ch->size());
 		if(ch->size()==0) deleteChannel(ch->getName());
 	}
 }
@@ -264,9 +313,7 @@ debug_output("aServer::addClient(id=%" PRIu32 ",nick=%s)\n",id,nick);
 #ifdef LIBAMANITA_SDL
 		if(_main.size()+1>setsz) createSocketSet();
 		SDLNet_TCP_AddSocket(set,s);
-#elif defined __linux__
-		FD_SET(s,&set);
-#endif /* LIBAMANITA_SDL */
+#endif
 		{ // Respond directly with ID and nick.
 debug_output("aServer::addClient(respond)\n");
 			uint8_t data[SOCKET_HEADER+5+strlen(nick)],*p = data;
@@ -292,10 +339,10 @@ debug_output("aServer::killClient(id=%" PRIu32 ")\n",c->id);
 			leaveChannel((aChannel)c->_channels[i],c);
 #ifdef LIBAMANITA_SDL
 	SDLNet_TCP_DelSocket(set,c->sock);
-#elif defined __linux__
-	FD_CLR(c->sock,&set);
-#endif /* LIBAMANITA_SDL */
 	tcp_close(c->sock);
+#elif defined(__linux__) || defined(WIN32)
+	removeSocket(c->sock);
+#endif
 	stateChanged(SM_KILL_CLIENT,(intptr_t)c,0,0);
 	delete c;
 debug_output("aServer::killClient(done)\n");
@@ -322,8 +369,7 @@ debug_output("aServer::killAllClients()\n");
 #ifdef LIBAMANITA_SDL
 	SDLNet_FreeSocketSet(set);
 	set = 0;
-#elif defined __linux__
-#endif /* LIBAMANITA_SDL */
+#endif
 }
 
 
@@ -332,7 +378,7 @@ void aServer::createSocketSet(int n) {
 	setsz = n;
 	if(set) SDLNet_FreeSocketSet(set);
 	if(_main.size()+1>setsz) setsz = (_main.size()+1)*2;
-debug_output("aServer::createSocketSet(setsz=%zu)\n",setsz);
+debug_output("aServer::createSocketSet(setsz=%lu)\n",(unsigned long)setsz);
 	set = SDLNet_AllocSocketSet(setsz);
 	if(!set) stateChanged(SM_ERR_ALLOC_SOCKETSET,0,(intptr_t)getError(),0);
 	else {
@@ -349,8 +395,7 @@ debug_output("aServer::createSocketSet(error=%s)\n",SDLNet_GetError());
 		}
 	}
 }
-#elif defined __linux__
-#endif /* LIBAMANITA_SDL */
+#endif
 
 
 int aServer::send(aConnection c,uint8_t *d,size_t l) {
@@ -392,8 +437,8 @@ void aServer::send(aChannel channel,uint8_t *d,size_t l) {
 	tcp_socket_header_len_t n = SOCKET_HEADER_LEN_SWAP(l);
 #endif /*SOCKET_HEADER_INCLUDED*/
 	aConnection c;
-debug_output("aServer::send(l=%zu,cmd=%d,len=%d)\n",
-		l,(int)*d,SOCKET_HEADER_LEN_SWAP(*SOCKET_HEADER_LEN_TYPE(d+SOCKET_OFFSET)));
+debug_output("aServer::send(l=%lu,cmd=%d,len=%d)\n",
+		(unsigned long)l,(int)*d,SOCKET_HEADER_LEN_SWAP(*SOCKET_HEADER_LEN_TYPE(d+SOCKET_OFFSET)));
 debug_output("aServer::send(lock)\n");
 	lock();
 debug_output("aServer::send(channel->size=%d)\n",(int)channel->size());

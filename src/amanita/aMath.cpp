@@ -60,6 +60,11 @@ double aMath::distance(double x1,double y1,double z1,double x2,double y2,double 
 	return d==0.? z : (z==0.? d : pythagoras(d,z));
 }
 
+double aMath::circleArea(double radius) { return PI*radius*radius; }
+double aMath::sphereArea(double radius) { return 4.*PI*radius*radius; }
+double aMath::sphereVolume(double radius) { return 4.*PI*radius*radius*radius/3.; }
+double aMath::radius(double volume) { return nrt((volume*3)/(4*PI),3.); }
+
 long aMath::sum(long min,long max) {
 	if(min==max) return min;
 	if(min>max) min ^= max,max ^= min,min ^= max;

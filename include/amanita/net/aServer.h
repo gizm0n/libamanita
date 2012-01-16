@@ -167,8 +167,10 @@ private:
 
 #ifdef LIBAMANITA_SDL
 	size_t setsz;					//!< SDL_SocketSet set, allocated size.
-#elif defined __linux__
-#endif /* LIBAMANITA_SDL */
+#elif defined(__linux__) || defined(WIN32)
+	size_t sockets_n,sockets_cap;
+	tcp_socket_t *sockets;
+#endif
 	aHashtable _sockets;			//!< All sockets connected to this server. Stored as socket=>aConnection.
 	aHashtable _clients;			//!< All clients connected to this server. Stored as ID=>aConnection.
 	aServerChannel _main;		//!< Main channel, contains all clients connected to this server.
@@ -183,8 +185,10 @@ private:
 	aConnection addClient(tcp_socket_t s,uint8_t *d,size_t l);
 #ifdef LIBAMANITA_SDL
 	void createSocketSet(int n=0);
-#elif defined __linux__
-#endif /* LIBAMANITA_SDL */
+#elif defined(__linux__) || defined(WIN32)
+	void addSocket(tcp_socket_t s);
+	void removeSocket(tcp_socket_t s);
+#endif
 	bool uniqueID(uint32_t id) { return _clients.get(id)==0; }
 	void killClient(uint32_t id) { killClient((aConnection)_clients.get(id)); }
 	void killClient(const char *nick) { killClient((aConnection)_clients.get(nick)); }

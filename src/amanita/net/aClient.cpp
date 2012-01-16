@@ -59,8 +59,12 @@ debug_output("start(\"%s\",%d)\n",h,p);
 		else {
 			ip = swap_be_32(address.host);
 
-#elif defined __linux__
+#elif defined(__linux__) || defined(WIN32)
+#ifdef __linux__
 	if((sock=socket(AF_INET,SOCK_STREAM,0))==-1)
+#else
+	if((sock=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))==INVALID_SOCKET)
+#endif
 		stateChanged(SM_ERR_OPEN_SOCKET,0,(intptr_t)getError(),0);
 	else if(!(hostinfo=gethostbyname(host)))
 		stateChanged(SM_ERR_RESOLVE_HOST,0,(intptr_t)getError(),0);
@@ -68,13 +72,17 @@ debug_output("start(\"%s\",%d)\n",h,p);
 		address.sin_addr = *(in_addr *)*hostinfo->h_addr_list;
 		address.sin_family = AF_INET;
 		address.sin_port = swap_be_16(p);
+#ifdef __linux__
 		if(connect(sock,(sockaddr *)&address,sizeof(address))<0)
+#else
+		if(connect(sock,(SOCKADDR *)&address,sizeof(SOCKADDR_IN))!=0)
+#endif
 			stateChanged(SM_ERR_CONNECT,0,(intptr_t)getError(),0);
 		else {
 			ip = swap_be_32(address.sin_addr.s_addr);
 			FD_ZERO(&set);
 			FD_SET(sock,&set);
-#endif /* LIBAMANITA_SDL */
+#endif
 
 #ifdef SOCKET_HEADER_INCLUDED
 debug_output("start(SOCKET_HEADER_INCLUDED)\n");
@@ -114,10 +122,9 @@ void aClient::stop(bool kill) {
 void aClient::run() {
 	int n;
 #ifdef LIBAMANITA_SDL
-#elif defined __linux__
-	int s;
+#elif defined(__linux__) || defined (WIN32)
 	fd_set test;
-#endif /* LIBAMANITA_SDL */
+#endif
 	uint8_t *d;
 	size_t l;
 	setRunning(true);
@@ -131,7 +138,7 @@ debug_output("aClient::run(n=%d)\n",n);
 		}
 		if(n && SDLNet_SocketReady(sock)) {
 
-#elif defined __linux__
+#elif defined(__linux__) || defined(WIN32)
 		test = set;
 		n = select(FD_SETSIZE,&test,0,0,0);
 		if(n==-1) {
@@ -139,13 +146,12 @@ debug_output("aClient::run(n=%d)\n",n);
 			break;
 		}
 		if(!n) continue;
-		for(s=0; s<FD_SETSIZE; s++) {
-			if(!FD_ISSET(s,&test)) continue;
-#endif /* LIBAMANITA_SDL */
+		if(FD_ISSET(sock,&test)) {
+#endif
 
 debug_output("aClient::run(receive)\n");
 			d = receive(sock,l);
-debug_output("aClient::run(l=%zu)\n",l);
+debug_output("aClient::run(l=%lu)\n",(unsigned long)l);
 			if(l>0) {
 				if(isStarting()) {
 					uint8_t *p = d+SOCKET_HEADER;

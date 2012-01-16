@@ -18,7 +18,7 @@
 	typedef TCPsocket http_socket_t;
 	typedef int http_clock_t;
 
-#elif defined __linux__
+#elif defined(__linux__)
 	#include <unistd.h>
 	#include <sys/types.h>
 	#include <sys/socket.h>
@@ -35,7 +35,19 @@
 	typedef int http_socket_t;
 	typedef clock_t http_clock_t;
 
-#endif /* LIBAMANITA_SDL */
+#elif defined(WIN32)
+	#include <winsock2.h>
+	#include <time.h>
+
+	#define http_close(s) ::closesocket(s)
+	#define http_send(s,d,l) ::send((s),(d),(l),0)
+	#define http_recv(s,d,l) ::recv((s),(d),(l),0)
+	#define http_clock clock
+
+	typedef SOCKET http_socket_t;
+	typedef clock_t http_clock_t;
+
+#endif
 
 #include <amanita/aApplication.h>
 #include <amanita/aString.h>
@@ -308,23 +320,35 @@ debug_output("aHttp::request(host=%s,url=%s)\n",host,url);
 		else if(SDLNet_TCP_AddSocket(set,sock)==-1) error = 4;
 		else {
 
-#elif defined __linux__
-	int sock;
+#elif defined(__linux__) || defined(WIN32)
+	http_socket_t sock;
 	hostent *hostinfo;
+#ifdef __linux__
 	sockaddr_in address;
+#else
+	SOCKADDR_IN address;
+#endif
 	fd_set set,test;
+#ifdef __linux__
 	if((sock=socket(AF_INET,SOCK_STREAM,0))==-1) error = 1;
+#else
+	if((sock=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))==INVALID_SOCKET) error = 1;
+#endif
 	else if(!(hostinfo=gethostbyname(host))) error = 2;
 	else {
 		address.sin_addr = *(in_addr *)*hostinfo->h_addr_list;
 		address.sin_family = AF_INET;
 		address.sin_port = htons(80);
 
+#ifdef __linux__
 		if(connect(sock,(sockaddr *)&address,sizeof(address))<0) error = 3;
+#else
+		if(connect(sock,(SOCKADDR *)&address,sizeof(SOCKADDR_IN))!=0) error = 3;
+#endif
 		else {
 			FD_ZERO(&set);
 			FD_SET(sock,&set);
-#endif /* LIBAMANITA_SDL */
+#endif
 
 			char buf[2049];
 			t2 = http_clock();
@@ -332,7 +356,7 @@ debug_output("aHttp::request(host=%s,url=%s)\n",host,url);
 				if(!headers.contains(http_headers[HTTP_HOST])) headers.put(http_headers[HTTP_HOST],host);
 				if(!headers.contains(http_headers[HTTP_CONNECTION])) headers.put(http_headers[HTTP_CONNECTION],"close");
 				if(data && len==0) len = strlen(data);
-				sprintf(buf,"%zu",len);
+				sprintf(buf,"%lu",(unsigned long)len);
 				headers.put(http_headers[HTTP_CONTENT_LENGTH],buf);
 				aString header(2048);
 				header.append(http_methods[method]).append(" /").append(url).append(" HTTP/1.1\r\n");
@@ -340,9 +364,9 @@ debug_output("aHttp::request(host=%s,url=%s)\n",host,url);
 				while(iter.next())
 					header.append((const char *)iter.key()).append(": ").append((const char *)iter.value()).append("\r\n");
 				header.append("\r\n");
-debug_output("aHttp::request(header=\"%s\",len=%zu)\n",header.toCharArray(),header.length());
+debug_output("aHttp::request(header=\"%s\",len=%lu)\n",header.toCharArray(),(unsigned long)header.length());
 				if(data && len) {
-debug_output("aHttp::request(data=\"%s\",len=%zu)\n",data,len);
+debug_output("aHttp::request(data=\"%s\",len=%lu)\n",data,(unsigned long)len);
 					http_send(sock,header.toCharArray(),header.length());
 					http_send(sock,data,len+1);
 				} else http_send(sock,header.toCharArray(),header.length()+1);
@@ -354,12 +378,12 @@ debug_output("aHttp::request(data=\"%s\",len=%zu)\n",data,len);
 			if(SDLNet_CheckSockets(set,(uint32_t)-1)<=0) error = 5;
 			else {
 
-#elif defined __linux__
+#elif defined(__linux__) || defined(WIN32)
 			test = set;
 			select(FD_SETSIZE,&test,0,0,0);
 			if(!FD_ISSET(sock,&test)) error = 5;
 			else {
-#endif /* LIBAMANITA_SDL */
+#endif
 
 				t4 = http_clock();
 				int r = http_recv(sock,buf,2048);
@@ -502,15 +526,16 @@ debug_output("aHttp::request(r=%d)\n",r);
 	}
 #ifdef LIBAMANITA_SDL
 	if(set) SDLNet_FreeSocketSet(set);
-#elif defined __linux__
-#endif /* LIBAMANITA_SDL */
+#endif
 	if(error>0) {
 		body.clear();
 #ifdef LIBAMANITA_SDL
 		fprintf(stderr,"HTTP Error %d: %s\n",error,SDLNet_GetError());
-#elif defined __linux__
+#elif defined(__linux__)
 		perror("HTTP Error");
-#endif /* LIBAMANITA_SDL */
+#elif defined(WIN32)
+		fprintf(stderr,"HTTP Error %d: %d\n",error,WSAGetLastError());
+#endif
 		fflush(stderr);
 		body.free();
 	}
@@ -518,8 +543,8 @@ debug_output("aHttp::request(r=%d)\n",r);
 	clearForm();
 
 fprintf(stdout,"Time alltogether: %d\nTime to init: %d\nTime to send: %d\nTime until response: %d\nTime to download: %d\n"
-	"header[%s]\nlen=%zu\nver=%.1f\nstatus=%d\n",
-	(int)(t5-t1),(int)(t2-t1),(int)(t3-t2),(int)(t4-t3),(int)(t5-t4),response.getString("Header"),body.length(),ver,status);
+	"header[%s]\nlen=%lu\nver=%.1f\nstatus=%d\n",
+	(int)(t5-t1),(int)(t2-t1),(int)(t3-t2),(int)(t4-t3),(int)(t5-t4),response.getString("Header"),(unsigned long)body.length(),ver,status);
 fflush(stdout);
 	return body.toCharArray();
 }

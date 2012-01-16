@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include <inttypes.h>
-#include <endian.h>
+#include <amanita/aBytes.h>
 #include <amanita/aMath.h>
 #include <amanita/aString.h>
 #include <amanita/aRandom.h>
@@ -513,7 +513,7 @@ void aInteger::print(FILE *fp) const {
 	} else if(len==1) printf("%" PRIu32,*num);
 	else for(long i=len-1; i>=0l; i--) fprintf(fp,i==(long)len-1? "%" PRIX32 : "%08" PRIX32,num[i]);
 	//fprintf(fp,"[%lu,%p:%p]",len*32,this,num);
-	//fprintf(fp,"[%zu]",len);
+	//fprintf(fp,"[%lu]",(unsigned long)len);
 	fflush(fp);
 }
 

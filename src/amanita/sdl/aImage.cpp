@@ -463,7 +463,7 @@ bool aImage::save(const char *fn,SDL_Surface *s) {
 			if(png_ptr) {
 				png_infop info_ptr = png_create_info_struct(png_ptr);
 				if(info_ptr) {
-					if(!setjmp(png_ptr->jmpbuf)) {
+					//if(!setjmp(png_ptr->jmpbuf)) {
 						png_init_io(png_ptr,fp);
 						int c = PNG_COLOR_MASK_COLOR; /* grayscale not supported */
 						if(s->format->palette) c |= PNG_COLOR_MASK_PALETTE;
@@ -516,7 +516,7 @@ bool aImage::save(const char *fn,SDL_Surface *s) {
 						}
 						png_write_end(png_ptr,info_ptr);
 						ret = true;
-					}
+					//}
 				} else fprintf(stderr,"png_create_info_struct error!\n");
 				png_destroy_write_struct(&png_ptr,&info_ptr);
 			} else fprintf(stderr,"png_create_write_struct error!\n");
