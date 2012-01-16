@@ -37,7 +37,7 @@ sudo apt-get install build-essential \
    mingw32-binutils \
    mingw32-runtime
 }}}
-Now look in your /usr map (terminal: "ls -la /usr"), there should be a map called "i586-mingw32msvc" or similar (an alternative may be "i686-pc-mingw32"). This map consists of the cross compile environment with MinGW binaries, DLLs, libraries and headers. Place all cross compile libraries in this map, look at MSYS below for where to find dependencies.
+Now look in your /usr map (terminal: "ls -la /usr"), there should be a map called "i586-mingw32msvc" or similar (alternatives may be "i686-pc-mingw32" or similar). This map consists of the cross compile environment with MinGW binaries, DLLs, libraries and headers. Place all cross compile libraries in this map, look at MSYS below for where to find dependencies.
 Add parameters for ./configure (adjust for your version of MinGW-cross-compile environment):
 {{{
 ./configure --target=i586-mingw32msvc --host=i586-mingw32msvc --prefix=/usr/i586-mingw32msvc
