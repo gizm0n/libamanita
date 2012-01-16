@@ -4,11 +4,11 @@
 Here follows instructions on how to compile and install on different platforms.
 
 ==Linux==
-===The Linux way===
-To download, compile and install on *linux*, open a terminal and run the following sequence of commands:
+===autotools===
+To download, compile and install, open a terminal and run the following sequence of commands:
 {{{
-sudo aptitude update
-sudo aptitude install build-essential \
+sudo apt-get update
+sudo apt-get install build-essential \
    libsdl1.2-dev \
    libsdl-net1.2-dev \
    libsdl-ttf2.0-dev \
@@ -28,10 +28,24 @@ cd ..
 rm -r libamanita
 }}}
 
+===Cross Compile on Linux with MinGW for Windows===
+It builds well with no need for modifications in the code, simply setup the cross-compile environment and run ./configure && make, with proper flags. In a terminal setup like so:
+{{{
+sudo apt-get update
+sudo apt-get install build-essential \
+   mingw32 \
+   mingw32-binutils \
+   mingw32-runtime
+}}}
+Now look in your /usr map (terminal: "ls -la /usr"), there should be a map called "i586-mingw32msvc" or similar (an alternative may be "i686-pc-mingw32"). This map consists of the cross compile environment with MinGW binaries, DLLs, libraries and headers. Place all cross compile libraries in this map, look at MSYS below for where to find dependencies.
+Add parameters for ./configure (adjust for your version of MinGW-cross-compile environment):
+{{{
+./configure --target=i586-mingw32msvc --host=i586-mingw32msvc --prefix=/usr/i586-mingw32msvc
+}}}
 
 ==Windows==
-===The MSYS way===
-For *windows* users, it's the same principles, therer are two alternatives. Either, if you install MinGW and MSYS, you can use the autotools and then you will have to install the dependencies manually. You can find everything you need here:
+===MSYS===
+For *windows* users, it's the same principles, there are two alternatives. Either, if you install MinGW and MSYS, you can use the autotools and then you will have to install the dependencies manually, or download [http://devpaks.org/ DevPaks], unzip and place in the MinGW-folder. You can find everything you need here:
  http://sourceforge.net/projects/mingw/files
 
  http://www.libsdl.org/download-1.2.php
@@ -43,14 +57,20 @@ For *windows* users, it's the same principles, therer are two alternatives. Eith
  http://www.libsdl.org/projects/SDL_image
 
  http://www.sqlite.org/download.html
+Run configure with MinGW-prefix, like so (adjust for where your MinGW is installed):
+{{{
+./configure --prefix=C:/MinGW
+}}}
 
-===The Dev-C++ way===
+===Dev-C++===
 The other alternative, that is slightly more simple, is to use the available Devpaks for the libraries SDL-1.2, SDL_net, SDL_ttf, SDL_image and sqlite3 that you can find here:
  http://devpaks.org/
 
 You can use Devpaks with any MinGW distribution, including Dev-C++, Code::Blocks etc. In fact, there is a libamanita.dev file among the sources that opens a project in Dev-C++. You may find and download Dev-C++ here:
  http://www.bloodshed.net/dev/
 
+==Mac OSX==
+Not tested to build on mac yet.
 
 ==Dependencies==
   * libsdl1.2-dev
