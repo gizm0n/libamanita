@@ -1,0 +1,94 @@
+
+#include <stdio.h>
+#include <amanita/net/aServer.h>
+
+aServer *server;
+
+void send_server_message(aConnection c,const char *format, ...) {
+	uint8_t data[SOCKET_HEADER+257],*p = data;
+	pack_header(&p,0);
+	va_list args;
+   va_start(args,format);
+	vsnprintf((char *)p,256,format,args);
+   va_end(args);
+	if(*p) server->send(c,data,SOCKET_HEADER+strlen((const char *)p)+1);
+}
+
+uint32_t server_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t p3) {
+	switch(st) {
+		case SM_ERR_RESOLVE_HOST:
+		case SM_ERR_OPEN_SOCKET:
+		case SM_ERR_CONNECT:
+		case SM_ERR_BIND:
+		case SM_ERR_LISTEN:
+		case SM_ERR_ADD_SOCKET:
+		case SM_ERR_ALLOC_SOCKETSET:
+		case SM_ERR_CHECK_SOCKETS:
+		case SM_ERR_GET_MESSAGE:
+		case SM_ERR_PUT_MESSAGE:
+			fprintf(stderr,"Server error: %u[%s] %s\n",st,aSocket::message_names[st],(const char *)p2);
+			fflush(stderr);
+			break;
+		case SM_CHECK_NICK:
+			printf("Check nick: %s\n",*(char **)p1);
+			fflush(stdout);
+			return 1;
+		case SM_DUPLICATE_ID:
+			printf("server_listener(SM_DUPLICATE_ID)\n");
+			fflush(stdout);
+			return 1;
+		case SM_STARTING_SERVER:
+		{
+			uint32_t ipaddr = server->getIP();
+			printf("Starting server...\nIP address: %d.%d.%d.%d\nPort: %d\n",
+					ipaddr>>24,(ipaddr>>16)&0xff,(ipaddr>>8)&0xff,ipaddr&0xff,server->getPort());
+			fflush(stdout);
+			break;
+		}
+		case SM_STOPPING_SERVER:
+			printf("Stopping server...\n");
+			fflush(stdout);
+			break;
+		case SM_ADD_CLIENT:
+		{
+			printf("Add Client.\n");
+			fflush(stdout);
+			aConnection c = (aConnection)p1;
+			/* Add handling of new client here; store client data, send list of clients etc. */
+			c->setActive(true);
+			send_server_message(0,"%s joined.",c->getNick());
+			break;
+		}
+		case SM_KILL_CLIENT:
+		{
+			aConnection c = (aConnection)p1;
+			c->setActive(false);
+			printf("Kill Client.\n");
+			fflush(stdout);
+			send_server_message(0,"%s left.",c->getNick());
+			break;
+		}
+		case SM_GET_MESSAGE:
+		{
+			uint8_t *data = (uint8_t *)p2,cmd;
+			unpack_header(&data,cmd);
+			fprintf(stdout,"Receive message: %s\n",data);
+			fflush(stdout);
+			server->send((uint8_t *)p2,(size_t)p3);
+			break;
+		}
+	}
+	return 0;
+}
+
+int main(int argc, char *argv[]) {
+	char text[1024];
+	InitNetwork();
+	server = new aServer(server_listener);
+	server->start(2012);
+	gets(text);
+	server->stop();
+	delete(server);
+	UninitNetwork();
+}
+

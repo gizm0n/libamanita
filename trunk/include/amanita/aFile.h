@@ -33,14 +33,6 @@ private:
 	FILE *file;
 
 public:
-	static bool exists(const char *fn);
-	static time_t accessed(const char *fn);
-	static time_t modified(const char *fn);
-	static long copy(const char *s,const char *d);
-	static long copy(FILE *s,FILE *d);
-	static bool remove(const char *dn);
-	static bool mkdir(const char *dn,int p=0700);
-
 	aFile() : dir(0),name(0),file(0) {}
 	~aFile() { close(); }
 
@@ -53,6 +45,22 @@ public:
 	aFile &read(char **data,size_t &len);
 	aFile &write(const char *data,size_t len);
 	size_t size();
+
+
+	static bool exists(const char *fn);
+	static time_t accessed(const char *fn);
+	static time_t modified(const char *fn);
+	static long copy(const char *s,const char *d);
+	static long copy(FILE *s,FILE *d);
+	static bool remove(const char *dn);
+	static bool mkdir(const char *dn,int p=0700);
+
+	static void getExecutable(char *dir,int l);
+	static void getHomeDir(char *dir,int l);
+	static void getApplicationDir(char *dir,int l);
+	static void getFontsDir(char *dir,int l);
+	static void getSystemDir(char *dir,int l);
+	static void getCurrentDir(char *dir,int l);
 };
 
 

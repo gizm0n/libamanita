@@ -13,6 +13,23 @@
 #include <stdlib.h>
 #include <amanita/aThread.h>
 
+#ifndef WIN32
+/** Initialize network functions. */
+bool InitNetwork();
+/** Uninitialize network functions. */
+bool UninitNetwork();
+
+#else
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+/** Initialize network functions. */
+bool WINAPI InitNetwork();
+/** Uninitialize network functions. */
+bool WINAPI UninitNetwork();
+#endif
+
+
 /** Set LIBAMANITA_SOCKET_HEADER to the sizeof the header in number of bytes.
  * Is can be 2 to 8 bytes and defines the size of the length parameter in the
  * header and the offset the lenth parameter is placed. I.e. if it's set to
@@ -37,6 +54,11 @@
 #if 0
 #define LIBAMANITA_NOCIPHER
 #endif
+
+
+/** Timeout in microseconds for select-function, for both aServer and aClient.
+ */
+#define LIBAMANITA_SELECT_TIMEOUT 100000
 
 
 #ifdef LIBAMANITA_SDL
@@ -189,33 +211,33 @@
 #endif
 
 enum {
-	SM_ERR_RESOLVE_HOST			= 1,
-	SM_ERR_OPEN_SOCKET,
-	SM_ERR_CONNECT,
-	SM_ERR_BIND,
-	SM_ERR_LISTEN,
-	SM_ERR_ADD_SOCKET,
-	SM_ERR_ALLOC_SOCKETSET,
-	SM_ERR_CHECK_SOCKETS,
-	SM_ERR_GET_MESSAGE,
-	SM_ERR_PUT_MESSAGE,
+	SM_ERR_RESOLVE_HOST			= 1,	//!< Error: Can't resolve host. [no thread]
+	SM_ERR_OPEN_SOCKET,					//!< Error: Cannot open socket. [no thread]
+	SM_ERR_CONNECT,						//!< Error: Connecting socket. [no thread]
+	SM_ERR_BIND,							//!< Error: Can't bind server socket. [no thread]
+	SM_ERR_LISTEN,							//!< Error: Listen. [no thread]
+	SM_ERR_ADD_SOCKET,					//!< Error: Adding socket. [no thread]
+	SM_ERR_ALLOC_SOCKETSET,				//!< Error: Allocating socket set. [SDL spec] [no thread]
+	SM_ERR_CHECK_SOCKETS,				//!< Error: Checking socket. [SDL spec] [within thread]
+	SM_ERR_GET_MESSAGE,					//!< Error: Getting message. Deprecated. [within thread]
+	SM_ERR_PUT_MESSAGE,					//!< Error: Sending message. Deprecated. [no thread]
 
-	SM_RESOLVE_HOST,
-	SM_STARTING_SERVER,
-	SM_STOPPING_SERVER,
-	SM_STARTING_CLIENT,
-	SM_STOPPING_CLIENT,
-	SM_CHECK_NICK,
-	SM_DUPLICATE_ID,
-	SM_ADD_CLIENT,
-	SM_KILL_CLIENT,
-	SM_GET_MESSAGE,
+	SM_RESOLVE_HOST,						//!< Message containing host info. [no thread]
+	SM_STARTING_SERVER,					//!< Starting up server. [no thread]
+	SM_STOPPING_SERVER,					//!< Stopping server. [no thread]
+	SM_STARTING_CLIENT,					//!< Starting client. [no thread]
+	SM_STOPPING_CLIENT,					//!< Stopping client. [no thread]
+	SM_CHECK_NICK,							//!< Check if nick is ok, or correct it. [within thread]
+	SM_DUPLICATE_ID,						//!< Message sent if connection has duplicate id. [within thread]
+	SM_ADD_CLIENT,							//!< Add new client. [within thread]
+	SM_KILL_CLIENT,						//!< Kill client. [within thread]
+	SM_GET_MESSAGE,						//!< Get message. [within thread]
 };
 
 enum {
-	SOCK_ST_STARTING				= 1,
-	SOCK_ST_RUNNING				= 2,
-	SOCK_ST_STOPPING				= 4,
+	SOCK_ST_STARTING				= 1,	//!<
+	SOCK_ST_RUNNING				= 2,	//!<
+	SOCK_ST_STOPPING				= 4,	//!<
 };
 
 
@@ -358,11 +380,6 @@ protected:
 
 public:
 	static const char *message_names[];
-
-	/** Initialize network functions. */
-	static void init();
-	/** Close network functions. */
-	static void close();
 
 	static void print_packet(const uint8_t *data,size_t l);
 

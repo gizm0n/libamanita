@@ -7,29 +7,44 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([src/config.h])
 AC_CONFIG_HEADER([config.h])
 
-case "${host}" in
+AC_CANONICAL_HOST
+case "$host" in
 	*linux*)
-		AM_CXXFLAGS="$AM_CFLAGS -g -Wall -Werror -O0 -fno-strict-aliasing -Wno-uninitialized -Wno-unused-but-set-variable"
-		AM_LDFLAGS="$AM_LDFLAGS"
+		PKG_CHECK_MODULES([DEPS],[gtk+-2.0 webkit-1.0])
+		AM_CFLAGS="-g -Wall -Werror -O0 -fno-strict-aliasing -Wno-uninitialized -Wno-unused-but-set-variable"
+		AM_CXXFLAGS="$AM_CFLAGS"
+		AM_LDFLAGS=""
+		EXAMPLES_LDFLAGS="-pthread"
+		EXAMPLES_LIBS=" -lm"
 		;;
-	i[[3456789]]86-mingw32*)
-		AM_CXXFLAGS="$AM_CFLAGS -g -Wall -Werror -O0 -fno-strict-aliasing -Wno-uninitialized -mms-bitfields"
-		AM_LDFLAGS="$AM_LDFLAGS -Wl,-subsystem,windows"
-		;;
-	*cygwin*)
+	*mingw32*)
+		AM_CFLAGS="-g -Wall -Werror -O0 -fno-strict-aliasing -Wno-uninitialized -mms-bitfields"
+		AM_CXXFLAGS="$AM_CFLAGS"
+		AM_LDFLAGS="-Wl,-subsystem,windows"
+		EXAMPLES_LDFLAGS=""
+		EXAMPLES_LIBS="-lws2_32 -lcomctl32 -lwinmm -lole32 -loleaut32 -luuid"
 		;;
 	*)
+		AM_CFLAGS="$AM_CFLAGS"
+		AM_CXXFLAGS="$os_cflags"
+		AM_LDFLAGS=""
+		EXAMPLES_LDFLAGS=""
+		EXAMPLES_LIBS=""
 		;;
 esac
+AC_SUBST([AM_CFLAGS])
 AC_SUBST([AM_CXXFLAGS])
 AC_SUBST([AM_LDFLAGS])
+AC_SUBST([EXAMPLES_LDFLAGS])
+AC_SUBST([EXAMPLES_LIBS])
+
 
 # Checks for programs.
+AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
 
 # Checks for libraries.
-PKG_CHECK_MODULES([DEPS], [gtk+-2.0])
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -54,6 +69,9 @@ AC_FUNC_REALLOC
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([floor memset pow sqrt strchr strdup strpbrk strstr strnicmp])
 
-AC_OUTPUT([Makefile bin/Makefile])
+AC_OUTPUT([
+	Makefile
+	bin/Makefile
+])
 
 
