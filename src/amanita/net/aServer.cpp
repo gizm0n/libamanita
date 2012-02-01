@@ -19,7 +19,7 @@ void aServerConnection::setKey(const uint32_t *k,size_t l) {
 
 
 
-uint32_t aServer::id_index = 0;
+uint32_t aServer::id_index = 0xffff;
 
 aServer::aServer(socket_event_handler seh) : aSocket(seh),_sockets(),_clients(),_main("main"),_channels() {
 #ifdef LIBAMANITA_SDL
@@ -161,9 +161,11 @@ void aServer::run() {
 	createSocketSet(16);
 #elif defined(__linux__) || defined(WIN32)
 	size_t i;
+	int n;
 	fd_set test;
 	FD_ZERO(&set);
 	FD_SET(sock,&set);
+	timeval timeout = { 0,LIBAMANITA_SELECT_TIMEOUT };
 #endif
 	setRunning(true);
 	while(isRunning()) {
@@ -206,10 +208,15 @@ debug_output("aServer::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),c->sock);
 		}
 
 #elif defined(__linux__) || defined(WIN32)
-debug_output("aServer::run(1)\n");
 		test = set;
-		select(FD_SETSIZE,&test,0,0,0);
+		n = select(FD_SETSIZE,&test,0,0,&timeout);
+		if(n==-1) {
+			stateChanged(SM_ERR_CHECK_SOCKETS,0,(intptr_t)getError(),0);
+			break;
+		}
+		if(!n) continue;
 
+debug_output("aServer::run(1)\n");
 		if(FD_ISSET(sock,&test)) {
 debug_output("aServer::run(2)\n");
 			s = accept(sock,0,0);
@@ -243,10 +250,6 @@ debug_output("aServer::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),(void *)c->sock
 
 #endif
 	}
-#ifdef LIBAMANITA_SDL
-#elif defined(__linux__) || defined(WIN32)
-	free(sockets);
-#endif
 }
 
 void aServer::changeNick(uint32_t id,const char *nick) {

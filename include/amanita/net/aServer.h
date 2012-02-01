@@ -216,7 +216,7 @@ public:
 	 * @{ */
 	bool start(const char *con);
 	bool start(uint16_t p);
-	void stop(bool kill=true);
+	void stop(bool kill=false);
 	/** @} */
 
 	/** @name Client

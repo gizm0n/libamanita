@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #include <sys/time.h>
 #include <esoteric/astro/horoscope.h>
 
@@ -83,33 +84,46 @@ char *astro_write_latitude(char *str,double c) {
 
 int main(int argc,char *argv[]) {
 	char deg[33];
-	int i,j,x,y,sign,m,n,*p;
-	double l,lon,lat;
-	long t;
+	int i,j,x,y/*,sign*/,n;
+	int year,month,day,hour,minute,second;
+	double /*l,*/lon = 0,lat = 0,tz = 0,dst = 0;
+	long usec;
+	time_t t = time(0);
+	struct tm *now = localtime(&t);
 	struct timeval tv;
-	struct timezone tz;
 	astronomy *a;
 	horoscope *h;
-	astronomy_planet *p1;
+//	astronomy_planet *p1;
 	astro_planet *p2;
 	astro_house *h2;
 	astro_aspect *a2;
 	astro_pattern *ap;
 
+	if(argc==2 && (!strcmp(argv[1],"--help") || !strcmp(argv[1],"-h"))) {
+		printf("Usage: horoscope [longitude] [latitude] [year-month-day] [hour:minute:second] [timezone (0.0-24.0)] [dst? (1|0|yes|no)]\n\nDefault values for longitude and latitude is 0.0. Date and time is set to present, and timezone to GMT. DST (Daylight Saving Time) is set to '0'.\n");
+		return 0;
+	}
 	astro_set_aspect_orbs(aspect_orbs);
 
-	lon = astro_read_coord("11e58");
-	lat = astro_read_coord("57n43");
-	h = horoscope_new("Per Löwgren",1975,6,17,3,30,0,1.0,0.0,1,lon,lat);
+	if(argc>1) lon = astro_read_coord(argv[1]);
+	if(argc>2) lat = astro_read_coord(argv[2]);
+	if(argc>3) sscanf(argv[3],"%d-%d-%d",&year,&month,&day);
+	else year = 1900+now->tm_year,month = now->tm_mon+1,day = now->tm_mday;
+	if(argc>4) sscanf(argv[4],"%d:%d:%d",&hour,&minute,&second);
+	else hour = now->tm_hour,minute = now->tm_min,second = now->tm_sec;
+	if(argc>5) sscanf(argv[4],"%lf",&tz);
+	if(argc>6) dst = !strcmp(argv[5],"1") || !strcmp(argv[5],"yes")? 1 : 0;
+
+	h = horoscope_new("",year,month,day,hour,minute,second,tz,dst,1,lon,lat);
 	a = astronomy_new(&h->gmt,h->lon,h->lat);
 
 	printf("\nCalculate planets...\n");
-	gettimeofday(&tv,&tz);
-	t = tv.tv_usec;
+	gettimeofday(&tv,NULL);
+	usec = tv.tv_usec;
 	astronomy_get_planets(a,planet_ids,0);
-	gettimeofday(&tv,&tz);
-	printf("Time to calculate planets: %ld microseconds\n\n",tv.tv_usec-t);
-
+	gettimeofday(&tv,NULL);
+	printf("Time to calculate planets: %ld microseconds\n",tv.tv_usec-usec);
+/*
 	printf("Astronomy: %d-%02d-%02d %d:%02d, jd(%f), lon(%3.2f), lat(%3.2f)\n",
 			h->gmt.year,h->gmt.month,h->gmt.day,h->gmt.hour,h->gmt.minute,h->gmt.jd,h->lon,h->lat);
 	printf("Julian Day: %lf   DeltaT: %lf   Siderian time: %s\n",
@@ -127,13 +141,13 @@ int main(int argc,char *argv[]) {
 		printf("%10s      ",astro_write_hms(deg,p1->lat,"."));
 		printf("%6.2f   %6.2f   %2d     %6.2f   %s\n",p1->radius,p1->speed,p1->constel,p1->phase,zodiac_names[sign]);
 	}
-
+*/
 	printf("\nCast horoscope...\n");
-	gettimeofday(&tv,&tz);
-	t = tv.tv_usec;
+	gettimeofday(&tv,NULL);
+	usec = tv.tv_usec;
 	horoscope_cast(h,a,HOROSCOPE_NATAL/*|HOROSCOPE_ASPECT_IN_SIGN*/,ASTRO_PLACIDUS);
-	gettimeofday(&tv,&tz);
-	printf("Time to cast horoscope: %ld microseconds\n\n",tv.tv_usec-t);
+	gettimeofday(&tv,NULL);
+	printf("Time to cast horoscope: %ld microseconds\n\n",tv.tv_usec-usec);
 
 	printf("\nHoroscope: %s   %d-%02d-%02d %d:%02d GMT   ",h->name,
 			h->gmt.year,h->gmt.month,h->gmt.day,h->gmt.hour,h->gmt.minute);

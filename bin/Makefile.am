@@ -1,10 +1,14 @@
 
 
-CXXFLAGS =  @AM_CXXFLAGS@ -I../include/
-LDFLAGS = @AM_LDFLAGS@
+CFLAGS =  $(AM_CFLAGS) -I../include/
+CXXFLAGS =  $(AM_CXXFLAGS) -I../include/
+LDFLAGS = $(AM_LDFLAGS)
 
 
-lib_LIBRARIES = libamanita.a libamanita-sdl.a
+lib_LIBRARIES = \
+	libamanita.a \
+	libamanita-sdl.a \
+	libesoteric.a
 
 
 nobase_include_HEADERS = \
@@ -26,7 +30,10 @@ nobase_include_HEADERS = \
 	../include/amanita/aThread.h \
 	../include/amanita/aVector.h \
 	../include/amanita/aWord.h \
+	../include/amanita/gui/aBrowser.h \
 	../include/amanita/gui/aEvent.h \
+	../include/amanita/gui/aSizer.h \
+	../include/amanita/gui/aWidget.h \
 	../include/amanita/net/aClient.h \
 	../include/amanita/net/aHttp.h \
 	../include/amanita/net/aServer.h \
@@ -50,32 +57,35 @@ nobase_include_HEADERS = \
 	../include/amanita/sqlite/aSQLite.h
 
 libamanita_a_SOURCES = \
-	../src/aApplication.cpp \
-	../src/aCollection.cpp \
-	../src/aDictionary.cpp \
-	../src/aFile.cpp \
-	../src/aFlood.cpp \
-	../src/aHashtable.cpp \
-	../src/aInteger.cpp \
-	../src/aMath.cpp \
-	../src/aObject.cpp \
-	../src/aPath.cpp \
-	../src/aRandom.cpp \
-	../src/aRegex.cpp \
-	../src/aString.cpp \
-	../src/aString_HTMLentities.cpp \
-	../src/aThread.cpp \
-	../src/aVector.cpp \
-	../src/aWord.cpp \
-	../src/config.cpp \
-	../src/config.h \
-	../src/net/aClient.cpp \
-	../src/net/aHttp.cpp \
-	../src/net/aServer.cpp \
-	../src/net/aSocket.cpp \
-	../src/sqlite/aRecord.cpp \
-	../src/sqlite/aResultset.cpp \
-	../src/sqlite/aSQLite.cpp
+	../src/amanita/aApplication.cpp \
+	../src/amanita/aCollection.cpp \
+	../src/amanita/aDictionary.cpp \
+	../src/amanita/aFile.cpp \
+	../src/amanita/aFlood.cpp \
+	../src/amanita/aHashtable.cpp \
+	../src/amanita/aInteger.cpp \
+	../src/amanita/aMath.cpp \
+	../src/amanita/aObject.cpp \
+	../src/amanita/aPath.cpp \
+	../src/amanita/aRandom.cpp \
+	../src/amanita/aRegex.cpp \
+	../src/amanita/aString.cpp \
+	../src/amanita/aString_HTMLentities.cpp \
+	../src/amanita/aThread.cpp \
+	../src/amanita/aVector.cpp \
+	../src/amanita/aWord.cpp \
+	../src/amanita/config.cpp \
+	../src/amanita/config.h \
+	../src/amanita/gui/aBrowser.cpp \
+	../src/amanita/gui/aSizer.cpp \
+	../src/amanita/gui/aWidget.cpp \
+	../src/amanita/net/aClient.cpp \
+	../src/amanita/net/aHttp.cpp \
+	../src/amanita/net/aServer.cpp \
+	../src/amanita/net/aSocket.cpp \
+	../src/amanita/sqlite/aRecord.cpp \
+	../src/amanita/sqlite/aResultset.cpp \
+	../src/amanita/sqlite/aSQLite.cpp
 
 libamanita_a_CPPFLAGS = \
 	-DLIBAMANITA \
@@ -84,51 +94,116 @@ libamanita_a_CXXFLAGS = $(DEPS_CFLAGS)
 
 
 libamanita_sdl_a_SOURCES = \
-	../src/aApplication.cpp \
-	../src/aCollection.cpp \
-	../src/aDictionary.cpp \
-	../src/aFile.cpp \
-	../src/aFlood.cpp \
-	../src/aHashtable.cpp \
-	../src/aInteger.cpp \
-	../src/aMath.cpp \
-	../src/aObject.cpp \
-	../src/aPath.cpp \
-	../src/aRandom.cpp \
-	../src/aRegex.cpp \
-	../src/aString.cpp \
-	../src/aString_HTMLentities.cpp \
-	../src/aThread.cpp \
-	../src/aVector.cpp \
-	../src/aWord.cpp \
-	../src/config.cpp \
-	../src/config.h \
-	../src/net/aClient.cpp \
-	../src/net/aHttp.cpp \
-	../src/net/aServer.cpp \
-	../src/net/aSocket.cpp \
-	../src/sdl/aButton.cpp \
-	../src/sdl/aComponent.cpp \
-	../src/sdl/aDisplay.cpp \
-	../src/sdl/aFont.cpp \
-	../src/sdl/aGraphics.cpp \
-	../src/sdl/aIconButton.cpp \
-	../src/sdl/aImage.cpp \
-	../src/sdl/aScroll.cpp \
-	../src/sdl/aTabset.cpp \
-	../src/sdl/aText.cpp \
-	../src/sdl/aTextbox.cpp \
-	../src/sdl/aTextfield.cpp \
-	../src/sdl/aTooltip.cpp \
-	../src/sdl/aWindow.cpp \
-	../src/sqlite/aRecord.cpp \
-	../src/sqlite/aResultset.cpp \
-	../src/sqlite/aSQLite.cpp
+	../src/amanita/aApplication.cpp \
+	../src/amanita/aCollection.cpp \
+	../src/amanita/aDictionary.cpp \
+	../src/amanita/aFile.cpp \
+	../src/amanita/aFlood.cpp \
+	../src/amanita/aHashtable.cpp \
+	../src/amanita/aInteger.cpp \
+	../src/amanita/aMath.cpp \
+	../src/amanita/aObject.cpp \
+	../src/amanita/aPath.cpp \
+	../src/amanita/aRandom.cpp \
+	../src/amanita/aRegex.cpp \
+	../src/amanita/aString.cpp \
+	../src/amanita/aString_HTMLentities.cpp \
+	../src/amanita/aThread.cpp \
+	../src/amanita/aVector.cpp \
+	../src/amanita/aWord.cpp \
+	../src/amanita/config.cpp \
+	../src/amanita/config.h \
+	../src/amanita/gui/aBrowser.cpp \
+	../src/amanita/gui/aSizer.cpp \
+	../src/amanita/gui/aWidget.cpp \
+	../src/amanita/net/aClient.cpp \
+	../src/amanita/net/aHttp.cpp \
+	../src/amanita/net/aServer.cpp \
+	../src/amanita/net/aSocket.cpp \
+	../src/amanita/sdl/aButton.cpp \
+	../src/amanita/sdl/aComponent.cpp \
+	../src/amanita/sdl/aDisplay.cpp \
+	../src/amanita/sdl/aFont.cpp \
+	../src/amanita/sdl/aGraphics.cpp \
+	../src/amanita/sdl/aIconButton.cpp \
+	../src/amanita/sdl/aImage.cpp \
+	../src/amanita/sdl/aScroll.cpp \
+	../src/amanita/sdl/aTabset.cpp \
+	../src/amanita/sdl/aText.cpp \
+	../src/amanita/sdl/aTextbox.cpp \
+	../src/amanita/sdl/aTextfield.cpp \
+	../src/amanita/sdl/aTooltip.cpp \
+	../src/amanita/sdl/aWindow.cpp \
+	../src/amanita/sqlite/aRecord.cpp \
+	../src/amanita/sqlite/aResultset.cpp \
+	../src/amanita/sqlite/aSQLite.cpp
 
 libamanita_sdl_a_CPPFLAGS = \
 	-DLIBAMANITA \
 	-DLIBAMANITA_SDL \
 	-DLIBAMANITA_DEBUG
 libamanita_sdl_a_CXXFLAGS = $(DEPS_CFLAGS)
+
+
+nobase_include_HEADERS += \
+	../include/esoteric/astro/astrology.h \
+	../include/esoteric/astro/astronomy.h \
+	../include/esoteric/astro/horoscope.h \
+	../include/esoteric/calendar.h
+
+libesoteric_a_SOURCES = \
+	../src/esoteric/calendar.c \
+	../src/esoteric/config.c \
+	../src/esoteric/config.h \
+	../src/esoteric/astro/planets/earth404.c \
+	../src/esoteric/astro/planets/jupiter404.c \
+	../src/esoteric/astro/planets/mars404.c \
+	../src/esoteric/astro/planets/mercury404.c \
+	../src/esoteric/astro/planets/moon404.c \
+	../src/esoteric/astro/planets/neptune404.c \
+	../src/esoteric/astro/planets/pluto404.c \
+	../src/esoteric/astro/planets/saturn404.c \
+	../src/esoteric/astro/planets/uranus404.c \
+	../src/esoteric/astro/planets/venus404.c \
+	../src/esoteric/astro/astrology.c \
+	../src/esoteric/astro/astronomy.c \
+	../src/esoteric/astro/astronomy_data.c \
+	../src/esoteric/astro/astronomy_data.h \
+	../src/esoteric/astro/horoscope.c
+
+libesoteric_a_CFLAGS = \
+	-DLIBESOTERIC \
+	-DLIBESOTERIC_DEBUG
+
+
+
+CFLAGS += $(DEPS_CFLAGS)
+CXXFLAGS += $(DEPS_CFLAGS)
+LDFLAGS += $(EXAMPLES_LDFLAGS)
+
+noinst_PROGRAMS = \
+	browser \
+	client \
+	horoscope \
+	http \
+	server
+
+browser_SOURCES = ../src/examples/browser.cpp
+browser_LDADD = libamanita.a $(EXAMPLES_LIBS) $(DEPS_LIBS)
+
+client_SOURCES = ../src/examples/client.cpp
+client_LDADD = libamanita.a $(EXAMPLES_LIBS) $(DEPS_LIBS)
+
+horoscope_SOURCES = ../src/examples/horoscope.c
+horoscope_LDADD = libesoteric.a $(EXAMPLES_LIBS) $(DEPS_LIBS)
+
+http_SOURCES = ../src/examples/http.cpp
+http_LDADD = libamanita.a $(EXAMPLES_LIBS) $(DEPS_LIBS)
+
+server_SOURCES = ../src/examples/server.cpp
+server_LDADD = libamanita.a $(EXAMPLES_LIBS) $(DEPS_LIBS)
+
+
+
 
 

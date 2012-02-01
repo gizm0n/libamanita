@@ -124,6 +124,7 @@ void aClient::run() {
 #ifdef LIBAMANITA_SDL
 #elif defined(__linux__) || defined (WIN32)
 	fd_set test;
+	timeval timeout = { 0,LIBAMANITA_SELECT_TIMEOUT };
 #endif
 	uint8_t *d;
 	size_t l;
@@ -140,7 +141,7 @@ debug_output("aClient::run(n=%d)\n",n);
 
 #elif defined(__linux__) || defined(WIN32)
 		test = set;
-		n = select(FD_SETSIZE,&test,0,0,0);
+		n = select(FD_SETSIZE,&test,0,0,&timeout);
 		if(n==-1) {
 			stateChanged(SM_ERR_CHECK_SOCKETS,0,(intptr_t)getError(),0);
 			break;
@@ -153,7 +154,7 @@ debug_output("aClient::run(receive)\n");
 			d = receive(sock,l);
 debug_output("aClient::run(l=%lu)\n",(unsigned long)l);
 			if(l>0) {
-				if(isStarting()) {
+				if(isStarting()) { // Server sends directly a message when accepting client, containing ID and nick. This guarantees client and server use the same ID and nick.
 					uint8_t *p = d+SOCKET_HEADER;
 					unpack_uint32(&p,id);
 					setNick((char *)p);

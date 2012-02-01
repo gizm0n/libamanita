@@ -36,7 +36,7 @@ public:
 
 	bool start(const char *con);
 	bool start(const char *h,uint16_t p,uint32_t i,const char *n);
-	void stop(bool kill=true);
+	void stop(bool kill=false);
 
 	int send(uint8_t *d,size_t l);
 

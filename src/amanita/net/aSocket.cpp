@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#ifdef WIN32
+#include <windows.h>
+#endif
 #include <amanita/net/aSocket.h>
 
 
@@ -34,24 +37,41 @@ const char *aSocket::message_names[] = {0,
 
 
 
-void aSocket::init() {
+#ifndef WIN32
+#ifdef WIN32_LEAN_AND_MEAN
+#undef WIN32_LEAN_AND_MEAN
+#endif
+
+bool InitNetwork() {
 #ifdef LIBAMANITA_SDL
-#elif defined(WIN32)
+	if(SDLNet_Init()==-1) return false;
+#endif
+	return true;
+}
+
+bool UninitNetwork() {
+#ifdef LIBAMANITA_SDL
+	SDLNet_Quit();
+#endif
+	return true;
+}
+
+#else
+bool WINAPI InitNetwork() {
 	WSADATA wsadata;
 	if(WSAStartup(MAKEWORD(2,0),&wsadata)!=0) {
 debug_output("Socket Initialization Error.\n");
 		WSACleanup();
+		return false;
 	}
-#endif
+	return true;
 }
 
-void aSocket::close() {
-#ifdef LIBAMANITA_SDL
-#elif defined(WIN32)
+bool WINAPI UninitNetwork() {
 	WSACleanup();
-#endif
+	return true;
 }
-
+#endif
 
 
 void aSocket::print_packet(const uint8_t *data,size_t l) {
@@ -184,7 +204,7 @@ debug_output("aSocket::receive(error=%s)\n",getError());
 
 #ifdef LIBAMANITA_SDL
 #elif defined(WIN32)
-const char *getError() {
+const char *aSocket::getError() {
 	static struct wsa_error_entry {
 		int id;
 		const char *msg;
@@ -271,7 +291,9 @@ const char *getError() {
 		{ WSA_QOS_EFILTERCOUNT,			"WSA_QOS_EFILTERCOUNT" },						// 1021
 		{ WSA_QOS_EOBJLENGTH,			"WSA_QOS_EOBJLENGTH" },							// 1022
 		{ WSA_QOS_EFLOWCOUNT,			"WSA_QOS_EFLOWCOUNT" },							// 1023
+#ifdef WSA_QOS_EUNKOWNPSOBJ
 		{ WSA_QOS_EUNKOWNPSOBJ,			"WSA_QOS_EUNKOWNPSOBJ" },						// 1024
+#endif
 		{ WSA_QOS_EPOLICYOBJ,			"WSA_QOS_EPOLICYOBJ" },							// 1025
 		{ WSA_QOS_EFLOWDESC,				"WSA_QOS_EFLOWDESC" },							// 1026
 		{ WSA_QOS_EPSFLOWSPEC,			"WSA_QOS_EPSFLOWSPEC" },						// 1027
