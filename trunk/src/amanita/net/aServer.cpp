@@ -221,10 +221,10 @@ debug_output("aServer::run(1)\n");
 debug_output("aServer::run(2)\n");
 			s = accept(sock,0,0);
 			addSocket(s);
-debug_output("aServer::run(3,n=%d,cap=%d)\n",sockets_n,sockets_cap);
+debug_output("aServer::run(3,n=%lu,cap=%lu)\n",(unsigned long)sockets_n,(unsigned long)sockets_cap);
 		} else for(i=0; i<sockets_n; i++) {
 			s = sockets[i];
-debug_output("aServer::run(4,i=%d,s=%d (sock=%d))\n",i,s,sock);
+debug_output("aServer::run(4,i=%lu,s=%d (sock=%d))\n",(unsigned long)i,s,sock);
 			if(FD_ISSET(s,&test)) {
 debug_output("aServer::run(5)\n");
 				b = receive(s,l);
@@ -234,7 +234,7 @@ debug_output("aServer::run(6,s=%d (sock=%d))\n",s,sock);
 					if(l>0) c = addClient(s,b,l);
 					else removeSocket(s);
 				} else if(l>0) {
-debug_output("aServer::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),(void *)c->sock);
+debug_output("aServer::run(id=%" PRIu32 ",sock=%p)\n",(uint32_t)c->getID(),(void *)((intptr_t)c->sock));
 #ifndef SOCKET_NOCIPHER
 #ifdef SOCKET_HEADER_INCLUDED
 					if(c->key) XORcipher(&b[SOCKET_HEADER],&b[SOCKET_HEADER],l-SOCKET_HEADER,c->key,c->keylen);

@@ -330,7 +330,7 @@ void aSocket::XORcipher(uint8_t *d,const uint8_t *s,size_t l,const uint32_t *k,s
 
 size_t aSocket::send(tcp_socket_t s,uint8_t *d,size_t l) {
 	if(d && l>0) {
-debug_output("aSocket::send(0,s=%p,l=%lu)\n",(void *)s,(unsigned long)l);
+debug_output("aSocket::send(0,s=%p,l=%lu)\n",(void *)((intptr_t)s),(unsigned long)l);
 #ifdef SOCKET_HEADER_INCLUDED
 		int n;
 		*SOCKET_HEADER_LEN_TYPE(d+SOCKET_OFFSET) = SOCKET_HEADER_LEN_SWAP(l);

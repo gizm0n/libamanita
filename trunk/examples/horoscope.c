@@ -4,6 +4,7 @@
  * gcc astro.c -o astro -I /usr/local/include -I /usr/include -lesoteric -lm
  */
 
+#include "../src/config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -180,7 +181,7 @@ int main(int argc,char *argv[]) {
 			}
 		}
 
-	printf("\nAspect Patterns (%d):  0x%0*x\n",h->nasppat,sizeof(h->fasppat)*2,h->fasppat);
+	printf("\nAspect Patterns (%d):  0x%0*x\n",h->nasppat,(int)sizeof(h->fasppat)*2,h->fasppat);
 	for(i=0; i<h->nasppat; i++) {
 		ap = &h->asppat[i];
 		printf("%s: ",pattern_names[ap->type]);

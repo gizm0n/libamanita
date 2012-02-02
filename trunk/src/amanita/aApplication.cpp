@@ -180,6 +180,7 @@ aApplication::aApplication(const char *prj,const char *nm) /*: app_lang_data(),a
 	app_user_agent = 0;
 	setApplicationName(nm);
 	setProjectName(prj);
+	app_locale_dir = 0;
 	app_local_id = 0;
 	app_local_time = 0;
 
@@ -226,7 +227,7 @@ uint32_t aApplication::init(int argc,char *argv[],uint32_t params) {
 	if((app_init_params&AMANITA_INIT_GETTEXT)) {
 debug_output("aApplication::init(AMANITA_INIT_GETTEXT,project=%s,localedir=%s)",app_project,app_locale_dir);
 		setlocale(LC_ALL,"");
-		bindtextdomain(app_project,app_locale_dir);
+		bindtextdomain(app_project,app_locale_dir? app_locale_dir : ".");
 		textdomain(app_project);
 	}
 	if((app_init_params&AMANITA_INIT_SOCKETS)) {

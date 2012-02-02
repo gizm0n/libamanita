@@ -1,4 +1,4 @@
 
-SUBDIRS = bin
+SUBDIRS = bin examples src/plugin/djynn
 
 

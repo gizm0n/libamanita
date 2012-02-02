@@ -11,6 +11,7 @@ AC_CANONICAL_HOST
 case "$host" in
 	*linux*)
 		PKG_CHECK_MODULES([DEPS],[gtk+-2.0 webkit-1.0])
+		PKG_CHECK_MODULES([DJYNN],[geany])
 		AM_CFLAGS="-g -Wall -Werror -O0 -fno-strict-aliasing -Wno-uninitialized -Wno-unused-but-set-variable"
 		AM_CXXFLAGS="$AM_CFLAGS"
 		AM_LDFLAGS=""
@@ -72,6 +73,7 @@ AC_CHECK_FUNCS([floor memset pow sqrt strchr strdup strpbrk strstr strnicmp])
 AC_OUTPUT([
 	Makefile
 	bin/Makefile
+	examples/Makefile
 ])
 
 
