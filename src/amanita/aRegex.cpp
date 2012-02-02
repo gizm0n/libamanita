@@ -855,7 +855,7 @@ void aRegex::print() {
 	printf("Compiled Expression:\nBlock:   First:   Last:    Match:   Fail:    Flags:     L    D  BR Code:\n");
 	while(bl!=0) {
 		printf("%08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %c%hu-%hu %2" PRIu32 " %" PRIu32 " ",
-				(uint32_t)bl,(uint32_t)bl->first,(uint32_t)bl->last,(uint32_t)bl->onmatch,(uint32_t)bl->onfail,
+				(uint32_t)((intptr_t)bl),(uint32_t)((intptr_t)bl->first),(uint32_t)((intptr_t)bl->last),(uint32_t)((intptr_t)bl->onmatch),(uint32_t)((intptr_t)bl->onfail),
 					bl->flags,bl->brack,bl->min,bl->max,bl->len,bl->depth);
 		m = bl->flags;
 		if(m&REGEX_BACKREFS) printf("\\%" PRIu32 " ",bl->ref);

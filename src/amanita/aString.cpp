@@ -106,9 +106,7 @@ aString &aString::appendi32(int32_t i) {
 	if(c) *p-- = c;
 	return append(p+1);
 }
-#endif
 
-#if __WORDSIZE < 64
 aString &aString::appendu32(uint32_t i) {
 	if(i==0) return append('0');
 	char s[12],*p = s+11;

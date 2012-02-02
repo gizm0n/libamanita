@@ -8,7 +8,8 @@ LDFLAGS = $(AM_LDFLAGS)
 lib_LIBRARIES = \
 	libamanita.a \
 	libamanita-sdl.a \
-	libesoteric.a
+	libesoteric.a \
+	libipomoea.a
 
 
 nobase_include_HEADERS = \
@@ -176,33 +177,15 @@ libesoteric_a_CFLAGS = \
 	-DLIBESOTERIC_DEBUG
 
 
+nobase_include_HEADERS += \
+	../include/ipomoea/hashtable_t.h \
+	../include/ipomoea/string_t.h \
+	../include/ipomoea/vector_t.h
 
-CFLAGS += $(DEPS_CFLAGS)
-CXXFLAGS += $(DEPS_CFLAGS)
-LDFLAGS += $(EXAMPLES_LDFLAGS)
-
-noinst_PROGRAMS = \
-	browser \
-	client \
-	horoscope \
-	http \
-	server
-
-browser_SOURCES = ../src/examples/browser.cpp
-browser_LDADD = libamanita.a $(EXAMPLES_LIBS) $(DEPS_LIBS)
-
-client_SOURCES = ../src/examples/client.cpp
-client_LDADD = libamanita.a $(EXAMPLES_LIBS) $(DEPS_LIBS)
-
-horoscope_SOURCES = ../src/examples/horoscope.c
-horoscope_LDADD = libesoteric.a $(EXAMPLES_LIBS) $(DEPS_LIBS)
-
-http_SOURCES = ../src/examples/http.cpp
-http_LDADD = libamanita.a $(EXAMPLES_LIBS) $(DEPS_LIBS)
-
-server_SOURCES = ../src/examples/server.cpp
-server_LDADD = libamanita.a $(EXAMPLES_LIBS) $(DEPS_LIBS)
-
+libipomoea_a_SOURCES = \
+	../src/ipomoea/hashtable_t.c \
+	../src/ipomoea/string_t.c \
+	../src/ipomoea/vector_t.c
 
 
 

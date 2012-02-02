@@ -1,6 +1,7 @@
 
+#include "../src/config.h"
 #include <stdio.h>
-#include "amanita/net/aHttp.h"
+#include <amanita/net/aHttp.h>
 
 int main(int argc, char *argv[]) {
 	aHttp http;

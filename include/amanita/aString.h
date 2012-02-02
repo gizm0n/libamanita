@@ -89,8 +89,8 @@ public:
 #if __WORDSIZE == 64
 	aString &operator+=(short i) { return appendi64((int64_t)i); }
 	aString &operator+=(unsigned short i) { return appendu64((uint64_t)i); }
-	aString &operator+=(int i) { return appendi32((int64_t)i); }
-	aString &operator+=(unsigned int i) { return appendu32((uint64_t)i); }
+	aString &operator+=(int i) { return appendi64((int64_t)i); }
+	aString &operator+=(unsigned int i) { return appendu64((uint64_t)i); }
 	aString &operator+=(long int i) { return appendi64((int64_t)i); }
 	aString &operator+=(unsigned long int i) { return appendu64((uint64_t)i); }
 #else
