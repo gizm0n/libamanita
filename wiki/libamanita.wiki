@@ -1,0 +1,50 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+Amanita Library is a collection of C++ classes.
+
+
+==Content==
+===Utility classes===
+The library consist of a set of utility classes:
+|| *[aCollection]* || An abstract class for collections, including [aDictionary], [aHashtable] and [aVector]. ||
+|| *[aDictionary]* || quick search an indexed dictionary for a numeric representation. ||
+|| *[aHashtable]* || A hashtable that easily handle all types and objects in one table instance, for both keys and values. ||
+|| *[aIterator]* || Generic abstract parent-class for Collection-iterators. ||
+|| *[aFlood]* || A simple class for flood-filling a vector, practical when making maps for example. ||
+|| *[aInteger]* || Handle big integer numbers, any size. Runs pretty fast. ||
+|| *[aMath]* || Static mathematical utility functions collected in one class. ||
+|| *[aObject]* || Handle inheritance and a simple introspection interface. ||
+|| *[aPath]* || Generate the nearest path using the AStar-algorithm. ||
+|| *[aRandom]* || Very good enthropy and one of the fastest pseudorandom number generators there is. Based on the Mersenne twister. ||
+|| *[aRegex]* || Minimalistic regex engine. Works pretty well. ||
+|| *[aString]* || Generic string class with many string-handling methods. ||
+|| *[aThread]* || Handle threads, using native functions (glib, win32, and also SDL). ||
+|| *[aVector]* || Can like Hashtable handle all types and objects in one vector instance. ||
+|| *[aWord]* || Generate random words for fantasynames or pseudolanguage. ||
+
+===HTTP Network classes===
+Classes for client/server HTTP connections:
+|| *[aClient]* || A client class that can be used for chatting or online gaming. ||
+|| *[aHttp]* || A http-client. Communicate with a webserver, download webpages or files and upload forms including files. ||
+|| *[aServer]* || A multiuser server class to handle any number of clients. ||
+|| *[aSocket]* || Platform independent network communication with sockets. ||
+
+===SDL classes===
+[http://www.libsdl.org SDL] wrapper classes, and a number of GUI-classes:
+|| *[aButton]* || A button component. ||
+|| *[aGraphics]* || Mimicking the java.awt.Graphics class in a way. To initialize SDL and to work with graphics. ||
+|| *[aFont]* || Load fonts and display. Using the SDL_ttf library. ||
+|| *[aImage]* || Load images. ||
+|| *[aScroll]* || A scrolling component. ||
+|| *[aTabset]* || A tabset component for handling a number of tabs. ||
+|| *[aText]* || A buffer class for handling text in a textbox. ||
+|| *[aTextbox]* || A multiline textbox for printing text. Uses the [aText] component for handling linebreaks and buffering etc. ||
+|| *[aTextfield]* || For entering a line of text. ||
+|| *[aWindow]* || A basic window class for handling windos and dialog boxed. ||
+
+===SQLite classes===
+[http://www.sqlite.org SQLite] wrapper classes:
+|| *[aRecord]* || Each row is stored in a Record. ||
+|| *[aResultset]* || Handle query-results. ||
+|| *[aSQLite]* || Easily open SQLite-databases, make queries and handle results with very little overhead. ||
