@@ -1,0 +1,82 @@
+#ifndef _LIBAMANITA_CONFIG_H
+#define _LIBAMANITA_CONFIG_H
+
+
+#define PACKAGE "@PACKAGE@"
+#define PACKAGE_BUGREPORT "@PACKAGE_BUGREPORT@"
+#define PACKAGE_NAME "@PACKAGE_NAME@"
+#define PACKAGE_STRING "@PACKAGE_STRING@"
+#define PACKAGE_TARNAME "@PACKAGE_TARNAME@"
+#define PACKAGE_URL "@PACKAGE_URL@"
+#define PACKAGE_VERSION "@PACKAGE_VERSION@"
+
+#define VERSION "@PACKAGE_VERSION@"
+
+#cmakedefine HAVE_DLFCN_H
+#cmakedefine HAVE_INTTYPES_H
+#cmakedefine HAVE_MEMORY_H
+#cmakedefine HAVE_STDBOOL_H
+#cmakedefine HAVE_STDDEF_H
+#cmakedefine HAVE_STDINT_H
+#cmakedefine HAVE_STDLIB_H
+#cmakedefine HAVE_STRINGS_H
+#cmakedefine HAVE_STRING_H
+#cmakedefine HAVE_SYS_STAT_H
+#cmakedefine HAVE_SYS_TYPES_H
+#cmakedefine HAVE_UNISTD_H
+
+#cmakedefine HAVE_MALLOC
+#cmakedefine HAVE_REALLOC
+
+#cmakedefine HAVE_FLOOR
+#cmakedefine HAVE_POW
+#cmakedefine HAVE_EXP
+#cmakedefine HAVE_LOG
+#cmakedefine HAVE_SQRT
+#cmakedefine HAVE_MEMSET
+#cmakedefine HAVE_STRCHR
+#cmakedefine HAVE_STRDUP
+#cmakedefine HAVE_STRNICMP
+#cmakedefine HAVE_STRPBRK
+#cmakedefine HAVE_STRSTR
+#cmakedefine HAVE_VPRINTF
+
+#cmakedefine ENABLE_NLS
+
+#ifndef HAVE_STRNICMP
+	#define strnicmp strncasecmp
+#endif
+
+#define __STDC_FORMAT_MACROS
+#ifdef __linux__
+#	if _WORDSIZE == 64
+#		define PRIl			"l"
+#		define PRIll		"l"
+#	else
+#		define PRIl			"l"
+#		define PRIll		"ll"
+#	endif
+#		define PRIlf		"L"
+#elif defined _WIN32
+#	ifdef _WIN64
+#		define PRIl			"l"
+#		define PRIll		"l"
+#	else
+#		define PRIl			"l"
+#		define PRIll		"I64l"
+#	endif
+#		define PRIlf		"L"
+#endif
+
+
+#ifdef NDEBUG
+#	define debug_output(...)
+#	define debug_putc(c)
+#else
+#	define debug_output(...) fprintf(stderr,__VA_ARGS__);
+#	define debug_putc(c) fputc(c,stderr);
+#endif
+
+#endif /* _LIBAMANITA_CONFIG_H */
+
+

@@ -4,7 +4,6 @@
  * gcc astro.c -o astro -I /usr/local/include -I /usr/include -lesoteric -lm
  */
 
-#include "../src/config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

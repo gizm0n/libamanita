@@ -1,5 +1,5 @@
 
-#include "../config.h"
+#include "../_config.h"
 #include <amanita/aMath.h>
 #include <amanita/sdl/aGraphics.h>
 #include <amanita/sdl/aFont.h>

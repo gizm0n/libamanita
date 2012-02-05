@@ -1,6 +1,6 @@
 
 
-#include "config.h"
+#include "_config.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +10,9 @@
 #if defined(__linux__)
 
 #elif defined(WIN32)
+#ifdef WIN32_LEAN_AND_MEAN
+#undef WIN32_LEAN_AND_MEAN
+#endif
 #ifndef WINVER
 #define WINVER 0x0501
 #endif

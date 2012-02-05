@@ -20,7 +20,7 @@ bool InitNetwork();
 bool UninitNetwork();
 
 #else
-#define WIN32_LEAN_AND_MEAN
+#include <winsock2.h>
 #include <windows.h>
 
 /** Initialize network functions. */
@@ -89,7 +89,6 @@ bool WINAPI UninitNetwork();
 	typedef int tcp_socket_t;
 
 #elif defined(WIN32)
-	#include <winsock2.h>
 	#include <amanita/aBytes.h>
 
 	#define tcp_close(s) ::closesocket(s)

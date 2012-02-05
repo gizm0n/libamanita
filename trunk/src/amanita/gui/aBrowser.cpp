@@ -1,4 +1,5 @@
 
+#include "../_config.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -63,7 +64,7 @@ char *BSTR2char(BSTR b) {
 	if(b) {
 		int l = SysStringLen(b);
 		char *c = (char *)malloc(l+1);
-		if(WideCharToMultiByte(CP_ACP,0,b,l+1,(char*)c,l+1,0,false)) return c;
+		if(WideCharToMultiByte(CP_ACP,0,b,l+1,(char*)c,l+1,0,0)) return c;
 		else free(c);
 	}
 	return 0;
@@ -731,14 +732,13 @@ fflush(stderr);
 
 
 
-aBrowser::aBrowser() {
+aBrowser::aBrowser(widget_event_handler weh) : aWidget(weh,WIDGET_BROWSER) {
 	/* Inherited from aWidget: */
 	id = 0;
-	type = WIDGET_BROWSER;
 	parent = 0;
 	handle = 0;
 	text = 0;
-	sizer = 0;
+//	sizer = 0;
 
 #if defined(__linux__)
 #elif defined(WIN32)

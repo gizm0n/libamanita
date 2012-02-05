@@ -1,5 +1,5 @@
 
-#include "../config.h"
+#include "../_config.h"
 #include <amanita/sdl/aTextfield.h>
 #include <amanita/sdl/aTextbox.h>
 #include <amanita/sdl/aButton.h>

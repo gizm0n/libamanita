@@ -4,17 +4,36 @@
 /**
  * @file amanita/gui/aWidget.h  
  * @author Per Löwgren
- * @date Modified: 2012-01-28
+ * @date Modified: 2012-02-04
  * @date Created: 2012-01-28
  */ 
+
+#include <stdint.h>
 
 #if defined(__linux__)
 #include <gtk/gtk.h>
 
+enum {
+	ARRANGE_HORIZONTAL		= 0x00000001,
+	ARRANGE_VERTICAL			= 0x00000002,
+	ARRANGE_TABLE				= 0x00000004,
+	ALIGN_CENTER				= 0x00000010,
+	ALIGN_LEFT					= 0x00000020,
+	ALIGN_TOP					= 0x00000030,
+	ALIGN_RIGHT					= 0x00000040,
+	ALIGN_BOTTOM				= 0x00000050,
+	STRETCH_NONE				= 0x00000100,
+	STRETCH_LEFT				= 0x00001000,
+	STRETCH_TOP					= 0x00002000,
+	STRETCH_RIGHT				= 0x00004000,
+	STRETCH_BOTTOM				= 0x00008000,
+	STRETCH_HORIZONTAL		= 0x00005000,
+	STRETCH_VERTICAL			= 0x0000a000,
+	STRETCH_FULL				= 0x0000f000,
+};
 
 
 #elif defined(WIN32)
-#define WIN32_LEAN_AND_MEAN
 #ifndef WINVER
 #define WINVER 0x0501
 #endif
@@ -66,53 +85,64 @@ enum {
 };
 
 #if defined(__linux__)
-typedef void *aHandle;
+typedef GtkWidget *aHandle;
 #elif defined(WIN32)
 typedef HANDLE aHandle;
 #endif
 
-enum {
-	WIDGET_CONTROL = 0x1000,						//!< 
-	WIDGET_BOX,											//!< 
-	WIDGET_BROWSER,									//!< 
-	WIDGET_BUTTON,										//!< 
-	WIDGET_CANVAS,										//!< 
-	WIDGET_CLABEL,										//!< 
-	WIDGET_CHOICE,										//!< 
-	WIDGET_CHECKBOX,									//!< 
-	WIDGET_DEFAULT_BUTTON,							//!< 
-	WIDGET_ENTRY,										//!< 
-	WIDGET_IMAGE,										//!< 
-	WIDGET_LABEL,										//!< 
-	WIDGET_LISTBOX,									//!< 
-	WIDGET_MENU,										//!< 
-	WIDGET_NOTEBOOK,									//!< 
-	WIDGET_PROGRESS,									//!< 
-	WIDGET_RLABEL,										//!< 
-	WIDGET_SEPARATOR,									//!< 
-	WIDGET_TABLE,										//!< 
-	WIDGET_TEXT,										//!< 
-	WIDGET_TREE,										//!< 
+class aWidget;
+
+typedef uint32_t (*widget_event_handler)(aWidget *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t p3);
+
+enum widget_type {
+	WIDGET_CONTROL = 0x1000,					//!< 
+	WIDGET_BOX,										//!< 
+	WIDGET_BROWSER,								//!< 
+	WIDGET_BUTTON,									//!< 
+	WIDGET_CANVAS,									//!< 
+	WIDGET_CLABEL,									//!< 
+	WIDGET_CHOICE,									//!< 
+	WIDGET_CHECKBOX,								//!< 
+	WIDGET_DEFAULT_BUTTON,						//!< 
+	WIDGET_ENTRY,									//!< 
+	WIDGET_IMAGE,									//!< 
+	WIDGET_LABEL,									//!< 
+	WIDGET_LISTBOX,								//!< 
+	WIDGET_MENU,									//!< 
+	WIDGET_NOTEBOOK,								//!< 
+	WIDGET_PROGRESS,								//!< 
+	WIDGET_RLABEL,									//!< 
+	WIDGET_SEPARATOR,								//!< 
+	WIDGET_TABLE,									//!< 
+	WIDGET_TEXT,									//!< 
+	WIDGET_TREE,									//!< 
 };
 
 class aSizer;
 
 class aWidget {
-friend class aSizer;
+//friend class aSizer;
 protected:
+	widget_event_handler event_handler;
 	unsigned long id;
-	int type;
-	aHandle parent;
-	aHandle handle;
+	widget_type type;								//!< Type of widget
+	aHandle parent;								//!< Handle to parent.
+	aHandle handle;								//!< Handle to native widget (GtkWidget in GTK, HWND in Win32)
 	char *text;
-	aSizer *sizer;
+	int16_t x;										//!< X-position.
+	int16_t y;										//!< Y-position.
+	int16_t width;									//!< Width.
+	int16_t height;								//!< Height.
+	int16_t min_width;
+	int16_t min_height;
+	int px;											//!< X-padding.
+	int py;											//!< Y-padding.
 
 public:	
-	aWidget();
-	aWidget(int t,aHandle h=0);
+	aWidget(widget_event_handler weh,widget_type t);
 	virtual ~aWidget();
 
-	virtual aHandle create(aHandle p,int s);
+	virtual aHandle create(aHandle p,int s); // <-- Move to private...
 
 	aHandle getPArent() { return parent; }
 	aHandle getHandle() { return handle; }
