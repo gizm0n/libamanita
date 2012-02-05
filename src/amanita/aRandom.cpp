@@ -1,5 +1,5 @@
 
-#include "config.h"
+#include "_config.h"
 #include <time.h>
 #include <amanita/aMath.h>
 #include <amanita/aRandom.h>

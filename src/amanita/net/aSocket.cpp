@@ -1,10 +1,11 @@
 
-#include "../config.h"
+#include "../_config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #ifdef WIN32
+#include <winsock2.h>
 #include <windows.h>
 #endif
 #include <amanita/net/aSocket.h>

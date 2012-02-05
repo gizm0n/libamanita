@@ -1,71 +1,153 @@
 
+# CMakeLists.txt
+#
+# To cross build from Linux with MinGW:
+# cmake -DCMAKE_TOOLCHAIN_FILE=mingw32.cmake .
+#
+# This assumes that your MinGW is installed in /usr/i686-w64-mingw32
+# and gcc for you crosscompiler is named i686-w64-mingw32-gcc.
+# Otherwise copy the cmake-file and replace all instances of i686-w64-mingw32
+# with the version of your mingw. Replace [mingw] with the name
+# of your mingw:
+#
+# sed 's/i686-w64-mingw32/[mingw]/g' mingw32.cmake > [mingw].cmake
+# cmake -DCMAKE_TOOLCHAIN_FILE=[mingw].cmake .
+#
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-PROJECT(LIBAMANITA) 
 
-OPTION(LIBAMANITA_DEBUG "Build the project using debugging code" ON)
-IF(LIBAMANITA_DEBUG)
-  ADD_DEFINITIONS(-DLIBAMANITA_DEBUG)
-ENDIF(LIBAMANITA_DEBUG)
+cmake_minimum_required(VERSION 2.8)
+project(libamanita) 
 
-OPTION(DJYNN "Build Djynn-plugin for Geany IDE" ON) 
+message("CMAKE_ROOT: ${CMAKE_ROOT}")
+message("CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
-FIND_PACKAGE(PkgConfig REQUIRED)
-FIND_PACKAGE(Threads REQUIRED)
+include(${CMAKE_ROOT}/Modules/CheckIncludeFile.cmake)
+include(${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
 
+find_package(PkgConfig REQUIRED)
+find_package(Threads REQUIRED)
+if(CMAKE_USE_PTHREADS_INIT)
+	set(AMANITA_PTHREADS 1)
+else()
+	if(CMAKE_USE_WIN32_THREADS_INIT)
+		set(AMANITA_WIN32_THREADS 1)
+	endif()
+endif()
 
-INCLUDE (${CMAKE_ROOT}/Modules/CheckIncludeFile.cmake)
+find_package(Gettext REQUIRED)
+
+set(PACKAGE "libamanita")
+set(PACKAGE_NAME "Amanita Library")
+set(PACKAGE_VERSION_MAJOR 1)
+set(PACKAGE_VERSION_MINOR 1)
+set(PACKAGE_VERSION "${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR}.0")
+set(PACKAGE_BUGREPORT "per.lowgren@gmail.com")
+set(PACKAGE_URL "http://code.google.com/p/libamanita/")
+set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
+set(PACKAGE_TARNAME "${PACKAGE}")
+
+option(DJYNN "Build Djynn-plugin for Geany IDE" ON) 
+option(ENABLE_NLS "Enable building of translations" ON)
+
+CHECK_INCLUDE_FILE("dlfcn.h" HAVE_DLFCN_H)
+CHECK_INCLUDE_FILE("inttypes.h" HAVE_INTTYPES_H)
+CHECK_INCLUDE_FILE("memory.h" HAVE_MEMORY_H)
+CHECK_INCLUDE_FILE("stdbool.h" HAVE_STDBOOL_H)
+CHECK_INCLUDE_FILE("stddef.h" HAVE_STDDEF_H)
+CHECK_INCLUDE_FILE("stdint.h" HAVE_STDINT_H)
+CHECK_INCLUDE_FILE("stdlib.h" HAVE_STDLIB_H)
+CHECK_INCLUDE_FILE("strings.h" HAVE_STRINGS_H)
+CHECK_INCLUDE_FILE("string.h" HAVE_STRING_H)
+CHECK_INCLUDE_FILE("sys/stat.h" HAVE_SYS_STAT_H)
+CHECK_INCLUDE_FILE("sys/types.h" HAVE_SYS_TYPES_H)
 CHECK_INCLUDE_FILE("unistd.h" HAVE_UNISTD_H)
-IF(HAVE_UNISTD_H)
-  ADD_DEFINITIONS(-DHAVE_UNISTD_H)
-ENDIF(HAVE_UNISTD_H)
+CHECK_FUNCTION_EXISTS(realloc HAVE_REALLOC)
+CHECK_FUNCTION_EXISTS(malloc HAVE_MALLOC)
+CHECK_FUNCTION_EXISTS(floor HAVE_FLOOR)
+CHECK_FUNCTION_EXISTS(pow HAVE_POW)
+CHECK_FUNCTION_EXISTS(exp HAVE_EXP)
+CHECK_FUNCTION_EXISTS(log HAVE_LOG)
+CHECK_FUNCTION_EXISTS(sqrt HAVE_SQRT)
+CHECK_FUNCTION_EXISTS(memset HAVE_MEMSET)
+CHECK_FUNCTION_EXISTS(strchr HAVE_STRCHR)
+CHECK_FUNCTION_EXISTS(strdup HAVE_STRDUP)
+CHECK_FUNCTION_EXISTS(strnicmp HAVE_STRNICMP)
+CHECK_FUNCTION_EXISTS(strpbrk HAVE_STRPBRK)
+CHECK_FUNCTION_EXISTS(strstr HAVE_STRSTR)
+CHECK_FUNCTION_EXISTS(vprintf HAVE_VPRINTF)
+
+find_package(GTK2 2.6 REQUIRED gtk)
+include_directories(${GTK2_INCLUDE_DIRS})
+#PKG_CHECK_MODULES(GTK2 REQUIRED gtk+-2.0)
+#include_directories(${GTK2_INCLUDE_DIRS})
+#link_directories(${GTK2_LIBRARY_DIRS})
+#add_definitions(${GTK2_CFLAGS_OTHER})
+
+PKG_CHECK_MODULES(WEBKIT webkit-1.0)
+if(WEBKIT_FOUND)
+	include_directories(${WEBKIT_INCLUDE_DIRS})
+	link_directories(${WEBKIT_LIBRARY_DIRS})
+	add_definitions(${WEBKIT_CFLAGS_OTHER})
+endif(WEBKIT_FOUND)
+
+include_directories(./include)
+
+if(CMAKE_TOOLCHAIN_FILE)
+endif()
+
+if(LIBAMANITA_DEBUG)
+	add_definitions("-g -Wall -Werror -O0 -fno-strict-aliasing -Wno-uninitialized -Wno-unused-but-set-variable")
+else()
+	add_definitions("-O2")
+endif()
+
+if(UNIX)
+	if(APPLE)
+		message("Apple")
+		set(GUI "Cocoa")
+	else()
+		message("Unix or Linux")
+		set(GUI "GTK+")
+	endif()
+	link_libraries(${CMAKE_THREAD_LIBS} ${CMAKE_DL_LIBS})
+else()
+	if(WIN32)
+		message("Windows")
+		set(GUI "Win32")
+		link_libraries(intl comctl32 ws2_32)
+		add_definitions(-DWIN32_LEAN_AND_MEAN)
+		if(MSVC)
+			add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -subsystem:windows")
+		endif(MSVC)
+		if(CMAKE_C_COMPILER_ID STREQUAL GNU)
+			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-subsystem,windows")
+		endif()
+	else()
+		message("Unknown")
+		set(GUI "Unknown")
+	endif()
+endif()
 
 
-PKG_CHECK_MODULES(GTK2 REQUIRED gtk+-2.0)
-INCLUDE_DIRECTORIES(${GTK_INCLUDE_DIRS})
-LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
-ADD_DEFINITIONS(${GTK_CFLAGS_OTHER})
+configure_file(
+	"${PROJECT_SOURCE_DIR}/src/_config.h.in"
+	"${PROJECT_BINARY_DIR}/src/_config.h"
+)
 
-PKG_CHECK_MODULES(WEBKIT REQUIRED webkit-1.0)
-INCLUDE_DIRECTORIES(${WEBKIT_INCLUDE_DIRS})
-LINK_DIRECTORIES(${WEBKIT_LIBRARY_DIRS})
-ADD_DEFINITIONS(${WEBKIT_CFLAGS_OTHER})
-
-PKG_CHECK_MODULES(GEANY geany)
-INCLUDE_DIRECTORIES(${GEANY_INCLUDE_DIRS})
-LINK_DIRECTORIES(${GEANY_LIBRARY_DIRS})
-ADD_DEFINITIONS(${GEANY_CFLAGS_OTHER})
-
-INCLUDE_DIRECTORIES(./include)
-
-IF(UNIX)
-  IF(APPLE)
-    SET(GUI "Cocoa")
-  ELSE(APPLE)
-    SET(GUI "GTK+")
-  ENDIF(APPLE)
-  LINK_LIBRARIES(${CMAKE_THREAD_LIBS} ${CMAKE_DL_LIBS})
-ELSE(UNIX)
-  IF(WIN32)
-    SET(GUI "Win32")
-  ELSE(WIN32)
-    SET(GUI "Unknown")
-  ENDIF(WIN32)
-ENDIF(UNIX)
-
-
-CONFIGURE_FILE(
-	"${PROJECT_SOURCE_DIR}/config.h.in"
-	"${PROJECT_BINARY_DIR}/config.h"
+configure_file(
+	"${PROJECT_SOURCE_DIR}/include/amanita/aConfig.h.in"
+	"${PROJECT_BINARY_DIR}/include/amanita/aConfig.h"
 )
 
 
 
-MESSAGE("GUI system is ${GUI}")
+message("GUI system is ${GUI}")
 
-SET(amanita_src
+set(amanita_src
 	src/amanita/aApplication.cpp
 	src/amanita/aCollection.cpp
+	src/amanita/aConfig.cpp
 	src/amanita/aDictionary.cpp
 	src/amanita/aFile.cpp
 	src/amanita/aFlood.cpp
@@ -81,10 +163,8 @@ SET(amanita_src
 	src/amanita/aThread.cpp
 	src/amanita/aVector.cpp
 	src/amanita/aWord.cpp
-	src/amanita/config.cpp
-	src/amanita/config.h
 	src/amanita/gui/aBrowser.cpp
-	src/amanita/gui/aSizer.cpp
+	src/amanita/gui/aMenu.cpp
 	src/amanita/gui/aWidget.cpp
 	src/amanita/net/aClient.cpp
 	src/amanita/net/aHttp.cpp
@@ -95,21 +175,21 @@ SET(amanita_src
 	src/amanita/sqlite/aSQLite.cpp
 )
 
-ADD_LIBRARY(amanita STATIC ${amanita_src})
+add_library(amanita STATIC ${amanita_src})
+target_link_libraries(amanita ${CMAKE_THREAD_LIBS_INIT})
 
 
-SET(ipomoea_src
+set(ipomoea_src
 	src/ipomoea/hashtable_t.c
 	src/ipomoea/string_t.c
 	src/ipomoea/vector_t.c
 )
 
-ADD_LIBRARY(ipomoea STATIC ${ipomoea_src})
+add_library(ipomoea STATIC ${ipomoea_src})
 
 
-SET(esoteric_src
+set(esoteric_src
 	src/esoteric/calendar.c
-	src/esoteric/config.c
 	src/esoteric/astro/planets/earth404.c
 	src/esoteric/astro/planets/jupiter404.c
 	src/esoteric/astro/planets/mars404.c
@@ -126,42 +206,14 @@ SET(esoteric_src
 	src/esoteric/astro/horoscope.c
 )
 
-ADD_LIBRARY(esoteric STATIC ${esoteric_src})
+add_library(esoteric STATIC ${esoteric_src})
 
 
-if(GEANY_FOUND)
-	MESSAGE("Has Geany installed")
-	IF(DJYNN)
-
-		SET(djynn_src
-			src/plugin/djynn/projectmanager_dlg.c
-			src/plugin/djynn/projectmanager.c
-			src/plugin/djynn/comment.c
-			src/plugin/djynn/sort.c
-			src/plugin/djynn/djynn.c
-		)
-		ADD_LIBRARY(djynn SHARED ${djynn_src})
-		SET_TARGET_PROPERTIES(djynn PROPERTIES PREFIX "")
-
-		IF("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
-			MESSAGE("Build Djynn with -fPIC flag")
-			ADD_LIBRARY(ipomoea_djynn_pic STATIC ${ipomoea_src})
-			SET_TARGET_PROPERTIES(ipomoea_djynn_pic PROPERTIES COMPILE_FLAGS -fpic)
-			SET_TARGET_PROPERTIES(djynn PROPERTIES COMPILE_FLAGS -fpic)
-			TARGET_LINK_LIBRARIES(djynn ipomoea_djynn_pic ${GTK_LIBRARIES} ${GEANY_LIBRARIES})
-		ELSE("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
-			MESSAGE("Build Djynn")
-			TARGET_LINK_LIBRARIES(djynn ipomoea ${GTK_LIBRARIES} ${GEANY_LIBRARIES})
-		ENDIF("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
-	ENDIF(DJYNN)
-ENDIF(GEANY_FOUND)
-
-
-
-INSTALL(FILES
+install(FILES
 	include/amanita/aApplication.h
 	include/amanita/aBytes.h
 	include/amanita/aCollection.h
+	include/amanita/aConfig.h
 	include/amanita/aDictionary.h
 	include/amanita/aFile.h
 	include/amanita/aFlood.h
@@ -180,15 +232,15 @@ INSTALL(FILES
 	DESTINATION include/amanita
 )
 
-INSTALL(FILES
+install(FILES
 	include/amanita/gui/aBrowser.h
 	include/amanita/gui/aEvent.h
-	include/amanita/gui/aSizer.h
+	include/amanita/gui/aMenu.h
 	include/amanita/gui/aWidget.h
 	DESTINATION include/amanita/gui
 )
 
-INSTALL(FILES
+install(FILES
 	include/amanita/net/aClient.h
 	include/amanita/net/aHttp.h
 	include/amanita/net/aServer.h
@@ -196,7 +248,7 @@ INSTALL(FILES
 	DESTINATION include/amanita/net
 )
 
-INSTALL(FILES
+install(FILES
 	include/amanita/sdl/aButton.h
 	include/amanita/sdl/aComponent.h
 	include/amanita/sdl/aDisplay.h
@@ -214,41 +266,89 @@ INSTALL(FILES
 	DESTINATION include/amanita/sdl
 )
 
-INSTALL(FILES
+install(FILES
 	include/amanita/sqlite/aRecord.h
 	include/amanita/sqlite/aResultset.h
 	include/amanita/sqlite/aSQLite.h
 	DESTINATION include/amanita/sqlite
 )
 
-INSTALL(FILES
+install(FILES
 	include/ipomoea/hashtable_t.h
 	include/ipomoea/string_t.h
 	include/ipomoea/vector_t.h
 	DESTINATION include/ipomoea
 )
 
-INSTALL(FILES
+install(FILES
 	include/esoteric/calendar.h
 	DESTINATION include/esoteric
 )
 
-INSTALL(FILES
+install(FILES
 	include/esoteric/astro/astrology.h
 	include/esoteric/astro/astronomy.h
 	include/esoteric/astro/horoscope.h
 	DESTINATION include/esoteric/astro
 )
 
-INSTALL(TARGETS amanita ipomoea esoteric
+install(TARGETS amanita ipomoea esoteric
 	DESTINATION lib
 )
 
-INSTALL(TARGETS djynn
-	DESTINATION /usr/lib/geany
-)
+
+
+PKG_CHECK_MODULES(GEANY geany)
+if(GEANY_FOUND)
+	message("Has Geany installed")
+	include_directories(${GEANY_INCLUDE_DIRS})
+	link_directories(${GEANY_LIBRARY_DIRS})
+	add_definitions(${GEANY_CFLAGS_OTHER})
+	if(DJYNN)
+
+		set(djynn_src
+			src/plugin/djynn/projectmanager_dlg.c
+			src/plugin/djynn/projectmanager.c
+			src/plugin/djynn/comment.c
+			src/plugin/djynn/sort.c
+			src/plugin/djynn/djynn.c
+		)
+		add_library(djynn SHARED ${djynn_src})
+		set_target_properties(djynn PROPERTIES PREFIX "")
+
+		if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
+			message("Build Djynn with -fPIC flag")
+			add_library(ipomoea_djynn_pic STATIC ${ipomoea_src})
+			set_target_properties(ipomoea_djynn_pic PROPERTIES COMPILE_FLAGS -fpic)
+			set_target_properties(djynn PROPERTIES COMPILE_FLAGS -fpic)
+			target_link_libraries(djynn ipomoea_djynn_pic ${GTK_LIBRARIES} ${GEANY_LIBRARIES})
+		else()
+			message("Build Djynn")
+			target_link_libraries(djynn ipomoea ${GTK2_LIBRARIES} ${GEANY_LIBRARIES})
+		endif()
+
+		install(TARGETS djynn
+			DESTINATION /usr/lib/geany
+		)
+	endif()
+endif()
 
 
 
-ADD_SUBDIRECTORY(examples) 
+
+add_subdirectory(examples) 
+
+if(GETTEXT_FOUND AND ENABLE_NLS)
+	add_subdirectory(po)
+endif()
+
+
+# CPack installer
+include(InstallRequiredSystemLibraries)
+#set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
+set(CPACK_PACKAGE_VERSION_MAJOR "${PACKAGE_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${PACKAGE_VERSION_MINOR}")
+set(CPACK_GENERATOR "DEB")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Per Löwgren")
+include(CPack)
 

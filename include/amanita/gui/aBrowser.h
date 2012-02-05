@@ -46,10 +46,10 @@ private:
 #endif
 
 public:
-	aBrowser();
+	aBrowser(widget_event_handler weh);
 	virtual ~aBrowser();
 
-	virtual aHandle create(aHandle p,int s);
+	virtual aHandle create(aHandle p,int s); // <-- Move to private...
 
 	void setUrl(const char *url);
 	void setHtmlContent(const char *html);

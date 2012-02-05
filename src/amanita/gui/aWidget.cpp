@@ -1,4 +1,5 @@
 
+#include "../_config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -147,10 +148,7 @@ static const widget_control controls[] = {
 };
 #endif
 
-aWidget::aWidget() : id(0),type(0),parent(0),handle(0),text(0),sizer(0) {
-}
-
-aWidget::aWidget(int t,aHandle h) : id(0),type(t),parent(0),handle(h),text(0),sizer(0) {
+aWidget::aWidget(widget_event_handler weh,widget_type t) : event_handler(0),id(0),type(t),parent(0),handle(0),text(0)/*,sizer(0)*/ {
 }
 
 aWidget::~aWidget() {
@@ -162,8 +160,10 @@ aHandle aWidget::create(aHandle p,int s) {
 	parent = p;
 #if defined(__linux__)
 	switch(type) {
-		case WIDGET_BOX:
+		case WIDGET_CONTROL:return 0;
 		case WIDGET_BROWSER:break; /* See: aBrowser::create(). */
+		case WIDGET_MENU:break; /* See: aMenu::create(). */
+		case WIDGET_BOX:
 		case WIDGET_BUTTON:
 		case WIDGET_CANVAS:
 		case WIDGET_CLABEL:
@@ -174,7 +174,6 @@ aHandle aWidget::create(aHandle p,int s) {
 		case WIDGET_IMAGE:
 		case WIDGET_LABEL:
 		case WIDGET_LISTBOX:
-		case WIDGET_MENU:
 		case WIDGET_NOTEBOOK:
 		case WIDGET_PROGRESS:
 		case WIDGET_RLABEL:
@@ -222,12 +221,12 @@ int aWidget::getWidth() {
 #if defined(__linux__)
 		return 0;
 #elif defined(WIN32)
-		if(sizer) return sizer->width;
-		else {
+/*		if(sizer) return sizer->width;
+		else {*/
 			RECT r;
 			GetClientRect((HWND)handle,&r);
 			return r.right;
-		}
+//		}
 #endif
 	} else return 0;
 }
@@ -237,12 +236,12 @@ int aWidget::getHeight() {
 #if defined(__linux__)
 		return 0;
 #elif defined(WIN32)
-		if(sizer) return sizer->height;
-		else {
+//		if(sizer) return sizer->height;
+//		else {
 			RECT r;
 			GetClientRect((HWND)handle,&r);
 			return r.bottom;
-		}
+//		}
 #endif
 	} else return 0;
 }

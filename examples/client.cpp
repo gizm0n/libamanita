@@ -1,5 +1,4 @@
 
-#include "../src/config.h"
 #include <stdio.h>
 #include <amanita/net/aClient.h>
 
@@ -18,7 +17,6 @@ uint32_t client_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 		case SM_ERR_GET_MESSAGE:
 		case SM_ERR_PUT_MESSAGE:
 			fprintf(stderr,"Client error: %u[%s] %s\n",st,aSocket::message_names[st],(const char *)p2);
-			fflush(stderr);
 			break;
 		case SM_STARTING_CLIENT:
 		{
@@ -26,19 +24,16 @@ uint32_t client_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 			const char *host = client->getHost();
 			printf("Connecting to server...\nIP Address: %d.%d.%d.%d\nHostname: %s\nPort: %d\n",
 				ipaddr>>24,(ipaddr>>16)&0xff,(ipaddr>>8)&0xff,ipaddr&0xff,host? host : "N/A",client->getPort());
-			fflush(stdout);
 			break;
 		}
 		case SM_STOPPING_CLIENT:
 			printf("Disconnecting from server...\n");
-			fflush(stdout);
 			break;
 		case SM_GET_MESSAGE:
 		{
 			uint8_t *data = (uint8_t *)p2,cmd;
 			unpack_header(&data,cmd);
 			printf("%s\n",data);
-			fflush(stdout);
 			break;
 		}
 	}
@@ -47,11 +42,11 @@ uint32_t client_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 
 
 int main(int argc, char *argv[]) {
-	char text[1024-SOCKET_HEADER-1];
+	char text[1024-SOCKET_HEADER-1],*s;
 	uint8_t data[1024],*p;
 
 	if(argc!=2) {
-		printf("Invalid parameters.\nUsage: client HOST:PORT|USER_ID|NICK\n");
+		printf("Invalid parameters.\nUsage: client HOST:PORT:USER_ID:NICK\n");
 		exit(0);
 	}
 
@@ -59,7 +54,7 @@ int main(int argc, char *argv[]) {
 	client = new aClient(client_listener);
 	client->start(argv[1]);
 	while(1) {
-		gets(text);	
+		s = gets(text);	
 		if(!strcmp(text,"exit")) break;
 		p = data;
 		pack_header(&p,0);

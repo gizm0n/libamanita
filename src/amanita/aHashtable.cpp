@@ -1,5 +1,5 @@
 
-#include "config.h"
+#include "_config.h"
 #include <stdio.h>
 #include <inttypes.h>
 #include <amanita/aHashtable.h>

@@ -1,5 +1,4 @@
 
-#include "../src/config.h"
 #include <stdio.h>
 #include <amanita/net/aHttp.h>
 

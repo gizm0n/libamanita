@@ -1,5 +1,5 @@
 
-#include "config.h"
+#include "_config.h"
 #include <amanita/aString.h>
 
 

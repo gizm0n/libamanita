@@ -1,5 +1,4 @@
 
-#include "../src/config.h"
 #include <stdio.h>
 #include <amanita/net/aServer.h>
 
@@ -28,32 +27,26 @@ uint32_t server_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 		case SM_ERR_GET_MESSAGE:
 		case SM_ERR_PUT_MESSAGE:
 			fprintf(stderr,"Server error: %u[%s] %s\n",st,aSocket::message_names[st],(const char *)p2);
-			fflush(stderr);
 			break;
 		case SM_CHECK_NICK:
 			printf("Check nick: %s\n",*(char **)p1);
-			fflush(stdout);
 			return 1;
 		case SM_DUPLICATE_ID:
 			printf("server_listener(SM_DUPLICATE_ID)\n");
-			fflush(stdout);
 			return 1;
 		case SM_STARTING_SERVER:
 		{
 			uint32_t ipaddr = server->getIP();
 			printf("Starting server...\nIP address: %d.%d.%d.%d\nPort: %d\n",
 					ipaddr>>24,(ipaddr>>16)&0xff,(ipaddr>>8)&0xff,ipaddr&0xff,server->getPort());
-			fflush(stdout);
 			break;
 		}
 		case SM_STOPPING_SERVER:
 			printf("Stopping server...\n");
-			fflush(stdout);
 			break;
 		case SM_ADD_CLIENT:
 		{
 			printf("Add Client.\n");
-			fflush(stdout);
 			aConnection c = (aConnection)p1;
 			/* Add handling of new client here; store client data, send list of clients etc. */
 			c->setActive(true);
@@ -73,8 +66,7 @@ uint32_t server_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 		{
 			uint8_t *data = (uint8_t *)p2,cmd;
 			unpack_header(&data,cmd);
-			fprintf(stdout,"Receive message: %s\n",data);
-			fflush(stdout);
+			printf("Receive message: %s\n",data);
 			server->send((uint8_t *)p2,(size_t)p3);
 			break;
 		}
@@ -83,11 +75,11 @@ uint32_t server_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 }
 
 int main(int argc, char *argv[]) {
-	char text[1024];
+	char text[1024],*s;
 	InitNetwork();
 	server = new aServer(server_listener);
 	server->start(2012);
-	gets(text);
+	s = gets(text);
 	server->stop();
 	delete(server);
 	UninitNetwork();
