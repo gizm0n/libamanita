@@ -12,12 +12,12 @@
 #include <time.h>
 #include <inttypes.h>
 #include <libintl.h>
-//#include <amanita/aHashtable.h>
 #include <amanita/aThread.h>
-#include <amanita/gui/aWidget.h>
 
 
-#if defined(__linux__)
+class aWindow;
+
+#ifdef __linux__
 #include <gtk/gtk.h>
 
 
@@ -42,7 +42,6 @@ enum {
 	AMANITA_INIT_THREADS			= 0x00000100,	//!<
 	AMANITA_INIT_SOCKETS			= 0x00000200,	//!<
 	AMANITA_INIT_GUI				= 0x00001000,	//!<
-	AMANITA_INIT_BROWSER			= 0x00003000,	//!<
 	AMANITA_INIT_SDL				= 0x00100008,	//!<
 	AMANITA_INIT_SDL_TTF			= 0x00300000,	//!<
 	AMANITA_INIT_SDL_IMAGE		= 0x00500000,	//!<
@@ -73,9 +72,6 @@ typedef void (*install_function)(void *obj,const char *file,int n,int max,int st
  * @ingroup amanita
  */
 class aApplication {
-#ifdef WIN32
-friend LRESULT CALLBACK AmanitaMainWndProc(HWND,UINT,WPARAM,LPARAM);
-#endif
 private:
 	unsigned long app_init_params;	//!< 
 	FILE *app_out;							//!< Output log-file, stdout and stderr is written to this file too.
@@ -87,54 +83,32 @@ private:
 	uint32_t app_local_id;				//!< A local ID for the running instance.
 	time_t app_local_time;				//!<
 	time_t app_last_access;				//!< Time the application last was executed.
-//	char app_lang[3];						//!< Two-letter code for language used in the application.
-//	aHashtable app_lang_data;			//!< Hashtable containing textstrings in the loaded language.
-//	aHashtable app_properties;			//!< Hashtable containing configuration and settings property values.
 
-	aHandle window;
-	aWidget *child;
-
-/*
-	static const char *property_key[];
-	enum {
-		APP_EXE,
-		APP_DIR_HOME,
-		APP_DIR_DATA,
-		APP_DIR_FONTS,
-		APP_DIR_LANG,
-		APP_TEMP_PROPERTIES,
-		APP_LANG,
-		APP_PROPERTIES,
-	};
-*/
+	aWindow *window;						//!< Main window for the application.
 
 protected:
 #ifdef WIN32
 	HINSTANCE hinst;
 #endif
 
-//	void loadProperties();
-//	void saveProperties();
-
 public:
 	aApplication();
 	aApplication(const char *prj,const char *nm);
 	virtual ~aApplication();
 
-	uint32_t init(int argc,char *argv[],uint32_t params);
-	int open(int w=900,int h=600,int minw=0,int minh=0,bool res=true);
-	uint32_t close();
-	void exit();
+	/** Initialize application, initialize resources. */
+	uint32_t open(int argc,char *argv[],uint32_t params);
+	uint32_t close();						//!< Close application, uninitialize and shut down the application, free resources.
+	int main();							//!< Start main loop.
+	void quit();							//!< Exit the main loop.
 
-	virtual int create();
-	virtual int destroy();
-	virtual int handleEvent(uint32_t msg,intptr_t p1,intptr_t p2);
+	void setMainWindow(aWindow *wnd) { window = wnd; }
+	bool isMainWindow(aWindow *wnd) { return window==wnd; }
+	aWindow *getMainWindow() { return window; }
 
-	void add(aHandle c,aWidget *w);
-	void add(aHandle c,aWidget &w) { add(c,&w); }
+	virtual int create();				//!< Create aplication, this method should be inherited and used for creating the windows and widgets etc.
+	virtual int destroy();				//!< Destroy application, inherit and use for freeing user created resources.
 
-	void show();
-	void hide();
 /*
 	int install(const char *host,const char *path,aVector &files,install_function func=0,void *obj=0);
 #if defined __linux__
@@ -160,20 +134,6 @@ public:
 	void setLocalTime(time_t t) { app_local_time = t; }
 	time_t getLocalTime() { return app_local_time; }
 	time_t getLastAccess() { return app_last_access; }
-
-	aHandle getWindow() { return window; }
-
-/*
-	void setProperties(const char *s) { app_properties.merge(s); }
-	const char *getProperty(const char *key) { return (const char *)app_properties.get(key); }
-	void setPropertyf(const char *key,const char *value, ...);
-	void setProperty(const char *key,const char *value) { app_properties.put(key,value); }
-
-	virtual void setLanguage(const char *l=0);
-	const char *getLanguage() { return app_lang; }
-	const char *getf(const char *format, ...);
-	const char *get(const char *key);
-*/
 };
 
 

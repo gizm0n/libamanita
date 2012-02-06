@@ -3,30 +3,33 @@
 #include <stdlib.h>
 #include <string.h>
 #include <amanita/gui/aMenu.h>
-//#include "..\util\String.h"
-//#include "..\util\Array.h"
+#include <amanita/gui/aStatusbar.h>
 
 
-gboolean aMenu::menuitem_callback(GtkWidget *widget,GdkEventCrossing *ev,gpointer data) {
-	menu_item *mi = (menu_item *)data;
-	if(mi->menu && mi->menu->event_handler) mi->menu->event_handler(mi->menu,mi->action,(intptr_t)mi,0,0);
-//	app.handleAction(ACTION_SHOW_STATUS,0,(intptr_t)g_object_get_data(G_OBJECT(widget),"StatusbarText"));
+#ifdef __linux__
+static gboolean menuitem_callback(GtkWidget *widget,gpointer data) {
+	aMenuItem *mi = (aMenuItem *)data;
+	widget_event_handler event_handler = mi->menu->getEventHandler();
+debug_output("aMenu::menuitem_callback(%p, action: %d)\n",mi,mi->action);
+	if(event_handler) event_handler(mi->menu,MENU_EVENT_ACTION,(intptr_t)mi,mi->action,0);
 	return FALSE;
 }
+#endif
 
-aMenu::aMenu(widget_event_handler weh,const menu_item *mi) : aWidget(weh,WIDGET_MENU) {
+aMenu::aMenu(widget_event_handler weh,const aMenuItem *mi) : aWidget(weh,WIDGET_MENU) {
 	int i,n;
-	menu_item *m,*mp;
+	aMenuItem *m,*mp;
 
+	parent = 0;
 	nitems = 0;
 
-	for(const menu_item *m1=mi; m1->pid!=-1 || m1->id!=-1; ++nitems,++m1);
+	for(const aMenuItem *m1=mi; m1->pid!=-1 || m1->id!=-1; ++nitems,++m1);
 debug_output("nitems=%d\n",nitems);
 
-	items = (menu_item *)malloc(nitems*sizeof(menu_item));
-	memcpy(items,mi,nitems*sizeof(menu_item));
-	items_index = (menu_item **)malloc(nitems*sizeof(menu_item *));
-	memset(items_index,0,nitems*sizeof(menu_item *));
+	items = (aMenuItem *)malloc(nitems*sizeof(aMenuItem));
+	memcpy(items,mi,nitems*sizeof(aMenuItem));
+	items_index = (aMenuItem **)malloc(nitems*sizeof(aMenuItem *));
+	memset(items_index,0,nitems*sizeof(aMenuItem *));
 	for(i=0; i<nitems; ++i) {
 		m = &items[i];
 		m->index = i,m->lvl = 0;
@@ -58,23 +61,25 @@ aMenu::~aMenu() {
 	items_index = 0;
 	nitems = 0;
 	parent = 0;
-	handle = 0;
+	container = 0;
 }
 
-aHandle aMenu::create(aHandle p,int s) {
+aComponent aMenu::create() {
 	int i,n;
 	char str[256];
-	menu_item *m;
+	aMenuItem *m;
+#ifdef __linux__
 	GtkAccelGroup *accel_group = gtk_accel_group_new();
-	gtk_window_add_accel_group(GTK_WINDOW(p),accel_group);
+	gtk_window_add_accel_group(GTK_WINDOW(parent->getContainer()),accel_group);
 
-	handle = (aHandle)gtk_menu_bar_new();
+	container = (aComponent)gtk_menu_bar_new();
+	component = container;
 
 	for(i=0,m=items; m && i<nitems; ++i) {
 *str = '\0';
 for(n=0; n<m->lvl; ++n) strcat(str,"--> ");
 strcat(str,m->name);
-debug_output("init(menu: index=%d,id='%d',parent='%d',child='%d',menuitem='%s')\n",m->index,m->id,m->parent? m->parent->id : -1,m->child? m->child->id : -1,str);
+debug_output("aMenu::create(menu: index=%d,id='%d',parent='%d',child='%d',menuitem='%s')\n",m->index,m->id,m->parent? m->parent->id : -1,m->child? m->child->id : -1,str);
 
 		if(m->id==-1) {
 			if(m->parent) {
@@ -83,26 +88,23 @@ debug_output("init(menu: index=%d,id='%d',parent='%d',child='%d',menuitem='%s')\
 			}
 		} else {
 			m->item = gtk_image_menu_item_new_with_label(m->name);
-//			menu.put(m->action,m);
 			if(!m->sensitive) gtk_widget_set_sensitive(m->item,false);
 			if(m->acc!=-1) {
 				gtk_image_menu_item_set_accel_group(GTK_IMAGE_MENU_ITEM(m->item),accel_group);
 				gtk_widget_add_accelerator(m->item,"activate",accel_group,m->acc,(GdkModifierType)m->acc_mod,GTK_ACCEL_VISIBLE);
 			}
-			if(m->status) {
-				g_object_set_data(G_OBJECT(m->item),"StatusbarText",(gpointer)m->status);
-//				g_signal_connect(m->item,"enter-notify-event",G_CALLBACK(statusbar_push),(gpointer)gui.statusbar);
-//				g_signal_connect(m->item,"leave-notify-event",G_CALLBACK(statusbar_pop),(gpointer)gui.statusbar);
-			}
 			if(m->child) {
-				m->submenu = (aHandle)gtk_menu_new();
+				m->submenu = (aComponent)gtk_menu_new();
 				gtk_menu_item_set_submenu(GTK_MENU_ITEM(m->item),m->submenu);
 			}
 			if(m->parent) {
 				gtk_menu_shell_append(GTK_MENU_SHELL(m->parent->submenu),m->item);
-				if(m->action) g_signal_connect(m->item,"activate",G_CALLBACK(menuitem_callback),(gpointer)m);
+				if(m->action) {
+debug_output("aMenu::create(g_signal_connect: %s - %p)\n",m->name,m);
+					g_signal_connect(G_OBJECT(m->item),"activate",G_CALLBACK(menuitem_callback),(gpointer)m);
+				}
 			} else {
-				gtk_menu_shell_append(GTK_MENU_SHELL((GtkWidget *)handle),m->item);
+				gtk_menu_shell_append(GTK_MENU_SHELL((GtkWidget *)container),m->item);
 			}
 		}
 
@@ -118,7 +120,8 @@ debug_output("init(menu: next <--)\n");
 			}
 		}*/ else break;
 	}
-	return handle;
+#endif
+	return container;
 }
 
 

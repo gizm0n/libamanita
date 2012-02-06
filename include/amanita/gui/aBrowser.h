@@ -12,14 +12,8 @@
 #include <amanita/gui/aWidget.h>
 
 
-#if defined(__linux__)
-
-#elif defined(WIN32)
-#ifdef UNICODE 
-#define BROWSER_CLASS  L"WebControl32"
-#else
+#ifdef WIN32
 #define BROWSER_CLASS "WebControl32"
-#endif
 
 enum {
 	BROWSER_CREATE				= 0x01,
@@ -49,7 +43,7 @@ public:
 	aBrowser(widget_event_handler weh);
 	virtual ~aBrowser();
 
-	virtual aHandle create(aHandle p,int s); // <-- Move to private...
+	virtual aComponent create();
 
 	void setUrl(const char *url);
 	void setHtmlContent(const char *html);

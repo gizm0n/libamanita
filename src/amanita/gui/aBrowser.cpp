@@ -340,7 +340,7 @@ fprintf(stderr,"_EventSink::BeforeNavigate2(loading=%d,str='%s')\n",loading,str)
 fflush(stderr);
 			if(str && *str && strncmp(str,"about:blank",11)!=0) {
 				strcpy(this->url,str);
-				//WPARAM w = GetWindowLong((HWND)browser->handle,GWL_ID)&0xFFFF;
+				//WPARAM w = GetWindowLong((HWND)browser->component,GWL_ID)&0xFFFF;
 				loading = true;//!SendMessage((HWND)browser->parent,WM_COMMAND,w|(BROWSER_ONCLICK<<16),(LPARAM)this->url);
 				*params->rgvarg[0].pboolVal = VARIANT_FALSE;
 //				if(loading) PostMessage(browser->hparent,WM_COMMAND,w|(BROWSER_ONREDIRECT<<16),(LPARAM)this->url);
@@ -538,7 +538,7 @@ fflush(stderr);
 	browser = b;
 	msie = 0;
 	ref = 0;
-	hwnd = (HWND)browser->handle;
+	hwnd = (HWND)browser->component;
 	unknown = 0;
 fprintf(stderr,"_Container::_Container(2)\n");
 fflush(stderr);
@@ -705,13 +705,14 @@ fflush(stderr);
 	if(msg==WM_CREATE) {
 		LPCREATESTRUCT cs = (LPCREATESTRUCT)lparam;
 		b = (aBrowser *)cs->lpCreateParams;
-		SetProp(hwnd,amanita_browser_class,(HANDLE)b);
-		b->handle = (aHandle)hwnd;
-		b->parent = (aHandle)cs->hwndParent;
+		SetProp(hwnd,"aBrowser",(HANDLE)b);
+		b->container = (aComponent)hwnd;
+		b->component = b->container;
+		b->parent = (aWidget *)cs->hwndParent;
 		b->container = new _Container(b);
 		if(cs->lpszName && *cs->lpszName) b->setUrl(cs->lpszName);
 		return 0;
-	} else if((b=(aBrowser *)GetProp(hwnd,amanita_browser_class))) {
+	} else if((b=(aBrowser *)GetProp(hwnd,"aBrowser"))) {
 		if(msg==WM_SIZE) {
 			b->container->setLocation(0,0,LOWORD(lparam),HIWORD(lparam));
 			return 0;
@@ -721,7 +722,7 @@ fflush(stderr);
 				b->container->Release();
 				b->container = 0;
 			}
-			RemoveProp(hwnd,amanita_browser_class);
+			RemoveProp(hwnd,"aBrowser");
 			return 0;
 		}
 	}
@@ -733,15 +734,7 @@ fflush(stderr);
 
 
 aBrowser::aBrowser(widget_event_handler weh) : aWidget(weh,WIDGET_BROWSER) {
-	/* Inherited from aWidget: */
-	id = 0;
-	parent = 0;
-	handle = 0;
-	text = 0;
-//	sizer = 0;
-
-#if defined(__linux__)
-#elif defined(WIN32)
+#ifdef WIN32
 	container = 0;
 	stamp = 0;
 //	scrollX = GetSystemMetrics(SM_CXHSCROLL)+2;
@@ -757,8 +750,7 @@ fprintf(stderr,"aBrowser::~aBrowser(widget=%p)\n",(aWidget *)this);
 fflush(stderr);
 }
 
-aHandle aBrowser::create(aHandle p,int s) {
-	parent = p;
+aComponent aBrowser::create() {
 #if defined(__linux__)
 	GtkWidget *scroll,*webkit;
 	scroll = gtk_scrolled_window_new(NULL,NULL);
@@ -771,10 +763,24 @@ aHandle aBrowser::create(aHandle p,int s) {
 	g_signal_connect(G_OBJECT(webkit),"navigation-policy-decision-requested",G_CALLBACK(webview_navigation_decision_event_callback),this);
 //	g_signal_connect(G_OBJECT(webkit),"navigation-requested",G_CALLBACK(webview_navigation_event_callback),this);
 	gtk_container_add(GTK_CONTAINER(scroll),webkit);
-	handle = (aHandle)webkit;
-	return (aHandle)scroll;
+	container = (aComponent)scroll;
+	component = (aComponent)webkit;
+	return container;
 #elif defined(WIN32)
-	return aWidget::create(p,s);
+	if(!(class_registers&WINDOW_CLASS_BROWSER)) {
+		WNDCLASS wc;
+		if(!GetClassInfo(hinst,amanita_browser_class,&wc)) {
+			memset(&wc,0,sizeof(wc));
+			wc.style         = CS_DBLCLKS|CS_GLOBALCLASS|CS_NOCLOSE;
+			wc.lpfnWndProc   = AmanitaBrowserProc;
+			wc.hInstance     = hinst;
+			wc.hCursor       = LoadCursor(0,IDC_ARROW);
+			wc.lpszClassName = amanita_browser_class;
+			if(!RegisterClass(&wc)) return 0;
+			class_registers |= WINDOW_CLASS_BROWSER;
+		}
+	}
+	return aWidget::create();
 #endif
 }
 
@@ -783,7 +789,7 @@ void aBrowser::setUrl(const char *url) {
 //fprintf(stderr,"aBrowser::setUrl('%s')\n",url);
 //fflush(stderr);
 #if defined(__linux__)
-	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(handle),url);
+	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(component),url);
 
 #elif defined(WIN32)
 	stamp = (intptr_t)url;
@@ -812,7 +818,7 @@ void aBrowser::setHtmlContent(const char *html) {
 	if(!html || !*html) return;
 	
 #if defined(__linux__)
-	webkit_web_view_load_string(WEBKIT_WEB_VIEW(handle),html,"text/html","UTF-8","file://./");
+	webkit_web_view_load_string(WEBKIT_WEB_VIEW(component),html,"text/html","UTF-8","file://./");
 
 #elif defined(WIN32)
 	LPDISPATCH d;

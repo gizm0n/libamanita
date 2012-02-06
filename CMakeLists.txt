@@ -90,7 +90,10 @@ if(WEBKIT_FOUND)
 	add_definitions(${WEBKIT_CFLAGS_OTHER})
 endif(WEBKIT_FOUND)
 
-include_directories(./include)
+include_directories(
+	"${PROJECT_SOURCE_DIR}/include"
+	"${PROJECT_BINARY_DIR}/include"
+)
 
 if(CMAKE_TOOLCHAIN_FILE)
 endif()
@@ -131,8 +134,8 @@ endif()
 
 
 configure_file(
-	"${PROJECT_SOURCE_DIR}/src/_config.h.in"
-	"${PROJECT_BINARY_DIR}/src/_config.h"
+	"${PROJECT_SOURCE_DIR}/include/amanita/_config.h.in"
+	"${PROJECT_BINARY_DIR}/include/amanita/_config.h"
 )
 
 configure_file(
@@ -165,7 +168,9 @@ set(amanita_src
 	src/amanita/aWord.cpp
 	src/amanita/gui/aBrowser.cpp
 	src/amanita/gui/aMenu.cpp
+	src/amanita/gui/aStatusbar.cpp
 	src/amanita/gui/aWidget.cpp
+	src/amanita/gui/aWindow.cpp
 	src/amanita/net/aClient.cpp
 	src/amanita/net/aHttp.cpp
 	src/amanita/net/aServer.cpp
@@ -236,7 +241,9 @@ install(FILES
 	include/amanita/gui/aBrowser.h
 	include/amanita/gui/aEvent.h
 	include/amanita/gui/aMenu.h
+	include/amanita/gui/aStatusbar.h
 	include/amanita/gui/aWidget.h
+	include/amanita/gui/aWindow.h
 	DESTINATION include/amanita/gui
 )
 

@@ -9,46 +9,50 @@
  */ 
 
 #include <stdio.h>
-#ifdef WIN32
-#include <windows.h>
-#endif
 #include <amanita/gui/aWidget.h>
+
+
+enum {
+	MENU_EVENT_ACTION,
+	MENU_EVENT_ENTER,
+	MENU_EVENT_LEAVE,
+};
+
 
 class aMenu;
 
-struct menu_item {
+struct aMenuItem {
 	int pid;
 	int id;
+	const char *name;
+	const char *status;
 	int action;
 	bool sensitive;
 	int acc;
 	int acc_mod;
 	int index;
 	int lvl;
-	const char *name;
-	const char *status;
-	menu_item *parent;
-	menu_item *child;
+	aMenuItem *parent;
+	aMenuItem *child;
 	aMenu *menu;
-	aHandle item;
-	aHandle submenu;
+	aComponent item;
+	aComponent submenu;
 };
 
 class aMenu : public aWidget {
+friend class aWindow;
 private:
-	menu_item *items;
-	menu_item **items_index;
+	aMenuItem *items;
+	aMenuItem **items_index;
 	int nitems;
-//	aHashtable menu;
-
-	static gboolean menuitem_callback(GtkWidget *widget,GdkEventCrossing *ev,gpointer data);
 
 public:
-	aMenu(widget_event_handler weh,const menu_item *mi);
+	aMenu(widget_event_handler weh,const aMenuItem *mi);
 	virtual ~aMenu();
 
-	virtual aHandle create(aHandle p,int s); // <-- Move to private...
+	virtual aComponent create();
 };
+
 /*
 class aMenu {
 private:
