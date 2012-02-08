@@ -2,3 +2,5 @@
 
 = Introduction =
 Djynn is a plugin for the Geany IDE and adds sorting and commenting functionality as well as a simple projectmanager. It is designed entirely to fulfill my own needs, and is supplied as is.
+
+http://img259.imageshack.us/img259/111/djynn.png
