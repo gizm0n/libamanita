@@ -94,7 +94,7 @@ value_t aHashtable::iterator::remove() {
 
 
 
-aObject_Inheritance(aHashtable,aCollection);
+aObject_Inheritance(aHashtable,aCollection)
 
 
 aHashtable::aHashtable(size_t c,float l,style_t st) : aCollection(),table(0),full(0),style(st),ld(l) { cap = c; }

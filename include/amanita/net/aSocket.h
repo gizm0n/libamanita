@@ -13,22 +13,6 @@
 #include <stdlib.h>
 #include <amanita/aThread.h>
 
-#ifndef WIN32
-/** Initialize network functions. */
-bool InitNetwork();
-/** Uninitialize network functions. */
-bool UninitNetwork();
-
-#else
-#include <winsock2.h>
-#include <windows.h>
-
-/** Initialize network functions. */
-bool WINAPI InitNetwork();
-/** Uninitialize network functions. */
-bool WINAPI UninitNetwork();
-#endif
-
 
 /** Set LIBAMANITA_SOCKET_HEADER to the sizeof the header in number of bytes.
  * Is can be 2 to 8 bytes and defines the size of the length parameter in the
@@ -61,41 +45,45 @@ bool WINAPI UninitNetwork();
 #define LIBAMANITA_SELECT_TIMEOUT 100000
 
 
-#ifdef LIBAMANITA_SDL
-	#include <SDL/SDL.h>
-	#include <SDL/SDL_net.h>
-	#include <SDL/SDL_thread.h>
+/*#ifdef USE_SDL
+#include <SDL/SDL.h>
+#include <SDL/SDL_net.h>
+#include <SDL/SDL_thread.h>
 
-	#define tcp_close(s) SDLNet_TCP_Close(s)
-	#define tcp_send(s,d,l) SDLNet_TCP_Send((s),(d),(l))
-	#define tcp_recv(s,d,l) SDLNet_TCP_Recv((s),(d),(l))
+#define tcp_close(s) SDLNet_TCP_Close(s)
+#define tcp_send(s,d,l) SDLNet_TCP_Send((s),(d),(l))
+#define tcp_recv(s,d,l) SDLNet_TCP_Recv((s),(d),(l))
 
-	typedef TCPsocket tcp_socket_t;
+typedef TCPsocket tcp_socket_t;
+#endif*/
 
-#elif defined(__linux__)
-	#include <unistd.h>
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <netdb.h>
-	#include <string.h>
-	#include <errno.h>
-	#include <amanita/aBytes.h>
+#ifdef USE_GTK
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <string.h>
+#include <errno.h>
+#include <amanita/aBytes.h>
 
-	#define tcp_close(s) ::close(s)
-	#define tcp_send(s,d,l) ::send((s),(d),(l),0)
-	#define tcp_recv(s,d,l) ::recv((s),(d),(l),0)
+#define tcp_close(s) ::close(s)
+#define tcp_send(s,d,l) ::send((s),(d),(l),0)
+#define tcp_recv(s,d,l) ::recv((s),(d),(l),0)
 
-	typedef int tcp_socket_t;
+typedef int tcp_socket_t;
+#endif
 
-#elif defined(WIN32)
-	#include <amanita/aBytes.h>
+#ifdef USE_WIN32
+#include <winsock2.h>
+#include <windows.h>
+#include <amanita/aBytes.h>
 
-	#define tcp_close(s) ::closesocket(s)
-	#define tcp_send(s,d,l) ::send((s),(const char *)(d),(l),0)
-	#define tcp_recv(s,d,l) ::recv((s),(char *)(d),(l),0)
+#define tcp_close(s) ::closesocket(s)
+#define tcp_send(s,d,l) ::send((s),(const char *)(d),(l),0)
+#define tcp_recv(s,d,l) ::recv((s),(char *)(d),(l),0)
 
-	typedef SOCKET tcp_socket_t;
+typedef SOCKET tcp_socket_t;
 #endif
 
 #undef swap_be_16
@@ -105,32 +93,34 @@ bool WINAPI UninitNetwork();
 #undef swap_le_32
 #undef swap_le_64
 
-#ifdef LIBAMANITA_SDL
-	#define swap_be_16 SDL_SwapBE16
-	#define swap_be_32 SDL_SwapBE32
-	#define swap_be_64 SDL_SwapBE64
-	#define swap_le_16 SDL_SwapLE16
-	#define swap_le_32 SDL_SwapLE32
-	#define swap_le_64 SDL_SwapLE64
+/*#ifdef USE_SDL
+#define swap_be_16 SDL_SwapBE16
+#define swap_be_32 SDL_SwapBE32
+#define swap_be_64 SDL_SwapBE64
+#define swap_le_16 SDL_SwapLE16
+#define swap_le_32 SDL_SwapLE32
+#define swap_le_64 SDL_SwapLE64
+#endif*/
 
+//#else
+
+#if __BYTE_ORDER == __BIG_ENDIAN
+#define swap_be_16(n) n
+#define swap_be_32(n) n
+#define swap_be_64(n) n
+#define swap_le_16(n) bswap_16(n)
+#define swap_le_32(n) bswap_32(n)
+#define swap_le_64(n) bswap_64(n)
 #else
-	#if __BYTE_ORDER == __BIG_ENDIAN
-		#define swap_be_16(n) n
-		#define swap_be_32(n) n
-		#define swap_be_64(n) n
-		#define swap_le_16(n) bswap_16(n)
-		#define swap_le_32(n) bswap_32(n)
-		#define swap_le_64(n) bswap_64(n)
+#define swap_be_16(n) bswap_16(n)
+#define swap_be_32(n) bswap_32(n)
+#define swap_be_64(n) bswap_64(n)
+#define swap_le_16(n) n
+#define swap_le_32(n) n
+#define swap_le_64(n) n
+#endif /* __BYTE_ORDER == __BIG_ENDIAN */
 
-	#else
-		#define swap_be_16(n) bswap_16(n)
-		#define swap_be_32(n) bswap_32(n)
-		#define swap_be_64(n) bswap_64(n)
-		#define swap_le_16(n) n
-		#define swap_le_32(n) n
-		#define swap_le_64(n) n
-	#endif /* __BYTE_ORDER == __BIG_ENDIAN */
-#endif /* LIBAMANITA_SDL */
+//#endif /* USE_SDL */
 
 
 
@@ -338,18 +328,19 @@ protected:
 	tcp_socket_t sock;
 	uint32_t ip;
 	uint16_t port;
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 	IPaddress address;
 	SDLNet_SocketSet set;
-#elif defined(__linux__) || defined(WIN32)
+#elif defined(USE_GTK) || defined(USE_WIN32)*/
 	fd_set set;
 	hostent *hostinfo;
-#ifdef __linux__
+#ifdef USE_GTK
 	sockaddr_in address;
-#else
+#endif
+#ifdef USE_WIN32
 	SOCKADDR_IN address;
 #endif
-#endif
+//#endif
 	aThread thread;
 
 	void setStarting(bool b) { status |= SOCK_ST_STARTING;if(!b) status ^= SOCK_ST_STARTING; }
@@ -360,11 +351,12 @@ protected:
 	uint8_t *receive(tcp_socket_t s,size_t &l);
 	void releaseMessageBuffer(uint8_t *b) { if(b!=buf) free(b); }
 
-#ifdef LIBAMANITA_SDL
-	const char *getError() { return SDL_GetError(); }
-#elif defined(__linux__)
+//#ifdef USE_SDL
+//	const char *getError() { return SDL_GetError(); }
+#ifdef USE_GTK
 	const char *getError() { return strerror(errno); }
-#elif defined(WIN32)
+#endif
+#ifdef USE_WIN32
 	const char *getError();
 #endif
 

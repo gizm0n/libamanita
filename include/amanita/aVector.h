@@ -206,10 +206,7 @@ public:
 	aVector &remove(aString &v) { return remove(v.toCharArray()); }
 	aVector &remove(aObject *v) { return remove((value_t)v,TYPE_OBJECT_P); }
 	aVector &remove(aObject &v) { return remove((value_t)&v,TYPE_OBJECT_P); }
-	/** @} */
 
-	/** @name Remove all methods
-	 * @{ */
 	aVector &removeAt(size_t n);
 	aVector &removeAll() { clear();return *this; }
 	/** @} */

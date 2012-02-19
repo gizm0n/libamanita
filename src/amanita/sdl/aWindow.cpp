@@ -10,7 +10,7 @@
 #include <amanita/sdl/aTooltip.h>
 
 
-aObject_Inheritance(aWindow,aComponent);
+aObject_Inheritance(aWindow,aComponent)
 
 
 extern char indent[32];

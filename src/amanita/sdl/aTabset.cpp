@@ -5,7 +5,7 @@
 #include <amanita/sdl/aTabset.h>
 
 
-aObject_Inheritance(aTabset,aComponent);
+aObject_Inheritance(aTabset,aComponent)
 
 
 aTabset::_settings aTabset::_s = { 0 };

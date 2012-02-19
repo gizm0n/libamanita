@@ -7,7 +7,7 @@
 #include <amanita/aString.h>
 
 
-aObject_Inheritance(aString,aObject);
+aObject_Inheritance(aString,aObject)
 
 
 const char aString::upper_hex[17] = "0123456789ABCDEF";
@@ -15,9 +15,10 @@ const char aString::lower_hex[17] = "0123456789abcdef";
 
 const char *aString::blank = "";
 
-#ifdef __linux__
+#ifdef USE_UNIX
 const char *aString::endline = "\n";
-#elif defined _WIN32
+#endif
+#ifdef USE_WIN32
 const char *aString::endline = "\r\n";
 #endif
 const char *aString::whitespace = " \t\n\r";

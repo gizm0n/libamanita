@@ -8,7 +8,7 @@
 #include <amanita/sdl/aGraphics.h>
 
 
-aObject_Inheritance(aImage,aObject);
+aObject_Inheritance(aImage,aObject)
 
 
 int aImage::created = 0;

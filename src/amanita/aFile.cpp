@@ -3,12 +3,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-#if defined __linux__
+#if defined USE_GTK
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <sys/types.h>
 #include <unistd.h>
-#elif defined WIN32
+#endif
+#ifdef USE_WIN32
 #include <windows.h>
 #endif
 
@@ -73,15 +74,23 @@ size_t aFile::size() {
 
 
 bool aFile::exists(const char *fn) {
-#if defined __linux__
+#ifdef USE_GLIB
 	return g_file_test(fn,G_FILE_TEST_EXISTS);
-#elif defined WIN32
-	return GetFileAttributes(fn)!=INVALID_FILE_ATTRIBUTES;
+#endif
+#ifdef USE_WIN32
+#ifdef USE_WCHAR
+	wchar_t *wfn = char2w(fn);
+	bool b = GetFileAttributes(wfn)!=INVALID_FILE_ATTRIBUTES;
+	free(wfn);
+	return b;
 #else
-	FILE *fp = fopen(fn,"r");
-	if(!fp) return false;
-	fclose(fp);
-	return true;
+	return GetFileAttributes(fn)!=INVALID_FILE_ATTRIBUTES;
+#endif
+//#else
+//	FILE *fp = fopen(fn,"r");
+//	if(!fp) return false;
+//	fclose(fp);
+//	return true;
 #endif
 }
 
@@ -122,32 +131,47 @@ long aFile::copy(FILE *s,FILE *d) {
 
 
 bool aFile::remove(const char *fn) {
-#if defined __linux__
+#ifdef USE_GLIB
 	return ::g_remove(fn)==0;
-#elif defined WIN32
+#endif
+#ifdef USE_WIN32
+#ifdef USE_WCHAR
+	wchar_t *wfn = char2w(fn);
+	int n = GetFileAttributes(wfn);
+	free(wfn);
+#else
 	int n = GetFileAttributes(fn);
+#endif
 	if(n&FILE_ATTRIBUTE_READONLY) return false;
 	if(n&FILE_ATTRIBUTE_DIRECTORY) return RemoveDirectory((LPCTSTR)fn)!=0;
 	else return DeleteFile((LPCTSTR)fn)==TRUE;
-#else
-	return ::remove(fn)==0;
+//#else
+//	return ::remove(fn)==0;
 #endif
 }
 
 
 bool aFile::mkdir(const char *dn,int p) {
-#if defined __linux__
+#ifdef USE_GLIB
 	return ::g_mkdir(dn,p)==0;
-#elif defined WIN32
-	return CreateDirectory((LPCTSTR)dn,NULL)==TRUE;
+#endif
+#ifdef USE_WIN32
+#ifdef USE_WCHAR
+	wchar_t *wdn = char2w(dn);
+	bool b = CreateDirectory(wdn,NULL)==TRUE;
+	free(wdn);
+	return b;
 #else
-	return ::mkdir(dn,p)==0;
+	return CreateDirectory(dn,NULL)==TRUE;
+#endif
+//#else
+//	return ::mkdir(dn,p)==0;
 #endif
 }
 
 
 void aFile::getExecutable(char *dir,int l) {
-#if defined(__linux__)
+#ifdef USE_GLIB
 	char link[64];
 	pid_t pid;
 	int ret;
@@ -155,70 +179,112 @@ void aFile::getExecutable(char *dir,int l) {
 	snprintf(link,sizeof(link),"/proc/%i/exe",pid);
 	ret = readlink(link,dir,l);
 	dir[ret] = '\0';
-#elif defined(WIN32)
-	GetModuleFileName(NULL,dir,l);
+#endif
+#ifdef USE_WIN32
+#ifdef USE_WCHAR
+	wchar_t wdir[l];
+	GetModuleFileName(NULL,wdir,l);
+	w2char(dir,wdir,l);
 #else
-	strcpy(dir,".");
+	GetModuleFileName(NULL,dir,l);
+#endif
+//#else
+//	strcpy(dir,".");
 #endif
 }
 
 void aFile::getHomeDir(char *dir,int l) {
-#if defined(__linux__)
+#ifdef USE_GLIB
 	snprintf(dir,l,"%s",g_get_home_dir());
-#elif defined(WIN32)
+#endif
+#ifdef USE_WIN32
+#ifdef USE_WCHAR
+	wchar_t wdir[l];
+	GetModuleFileName(NULL,wdir,l);
+	w2char(dir,wdir,l);
+#else
 	GetModuleFileName(NULL,dir,l);
+#endif
 	char *p = strrchr(dir,'\\');
 	if(!p) p = strrchr(dir,'/');
 	if(p) *p = '\0';
-#else
-	strcpy(dir,".");
+//#else
+//	strcpy(dir,".");
 #endif
 }
 
 void aFile::getApplicationDir(char *dir,int l) {
-#if defined(__linux__)
+#ifdef USE_GLIB
 	getExecutable(dir,l);
 	char *p = strrchr(dir,'/');
 	if(p) *p = '\0';
-#elif defined(WIN32)
+#endif
+#ifdef USE_WIN32
+#ifdef USE_WCHAR
+	wchar_t wdir[l];
+	GetModuleFileName(NULL,wdir,l);
+	w2char(dir,wdir,l);
+#else
 	GetModuleFileName(NULL,dir,l);
+#endif
 	char *p = strrchr(dir,'\\');
 	if(!p) p = strrchr(dir,'/');
 	if(p) *p = '\0';
-#else
-	strcpy(dir,".");
+//#else
+//	strcpy(dir,".");
 #endif
 }
 
 void aFile::getFontsDir(char *dir,int l) {
-#if defined(__linux__)
+#ifdef USE_GLIB
 	snprintf(dir,l,"%s/.fonts",g_get_home_dir());
-#elif defined(WIN32)
-	GetWindowsDirectory((LPTSTR)dir,(UINT)l);
-	strcat(dir,"\\fonts");
+#endif
+#ifdef USE_WIN32
+#ifdef USE_WCHAR
+	wchar_t wdir[l];
+	GetWindowsDirectory(wdir,l);
+	w2char(dir,wdir,l);
 #else
-	strcpy(dir,".");
+	GetWindowsDirectory(dir,l);
+#endif
+	strcat(dir,"\\fonts");
+//#else
+//	strcpy(dir,".");
 #endif
 }
 
 void aFile::getSystemDir(char *dir,int l) {
-#if defined(__linux__)
+#ifdef USE_GLIB
 	snprintf(dir,l,"%s",g_get_home_dir());
-#elif defined(WIN32)
-	GetSystemDirectory((LPTSTR)dir,(UINT)l);
+#endif
+#ifdef USE_WIN32
+#ifdef USE_WCHAR
+	wchar_t wdir[l];
+	GetSystemDirectory(wdir,l);
+	w2char(dir,wdir,l);
 #else
-	strcpy(dir,".");
+	GetSystemDirectory(dir,l);
+#endif
+//#else
+//	strcpy(dir,".");
 #endif
 }
 
 void aFile::getCurrentDir(char *dir,int l) {
-#if defined(__linux__)
+#ifdef USE_GLIB
 	char *p;
 	p = getcwd(dir,l);
-#elif defined(WIN32)
-	GetCurrentDirectory((DWORD)l,(LPTSTR)dir);
+#endif
+#ifdef USE_WIN32
+#ifdef USE_WCHAR
+	wchar_t wdir[l];
+	GetCurrentDirectory(l,wdir);
+	w2char(dir,wdir,l);
 #else
-	strcpy(dir,".");
+	GetCurrentDirectory(l,dir);
+#endif
+//#else
+//	strcpy(dir,".");
 #endif
 }
 

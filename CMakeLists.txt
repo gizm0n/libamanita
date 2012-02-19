@@ -27,10 +27,10 @@ include(${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
 find_package(PkgConfig REQUIRED)
 find_package(Threads REQUIRED)
 if(CMAKE_USE_PTHREADS_INIT)
-	set(AMANITA_PTHREADS 1)
+	set(USE_PTHREADS 1)
 else()
 	if(CMAKE_USE_WIN32_THREADS_INIT)
-		set(AMANITA_WIN32_THREADS 1)
+		set(USE_WIN32_THREADS 1)
 	endif()
 endif()
 
@@ -105,12 +105,19 @@ else()
 endif()
 
 if(UNIX)
+	set(USE_UNIX 1)
 	if(APPLE)
 		message("Apple")
 		set(GUI "Cocoa")
+		set(GUI_COCOA 1)
+		set(USE_COCOA 1)
+		set(USE_APPLE 1)
 	else()
 		message("Unix or Linux")
 		set(GUI "GTK+")
+		set(GUI_GTK 1)
+		set(USE_GTK 1)
+		set(USE_GLIB 1)
 	endif()
 	link_libraries(${CMAKE_THREAD_LIBS} ${CMAKE_DL_LIBS})
 else()
@@ -119,13 +126,17 @@ else()
 		set(GUI "Win32")
 		link_libraries(intl comctl32 ws2_32)
 		add_definitions(-DWIN32_LEAN_AND_MEAN)
+		set(UNICODE 1)
+		set(USE_WCHAR 1)
+		set(GUI_WIN32 1)
+		set(USE_WIN32 1)
 		if(MSVC)
 			add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -subsystem:windows")
 		endif(MSVC)
-		if(CMAKE_C_COMPILER_ID STREQUAL GNU)
-			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-subsystem,windows")
-		endif()
+#		if(CMAKE_C_COMPILER_ID STREQUAL GNU)
+#			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-subsystem,windows")
+#		endif()
 	else()
 		message("Unknown")
 		set(GUI "Unknown")
@@ -167,7 +178,16 @@ set(amanita_src
 	src/amanita/aVector.cpp
 	src/amanita/aWord.cpp
 	src/amanita/gui/aBrowser.cpp
+	src/amanita/gui/aButton.cpp
+	src/amanita/gui/aCairo.cpp
+	src/amanita/gui/aCanvas.cpp
+	src/amanita/gui/aChoice.cpp
+	src/amanita/gui/aContainer.cpp
+	src/amanita/gui/aEntry.cpp
+	src/amanita/gui/aLabel.cpp
+	src/amanita/gui/aList.cpp
 	src/amanita/gui/aMenu.cpp
+	src/amanita/gui/aNotebook.cpp
 	src/amanita/gui/aStatusbar.cpp
 	src/amanita/gui/aWidget.cpp
 	src/amanita/gui/aWindow.cpp
@@ -239,8 +259,17 @@ install(FILES
 
 install(FILES
 	include/amanita/gui/aBrowser.h
+	include/amanita/gui/aButton.h
+	include/amanita/gui/aCairo.h
+	include/amanita/gui/aCanvas.h
+	include/amanita/gui/aChoice.h
+	include/amanita/gui/aContainer.h
+	include/amanita/gui/aEntry.h
 	include/amanita/gui/aEvent.h
+	include/amanita/gui/aLabel.h
+	include/amanita/gui/aList.h
 	include/amanita/gui/aMenu.h
+	include/amanita/gui/aNotebook.h
 	include/amanita/gui/aStatusbar.h
 	include/amanita/gui/aWidget.h
 	include/amanita/gui/aWindow.h

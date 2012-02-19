@@ -47,34 +47,66 @@
 	#define strnicmp strncasecmp
 #endif
 
+#define _(x) gettext(x)
+
+#cmakedefine UNICODE
+#cmakedefine USE_WCHAR
+
+#ifdef USE_WCHAR
+typedef wchar_t tchar_t;
+#define TEOF WEOF
+#define TEXT(s) L##s
+#define _T(s) L##s
+#else
+typedef unsigned char tchar_t;
+#define TEOF EOF
+#define TEXT(s) s
+#define _T(s) s
+#endif
+
+#ifdef WIN32
+extern wchar_t *char2w(const char *c);
+extern void char2w(wchar_t *w,const char *c,int l);
+extern char *w2char(const wchar_t *w);
+extern void w2char(char *c,const wchar_t *w,int l);
+#endif
+
 #define __STDC_FORMAT_MACROS
 #ifdef __linux__
-#	if _WORDSIZE == 64
-#		define PRIl			"l"
-#		define PRIll		"l"
-#	else
-#		define PRIl			"l"
-#		define PRIll		"ll"
-#	endif
-#		define PRIlf		"L"
-#elif defined _WIN32
-#	ifdef _WIN64
-#		define PRIl			"l"
-#		define PRIll		"l"
-#	else
-#		define PRIl			"l"
-#		define PRIll		"I64l"
-#	endif
-#		define PRIlf		"L"
+#if _WORDSIZE == 64
+#define PRIl		"l"
+#define PRIll		"l"
+#else
+#define PRIl		"l"
+#define PRIll		"ll"
+#endif
+#define PRIlf		"L"
+#define PRIts		"s"
+#endif
+
+#ifdef _WIN32
+#ifdef _WIN64
+#define PRIl		"l"
+#define PRIll		"l"
+#else
+#define PRIl		"l"
+#define PRIll		"I64l"
+#endif
+#define PRIlf		"L"
+#ifdef USE_WCHAR
+#define PRIts		"ls"
+#else
+#define PRIts		"s"
+#endif
 #endif
 
 
 #ifdef NDEBUG
-#	define debug_output(...)
-#	define debug_putc(c)
+#define debug_output(...)
+#define debug_putc(c)
 #else
-#	define debug_output(...) fprintf(stderr,__VA_ARGS__);
-#	define debug_putc(c) fputc(c,stderr);
+#define debug_output(...) fprintf(stderr,__VA_ARGS__);
+#define debug_putc(c) fputc(c,stderr);
 #endif
 
 #endif /* _LIBAMANITA_CONFIG_H */

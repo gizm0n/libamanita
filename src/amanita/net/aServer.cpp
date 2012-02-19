@@ -22,20 +22,20 @@ void aServerConnection::setKey(const uint32_t *k,size_t l) {
 uint32_t aServer::id_index = 0xffff;
 
 aServer::aServer(socket_event_handler seh) : aSocket(seh),_sockets(),_clients(),_main("main"),_channels() {
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 	setsz = 0;
-#elif defined(__linux__) || defined(WIN32)
+#elif defined(USE_GTK) || defined(USE_WIN32)*/
 	sockets_n = sockets_cap = 0,sockets = 0;
-#endif
+//#endif
 	_channels.put(_main.getName(),&_main);
 }
 
 aServer::~aServer() {
-#ifdef LIBAMANITA_SDL
-#elif defined(__linux__) || defined(WIN32)
+/*#ifdef USE_SDL
+#elif defined(USE_GTK) || defined(USE_WIN32)*/
 	if(sockets) free(sockets);
 	sockets_n = sockets_cap = 0,sockets = 0;
-#endif
+//#endif
 	stop();
 }
 
@@ -56,7 +56,7 @@ bool aServer::start(uint16_t p) {
 	setStarting(true);
 	port = p;
 
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 	if(SDLNet_ResolveHost(&address,0,swap_be_16(p))==-1)
 		stateChanged(SM_ERR_RESOLVE_HOST,(intptr_t)&address,(intptr_t)getError(),0);
 	else {
@@ -71,10 +71,11 @@ bool aServer::start(uint16_t p) {
 		}
 	}
 
-#elif defined(__linux__) || defined(WIN32)
-#if defined(__linux__)
+#elif defined(USE_GTK) || defined(USE_WIN32)*/
+#ifdef USE_GTK
 	if((sock=socket(AF_INET,SOCK_STREAM,0))==-1)
-#else
+#endif
+#ifdef USE_WIN32
 	if((sock=WSASocket(AF_INET,SOCK_STREAM,0,0,0,WSA_FLAG_OVERLAPPED))==INVALID_SOCKET)
 #endif
 		stateChanged(SM_ERR_OPEN_SOCKET,0,(intptr_t)getError(),0);
@@ -82,19 +83,21 @@ bool aServer::start(uint16_t p) {
 		address.sin_family = AF_INET;
 		address.sin_addr.s_addr = swap_be_32(INADDR_ANY);
 		address.sin_port = swap_be_16(p);
-#ifdef __linux__
+#ifdef USE_GTK
 		int y = 1;
 		if(setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,(const char *)&y,sizeof(int))==-1 ||
 				bind(sock,(sockaddr *)&address,sizeof(address))==-1)
-#else
+#endif
+#ifdef USE_WIN32
 		int y = 1,n;
 		if(setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,(const char *)&y,sizeof(int))==SOCKET_ERROR ||
 				bind(sock,(SOCKADDR *)&address,sizeof(address))==SOCKET_ERROR)
 #endif
 			stateChanged(SM_ERR_BIND,(intptr_t)&address,(intptr_t)getError(),0);
-#ifdef __linux__
+#ifdef USE_GTK
 		else if(listen(sock,SOMAXCONN)==-1)
-#else
+#endif
+#ifdef USE_WIN32
 		else if(listen(sock,SOMAXCONN)==SOCKET_ERROR ||
 				ioctlsocket(sock,FIONBIO,(u_long *)&n)==SOCKET_ERROR)
 #endif
@@ -105,7 +108,7 @@ bool aServer::start(uint16_t p) {
 			ret = true;
 		}
 	}
-#endif
+//#endif
 
 	setStarting(false);
 	return ret;
@@ -129,8 +132,8 @@ debug_output("aServer::stop(tcp_close)\n");
 	}
 }
 
-#ifdef LIBAMANITA_SDL
-#elif defined(__linux__) || defined(WIN32)
+//#ifdef USE_SDL
+//#elif defined(USE_GTK) || defined(USE_WIN32)
 void aServer::addSocket(tcp_socket_t s) {
 	if(!sockets) sockets_cap = 8,sockets = (tcp_socket_t *)malloc(sizeof(tcp_socket_t)*sockets_cap);
 	else if(sockets_n+1==sockets_cap) sockets_cap <<= 1,sockets = (tcp_socket_t *)realloc(sockets,sockets_cap);
@@ -148,7 +151,7 @@ void aServer::removeSocket(tcp_socket_t s) {
 	tcp_close(s);
 	FD_CLR(s,&set);
 }
-#endif
+//#endif
 
 
 void aServer::run() {
@@ -156,21 +159,21 @@ void aServer::run() {
 	aConnection c;
 	uint8_t *b;
 	size_t l;
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 	int i,n;
 	createSocketSet(16);
-#elif defined(__linux__) || defined(WIN32)
+#elif defined(USE_GTK) || defined(USE_WIN32)*/
 	size_t i;
 	int n;
 	fd_set test;
 	FD_ZERO(&set);
 	FD_SET(sock,&set);
 	timeval timeout = { 0,LIBAMANITA_SELECT_TIMEOUT };
-#endif
+//#endif
 	setRunning(true);
 	while(isRunning()) {
 
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 		if(!set) { stop();break; }
 		n = SDLNet_CheckSockets(set,(uint32_t)-1);
 		if(n==-1) {
@@ -197,17 +200,17 @@ debug_output("aServer::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),c->sock);
 #ifndef SOCKET_NOCIPHER
 #ifdef SOCKET_HEADER_INCLUDED
 					if(c->key) XORcipher(&b[SOCKET_HEADER],&b[SOCKET_HEADER],l-SOCKET_HEADER,c->key,c->keylen);
-#else /*SOCKET_HEADER_INCLUDED*/
+#else //SOCKET_HEADER_INCLUDED
 					if(c->key) XORcipher(b,b,l,c->key,c->keylen);
-#endif /*SOCKET_HEADER_INCLUDED*/
-#endif /*SOCKET_NOCIPHER*/
+#endif //SOCKET_HEADER_INCLUDED
+#endif //SOCKET_NOCIPHER
 					stateChanged(SM_GET_MESSAGE,(intptr_t)c,(intptr_t)b,(intptr_t)l);
 				} else killClient(c->id);
 				releaseMessageBuffer(b);
 			}
 		}
 
-#elif defined(__linux__) || defined(WIN32)
+#elif defined(USE_GTK) || defined(USE_WIN32)*/
 		test = set;
 		n = select(FD_SETSIZE,&test,0,0,&timeout);
 		if(n==-1) {
@@ -248,7 +251,7 @@ debug_output("aServer::run(id=%" PRIu32 ",sock=%p)\n",(uint32_t)c->getID(),(void
 			}
 		}
 
-#endif
+//#endif
 	}
 }
 
@@ -313,10 +316,10 @@ debug_output("aServer::addClient(id=%" PRIu32 ",nick=%s)\n",id,nick);
 		_clients.put(c->id,(void *)c);
 		_clients.put(c->nick,(void *)c);
 		_main += c;
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 		if(_main.size()+1>setsz) createSocketSet();
 		SDLNet_TCP_AddSocket(set,s);
-#endif
+#endif*/
 		{ // Respond directly with ID and nick.
 debug_output("aServer::addClient(respond)\n");
 			uint8_t data[SOCKET_HEADER+5+strlen(nick)],*p = data;
@@ -340,12 +343,12 @@ debug_output("aServer::killClient(id=%" PRIu32 ")\n",c->id);
 	if(c->_channels.size()>0)
 		for(int i=c->_channels.size()-1; i>=0; i--)
 			leaveChannel((aChannel)c->_channels[i],c);
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 	SDLNet_TCP_DelSocket(set,c->sock);
 	tcp_close(c->sock);
-#elif defined(__linux__) || defined(WIN32)
+#elif defined(USE_GTK) || defined(USE_WIN32)*/
 	removeSocket(c->sock);
-#endif
+//#endif
 	stateChanged(SM_KILL_CLIENT,(intptr_t)c,0,0);
 	delete c;
 debug_output("aServer::killClient(done)\n");
@@ -369,14 +372,14 @@ debug_output("aServer::killAllClients()\n");
 		if(ch!=&_main) delete ch;
 	_channels.removeAll();
 	_channels.put(_main.getName(),&_main);
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 	SDLNet_FreeSocketSet(set);
 	set = 0;
-#endif
+#endif*/
 }
 
 
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 void aServer::createSocketSet(int n) {
 	setsz = n;
 	if(set) SDLNet_FreeSocketSet(set);
@@ -398,7 +401,7 @@ debug_output("aServer::createSocketSet(error=%s)\n",SDLNet_GetError());
 		}
 	}
 }
-#endif
+#endif*/
 
 
 int aServer::send(aConnection c,uint8_t *d,size_t l) {

@@ -6,47 +6,48 @@
 #include <stdarg.h>
 
 
-#ifdef LIBAMANITA_SDL
-	#include <SDL/SDL.h>
-	#include <SDL/SDL_net.h>
+/*#ifdef USE_SDL
+#include <SDL/SDL.h>
+#include <SDL/SDL_net.h>
 
-	#define http_close(s) SDLNet_TCP_Close(s)
-	#define http_send(s,d,l) SDLNet_TCP_Send((s),(d),(l))
-	#define http_recv(s,d,l) SDLNet_TCP_Recv((s),(d),(l))
-	#define http_clock SDL_GetTicks
+#define http_close(s) SDLNet_TCP_Close(s)
+#define http_send(s,d,l) SDLNet_TCP_Send((s),(d),(l))
+#define http_recv(s,d,l) SDLNet_TCP_Recv((s),(d),(l))
+#define http_clock SDL_GetTicks
 
-	typedef TCPsocket http_socket_t;
-	typedef int http_clock_t;
+typedef TCPsocket http_socket_t;
+typedef int http_clock_t;
+#endif*/
 
-#elif defined(__linux__)
-	#include <unistd.h>
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <netdb.h>
-	#include <signal.h>
-	#include <time.h>
+#ifdef USE_GTK
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <signal.h>
+#include <time.h>
 
-	#define http_close(s) ::close(s)
-	#define http_send(s,d,l) ::send((s),(d),(l),0)
-	#define http_recv(s,d,l) ::recv((s),(d),(l),0)
-	#define http_clock clock
+#define http_close(s) ::close(s)
+#define http_send(s,d,l) ::send((s),(d),(l),0)
+#define http_recv(s,d,l) ::recv((s),(d),(l),0)
+#define http_clock clock
 
-	typedef int http_socket_t;
-	typedef clock_t http_clock_t;
+typedef int http_socket_t;
+typedef clock_t http_clock_t;
+#endif
 
-#elif defined(WIN32)
-	#include <winsock2.h>
-	#include <time.h>
+#ifdef USE_WIN32
+#include <winsock2.h>
+#include <time.h>
 
-	#define http_close(s) ::closesocket(s)
-	#define http_send(s,d,l) ::send((s),(d),(l),0)
-	#define http_recv(s,d,l) ::recv((s),(d),(l),0)
-	#define http_clock clock
+#define http_close(s) ::closesocket(s)
+#define http_send(s,d,l) ::send((s),(d),(l),0)
+#define http_recv(s,d,l) ::recv((s),(d),(l),0)
+#define http_clock clock
 
-	typedef SOCKET http_socket_t;
-	typedef clock_t http_clock_t;
-
+typedef SOCKET http_socket_t;
+typedef clock_t http_clock_t;
 #endif
 
 #include <amanita/aApplication.h>
@@ -309,7 +310,7 @@ debug_output("aHttp::request(host=%s,url=%s)\n",host,url);
 	int error = 0;
 	http_clock_t t1 = http_clock(),t2 = t1,t3 = t1,t4 = t1,t5 = t1;
 
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 	IPaddress ip;
 	TCPsocket sock = 0;
 	SDLNet_SocketSet set = 0;
@@ -320,18 +321,20 @@ debug_output("aHttp::request(host=%s,url=%s)\n",host,url);
 		else if(SDLNet_TCP_AddSocket(set,sock)==-1) error = 4;
 		else {
 
-#elif defined(__linux__) || defined(WIN32)
+#elif defined(USE_GTK) || defined(USE_WIN32)*/
 	http_socket_t sock;
 	hostent *hostinfo;
-#ifdef __linux__
+#ifdef USE_GTK
 	sockaddr_in address;
-#else
+#endif
+#ifdef USE_WIN32
 	SOCKADDR_IN address;
 #endif
 	fd_set set,test;
-#ifdef __linux__
+#ifdef USE_GTK
 	if((sock=socket(AF_INET,SOCK_STREAM,0))==-1) error = 1;
-#else
+#endif
+#ifdef USE_WIN32
 	if((sock=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))==INVALID_SOCKET) error = 1;
 #endif
 	else if(!(hostinfo=gethostbyname(host))) error = 2;
@@ -340,15 +343,16 @@ debug_output("aHttp::request(host=%s,url=%s)\n",host,url);
 		address.sin_family = AF_INET;
 		address.sin_port = htons(80);
 
-#ifdef __linux__
+#ifdef USE_GTK
 		if(connect(sock,(sockaddr *)&address,sizeof(address))<0) error = 3;
-#else
+#endif
+#ifdef USE_WIN32
 		if(connect(sock,(SOCKADDR *)&address,sizeof(SOCKADDR_IN))!=0) error = 3;
 #endif
 		else {
 			FD_ZERO(&set);
 			FD_SET(sock,&set);
-#endif
+//#endif
 
 			char buf[2049];
 			t2 = http_clock();
@@ -374,16 +378,16 @@ debug_output("aHttp::request(data=\"%s\",len=%lu)\n",data,(unsigned long)len);
 
 			t3 = http_clock();
 
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 			if(SDLNet_CheckSockets(set,(uint32_t)-1)<=0) error = 5;
 			else {
 
-#elif defined(__linux__) || defined(WIN32)
+#elif defined(USE_GTK) || defined(USE_WIN32)*/
 			test = set;
 			select(FD_SETSIZE,&test,0,0,0);
 			if(!FD_ISSET(sock,&test)) error = 5;
 			else {
-#endif
+//#endif
 
 				t4 = http_clock();
 				int r = http_recv(sock,buf,2048);
@@ -524,16 +528,17 @@ debug_output("aHttp::request(r=%d)\n",r);
 		}
 		if(sock) http_close(sock);
 	}
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 	if(set) SDLNet_FreeSocketSet(set);
-#endif
+#endif*/
 	if(error>0) {
 		body.clear();
-#ifdef LIBAMANITA_SDL
-		fprintf(stderr,"HTTP Error %d: %s\n",error,SDLNet_GetError());
-#elif defined(__linux__)
+/*#ifdef USE_SDL
+		fprintf(stderr,"HTTP Error %d: %s\n",error,SDLNet_GetError());*/
+#ifdef USE_GTK
 		perror("HTTP Error");
-#elif defined(WIN32)
+#endif
+#ifdef USE_WIN32
 		fprintf(stderr,"HTTP Error %d: %d\n",error,WSAGetLastError());
 #endif
 		fflush(stderr);

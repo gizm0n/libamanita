@@ -3,16 +3,12 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef WIN32
-#include <windows.h>
-#include <exdisp.h>
-#include <oaidl.h>
-#endif
+#include <amanita/aApplication.h>
 #include <amanita/gui/aBrowser.h>
 
-#if defined(__linux__)
-#include <webkit/webkit.h>
 
+#ifdef USE_GTK
+#include <webkit/webkit.h>
 
 void webview_hover_event_callback(WebKitWebView *webview,gchar *title,gchar *uri,gpointer data) {
 //	aBrowser *browser = (aBrowser *)data;
@@ -34,42 +30,19 @@ app.printf("TextPage::webview_navigation_decision_event_callback(uri=\"%s\",reas
 		return TRUE;
 	} else */return FALSE;
 }
+#endif
 
+#ifdef USE_WIN32
+#include <windows.h>
+#include <exdisp.h>
+#include <oaidl.h>
 
-#elif defined(WIN32)
 #ifdef WIN32_LEAN_AND_MEAN
 #undef WIN32_LEAN_AND_MEAN
 #endif
 #include <mshtml.h>
 
-#ifdef UNICODE 
-const WCHAR *amanita_browser_class = BROWSER_CLASS;
-#else
-const char *amanita_browser_class = BROWSER_CLASS;
-#endif
-
-
-
-BSTR char2BSTR(char *c) {
-	if(!c || !*c) return 0;
-	int l = strlen(c);
-	WCHAR *w = (WCHAR *)malloc(sizeof(WCHAR)*(l+1));
-	MultiByteToWideChar(CP_ACP,0,c,-1,w,l+1);
-	BSTR b = SysAllocString(w);
-	free(w);
-	return b;
-}
-
-char *BSTR2char(BSTR b) {
-	if(b) {
-		int l = SysStringLen(b);
-		char *c = (char *)malloc(l+1);
-		if(WideCharToMultiByte(CP_ACP,0,b,l+1,(char*)c,l+1,0,0)) return c;
-		else free(c);
-	}
-	return 0;
-}
-
+const tchar_t *amanita_browser_class = aBROWSER_CLASS;
 
 #define DISPID_BEFORENAVIGATE						100	// this is sent before navigation to give a chance to abort
 #define DISPID_NAVIGATECOMPLETE					101	// in async, this is sent when we have enough to show
@@ -330,12 +303,12 @@ STDMETHODIMP _EventSink::GetIDsOfNames(REFIID,OLECHAR **,unsigned int,LCID,DISPI
 }
 
 STDMETHODIMP _EventSink::Invoke(DISPID disp,REFIID riid,LCID lcid,WORD flags,DISPPARAMS *params,VARIANT *result,EXCEPINFO *info,unsigned int *err) {
-	if(disp!=102 && disp!=113) printInvokeParams(disp,flags,params);
+//	if(disp!=102 && disp!=113) printInvokeParams(disp,flags,params);
 	switch(disp) {
 		case DISPID_BEFORENAVIGATE2:
 		{
 //			if(loading) { *params->rgvarg[0].pboolVal = TRUE;return; }
-			char *str = BSTR2char(params->rgvarg[5].pvarVal->bstrVal);
+			char *str = w2char(params->rgvarg[5].pvarVal->bstrVal);
 fprintf(stderr,"_EventSink::BeforeNavigate2(loading=%d,str='%s')\n",loading,str);
 fflush(stderr);
 			if(str && *str && strncmp(str,"about:blank",11)!=0) {
@@ -412,7 +385,7 @@ void _EventSink::printVariant(VARIANT *v,int l) {
 		case VT_DATE:fprintf(stderr,",date=%lf\n",v->date);break;
 		case VT_BSTR:
 		{
-			char *str = BSTR2char(v->bstrVal);
+			char *str = w2char(v->bstrVal);
 			fprintf(stderr,",bstrVal='%s'\n",str? str : "");
 			if(str) free(str);
 			break;
@@ -533,28 +506,25 @@ public:
 
 
 _Container::_Container(aBrowser *b){
-fprintf(stderr,"_Container::_Container(1,widget=%p)\n",(aWidget *)b);
-fflush(stderr);
+debug_output("_Container::_Container(1,widget=%p)\n",(aWidget *)b);
 	browser = b;
 	msie = 0;
 	ref = 0;
 	hwnd = (HWND)browser->component;
 	unknown = 0;
-fprintf(stderr,"_Container::_Container(2)\n");
-fflush(stderr);
+debug_output("_Container::_Container(2)\n");
 	SetRectEmpty(&rect);
-fprintf(stderr,"_Container::_Container(3)\n");
-fflush(stderr);
+debug_output("_Container::_Container(3)\n");
 	event = new _EventSink(browser);
 	event->AddRef();
-fprintf(stderr,"_Container::_Container(4)\n");
-fflush(stderr);
+debug_output("_Container::_Container(4)\n");
 	AddRef();
 	add();
 	getMSIE();
 }
 
 _Container::~_Container() {
+debug_output("_Container::~_Container()\n");
 	if(msie) { msie->Release();msie = 0; }
 	event->Release();
 	unknown->Release();
@@ -601,10 +571,15 @@ STDMETHODIMP _Container::GetWindowContext(IOleInPlaceFrame **ppFrame,IOleInPlace
 }
 
 void _Container::add() {
+//	HRESULT res;
+//	IClassFactory *cf;
 	CLSID clsid;
 fprintf(stderr,"_Container::add(1)\n");
 fflush(stderr);
 	CLSIDFromString((WCHAR *)L"Shell.Explorer",&clsid);
+//	CoGetClassObject(clsid,CLSCTX_INPROC_SERVER|CLSCTX_LOCAL_SERVER,0,IID_IClassFactory,(PVOID *)&cf);
+//	res = cf->CreateInstance(0,IID_IUnknown,(PVOID *)&unknown);
+//	cf->Release(); 
 	CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER|CLSCTX_LOCAL_SERVER,IID_IUnknown,(PVOID *)&unknown);
 	IOleObject *pioo;
 fprintf(stderr,"_Container::add(2)\n");
@@ -705,26 +680,24 @@ fflush(stderr);
 	if(msg==WM_CREATE) {
 		LPCREATESTRUCT cs = (LPCREATESTRUCT)lparam;
 		b = (aBrowser *)cs->lpCreateParams;
-		SetProp(hwnd,"aBrowser",(HANDLE)b);
-		b->container = (aComponent)hwnd;
-		b->component = b->container;
-		b->parent = (aWidget *)cs->hwndParent;
-		b->container = new _Container(b);
+		SetWindowLongPtr(hwnd,GWL_USERDATA,(LONG_PTR)b);
+		b->component = (aComponent)hwnd;
+		b->_container = new _Container(b);
 		if(cs->lpszName && *cs->lpszName) b->setUrl(cs->lpszName);
 		return 0;
-	} else if((b=(aBrowser *)GetProp(hwnd,"aBrowser"))) {
+	} else if((b=(aBrowser *)GetWindowLongPtr(hwnd,GWL_USERDATA))) {
 		if(msg==WM_SIZE) {
-			b->container->setLocation(0,0,LOWORD(lparam),HIWORD(lparam));
+			b->_container->setLocation(0,0,LOWORD(lparam),HIWORD(lparam));
 			return 0;
-		} else if(msg==WM_DESTROY) {
-			if(b->container) {
-				b->container->remove();
-				b->container->Release();
-				b->container = 0;
+		}/* else if(msg==WM_DESTROY) {
+			if(b->_container) {
+				b->_container->remove();
+				b->_container->Release();
+				b->_container = 0;
 			}
 			RemoveProp(hwnd,"aBrowser");
 			return 0;
-		}
+		}*/
 	}
 	return DefWindowProc(hwnd,msg,wparam,lparam);
 }
@@ -733,9 +706,11 @@ fflush(stderr);
 
 
 
-aBrowser::aBrowser(widget_event_handler weh) : aWidget(weh,WIDGET_BROWSER) {
-#ifdef WIN32
-	container = 0;
+aObject_Inheritance(aBrowser,aWidget)
+
+aBrowser::aBrowser(widget_event_handler weh) : aWidget(weh,aWIDGET_BROWSER) {
+#ifdef USE_WIN32
+	_container = 0;
 	stamp = 0;
 //	scrollX = GetSystemMetrics(SM_CXHSCROLL)+2;
 //	scrollY = GetSystemMetrics(SM_CYVSCROLL)+2;
@@ -746,13 +721,20 @@ fflush(stderr);
 }
 
 aBrowser::~aBrowser() {
-fprintf(stderr,"aBrowser::~aBrowser(widget=%p)\n",(aWidget *)this);
-fflush(stderr);
+debug_output("aBrowser::~aBrowser(widget=%p)\n",(aWidget *)this);
+#ifdef USE_WIN32
+	if(_container) {
+		_container->remove();
+		_container->Release();
+		_container = 0;
+	}
+#endif
 }
 
-aComponent aBrowser::create() {
-#if defined(__linux__)
-	GtkWidget *scroll,*webkit;
+void aBrowser::create(aWindow *wnd,uint32_t st) {
+debug_output("aBrowser::create()\n");
+#ifdef USE_GTK
+	GtkWidget *scroll;
 	scroll = gtk_scrolled_window_new(NULL,NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),GTK_POLICY_AUTOMATIC,GTK_POLICY_ALWAYS);
 	webkit = webkit_web_view_new();
@@ -763,114 +745,111 @@ aComponent aBrowser::create() {
 	g_signal_connect(G_OBJECT(webkit),"navigation-policy-decision-requested",G_CALLBACK(webview_navigation_decision_event_callback),this);
 //	g_signal_connect(G_OBJECT(webkit),"navigation-requested",G_CALLBACK(webview_navigation_event_callback),this);
 	gtk_container_add(GTK_CONTAINER(scroll),webkit);
-	container = (aComponent)scroll;
-	component = (aComponent)webkit;
-	return container;
-#elif defined(WIN32)
-	if(!(class_registers&WINDOW_CLASS_BROWSER)) {
+	component = (aComponent)scroll;
+#endif
+#ifdef USE_WIN32
+	if(!(class_registers&aBROWSER_CLASS_REGISTER)) {
 		WNDCLASS wc;
-		if(!GetClassInfo(hinst,amanita_browser_class,&wc)) {
+		if(!GetClassInfo(hMainInstance,amanita_browser_class,&wc)) {
 			memset(&wc,0,sizeof(wc));
 			wc.style         = CS_DBLCLKS|CS_GLOBALCLASS|CS_NOCLOSE;
 			wc.lpfnWndProc   = AmanitaBrowserProc;
-			wc.hInstance     = hinst;
+			wc.hInstance     = hMainInstance;
 			wc.hCursor       = LoadCursor(0,IDC_ARROW);
 			wc.lpszClassName = amanita_browser_class;
-			if(!RegisterClass(&wc)) return 0;
-			class_registers |= WINDOW_CLASS_BROWSER;
+			if(!RegisterClass(&wc)) return;
+			class_registers |= aBROWSER_CLASS_REGISTER;
 		}
 	}
-	return aWidget::create();
 #endif
+	aWidget::create(wnd,0);
 }
 
 void aBrowser::setUrl(const char *url) {
-	if(!url || !*url) return;
-//fprintf(stderr,"aBrowser::setUrl('%s')\n",url);
-//fflush(stderr);
-#if defined(__linux__)
-	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(component),url);
-
-#elif defined(WIN32)
-	stamp = (intptr_t)url;
-	int len = lstrlen(url)+ 1;
-	WCHAR *w;
-	w = (WCHAR *)malloc(sizeof(WCHAR)*len);
-	MultiByteToWideChar(CP_ACP,0,url,-1,w,len);
-	VARIANT v;
-	VariantInit(&v);
-	v.vt = VT_BSTR;
-	v.bstrVal = SysAllocString(w);
-	free(w);
-
-	if(stamp!=(intptr_t)url) return;
-	container->msie->Navigate2(&v,0,0,0,0);
-	VariantClear(&v);
+	if(url && *url) {
+#ifdef USE_GTK
+		webkit_web_view_load_uri(WEBKIT_WEB_VIEW(webkit),url);
 #endif
+#ifdef USE_WIN32
+		wchar_t *wurl = char2w(url);
+		setUrl(wurl);
+		free(wurl);
+#endif
+	}
 }
-
 
 void aBrowser::setHtmlContent(const char *html) {
-#ifdef WIN32
-	static const SAFEARRAYBOUND ArrayBound = {1, 0};
+	if(html && *html) {
+#ifdef USE_GTK
+		webkit_web_view_load_string(WEBKIT_WEB_VIEW(webkit),html,"text/html","UTF-8","file://./");
 #endif
-
-	if(!html || !*html) return;
-	
-#if defined(__linux__)
-	webkit_web_view_load_string(WEBKIT_WEB_VIEW(component),html,"text/html","UTF-8","file://./");
-
-#elif defined(WIN32)
-	LPDISPATCH d;
-	IHTMLDocument2 *h;
-	SAFEARRAY *a;
-	VARIANT url;
-	VARIANT *v;
-	BSTR bstr = 0;
-
-	container->event->loading = true,stamp = (intptr_t)html;
-
-	VariantInit(&url);
-	url.vt = VT_BSTR;
-	url.bstrVal = SysAllocString(L"about:blank");
-	container->msie->Navigate2(&url,0,0,0,0);
-	VariantClear(&url);
-	if(!pumpMessages(stamp)) return;
-	if(!container->msie->get_Document(&d)) {
-		if(!d->QueryInterface(IID_IHTMLDocument2,(void**)&h)) {
-			if((a=SafeArrayCreate(VT_VARIANT,1,(SAFEARRAYBOUND *)&ArrayBound))) {
-				if(!SafeArrayAccessData(a,(void**)&v)) {
-					v->vt = VT_BSTR;
-					wchar_t *buffer;
-					DWORD size = MultiByteToWideChar(CP_ACP,0,html,-1,0,0);
-					if((buffer=(wchar_t *)GlobalAlloc(GMEM_FIXED,sizeof(wchar_t)*size))) {
-						MultiByteToWideChar(CP_ACP,0,html,-1,buffer,size);
-						bstr = SysAllocString(buffer);
-						GlobalFree(buffer);
-						if((v->bstrVal=bstr)) h->write(a);
-					}
-				}
-				SafeArrayDestroy(a);
-			}
-			h->Release();
-		}
-		d->Release();
+#ifdef USE_WIN32
+		wchar_t *whtml = char2w(html);
+		setHtmlContent(whtml);
+		free(whtml);
+#endif
 	}
-#endif
 }
 
+#ifdef USE_WIN32
+void aBrowser::setUrl(const wchar_t *url) {
+	if(url && *url) {
+		stamp = (intptr_t)url;
+		VARIANT v;
+		VariantInit(&v);
+		v.vt = VT_BSTR;
+		v.bstrVal = SysAllocString(url);
 
-#if defined(__linux__)
+		if(stamp!=(intptr_t)url) return;
+		_container->msie->Navigate2(&v,0,0,0,0);
+		VariantClear(&v);
+	}
+}
 
-#elif defined(WIN32)
+static const SAFEARRAYBOUND ArrayBound = {1, 0};
+
+void aBrowser::setHtmlContent(const wchar_t *html) {
+	if(html && *html) {
+		LPDISPATCH d;
+		IHTMLDocument2 *h;
+		SAFEARRAY *a;
+		VARIANT url;
+		VARIANT *v;
+		BSTR bstr = 0;
+
+		_container->event->loading = true;
+		stamp = (intptr_t)html;
+
+		VariantInit(&url);
+		url.vt = VT_BSTR;
+		url.bstrVal = SysAllocString(L"about:blank");
+		_container->msie->Navigate2(&url,0,0,0,0);
+		VariantClear(&url);
+		if(!pumpMessages(stamp)) return;
+		if(!_container->msie->get_Document(&d)) {
+			if(!d->QueryInterface(IID_IHTMLDocument2,(void**)&h)) {
+				if((a=SafeArrayCreate(VT_VARIANT,1,(SAFEARRAYBOUND *)&ArrayBound))) {
+					if(!SafeArrayAccessData(a,(void**)&v)) {
+						v->vt = VT_BSTR;
+						v->bstrVal = SysAllocString(html);
+						h->write(a);
+					}
+					SafeArrayDestroy(a);
+				}
+				h->Release();
+			}
+			d->Release();
+		}
+	}
+}
+
 bool aBrowser::pumpMessages(intptr_t st) {
 	MSG msg;
-	while(container->event->loading && stamp==st) if(PeekMessage(&msg,0,0,0,PM_REMOVE)) {
+	while(_container->event->loading && stamp==st) if(PeekMessage(&msg,0,0,0,PM_REMOVE)) {
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
 	return (stamp==st);
 }
-
 #endif
 

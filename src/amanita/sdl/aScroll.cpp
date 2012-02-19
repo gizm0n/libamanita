@@ -6,7 +6,7 @@
 
 
 
-aObject_Inheritance(aScroll,aComponent);
+aObject_Inheritance(aScroll,aComponent)
 
 
 aScroll::_settings aScroll::_s = { 0 };

@@ -11,42 +11,53 @@
 #include <stdint.h>
 #include <amanita/gui/aWidget.h>
 
-
-#ifdef WIN32
-#define BROWSER_CLASS "WebControl32"
-
 enum {
-	BROWSER_CREATE				= 0x01,
-	BROWSER_ONCLICK			= 0x11,
-	BROWSER_ONREDIRECT		= 0x12,
-	BROWSER_ONLOADED			= 0x13,
+	aBROWSER_CREATE			= 0x00000001,
+	aBROWSER_CLICK				= 0x00000011,
+	aBROWSER_REDIRECT			= 0x00000012,
+	aBROWSER_LOADED			= 0x00000013,
 };
 
+#ifdef USE_WIN32
 class _EventSink;
 class _Container;
 #endif
 
 
 class aBrowser : public aWidget {
-#ifdef WIN32
+/** @cond */
+#ifdef USE_WIN32
 friend LRESULT CALLBACK AmanitaBrowserProc(HWND,UINT,WPARAM,LPARAM);
 friend class _EventSink;
 friend class _Container;
+#endif
+
+aObject_Instance(aBrowser)
+
 private:
-	_Container *container;
+#ifdef USE_GTK
+	GtkWidget *webkit;
+#endif
+#ifdef USE_WIN32
+	_Container *_container;
 	intptr_t stamp;
 
 	bool pumpMessages(intptr_t st);
 #endif
+/** @endcond */
 
 public:
 	aBrowser(widget_event_handler weh);
 	virtual ~aBrowser();
 
-	virtual aComponent create();
+	virtual void create(aWindow *wnd,uint32_t st);
 
 	void setUrl(const char *url);
 	void setHtmlContent(const char *html);
+#ifdef USE_WIN32
+	void setUrl(const wchar_t *url);
+	void setHtmlContent(const wchar_t *html);
+#endif
 };
 
 
