@@ -4,10 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#ifdef WIN32
-#include <winsock2.h>
-#include <windows.h>
-#endif
 #include <amanita/net/aSocket.h>
 
 
@@ -35,44 +31,6 @@ const char *aSocket::message_names[] = {0,
 	"SM_KILL_CLIENT",
 	"SM_GET_MESSAGE",
 };
-
-
-
-#ifndef WIN32
-#ifdef WIN32_LEAN_AND_MEAN
-#undef WIN32_LEAN_AND_MEAN
-#endif
-
-bool InitNetwork() {
-#ifdef LIBAMANITA_SDL
-	if(SDLNet_Init()==-1) return false;
-#endif
-	return true;
-}
-
-bool UninitNetwork() {
-#ifdef LIBAMANITA_SDL
-	SDLNet_Quit();
-#endif
-	return true;
-}
-
-#else
-bool WINAPI InitNetwork() {
-	WSADATA wsadata;
-	if(WSAStartup(MAKEWORD(2,0),&wsadata)!=0) {
-debug_output("Socket Initialization Error.\n");
-		WSACleanup();
-		return false;
-	}
-	return true;
-}
-
-bool WINAPI UninitNetwork() {
-	WSACleanup();
-	return true;
-}
-#endif
 
 
 void aSocket::print_packet(const uint8_t *data,size_t l) {
@@ -103,12 +61,12 @@ aSocket::aSocket(socket_event_handler seh) : event_handler(seh) {
 	sock = 0;
 	ip = 0;
 	port = 0;
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 	address = (IPaddress){0,0};
 	set = 0;
-#elif defined(__linux__) || defined(WIN32)
+#elif defined(USE_GTK) || defined(USE_WIN32)*/
 	hostinfo = 0;
-#endif
+//#endif
 	buf = 0;
 	len = 0;
 	setMessageBuffer(1024);
@@ -116,9 +74,9 @@ aSocket::aSocket(socket_event_handler seh) : event_handler(seh) {
 
 aSocket::~aSocket() {
 	if(host) { free(host);host = 0; }
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 	if(set) { SDLNet_FreeSocketSet(set);set = 0; }
-#endif
+#endif*/
 	if(buf) { free(buf);buf = 0,len = 0; }
 }
 
@@ -203,8 +161,7 @@ debug_output("aSocket::receive(error=%s)\n",getError());
 	return 0;
 }
 
-#ifdef LIBAMANITA_SDL
-#elif defined(WIN32)
+#ifdef USE_WIN32
 const char *aSocket::getError() {
 	static struct wsa_error_entry {
 		int id;

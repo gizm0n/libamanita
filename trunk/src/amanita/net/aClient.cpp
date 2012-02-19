@@ -45,7 +45,7 @@ debug_output("start(\"%s\",%d)\n",h,p);
 	host = strdup(h);
 	port = p;
 
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 	if(!(set=SDLNet_AllocSocketSet(1)))
 		stateChanged(SM_ERR_ALLOC_SOCKETSET,0,(intptr_t)getError(),0);
 	else if(SDLNet_ResolveHost(&address,host,p)==-1)
@@ -59,10 +59,11 @@ debug_output("start(\"%s\",%d)\n",h,p);
 		else {
 			ip = swap_be_32(address.host);
 
-#elif defined(__linux__) || defined(WIN32)
-#ifdef __linux__
+#elif defined(USE_GTK) || defined(USE_WIN32)*/
+#ifdef USE_GTK
 	if((sock=socket(AF_INET,SOCK_STREAM,0))==-1)
-#else
+#endif
+#ifdef USE_WIN32
 	if((sock=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))==INVALID_SOCKET)
 #endif
 		stateChanged(SM_ERR_OPEN_SOCKET,0,(intptr_t)getError(),0);
@@ -72,9 +73,10 @@ debug_output("start(\"%s\",%d)\n",h,p);
 		address.sin_addr = *(in_addr *)*hostinfo->h_addr_list;
 		address.sin_family = AF_INET;
 		address.sin_port = swap_be_16(p);
-#ifdef __linux__
+#ifdef USE_GTK
 		if(connect(sock,(sockaddr *)&address,sizeof(address))<0)
-#else
+#endif
+#ifdef USE_WIN32
 		if(connect(sock,(SOCKADDR *)&address,sizeof(SOCKADDR_IN))!=0)
 #endif
 			stateChanged(SM_ERR_CONNECT,0,(intptr_t)getError(),0);
@@ -82,7 +84,7 @@ debug_output("start(\"%s\",%d)\n",h,p);
 			ip = swap_be_32(address.sin_addr.s_addr);
 			FD_ZERO(&set);
 			FD_SET(sock,&set);
-#endif
+//#endif
 
 #ifdef SOCKET_HEADER_INCLUDED
 debug_output("start(SOCKET_HEADER_INCLUDED)\n");
@@ -121,16 +123,16 @@ void aClient::stop(bool kill) {
 
 void aClient::run() {
 	int n;
-#ifdef LIBAMANITA_SDL
-#elif defined(__linux__) || defined (WIN32)
+//#ifdef USE_SDL
+//#elif defined(USE_GTK) || defined (USE_WIN32)
 	fd_set test;
 	timeval timeout = { 0,LIBAMANITA_SELECT_TIMEOUT };
-#endif
+//#endif
 	uint8_t *d;
 	size_t l;
 	setRunning(true);
 	while(isRunning()) {
-#ifdef LIBAMANITA_SDL
+/*#ifdef USE_SDL
 		n = SDLNet_CheckSockets(set,(uint32_t)-1);
 debug_output("aClient::run(n=%d)\n",n);
 		if(n==-1) {
@@ -139,7 +141,7 @@ debug_output("aClient::run(n=%d)\n",n);
 		}
 		if(n && SDLNet_SocketReady(sock)) {
 
-#elif defined(__linux__) || defined(WIN32)
+#elif defined(USE_GTK) || defined(USE_WIN32)*/
 		test = set;
 		n = select(FD_SETSIZE,&test,0,0,&timeout);
 		if(n==-1) {
@@ -148,7 +150,7 @@ debug_output("aClient::run(n=%d)\n",n);
 		}
 		if(!n) continue;
 		if(FD_ISSET(sock,&test)) {
-#endif
+//#endif
 
 debug_output("aClient::run(receive)\n");
 			d = receive(sock,l);
@@ -162,7 +164,7 @@ debug_output("start(received id=%d,nick=%s)\n",getID(),getNick());
 					setStarting(false);
 				} else {
 #ifndef SOCKET_NOCIPHER
-	#ifdef SOCKET_HEADER_INCLUDED
+#ifdef SOCKET_HEADER_INCLUDED
 					if(key) XORcipher(&d[SOCKET_HEADER],&d[SOCKET_HEADER],l-SOCKET_HEADER,key,keylen);
 #else /*SOCKET_HEADER_INCLUDED*/
 					if(key) XORcipher(d,d,l,key,keylen);

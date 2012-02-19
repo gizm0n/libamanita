@@ -8,50 +8,67 @@
  * @date Created: 2012-01-28
  */ 
 
-#include <amanita/gui/aWidget.h>
+#include <amanita/gui/aContainer.h>
 
+enum {
+	aWINDOW_DIALOG				= 0x00000001,
+	aWINDOW_RESIZABLE			= 0x00000002,
+	aWINDOW_MODAL				= 0x00000004,
+	aWINDOW_FULLSCREEN		= 0x00000008,
+	aWINDOW_CENTER				= 0x00000010,
+};
 
 class aApplication;
 class aMenu;
 class aStatusbar;
 
-#ifdef WIN32
-#define AMANITA_MAIN_WINDOW_CLASS "AmanitaMainWndClass"
-#endif
-
-class aWindow : public aWidget {
-#ifdef WIN32
+class aWindow : public aContainer {
+friend class aMenu;
+friend class aWidget;
+/** @cond */
+#ifdef USE_WIN32
 friend LRESULT CALLBACK AmanitaMainWndProc(HWND,UINT,WPARAM,LPARAM);
 #endif
 
+aObject_Instance(aWindow)
+/** @endcond */
+
 private:
 	aApplication *app;
-	aWindow *window;
 	aMenu *menu;
 	aStatusbar *statusbar;
-#ifdef WIN32
-//	INT_PTR dlg_result;
+
+#ifdef USE_GTK
+	GtkWidget *wnd;
+#endif
+
+	void openWindow(aWindow *wnd);
+	void closeWindow(aWindow *wnd);
+
+#ifdef USE_WIN32
+	static bool handleEvent(aWindow *wnd,UINT msg,WPARAM wparam,LPARAM lparam);
+	bool command(WPARAM wparam,LPARAM lparam);
+	bool notify(LPNMHDR nmhdr);
+	bool drawItem(LPDRAWITEMSTRUCT dis);
+
+	virtual void makeLayout(int x,int y,int w,int h);
 #endif
 
 public:
 	aWindow(aApplication *a,widget_event_handler weh);
-	~aWindow();
+	virtual ~aWindow();
 
-	void open();
+	void open(aWindow *p);
 	bool close();
 
+	aApplication *getApplication() { return app; }
 	void setMenu(aMenu *m);
 	aMenu *getMenu() { return menu; }
 	void setStatusbar(aStatusbar *sb);
 	aStatusbar *getStatusbar() { return statusbar; }
-	void openWindow(aWindow *w) {}
-	void closeWindow(aWindow *w) {}
 
-	virtual aComponent create();
-
-#ifdef WIN32
-	virtual void makeLayout(int w,int h);
-#endif
+	virtual void create(aWindow *wnd,uint32_t st);
+	virtual void createAll(aComponent p,bool n);
 };
 
 

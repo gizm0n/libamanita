@@ -6,7 +6,7 @@
 #include <amanita/sdl/aFont.h>
 
 
-aObject_Inheritance(aFont,aObject);
+aObject_Inheritance(aFont,aObject)
 
 
 aFont::aFont(const char *file,int size,int style,long color,int render) : aObject() {

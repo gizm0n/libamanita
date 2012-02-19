@@ -12,9 +12,7 @@
 #include <time.h>
 
 
-#if defined __linux__
-#define FILE_DIRSEP "/"
-#elif defined WIN32
+#ifdef WIN32
 #define FILE_DIRSEP "\\"
 #else
 #define FILE_DIRSEP "/"

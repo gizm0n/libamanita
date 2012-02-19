@@ -7,9 +7,7 @@
 #include <sys/stat.h>
 #include <locale.h>
 
-#ifdef __linux__
-
-#elif defined(WIN32)
+#ifdef USE_WIN32
 #ifdef WIN32_LEAN_AND_MEAN
 #undef WIN32_LEAN_AND_MEAN
 #endif
@@ -17,6 +15,7 @@
 #define WINVER 0x0501
 #endif
 #define _WIN32_IE	0x0501
+#include <winsock2.h>
 #include <windows.h>
 //#include <ctype.h>
 #include <commctrl.h>
@@ -24,25 +23,15 @@
 #endif
 
 #include <amanita/aApplication.h>
+#include <amanita/gui/aWindow.h>
+#include <amanita/gui/aMenu.h>
 //#include <amanita/aFile.h>
 //#include <amanita/aVector.h>
 //#include <amanita/net/aHttp.h>
 
 
-#ifdef WIN32
-#ifdef WIN32_LEAN_AND_MEAN
-#undef WIN32_LEAN_AND_MEAN
-#endif
-
-static char *w2char(LPCWSTR b) {
-	if(b) {
-		int l = wcslen(b);
-		char *c = (char *)malloc(l+1);
-		if(WideCharToMultiByte(CP_ACP,0,b,-1,(char*)c,l+1,0,0)) return c;
-		else free(c);
-	}
-	return 0;
-}
+#ifdef USE_WIN32
+HINSTANCE hMainInstance;
 
 int WINAPI WinMain(HINSTANCE hi,HINSTANCE hp,LPSTR cmd,int show) {
 	int i,argc;
@@ -53,6 +42,7 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE hp,LPSTR cmd,int show) {
 		fprintf(stderr,"Cmd[%d]: %s\n",i,argv[i]);
 	}
 	LocalFree(args);
+	hMainInstance = hi;
 	i = main(argc,argv);
 	while(--argc>=0) free(argv[argc]);
 	return i;
@@ -62,18 +52,21 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE hp,LPSTR cmd,int show) {
 //#define _QUOTE_MACRO(x) #x
 //#define QUOTE_MACRO(x) _QUOTE_MACRO(x)
 
-aApplication::aApplication() /*: app_lang_data(),app_properties()*/ {
+aApplication::aApplication() : app_thread()/*: app_lang_data(),app_properties()*/ {
 //	FILE *fp;
 //	char str[257],home[257],data[257];
 //	int n;
 
+	app_init_params = 0;
+	app_out = 0;
 	app_project = 0;
 	app_name = 0;
 	app_user_agent = 0;
+	app_locale_dir = 0;
 	app_local_id = 0;
 	app_local_time = 0;
-
-	app_out = 0;
+	app_last_access = 0;
+	window = 0;
 
 /*
 	getExecutable(str,256);
@@ -81,16 +74,16 @@ aApplication::aApplication() /*: app_lang_data(),app_properties()*/ {
 debug_output("app_exe=%s\n",getExecutable());
 
 	getHomeDir(str,256);
-#if defined __linux__
+#if defined USE_GTK
 	sprintf(home,"%s/.%s/",str,app_project);
-#elif defined WIN32
+#elif defined USE_WIN32
 	sprintf(home,"%s\\",str);
 #endif
 	setProperty(property_key[APP_DIR_HOME],home);
 	if(!aFile::exists(home)) aFile::mkdir(home);
 debug_output("app_dir_home=%s\n",getHomeDir());
 
-#if defined __linux__
+#if defined USE_GTK
 	n = 0;
 	snprintf(data,256,"/usr/share/%s/",app_project);
 	if(!aFile::exists(data)) {
@@ -105,7 +98,7 @@ debug_output("app_dir_home=%s\n",getHomeDir());
 			}
 		}
 	}
-#elif defined WIN32
+#elif defined USE_WIN32
 	n = 3;
 	strcpy(data,home);
 #endif
@@ -136,7 +129,9 @@ debug_output("aApplication::aApplication()");
 */
 }
 
-aApplication::aApplication(const char *prj,const char *nm) /*: app_lang_data(),app_properties()*/ {
+aApplication::aApplication(const char *prj,const char *nm) : app_thread() {
+	app_init_params = 0;
+	app_out = 0;
 	app_project = 0;
 	app_name = 0;
 	app_user_agent = 0;
@@ -145,9 +140,7 @@ aApplication::aApplication(const char *prj,const char *nm) /*: app_lang_data(),a
 	app_locale_dir = 0;
 	app_local_id = 0;
 	app_local_time = 0;
-
-	app_out = 0;
-
+	app_last_access = 0;
 	window = 0;
 }
 
@@ -163,43 +156,69 @@ debug_output("aApplication::~aApplication()\n");
 	if(app_locale_dir) free(app_locale_dir);
 	app_locale_dir = 0;
 
-debug_output("Completely finalized, could not have gone better! You the Man!\n");
 	if(app_out) fclose(app_out);
 	app_out = 0;
+
+	if(window) delete window;
+	window = 0;
+debug_output("Completely finalized, could not have gone better! You the Man!\n");
 }
 
 
 uint32_t aApplication::open(int argc,char *argv[],uint32_t params) {
 	app_init_params = params;
 
-	if((app_init_params&AMANITA_INIT_GETTEXT)) {
+	if((app_init_params&aINIT_GETTEXT)) {
 debug_output("aApplication::init(AMANITA_INIT_GETTEXT,project=%s,localedir=%s)",app_project,app_locale_dir);
 		setlocale(LC_ALL,"");
 		bindtextdomain(app_project,app_locale_dir? app_locale_dir : ".");
 		textdomain(app_project);
 	}
 
-#ifdef __linux__
+#ifdef USE_GTK
 	gtk_init(&argc,&argv);
-	gtk_rc_parse_string (
-		"style \"tab-close-button-style\"\n"
-		"{\n"
-		"  GtkWidget::focus-padding = 0\n"
-		"  GtkWidget::focus-line-width = 0\n"
-		"  xthickness = 0\n"
-		"  ythickness = 0\n"
-		"}\n"
-		"widget \"*.tab-close-button\" style \"tab-close-button-style\"");
-	if((app_init_params&AMANITA_INIT_THREADS)) {
+	if((app_init_params&aINIT_GUI)) {
+		gtk_rc_parse_string (""
+			"style \"notebook-style\" {\n"
+			"  GtkWidget::focus-padding = 0\n"
+			"  GtkWidget::focus-line-width = 0\n"
+			"  GtkNotebook::tab-curvature = 0\n"
+			"  GtkNotebook::tab-overlap = -1\n"
+			"  xthickness = 0\n"
+			"  ythickness = 0\n"
+			"}\n\n"
+			"style \"tab-close-button-style\" {\n"
+			"  GtkWidget::focus-padding = 0\n"
+			"  GtkWidget::focus-line-width = 0\n"
+//			"  xthickness = 0\n"
+//			"  ythickness = 0\n"
+			"}\n\n"
+			"widget \"*.notebook\" style \"notebook-style\""
+			"widget \"*.tab-close-button\" style \"tab-close-button-style\""
+		);
+	}
+	g_type_init();
+	if((app_init_params&aINIT_THREADS)) {
 		if(!g_thread_supported()) g_thread_init(0);
 		gdk_threads_init();
 	}
+#endif
 
-#elif defined(WIN32)
-	hinst = GetModuleHandle(0);
-	if((app_init_params&AMANITA_INIT_SOCKETS)) {
+	if((app_init_params&aINIT_SOCKETS)) {
+/*#ifdef USE_SDL
+		if(SDLNet_Init()==-1) return aINIT_SOCKETS;
+#endif*/
+#ifdef USE_WIN32
+		WSADATA wsadata;
+		if(WSAStartup(MAKEWORD(2,0),&wsadata)!=0) {
+debug_output("Socket Initialization Error.\n");
+			WSACleanup();
+			return aINIT_SOCKETS;
+		}
+#endif
 	}
-	if((app_init_params&AMANITA_INIT_GUI)) {
+#ifdef USE_WIN32
+	if((app_init_params&aINIT_GUI)) {
 		INITCOMMONCONTROLSEX commctrl = { sizeof(INITCOMMONCONTROLSEX),0xffffffff };
 		OleInitialize(0);
 		InitCommonControlsEx(&commctrl);
@@ -208,15 +227,18 @@ debug_output("aApplication::init(AMANITA_INIT_GETTEXT,project=%s,localedir=%s)",
 	return 0;
 }
 
+
 uint32_t aApplication::close() {
-	if((app_init_params&AMANITA_INIT_SOCKETS)) {
-#if defined(__linux__)
-#elif defined(WIN32)
+	if((app_init_params&aINIT_SOCKETS)) {
+#ifdef USE_SDL
+		SDLNet_Quit();
+#endif
+#ifdef USE_WIN32
+		WSACleanup();
 #endif
 	}
-	if((app_init_params&AMANITA_INIT_GUI)) {
-#if defined(__linux__)
-#elif defined(WIN32)
+	if((app_init_params&aINIT_GUI)) {
+#ifdef USE_WIN32
 		OleUninitialize();
 #endif
 	}
@@ -224,9 +246,9 @@ uint32_t aApplication::close() {
 }
 
 int aApplication::main() {
-#if defined(__linux__)
+#ifdef USE_GTK
 	create();
-	if((app_init_params&AMANITA_INIT_THREADS)) {
+	if((app_init_params&aINIT_THREADS)) {
 		gdk_threads_enter();
 		gtk_main();
 		gdk_threads_leave();
@@ -234,14 +256,39 @@ int aApplication::main() {
 		gtk_main();
 	}
 	return 0;
+#endif
 
-#elif defined(WIN32)
+#ifdef USE_WIN32
+	HACCEL hacc = 0;
+	HWND hwnd = 0;
 	MSG msg;
+
 	create();
+
+	if(window && window->getMenu()) {
+		aMenuItem *items = window->getMenu()->items,*m;
+		int i,n,nitems = window->getMenu()->nitems;
+		for(i=0,n=0,m=items; m && i<nitems; ++i,++m) if(m->acc!=-1) ++n;
+		if(n>0) {
+			int mod;
+			ACCEL accel[n],*a;
+			for(i=0,m=items,a=accel; i<nitems; ++i,++m) if(m->acc!=-1) {
+				a->fVirt = (m->acc_mod==aKEY_CONTROL? FCONTROL : (m->acc_mod==aKEY_ALT? FALT : 0))|FVIRTKEY;
+				a->key = m->acc;
+				a->cmd = (aWIDGET_MENU<<9)|m->index;
+				++a;
+			}
+			hacc = CreateAcceleratorTable(accel,n);
+			hwnd = (HWND)window->getComponent();
+		}
+	}
+
 	while(GetMessage(&msg,NULL,0,0)) {
-		if(msg.message==WM_QUIT) break;
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		if((!hacc || !TranslateAccelerator(hwnd,hacc,&msg))) {
+			if(msg.message==WM_QUIT) break;
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
 	}
 	return msg.wParam;
 #endif
@@ -249,29 +296,28 @@ int aApplication::main() {
 
 void aApplication::quit() {
 debug_output("aApplication::exit()\n");
-#if defined(__linux__)
+#ifdef USE_GTK
 	gtk_main_quit();
-#elif defined(WIN32)
+#endif
+#ifdef USE_WIN32
 	PostQuitMessage(0);
 #endif
 }
 
 
-int aApplication::create() {
-	return 0;
+void aApplication::create() {
 }
 
-int aApplication::destroy() {
+void aApplication::destroy() {
 	quit();
-	return 1;
 }
 /*
 void aApplication::add(aComponent c,aWidget *w) {
 	aComponent handle;
 	handle = w->create(window,0);
-#if defined(__linux__)
+#if defined(USE_GTK)
 	gtk_container_add(GTK_CONTAINER(window),(GtkWidget *)handle);
-#elif defined(WIN32)
+#elif defined(USE_WIN32)
 	w->hinst = hinst;
 #endif
 	child = w;
@@ -320,7 +366,7 @@ debug_output("sz=%lu\n",(unsigned long)sz);
 	return n;
 }
 
-#if defined __linux__
+#if defined USE_GTK
 void aApplication::updateFontCache() {
 	const char *p;
 	gchar *so,*se;

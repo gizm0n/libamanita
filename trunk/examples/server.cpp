@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <amanita/aApplication.h>
 #include <amanita/net/aServer.h>
 
 aServer *server;
@@ -76,12 +77,13 @@ uint32_t server_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 
 int main(int argc, char *argv[]) {
 	char text[1024],*s;
-	InitNetwork();
+	aApplication app;
+	app.open(argc,argv,aINIT_SOCKETS);
 	server = new aServer(server_listener);
 	server->start(2012);
 	s = gets(text);
 	server->stop();
 	delete(server);
-	UninitNetwork();
+	app.close();
 }
 

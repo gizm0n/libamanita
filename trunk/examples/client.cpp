@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <amanita/aApplication.h>
 #include <amanita/net/aClient.h>
 
 
@@ -42,27 +43,27 @@ uint32_t client_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 
 
 int main(int argc, char *argv[]) {
-	char text[1024-SOCKET_HEADER-1],*s;
-	uint8_t data[1024],*p;
-
 	if(argc!=2) {
 		printf("Invalid parameters.\nUsage: client HOST:PORT:USER_ID:NICK\n");
-		exit(0);
+		return 0;
+	} else {
+		char text[1024-SOCKET_HEADER-1],*s;
+		uint8_t data[1024],*p;
+		aApplication app;
+		app.open(argc,argv,aINIT_SOCKETS);
+		client = new aClient(client_listener);
+		client->start(argv[1]);
+		while(1) {
+			s = gets(text);	
+			if(!strcmp(text,"exit")) break;
+			p = data;
+			pack_header(&p,0);
+			sprintf((char *)p,"%s> %s",client->getNick(),text);
+			client->send(data,(size_t)(SOCKET_HEADER+strlen((char *)p)+1));
+		}
+		client->stop();
+		delete(client);
+		app.close();
 	}
-
-	InitNetwork();
-	client = new aClient(client_listener);
-	client->start(argv[1]);
-	while(1) {
-		s = gets(text);	
-		if(!strcmp(text,"exit")) break;
-		p = data;
-		pack_header(&p,0);
-		sprintf((char *)p,"%s> %s",client->getNick(),text);
-		client->send(data,(size_t)(SOCKET_HEADER+strlen((char *)p)+1));
-	}
-	client->stop();
-	delete(client);
-	UninitNetwork();
 }
 

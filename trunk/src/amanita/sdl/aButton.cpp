@@ -8,7 +8,7 @@
 #include <amanita/sdl/aButton.h>
 
 
-aObject_Inheritance(aButton,aComponent);
+aObject_Inheritance(aButton,aComponent)
 
 
 extern char indent[32];

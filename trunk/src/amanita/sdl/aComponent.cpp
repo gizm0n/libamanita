@@ -9,7 +9,7 @@
 #include <amanita/sdl/aDisplay.h>
 
 
-aObject_Inheritance(aComponent,aObject);
+aObject_Inheritance(aComponent,aObject)
 
 
 aComponent *aComponent::componentFocus = 0;

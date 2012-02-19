@@ -12,17 +12,17 @@
 #include <time.h>
 #include <inttypes.h>
 #include <libintl.h>
+#include <amanita/aConfig.h>
 #include <amanita/aThread.h>
 
 
 class aWindow;
 
-#ifdef __linux__
+#ifdef USE_GTK
 #include <gtk/gtk.h>
+#endif
 
-
-
-#elif defined(WIN32)
+#ifdef USE_WIN32
 #include <windows.h>
 
 #ifdef main
@@ -30,25 +30,24 @@ class aWindow;
 #endif
 #define main amanita_main
 extern int main(int, char *[]);
+extern HINSTANCE hMainInstance;
 #endif
 
 
 enum {
-	AMANITA_INIT_CONSOLE			= 0x00000001,	//!<
-	AMANITA_INIT_WINDOWED		= 0x00000002,	//!<
-	AMANITA_INIT_FULLSCREEN		= 0x00000004,	//!<
-	AMANITA_INIT_DIRECTORIES	= 0x00000010,	//!<
-	AMANITA_INIT_GETTEXT			= 0x00000020,	//!<
-	AMANITA_INIT_THREADS			= 0x00000100,	//!<
-	AMANITA_INIT_SOCKETS			= 0x00000200,	//!<
-	AMANITA_INIT_GUI				= 0x00001000,	//!<
-	AMANITA_INIT_SDL				= 0x00100008,	//!<
-	AMANITA_INIT_SDL_TTF			= 0x00300000,	//!<
-	AMANITA_INIT_SDL_IMAGE		= 0x00500000,	//!<
+	aINIT_CONSOLE			= 0x00000001,	//!<
+	aINIT_WINDOWED			= 0x00000002,	//!<
+	aINIT_FULLSCREEN		= 0x00000004,	//!<
+	aINIT_DIRECTORIES		= 0x00000010,	//!<
+	aINIT_GETTEXT			= 0x00000020,	//!<
+	aINIT_THREADS			= 0x00000100,	//!<
+	aINIT_SOCKETS			= 0x00000200,	//!<
+	aINIT_GUI				= 0x00001000,	//!<
+	aINIT_SDL				= 0x00100008,	//!<
+	aINIT_SDL_TTF			= 0x00300000,	//!<
+	aINIT_SDL_IMAGE		= 0x00500000,	//!<
 };
 
-
-#define _(str) gettext(str)
 
 
 /** Callback function to receive installation progress, i.e. for updating a progressbar.
@@ -83,13 +82,7 @@ private:
 	uint32_t app_local_id;				//!< A local ID for the running instance.
 	time_t app_local_time;				//!<
 	time_t app_last_access;				//!< Time the application last was executed.
-
 	aWindow *window;						//!< Main window for the application.
-
-protected:
-#ifdef WIN32
-	HINSTANCE hinst;
-#endif
 
 public:
 	aApplication();
@@ -99,19 +92,19 @@ public:
 	/** Initialize application, initialize resources. */
 	uint32_t open(int argc,char *argv[],uint32_t params);
 	uint32_t close();						//!< Close application, uninitialize and shut down the application, free resources.
-	int main();							//!< Start main loop.
+	int main();								//!< Start main loop.
 	void quit();							//!< Exit the main loop.
 
 	void setMainWindow(aWindow *wnd) { window = wnd; }
 	bool isMainWindow(aWindow *wnd) { return window==wnd; }
 	aWindow *getMainWindow() { return window; }
 
-	virtual int create();				//!< Create aplication, this method should be inherited and used for creating the windows and widgets etc.
-	virtual int destroy();				//!< Destroy application, inherit and use for freeing user created resources.
+	virtual void create();				//!< Create aplication, this method should be inherited and used for creating the windows and widgets etc.
+	virtual void destroy();				//!< Destroy application, inherit and use for freeing user created resources.
 
 /*
 	int install(const char *host,const char *path,aVector &files,install_function func=0,void *obj=0);
-#if defined __linux__
+#if defined USE_GTK
 	void updateFontCache();
 #endif
 */

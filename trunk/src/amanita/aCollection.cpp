@@ -3,6 +3,6 @@
 #include <amanita/aCollection.h>
 
 
-aObject_Inheritance(aCollection,aObject);
+aObject_Inheritance(aCollection,aObject)
 
 

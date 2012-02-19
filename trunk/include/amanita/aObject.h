@@ -10,6 +10,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 
 
@@ -28,31 +29,33 @@ class aClass {
 friend class aObject;
 
 private:
-	static uint32_t id_index;		//!< Static counter for new unique IDs.
+	static uint16_t id_index;		//!< Static counter for new unique IDs.
 
-	uint32_t id;						//!< Unique ID for this class.
+	uint16_t id;						//!< Unique ID for this class.
 	const char *name;					//!< Name of class.
-	int d;								//!< Depth of class in hierarchy.
+//	int d;								//!< Depth of class in hierarchy.
 	aClass *super;						//!< Parent class that this class inherit from.
-	size_t nsub;						//!< Number of child classes that inherit from this class.
+	uint16_t nsub;						//!< Number of child classes that inherit from this class.
 	aClass **sub;						//!< Child classes that inherit from this class.
 
-	void setDepth(int n);			//!< Set depth of class
-	void print(char *ind);			//!< Print class to stdout.
+//	void setDepth(int n);			//!< Set depth of class
+
+	/** Print class to fp, where ind is indentation and d depth. */
+	void print(FILE *fp,char *ind,int d);			
 
 public:
 	aClass(const char *nm,aClass *s);
 	~aClass();
 
 	bool instanceOf(aClass &c);						//!< Test if this is an instance of c, that is, if this is the same or inherit c.
-	uint32_t getID() { return id; }					//!< Get ID for class.
+	uint16_t getID() { return id; }					//!< Get ID for class.
 	const char *getName() { return name; }			//!< Get class name.
 	/** Get class that this class inherit from. */
 	aClass *getSuperClass() { return super; }
 	size_t subClasses() { return nsub; }			//!< Get number of inheriting classes.
 	/** Get the class inheriting this class with index n. */
 	aClass *getSubClass(int n) { return n>=0 && n<(int)nsub? sub[n] : 0; }
-	operator uint32_t() const { return id; }		//!< Get ID for class.
+	operator uint16_t() const { return id; }		//!< Get ID for class.
 };
 
 
@@ -82,16 +85,16 @@ public:
 	A() : aObject() { a = 0; }
 };
  * @endcode
- * If this is omitted, the could be runtime errors that are difficult to trace.
+ * If this is omitted, there could be runtime errors that are difficult to trace.
  * 
- * Note, it should not be ended with a semicolon.
+ * Note, this macro should not be ended with a semicolon.
  * @param class_name This must be the name of the class, as it is. No quotes or anything. */
 #define aObject_Instance(class_name) \
 private:\
 	static aClass instance;\
-	virtual aClass &getInstance() { return class_name::instance; }\
 public:\
-	static aClass &getClass() { return class_name::instance; }
+	static aClass &getClass() { return class_name::instance; }\
+	virtual aClass &getInstance() { return class_name::instance; }
 
 
 
@@ -103,11 +106,11 @@ public:\
 
 aObject_Inheritance(A,aObject)
  * @endcode
- * Note, this should end with a semicolon.
+ * Note, this macro should not end with a semicolon.
  * @param class_name This must be the name of the class, as it is. No quotes or anything.
  * @param super_name This must be the name of the class that this class inherit. */
 #define aObject_Inheritance(class_name,super_name) \
-aClass class_name::instance(#class_name,&super_name::getClass())
+aClass class_name::instance(#class_name,&super_name::getClass());
 
 /* Work in progress: These macros will implement capability for multiple inheritance. */
 /*#define aObject_SuperClass(class_name) \
@@ -235,18 +238,21 @@ private:
 	/** Statically stored instance of aClass. */
 	static aClass instance;
 
-	/** Virtual method to get the statically stored aClass instance for this class. */
-	virtual aClass &getInstance() { return aObject::instance; }
-
 public:
 	/** Get the aClass object statically attached to this class. */
 	static aClass &getClass() { return aObject::instance; }
+
+	/** Print all classes inheriting aObject to fp. */
+	static void printClasses(FILE *fp);
 
 	/** @name Constructors and Destructors
 	 * @{ */
 	aObject() {}					//!< Constructor
 	virtual ~aObject() {}		//!< Destructor
 	/** @} */
+
+	/** Virtual method to get the statically stored aClass instance for this class. */
+	virtual aClass &getInstance() { return aObject::instance; }
 
 	/** @name Instance of
 	 * @{ */

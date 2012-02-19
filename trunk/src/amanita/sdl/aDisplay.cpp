@@ -5,7 +5,7 @@
 #include <amanita/sdl/aDisplay.h>
 
 
-aObject_Inheritance(aDisplay,aComponent);
+aObject_Inheritance(aDisplay,aComponent)
 
 
 aDisplay *aDisplay::activeDisplay = 0;

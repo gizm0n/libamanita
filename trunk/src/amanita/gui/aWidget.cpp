@@ -3,24 +3,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef WIN32
-#include <windows.h>
-#endif
+#include <amanita/aApplication.h>
 #include <amanita/gui/aBrowser.h>
 #include <amanita/gui/aWidget.h>
 #include <amanita/gui/aWindow.h>
 
 
-#ifdef WIN32
+#ifdef USE_WIN32
+#ifndef WINVER
+#define WINVER 0x0501
+#endif
+#define _WIN32_IE	0x0501
 #ifdef WIN32_LEAN_AND_MEAN
 #undef WIN32_LEAN_AND_MEAN
 #endif
-//#include <ctype.h>
+#include <windows.h>
 #include <commctrl.h>
 #include <richedit.h>
 
-
 uint32_t class_registers = 0;
+
+int dbu_x = LOWORD(GetDialogBaseUnits());
+int dbu_y = HIWORD(GetDialogBaseUnits());
 
 enum {
 	WIN32_CONTROL_BUTTON,
@@ -29,271 +33,266 @@ enum {
 	WIN32_CONTROL_LISTBOX,
 	WIN32_CONTROL_LISTVIEW,
 	WIN32_CONTROL_STATIC,
+	WIN32_CONTROL_STATUSBAR,
+	WIN32_CONTROL_TABS,
 	WIN32_CONTROL_RICHEDIT,
 	WIN32_CONTROL_BROWSER,
 	WIN32_CONTROL_WINDOW,
 };
-static const char *win32_classes[] = {
-	"Button",
-	"ComboBox",
-	"Edit",
-	"ListBox",
-	"SysListView32",
-	"Static",
+static const tchar_t *win32_classes[] = {
+	_T("Button"),
+	_T("ComboBox"),
+	_T("Edit"),
+	_T("ListBox"),
+	WC_LISTVIEW,
+	_T("Static"),
+	STATUSCLASSNAME,
+	WC_TABCONTROL,
 	RICHEDIT_CLASS,
-	BROWSER_CLASS,
-	AMANITA_MAIN_WINDOW_CLASS,
+	aBROWSER_CLASS,
+	aWINDOW_CLASS,
 };
 
 struct widget_control {
 	int style;
 	int style_x;
-	const char *win32_control;
+	int control;
+	int min_width;
+	int min_height;
 };
 
 static const widget_control controls[] = {
-	/* WIDGET_CONTROL */
-	{ 0,0,0 },
-	/* WIDGET_BOX */
-	{	WS_CHILD|WS_VISIBLE|BS_GROUPBOX,0,"Button" },
-	/* WIDGET_BROWSER */
-	{ WS_CHILD|WS_VISIBLE,0,win32_classes[WIN32_CONTROL_BROWSER], },
-	/* WIDGET_BUTTON */
-	{ WS_CHILD|WS_VISIBLE|BS_PUSHBUTTON,0,"Button", },
-	/* WIDGET_CANVAS */
-	{ WS_CHILD|WS_VISIBLE|SS_CENTER,0,win32_classes[WIN32_CONTROL_STATIC], },
-	/* WIDGET_CLABEL */
-	{ WS_CHILD|WS_VISIBLE|SS_CENTER,0,win32_classes[WIN32_CONTROL_STATIC], },
-	/* WIDGET_CHOICE */
-	{ CBS_DROPDOWNLIST|CBS_AUTOHSCROLL|WS_BORDER|WS_VSCROLL,0,win32_classes[WIN32_CONTROL_COMBOBOX], },
-	/* WIDGET_CHECKBOX */
-	{ BS_AUTOCHECKBOX|WS_GROUP,0,"Button", },
-	/* WIDGET_DEFAULT_BUTTON */
-	{ BS_DEFPUSHBUTTON,0,win32_classes[WIN32_CONTROL_BUTTON], },
-	/* WIDGET_ENTRY */
-	{ WS_CHILD|ES_AUTOHSCROLL,WS_EX_CLIENTEDGE,win32_classes[WIN32_CONTROL_EDIT], },
-	/* WIDGET_IMAGE */
-	{ WS_CHILD|SS_CENTER,0,win32_classes[WIN32_CONTROL_STATIC], },
-	/* WIDGET_LABEL */
-	{ WS_CHILD|SS_LEFT,0,win32_classes[WIN32_CONTROL_STATIC], },
-	/* WIDGET_LISTBOX */
-	{ WS_CHILD|LBS_USETABSTOPS|LBS_EXTENDEDSEL|WS_VSCROLL|WS_HSCROLL|WS_TABSTOP,WS_EX_CLIENTEDGE,win32_classes[WIN32_CONTROL_LISTBOX], },
-	/* WIDGET_MENU */
-	{ 0,0,0, },
-	/* WIDGET_NOTEBOOK */
-	{ 0,0,0, },
-	/* WIDGET_PROGRESS */
-	{ WS_CHILD|SS_CENTER,0,win32_classes[WIN32_CONTROL_STATIC], },
-	/* WIDGET_RLABEL */
-	{ WS_CHILD|SS_RIGHT,0,win32_classes[WIN32_CONTROL_STATIC], },
-	/* WIDGET_SEPARATOR */
-	{ WS_CHILD|SS_CENTER,0,win32_classes[WIN32_CONTROL_STATIC], },
-	/* WIDGET_STATUSBAR */
-	{ 0,0,0, },
-	/* WIDGET_TABLE */
-	{ WS_CHILD|WS_VISIBLE|WS_HSCROLL|WS_VSCROLL|LVS_REPORT|LVS_SINGLESEL,
+	/* aWIDGET_CONTROL */
+	{ 0,0,0,0,0, },
+	/* aWIDGET_BROWSER */
+	{ WS_CHILD,0,WIN32_CONTROL_BROWSER,0,0, },
+	/* aWIDGET_BUTTON */
+	{ WS_CHILD|WS_TABSTOP|BS_NOTIFY,WS_EX_STATICEDGE,WIN32_CONTROL_BUTTON,MulDiv(dbu_x,40,4),MulDiv(dbu_y,14,8), },
+	/* aWIDGET_CAIRO */
+	{ WS_CHILD|SS_OWNERDRAW,0,WIN32_CONTROL_STATIC,0,0, },
+	/* aWIDGET_CANVAS */
+	{ WS_CHILD|SS_OWNERDRAW,0,WIN32_CONTROL_STATIC,0,0, },
+	/* aWIDGET_CHECKBOX */
+	{ WS_CHILD|WS_TABSTOP|BS_NOTIFY|BS_AUTOCHECKBOX,0,WIN32_CONTROL_BUTTON,MulDiv(dbu_x,40,4),MulDiv(dbu_y,10,8), },
+	/* aWIDGET_COMBOBOX */
+	{ WS_CHILD|WS_TABSTOP|CBS_DROPDOWNLIST|WS_VSCROLL,0,WIN32_CONTROL_COMBOBOX,MulDiv(dbu_x,40,4),MulDiv(dbu_y,10,8), },
+	/* aWIDGET_COMBOBOX_ENTRY */
+	{ WS_CHILD|WS_TABSTOP|CBS_DROPDOWN|CBS_AUTOHSCROLL|WS_VSCROLL,0,WIN32_CONTROL_COMBOBOX,MulDiv(dbu_x,40,4),MulDiv(dbu_y,10,8), },
+	/* aWIDGET_CONTAINER */
+	{ WS_CHILD,0,WIN32_CONTROL_STATIC,0,0, },
+	/* aWIDGET_ENTRY */
+	{ WS_CHILD|WS_TABSTOP|ES_AUTOHSCROLL,WS_EX_CLIENTEDGE,WIN32_CONTROL_EDIT,MulDiv(dbu_x,40,4),MulDiv(dbu_y,10,8), },
+	/* aWIDGET_FRAME */
+	{ WS_CHILD|BS_GROUPBOX,0,WIN32_CONTROL_BUTTON,MulDiv(dbu_x,7+7,4),MulDiv(dbu_y,11+7,8), },
+	/* aWIDGET_IMAGE */
+	{ WS_CHILD|SS_CENTER,0,WIN32_CONTROL_STATIC,0,0, },
+	/* aWIDGET_LABEL */
+	{ WS_CHILD,0,WIN32_CONTROL_STATIC,MulDiv(dbu_x,40,4),MulDiv(dbu_y,8,8), },
+	/* aWIDGET_LISTBOX */
+	{ WS_CHILD|WS_TABSTOP|LBS_USETABSTOPS|LBS_NOTIFY|WS_VSCROLL|WS_HSCROLL,WS_EX_CLIENTEDGE,WIN32_CONTROL_LISTBOX,0,0, },
+	/* aWIDGET_LISTVIEW */
+	{ WS_CHILD|WS_TABSTOP|LVS_REPORT|LVS_SINGLESEL|WS_VSCROLL|WS_HSCROLL,WS_EX_CLIENTEDGE,WIN32_CONTROL_LISTVIEW,0,0, },
+	/* aWIDGET_MENU */
+	{ 0,0,0,0,0, },
+	/* aWIDGET_NOTEBOOK */
+	{ WS_CHILD,0,WIN32_CONTROL_TABS,0,0, },
+	/* aWIDGET_PROGRESS */
+	{ WS_CHILD|SS_CENTER,0,WIN32_CONTROL_STATIC,0,0, },
+	/* aWIDGET_RADIOBUTTON */
+	{ WS_CHILD|WS_TABSTOP|BS_NOTIFY|BS_AUTORADIOBUTTON,0,WIN32_CONTROL_BUTTON,0,MulDiv(dbu_y,10,8), },
+	/* aWIDGET_SEPARATOR */
+	{ WS_CHILD|SS_CENTER,0,WIN32_CONTROL_STATIC,0,0, },
+	/* aWIDGET_STATUSBAR */
+	{ WS_CHILD,0,WIN32_CONTROL_STATUSBAR,0,0, },
+	/* aWIDGET_TABLE */
+	{ WS_CHILD|WS_TABSTOP|WS_HSCROLL|WS_VSCROLL|LVS_REPORT|LVS_SINGLESEL,
 		LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES|LVS_EX_HEADERDRAGDROP,
-		win32_classes[WIN32_CONTROL_LISTVIEW], },
-	/* WIDGET_TEXT */
-	{ WS_VISIBLE|ES_READONLY|WS_VSCROLL|ES_MULTILINE|ES_WANTRETURN,WS_EX_CLIENTEDGE,win32_classes[WIN32_CONTROL_RICHEDIT], },
-	/* WIDGET_TREE */
-	{ WS_CHILD|SS_CENTER,0,win32_classes[WIN32_CONTROL_STATIC], },
-	/* WIDGET_WINDOW */
-	{ 0,0,0, },
+		WIN32_CONTROL_LISTVIEW,0,0, },
+	/* aWIDGET_TEXT */
+	{ WS_CHILD|WS_TABSTOP|ES_READONLY|WS_VSCROLL|ES_MULTILINE|ES_WANTRETURN,WS_EX_CLIENTEDGE,WIN32_CONTROL_RICHEDIT,0,0, },
+	/* aWIDGET_TREE */
+	{ WS_CHILD|WS_TABSTOP|SS_CENTER,0,WIN32_CONTROL_STATIC,0,0, },
+	/* aWIDGET_WINDOW */
+	{ 0,0,0,0,0, },
 };
+
 #endif
+
+aHashtable aWidget::components = aHashtable();
+
+
+aObject_Inheritance(aWidget,aObject)
 
 aWidget::aWidget(widget_event_handler weh,widget_type t) : event_handler(weh),type(t) {
 	id = 0;
+	window = 0;
 	parent = 0;
-	child = 0;
 	next = 0;
-	container = 0;
 	component = 0;
 	text = 0;
-	format = 0;
-	x = 0,y = 0,width = 0,height = 0,min_width = 0,min_height = 0,pad_x = 0,pad_y = 0;
+	style = 0;
+	x = 0,y = 0,width = 0,height = 0,min_width = 0,min_height = 0,border = 0,spacing = 0;
 }
 
 aWidget::~aWidget() {
+debug_output("aWidget::~aWidget()\n");
+	if(component) deleteComponent(component);
 	if(text) free(text);
 	text = 0;
-	if(child) delete child;
-	child = 0;
 	if(next) delete next;
 	next = 0;
-}
-
-
-void aWidget::add(aWidget *w) {
-	w->parent = this;
-	if(!child) child = w;
-	else {
-		aWidget *c;
-		for(c=child; c->next; c=c->next);
-		c->next = w;
+#ifdef USE_WIN32
+	if(event_data) {
+		SetWindowLongPtr((HWND)component,GWL_USERDATA,(LONG_PTR)0);
+		free(event_data);
 	}
+	event_data = 0;
+#endif
 }
 
-aWidget *aWidget::get(uint32_t id) {
-	if(id==this->id) return this;
-	else {
-		aWidget *w = child;
-		while(w && w!=this) {
-			if(id==w->id) return w;
-			if(w->child) w = w->child;
-			else if(w->next) w = w->next;
-			else if(w->parent) {
-				while(w->parent && !w->parent->next) w = w->parent;
-				if(w) w = w->next;
-			}
+void aWidget::create(aWindow *wnd,uint32_t st) {
+	static uint32_t id_index = 0;
+	id = (type<<9)|(++id_index);
+	window = wnd;
+#ifdef USE_GTK
+/*	switch(type) {
+		case aWIDGET_BUTTON:component = (aComponent)gtk_button_new_with_label(text? text : "");break;
+		case aWIDGET_CHOICE:component = (aComponent)gtk_label_new(text? text : "");
+		case aWIDGET_LABEL:component = (aComponent)gtk_label_new(text? text : "");
+		case aWIDGET_BOX:
+		case aWIDGET_CHECKBOX:
+		case aWIDGET_DEFAULT_BUTTON:
+		case aWIDGET_ENTRY:
+		case aWIDGET_IMAGE:
+		case aWIDGET_LISTBOX:
+		case aWIDGET_PROGRESS:
+		case aWIDGET_SEPARATOR:
+		case aWIDGET_TABLE:
+		case aWIDGET_TEXT:
+		case aWIDGET_TREE:break;
+	}*/
+	if(min_width || min_height)
+		gtk_widget_set_size_request((GtkWidget *)component,min_width? min_width : -1,min_height? min_height : -1);
+#endif
+#ifdef USE_WIN32
+	const widget_control *wc = &controls[type-aWIDGET_CONTROL];
+	st |= wc->style;
+	if(!(style&aHIDE)) st |= WS_VISIBLE;
+#ifdef USE_WCHAR
+	int len = text? strlen(text)+1 : 1;
+	wchar_t t[len];
+	if(text) char2w(t,text,len);
+	else *t = L'\0';
+#else
+	char *t = text;
+#endif
+debug_output("aWidget::create(window: %p, widget: %p, control: %s, component: %p, text: %" PRIts ")\n",window,this,win32_classes[wc->control],component,text? t : _T("-"));
+	component = (aComponent)CreateWindowEx(wc->style_x,win32_classes[wc->control],
+		text? t : _T(""),st,0,0,0,0,(HWND)parent->component,(HMENU)id,hMainInstance,this);
+//	SetParent((HWND)component,(HWND)window->component);
+	if(!min_width && wc->min_width) min_width = wc->min_width;
+	if(!min_height && wc->min_height) min_height = wc->min_height;
+	SendMessage((HWND)component,WM_SETFONT,(WPARAM)GetStockObject(DEFAULT_GUI_FONT),(LPARAM)1);
+#endif
+	if(component) addComponent(component);
+}
+
+
+void aWidget::createAll(aComponent p,bool n) {
+	if(n && next) {
+		aWidget *w;
+		for(w=next; w; w=w->next) {
+			w->create(window,0);
+			w->createAll(component,false);
 		}
 	}
-}
-
-aWidget *aWidget::iterate(int &lvl) {
-	if(child) {
-		++lvl;
-		return child;
-	}
-	else if(next) return next;
-	else if(parent) {
-		aWidget *w = this;
-		while(w->parent && !w->parent->next) w = w->parent,--lvl;
-		if(w) w = w->next;
-		return w;
-	}
-	return 0;
-}
-
-aWidget *aWidget::remove(aWidget *w) {
-}
-
-aWidget *aWidget::remove(uint32_t id) {
-}
-
-
-aComponent aWidget::create() {
-#ifdef __linux__
-	switch(type) {
-		case WIDGET_CONTROL:return 0;
-		case WIDGET_BROWSER:break; /* See: aBrowser::create(). */
-		case WIDGET_MENU:break; /* See: aMenu::create(). */
-		case WIDGET_WINDOW:break; /* See: aWindow::create(). */
-		case WIDGET_BOX:
-		case WIDGET_BUTTON:
-		case WIDGET_CANVAS:
-		case WIDGET_CLABEL:
-		case WIDGET_CHOICE:
-		case WIDGET_CHECKBOX:
-		case WIDGET_DEFAULT_BUTTON:
-		case WIDGET_ENTRY:
-		case WIDGET_IMAGE:
-		case WIDGET_LABEL:
-		case WIDGET_LISTBOX:
-		case WIDGET_NOTEBOOK:
-		case WIDGET_PROGRESS:
-		case WIDGET_RLABEL:
-		case WIDGET_SEPARATOR:
-		case WIDGET_TABLE:
-		case WIDGET_TEXT:
-		case WIDGET_TREE:break;
-	}
+#ifdef USE_GTK
+	if(p) gtk_container_add(GTK_CONTAINER(p),(GtkWidget *)component);
 #endif
-#ifdef WIN32
-	{
-		const widget_control *c = &controls[type-WIDGET_CONTROL];
-debug_output("aWidget::create(widget=%p)\n",(aWidget *)this);
-		component = (aComponent)CreateWindowEx(c->style_x,c->win32_control,
-				text? text : "",c->style,0,0,0,0,(HWND)parent->container,(HMENU)id,hinst,this);
-		container = component;
-	}
-#endif
-	return container;
-}
-
-void aWidget::setID(unsigned long i) {
-	id = i;
 }
 
 void aWidget::setText(const char *str) {
 	if(text) free(text);
-	text = strdup(text);
+	text = strdup(str);
 }
 
 void aWidget::setFont(aComponent font) {
 	if(component) {
-#ifdef WIN32
+#ifdef USE_WIN32
 		SendMessage((HWND)component,WM_SETFONT,(WPARAM)font,0);
 #endif
 	}
 }
 
-int aWidget::getWidth() {
-	if(container) {
-#ifdef __linux__
-		return 0;
-#endif
-#ifdef WIN32
-/*		if(sizer) return sizer->width;
-		else {*/
-			RECT r;
-			GetClientRect((HWND)container,&r);
-			return r.right;
-//		}
-#endif
-	} else return 0;
-}
-
-int aWidget::getHeight() {
-	if(container) {
-#ifdef __linux__
-		return 0;
-#endif
-#ifdef WIN32
-//		if(sizer) return sizer->height;
-//		else {
-			RECT r;
-			GetClientRect((HWND)container,&r);
-			return r.bottom;
-//		}
-#endif
-	} else return 0;
-}
-
-
-void aWidget::setFormat(uint32_t f,int w,int h,int px,int py) {
-	format = f;
+void aWidget::setStyle(uint32_t st,uint16_t minw,uint16_t minh,uint8_t b,uint8_t sp) {
+	style = st;
 	x = 0;
 	y = 0;
-	width = w;
-	height = h;
-	min_width = w;
-	min_height = h;
-	pad_x = px;
-	pad_y = py;
+	width = minw;
+	height = minh;
+	min_width = minw;
+	min_height = minh;
+	border = b;
+	spacing = sp;
 }
 
-#ifdef WIN32
-void aWidget::makeLayout(int w,int h) {
+#ifdef USE_WIN32
+static LRESULT CALLBACK WidgetProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam) {
+	widget_event_data *wed = (widget_event_data *)GetWindowLongPtr(hwnd,GWL_USERDATA);
+	if(!wed || wed->event_handler(wed->window,msg,wparam,lparam)) return 0;
+	return CallWindowProc(wed->proc,hwnd,msg,wparam,lparam);
+}
+
+void aWidget::captureEvents() {
+	widget_event_data *wed = (widget_event_data *)malloc(sizeof(widget_event_data));
+	event_data = wed;
+	SetWindowLongPtr((HWND)component,GWL_USERDATA,(LONG_PTR)wed);
+	wed->window = window;
+	wed->event_handler = aWindow::handleEvent;
+	wed->widget = this;
+	wed->proc = (WNDPROC)SetWindowLongPtr((HWND)component,GWL_WNDPROC,(LONG_PTR)WidgetProc);
+}
+
+void aWidget::makeLayout(int x,int y,int w,int h) {
+//debug_output("aWidget::makeLayout(x: %d, y: %d, w: %d, h: %d)\n",x,y,w,h);
+	this->x = x,this->y = y;
+	if((style&aFILL) || !min_width) width = w;
+	else width = min_width;
+	if((style&aFILL) || !min_height) height = h;
+	else height = min_height;
+}
+
+void aWidget::move() {
+debug_output("aWidget::move(component: %p, x: %d, y: %d, width: %d, heigth: %d)\n",component,x,y,width,height);
+	if(component) MoveWindow((HWND)component,x,y,width,height,true);
 }
 #endif
 
 void aWidget::show() {
 debug_output("aWidget::show(1)\n");
-	if(!container) return;
-#ifdef __linux__
+	if(!component) return;
+#ifdef USE_GTK
 debug_output("aWidget::show(2)\n");
-	gtk_widget_show_all((GtkWidget *)container);
+	gtk_widget_show_all((GtkWidget *)component);
 debug_output("aWidget::show(3)\n");
 #endif
-#ifdef WIN32
-	ShowWindow((HWND)container,SW_SHOW);
-	UpdateWindow((HWND)container);
+#ifdef USE_WIN32
+	ShowWindow((HWND)component,SW_SHOW);
+	UpdateWindow((HWND)component);
 #endif
 }
 
 void aWidget::hide() {
+debug_output("aWidget::show(1)\n");
+	if(!component) return;
+#ifdef USE_GTK
+debug_output("aWidget::show(2)\n");
+	gtk_widget_hide((GtkWidget *)component);
+debug_output("aWidget::show(3)\n");
+#endif
+#ifdef USE_WIN32
+	ShowWindow((HWND)component,SW_HIDE);
+#endif
 }
 
 

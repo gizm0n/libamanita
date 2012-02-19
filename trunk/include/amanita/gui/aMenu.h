@@ -13,9 +13,9 @@
 
 
 enum {
-	MENU_EVENT_ACTION,
-	MENU_EVENT_ENTER,
-	MENU_EVENT_LEAVE,
+	aMENU_EVENT_ACTION,
+	aMENU_EVENT_ENTER,
+	aMENU_EVENT_LEAVE,
 };
 
 
@@ -25,8 +25,6 @@ struct aMenuItem {
 	int pid;
 	int id;
 	const char *name;
-	const char *status;
-	int action;
 	bool sensitive;
 	int acc;
 	int acc_mod;
@@ -40,7 +38,13 @@ struct aMenuItem {
 };
 
 class aMenu : public aWidget {
+friend class aApplication;
 friend class aWindow;
+
+/** @cond */
+aObject_Instance(aMenu)
+/** @endcond */
+
 private:
 	aMenuItem *items;
 	aMenuItem **items_index;
@@ -50,7 +54,9 @@ public:
 	aMenu(widget_event_handler weh,const aMenuItem *mi);
 	virtual ~aMenu();
 
-	virtual aComponent create();
+	aMenuItem *getItem(int n) { return n>=0 && n<nitems? items_index[n] : 0; }
+
+	virtual void create(aWindow *wnd,uint32_t st);
 };
 
 /*
