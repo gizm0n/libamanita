@@ -185,7 +185,7 @@ int main(int argc,char *argv[]) {
 		ap = &h->asppat[i];
 		printf("%s: ",pattern_names[ap->type]);
 		for(x=0,n=0; x<ap->nplanets; x++)
-			for(j=0; j<h->nplanets && j<32; j++)
+			for(j=0; x*32+j<h->nplanets && j<32; j++)
 				if(ap->planets[x]&(1<<j)) {
 					if(n++>0) printf(", ");
 					printf("%s",planet_names[h->planets[x*32+j].id]);

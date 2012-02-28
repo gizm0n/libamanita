@@ -1,6 +1,7 @@
 #ifndef _ESOTERIC_ASTRO_ASTRONOMY_DATA_H_
 #define _ESOTERIC_ASTRO_ASTRONOMY_DATA_H_
 
+#include <esoteric/astro/astronomy.h>
 
 #define WILLIAMS 1
 #define SIMON 0
@@ -136,6 +137,40 @@ extern astro_orbit astro_saturn;
 extern astro_orbit astro_uranus;
 extern astro_orbit astro_neptune;
 extern astro_orbit astro_pluto;
+
+
+typedef struct astro_orbit_data {
+	short year;
+	char month;
+	double day;
+	double M;
+	double a;
+	double ecc;
+	double w;
+	double W;
+	double i;
+	double mag;
+} astro_orbit_data;
+
+extern const astro_orbit_data astro_orbits_data[];
+
+
+typedef struct astro_fixedstar_data {
+	short epoch;
+	char rh;
+	char rm;
+	double rs;
+	char dd;
+	char dm;
+	double ds;
+	double mura;
+	double mudec;
+	double v;
+	double px;
+	double mag;
+} astro_fixedstar_data;
+
+extern const astro_fixedstar_data astro_fixedstars_data[];
 
 
 #endif /* _ESOTERIC_ASTRO_ASTRONOMY_DATA_H_ */

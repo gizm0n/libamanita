@@ -22,6 +22,30 @@ enum {
 };
 
 
+class aNotebook;
+
+struct aNotebookTab {
+	aNotebook *notebook;
+	uint8_t index;
+	char *name;
+};
+
+class aNotebookPage {
+friend class aNotebook;
+protected:
+	aNotebookTab tab;
+	aWidget *page;
+	int status;
+
+public:
+	aNotebookPage(aNotebook *nb);
+	virtual ~aNotebookPage();
+
+	void open();
+	void close();
+};
+
+
 class aNotebook : public aWidget {
 friend class aWindow;
 
@@ -50,10 +74,13 @@ public:
 	virtual void create(aWindow *wnd,uint32_t st);
 
 	int openPage(const char *tab,aWidget *page);
+	int openPage(aNotebookPage *np);
 	void selectPage(int n);
-	const char *getTab(int n);
-	aWidget *getPage(int n);
-	void closePage(int n);
+	void selectPage(aNotebookPage *np) { selectPage(np->tab.index); }
+	const char *getTab(int n=-1);
+	aNotebookPage *getPage(int n=-1);
+	void closePage(int n=-1);
+	void closePage(aNotebookPage *np) { closePage(np->tab.index); }
 };
 
 

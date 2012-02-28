@@ -12,7 +12,7 @@ static gboolean menuitem_callback(GtkWidget *widget,gpointer data) {
 	aMenuItem *mi = (aMenuItem *)data;
 	widget_event_handler weh = mi->menu->getEventHandler();
 debug_output("aMenu::menuitem_callback(%p, id: %d)\n",mi,mi->id);
-	weh(mi->menu,aMENU_EVENT_ACTION,mi->id,(intptr_t)mi,0);
+	weh(mi->menu,aMENU_EVENT_ACTION,mi->id,(intptr_t)mi->data,0);
 	return FALSE;
 }
 #endif
@@ -103,6 +103,8 @@ debug_output("aMenu::create(menu: index=%d,id='%d',parent='%d',child='%d',menuit
 			}
 		} else {
 			m->item = gtk_image_menu_item_new_with_label(m->name);
+			if(m->icon)
+				gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(m->item),GTK_WIDGET(gtk_image_new_from_stock(m->icon,GTK_ICON_SIZE_MENU)));
 			if(!m->sensitive) gtk_widget_set_sensitive(m->item,false);
 			if(m->acc!=-1) {
 				gtk_image_menu_item_set_accel_group(GTK_IMAGE_MENU_ITEM(m->item),accel_group);
