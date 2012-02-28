@@ -28,6 +28,8 @@ struct aMenuItem {
 	bool sensitive;
 	int acc;
 	int acc_mod;
+	const char *icon;
+	void *data;
 	int index;
 	int lvl;
 	aMenuItem *parent;

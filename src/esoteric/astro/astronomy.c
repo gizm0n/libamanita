@@ -212,12 +212,27 @@ static void update(astro_data *ad,int f) {
 }
 
 
+static char astronomy_data_path[257] = "./";
+
+void astronomy_set_data_path(const char *path) {
+	int len = strlen(path);
+	char *p;
+	strcpy(astronomy_data_path,path);
+	p = &astronomy_data_path[len-1];
+#ifdef USE_WIN32
+	if(*p!='\\') ++p,*p++ = '\\',*p = '\0';
+#else
+	if(*p!='/') ++p,*p++ = '/',*p = '\0';
+#endif
+}
+
+/*
 static int fincat(astro_data *ad,const char *fn,int index,char *str) {
 	FILE *fp;
 	char *r,s[257];
 	size_t n;
 	*str = '\0';
-	sprintf(s,"%s%s","data_path",fn);
+	sprintf(s,"%s%s",astronomy_data_path,fn);
 	fp = fopen(s,"rb");
 	if(!fp) return 0;
 	r = fgets(s,256,fp);
@@ -227,30 +242,40 @@ static int fincat(astro_data *ad,const char *fn,int index,char *str) {
 	fclose(fp);
 	return 1;
 }
-
+*/
 static int get_orbit(astro_data *ad,astro_orbit *el,int index) {
 	memset(el,0,sizeof(astro_orbit));
 	if(index<=0) return 0;
 	else {
-		char str[257];
-		char orbnam[80];
-		int num,year,month;
-		size_t ret;
-		double day;
-		FILE *fp;
-		sprintf(str,"%sorbits.cat","data_path");
-		fp = fopen(str,"r");
-		if(!fp) return 0;
-		if(index>1) fseek(fp,(index-1)*128,SEEK_SET);
-		ret = fread(str,127,1,fp);
-		fclose(fp);
-		str[127] = 0;
-printf("orbit(%s)\n",str);
-		sscanf(str,"%d %s %d %d %lf %lf %lf %lf %lf %lf %lf %lf",
-			&num,orbnam,&year,&month,&day,&el->M,&el->a,&el->ecc,&el->w,&el->W,&el->i,&el->mag);
-		el->epoch = el->equinox = calendar_get_julian_day(year,month,day,1);
-printf("orbit(%7d,%38s,%4d,%02d,%02.1lf,%3.4lf,%2.6lf,%1.6lf,%3.4lf,%3.4lf,%3.4lf,%3.2lf,%.1lf)\n",
-		num,orbnam,year,month,day,el->M,el->a,el->ecc,el->w,el->W,el->i,el->mag,el->epoch);
+//		char str[257];
+//		char orbnam[80];
+//		int num,year,month;
+//		size_t ret;
+//		double day;
+//		FILE *fp;
+//		sprintf(str,"%sorbits.cat",astronomy_data_path);
+//		fp = fopen(str,"r");
+//		if(!fp) return 0;
+//		if(index>1) fseek(fp,(index-1)*128,SEEK_SET);
+//		ret = fread(str,127,1,fp);
+//		fclose(fp);
+//		str[127] = 0;
+//printf("orbit(%s)\n",str);
+//		sscanf(str,"%d %s %d %d %lf %lf %lf %lf %lf %lf %lf %lf",
+//			&num,orbnam,&year,&month,&day,&el->M,&el->a,&el->ecc,&el->w,&el->W,&el->i,&el->mag);
+
+		const astro_orbit_data *aod = &astro_orbits_data[index];
+		el->M = aod->M;
+		el->a = aod->a;
+		el->ecc = aod->ecc;
+		el->w = aod->w;
+		el->W = aod->W;
+		el->i = aod->i;
+		el->mag = aod->mag;
+
+		el->epoch = el->equinox = calendar_get_julian_day(aod->year,aod->month,aod->day,1);
+printf("orbit(%7d,%4d,%02d,%02.1lf,%3.4lf,%2.6lf,%1.6lf,%3.4lf,%3.4lf,%3.4lf,%3.2lf,%.1lf)\n",
+		index,aod->year,aod->month,aod->day,el->M,el->a,el->ecc,el->w,el->W,el->i,el->mag,el->epoch);
 		return 1;
 	}
 }
@@ -259,23 +284,32 @@ static int get_star(astro_data *ad,astro_star *el,int index) {
 	int sign,i;
 	char starnam[80],s[256],*p;
 	double rh,rm,rs,dd,dm,ds,x,z;
-	if(!fincat(ad,"fixedstars.cat",index,s)) return 0;
-	sscanf(s,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %s",
-		&el->epoch,&rh,&rm,&rs,&dd,&dm,&ds,&el->mura,&el->mudec,&el->v,&el->px,&el->mag,starnam);
+//	if(!fincat(ad,"fixedstars.cat",index,s)) return 0;
+//	sscanf(s,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %s",
+//		&el->epoch,&rh,&rm,&rs,&dd,&dm,&ds,&el->mura,&el->mudec,&el->v,&el->px,&el->mag,starnam);
+
+	const astro_fixedstar_data *afd = &astro_fixedstars_data[index];
+
+	el->epoch = afd->epoch;
+	rh = afd->rh;
+	rm = afd->rm;
+	rs = afd->rs;
+	dd = afd->dd;
+	dm = afd->dm;
+	ds = afd->ds;
+	el->mura = afd->mura;
+	el->mudec = afd->mudec;
+	el->v = afd->v;
+	el->px = afd->px;
+	el->mag = afd->mag;
+
 	x = el->epoch;
 	el->epoch = (x==2000.0? J2000 : (x==1950.0? B1950 : (x==1900.0? J1900 : J2000+365.25*(x-2000.0))));
 	el->ra = PIx2*(3600.0*rh+60.0*rm+rs)/86400.0;
 	sign = 1;
 	if((dd<0.0) || (dm<0.0) || (ds<0.0)) sign = -1;
+	if(afd->dd==-127) dd = 0.0;
 	z =(3600.0*fabs(dd)+60.0*fabs(dm)+fabs(ds))/RTS;
-	if(dd==0.0) {
-		for(p=s,i=0; i<4; i++) {
-			while(*p++==' ');
-			while(*p++!=' ');
-		}
-		while(*p++==' ');
-		if(*--p=='-') sign = -1;
-	}
 	if(sign<0) z = -z;
 	el->dec = z,el->mura *= 15.0/RTS,el->mudec /= RTS,z = el->px;
 	el->px = z<1.0? (z<=0.0? 0.0 : STR*z) : 1.0/(RTS*z);

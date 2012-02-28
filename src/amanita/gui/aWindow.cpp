@@ -285,7 +285,7 @@ bool aWindow::command(WPARAM wparam,LPARAM lparam) {
 			widget_event_handler weh;
 			if(menu && (weh=menu->getEventHandler())) {
 				aMenuItem *mi = menu->getItem(LOWORD(wparam)&0x1ff);
-				weh(menu,aMENU_EVENT_ACTION,mi->id,(intptr_t)mi,0);
+				weh(menu,aMENU_EVENT_ACTION,mi->id,(intptr_t)mi->data,0);
 				return true;
 			}
 			break;

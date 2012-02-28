@@ -1,5 +1,5 @@
-#ifndef _LIBAMANITA_CONFIG_H
-#define _LIBAMANITA_CONFIG_H
+#ifndef _AMANITA__CONFIG_H
+#define _AMANITA__CONFIG_H
 
 
 #define PACKAGE "@PACKAGE@"
@@ -109,6 +109,6 @@ extern void w2char(char *c,const wchar_t *w,int l);
 #define debug_putc(c) fputc(c,stderr);
 #endif
 
-#endif /* _LIBAMANITA_CONFIG_H */
+#endif /* _AMANITA__CONFIG_H */
 
 

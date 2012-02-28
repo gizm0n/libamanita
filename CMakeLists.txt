@@ -98,12 +98,6 @@ include_directories(
 if(CMAKE_TOOLCHAIN_FILE)
 endif()
 
-if(LIBAMANITA_DEBUG)
-	add_definitions("-g -Wall -Werror -O0 -fno-strict-aliasing -Wno-uninitialized -Wno-unused-but-set-variable")
-else()
-	add_definitions("-O2")
-endif()
-
 if(UNIX)
 	set(USE_UNIX 1)
 	if(APPLE)
@@ -124,12 +118,12 @@ else()
 	if(WIN32)
 		message("Windows")
 		set(GUI "Win32")
-		link_libraries(intl comctl32 ws2_32)
-		add_definitions(-DWIN32_LEAN_AND_MEAN)
 		set(UNICODE 1)
 		set(USE_WCHAR 1)
 		set(GUI_WIN32 1)
 		set(USE_WIN32 1)
+		link_libraries(intl comctl32 ws2_32)
+		add_definitions(-DWIN32_LEAN_AND_MEAN)
 		if(MSVC)
 			add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -subsystem:windows")
@@ -228,6 +222,8 @@ set(esoteric_src
 	src/esoteric/astro/astrology.c
 	src/esoteric/astro/astronomy.c
 	src/esoteric/astro/astronomy_data.c
+	src/esoteric/astro/astronomy_fixedstars.c
+	src/esoteric/astro/astronomy_orbits.c
 	src/esoteric/astro/horoscope.c
 )
 
@@ -238,7 +234,7 @@ install(FILES
 	include/amanita/aApplication.h
 	include/amanita/aBytes.h
 	include/amanita/aCollection.h
-	include/amanita/aConfig.h
+	${PROJECT_BINARY_DIR}/include/amanita/aConfig.h
 	include/amanita/aDictionary.h
 	include/amanita/aFile.h
 	include/amanita/aFlood.h

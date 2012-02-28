@@ -72,6 +72,11 @@ double asn(double a);
 double acs(double a);
 
 
+/** Set path for where data files are stored.
+ * @param path Absolute path to where data files are stored.
+ */
+void astronomy_set_data_path(const char *path);
+
 
 /** Create an astronomy object to calculate planetary data.
  * @param gmt Calendar date and time. It must be set to GMT.
