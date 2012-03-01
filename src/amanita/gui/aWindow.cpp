@@ -16,7 +16,7 @@
 #include <amanita/aApplication.h>
 #include <amanita/gui/aWindow.h>
 #include <amanita/gui/aMenu.h>
-#include <amanita/gui/aStatusbar.h>
+#include <amanita/gui/aStatus.h>
 #include <amanita/gui/aNotebook.h>
 #include <amanita/gui/aButton.h>
 #include <amanita/gui/aChoice.h>
@@ -83,7 +83,7 @@ aWindow::aWindow(aApplication *a,widget_event_handler weh) : aContainer(weh,aWID
 	app = a;
 	window = 0;
 	menu = 0;
-	statusbar = 0;
+	status = 0;
 }
 
 aWindow::~aWindow() {
@@ -92,8 +92,8 @@ debug_output("aWindow::~aWindow()\n");
 	window = 0;
 	if(menu) delete menu;
 	menu = 0;
-	if(statusbar) delete statusbar;
-	statusbar = 0;
+	if(status) delete status;
+	status = 0;
 }
 
 
@@ -217,9 +217,24 @@ void aWindow::setMenu(aMenu *m) {
 	menu->parent = this;
 }
 
-void aWindow::setStatusbar(aStatusbar *sb) {
-	statusbar = sb;
-	statusbar->parent = this;
+void aWindow::setStatus(aStatus *sb) {
+	status = sb;
+	status->parent = this;
+}
+
+void aWindow::updateStatus(int n,const char *format, ...) {
+	if(status) {
+		char str[129];
+		if(n<0 || n>=status->ncells) return;
+		if(format && *format) {
+			va_list args;
+			va_start(args,format);
+			vsnprintf(str,128,format,args);
+			va_end(args);
+//debug_output("setStatus(\"%s\")\n",str);
+		} else *str = '\0';
+		status->update(n,str);
+	}
 }
 
 void aWindow::create(aWindow *wnd,uint32_t st) {
@@ -229,14 +244,14 @@ void aWindow::create(aWindow *wnd,uint32_t st) {
 void aWindow::createAll(aComponent p,bool n) {
 #ifdef USE_GTK
 	component = gtk_vbox_new(FALSE,0);
-	if(menu || statusbar) {
+	if(menu || status) {
 		if(menu) {
 			menu->create(this,0);
 			gtk_box_pack_start(GTK_BOX(component),GTK_WIDGET(menu->component),FALSE,FALSE,0);
 		}
-		if(statusbar) {
-			statusbar->create(this,0);
-			gtk_box_pack_end(GTK_BOX(component),GTK_WIDGET(statusbar->component),FALSE,FALSE,0);
+		if(status) {
+			status->create(this,0);
+			gtk_box_pack_end(GTK_BOX(component),GTK_WIDGET(status->component),FALSE,FALSE,0);
 		}
 	}
 
@@ -251,7 +266,7 @@ debug_output("aWindow::createAll(component: %p)\n",component);
 
 #ifdef USE_WIN32
 	if(menu) menu->create(this,0);
-	if(statusbar) statusbar->create(this,0);
+	if(status) status->create(this,0);
 
 debug_output("aWindow::createAll(component: %p)\n",component);
 	if(child) {
@@ -285,7 +300,7 @@ bool aWindow::command(WPARAM wparam,LPARAM lparam) {
 			widget_event_handler weh;
 			if(menu && (weh=menu->getEventHandler())) {
 				aMenuItem *mi = menu->getItem(LOWORD(wparam)&0x1ff);
-				weh(menu,aMENU_EVENT_ACTION,mi->id,(intptr_t)mi->data,0);
+				weh(menu,aMENU_EVENT_ACTION,mi->id,(intptr_t)mi->name,(intptr_t)mi->data);
 				return true;
 			}
 			break;
@@ -366,11 +381,11 @@ bool aWindow::drawItem(LPDRAWITEMSTRUCT dis) {
 
 
 void aWindow::makeLayout(int x,int y,int w,int h) {
-	if(statusbar) {
+	if(status) {
 		RECT r;
-//debug_output("aWindow::makeLayout(statusbar - w: %d, h: %d)\n",w,h);
-		SendMessage((HWND)statusbar->getComponent(),WM_SIZE,0,0);
-		GetClientRect((HWND)statusbar->getComponent(),&r);
+//debug_output("aWindow::makeLayout(status - w: %d, h: %d)\n",w,h);
+		SendMessage((HWND)status->getComponent(),WM_SIZE,0,0);
+		GetClientRect((HWND)status->getComponent(),&r);
 		h -= r.bottom-r.top;
 	}
 	h -= y;

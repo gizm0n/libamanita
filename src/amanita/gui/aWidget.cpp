@@ -62,7 +62,7 @@ struct widget_control {
 };
 
 static const widget_control controls[] = {
-	/* aWIDGET_CONTROL */
+	/* aWIDGET_VOID */
 	{ 0,0,0,0,0, },
 	/* aWIDGET_BROWSER */
 	{ WS_CHILD,0,WIN32_CONTROL_BROWSER,0,0, },
@@ -109,7 +109,7 @@ static const widget_control controls[] = {
 		LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES|LVS_EX_HEADERDRAGDROP,
 		WIN32_CONTROL_LISTVIEW,0,0, },
 	/* aWIDGET_TEXT */
-	{ WS_CHILD|WS_TABSTOP|ES_READONLY|WS_VSCROLL|ES_MULTILINE|ES_WANTRETURN,WS_EX_CLIENTEDGE,WIN32_CONTROL_RICHEDIT,0,0, },
+	{ WS_CHILD|WS_TABSTOP|ES_READONLY|WS_VSCROLL|ES_MULTILINE|ES_WANTRETURN,WS_EX_CLIENTEDGE,WIN32_CONTROL_RICHEDIT,MulDiv(dbu_x,40,4),MulDiv(dbu_y,10,8), },
 	/* aWIDGET_TREE */
 	{ WS_CHILD|WS_TABSTOP|SS_CENTER,0,WIN32_CONTROL_STATIC,0,0, },
 	/* aWIDGET_WINDOW */
@@ -175,24 +175,28 @@ void aWidget::create(aWindow *wnd,uint32_t st) {
 		gtk_widget_set_size_request((GtkWidget *)component,min_width? min_width : -1,min_height? min_height : -1);
 #endif
 #ifdef USE_WIN32
-	const widget_control *wc = &controls[type-aWIDGET_CONTROL];
+	const widget_control *wc = &controls[type-aWIDGET_VOID];
 	st |= wc->style;
 	if(!(style&aHIDE)) st |= WS_VISIBLE;
 #ifdef USE_WCHAR
 	int len = text? strlen(text)+1 : 1;
 	wchar_t t[len];
 	if(text) char2w(t,text,len);
-	else *t = L'\0';
 #else
 	char *t = text;
 #endif
 debug_output("aWidget::create(window: %p, widget: %p, control: %s, component: %p, text: %" PRIts ")\n",window,this,win32_classes[wc->control],component,text? t : _T("-"));
-	component = (aComponent)CreateWindowEx(wc->style_x,win32_classes[wc->control],
-		text? t : _T(""),st,0,0,0,0,(HWND)parent->component,(HMENU)id,hMainInstance,this);
+	if(wc->style!=0) {
+		component = (aComponent)CreateWindowEx(wc->style_x,win32_classes[wc->control],
+			text? t : _T(""),st,0,0,0,0,(HWND)parent->component,(HMENU)id,hMainInstance,this);
+	}
 //	SetParent((HWND)component,(HWND)window->component);
 	if(!min_width && wc->min_width) min_width = wc->min_width;
 	if(!min_height && wc->min_height) min_height = wc->min_height;
 	SendMessage((HWND)component,WM_SETFONT,(WPARAM)GetStockObject(DEFAULT_GUI_FONT),(LPARAM)1);
+#ifdef USE_WCHAR
+	if(text) free(t);
+#endif
 #endif
 	if(component) addComponent(component);
 }

@@ -20,7 +20,7 @@ enum {
 
 class aApplication;
 class aMenu;
-class aStatusbar;
+class aStatus;
 
 class aWindow : public aContainer {
 friend class aMenu;
@@ -36,7 +36,7 @@ aObject_Instance(aWindow)
 private:
 	aApplication *app;
 	aMenu *menu;
-	aStatusbar *statusbar;
+	aStatus *status;
 
 #ifdef USE_GTK
 	GtkWidget *wnd;
@@ -64,8 +64,9 @@ public:
 	aApplication *getApplication() { return app; }
 	void setMenu(aMenu *m);
 	aMenu *getMenu() { return menu; }
-	void setStatusbar(aStatusbar *sb);
-	aStatusbar *getStatusbar() { return statusbar; }
+	void setStatus(aStatus *sb);
+	void updateStatus(int n,const char *format, ...);
+	aStatus *getStatus() { return status; }
 
 	virtual void create(aWindow *wnd,uint32_t st);
 	virtual void createAll(aComponent p,bool n);

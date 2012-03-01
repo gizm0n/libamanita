@@ -48,6 +48,7 @@ aWidget *aContainer::remove(uint32_t id) {
 
 void aContainer::create(aWindow *wnd,uint32_t st) {
 	if(text) type = aWIDGET_FRAME;
+	else if(!(style&aCONTAINER_HARD)) type = aWIDGET_VOID;
 
 #ifdef USE_GTK
 	if((style&aHORIZONTAL)) {
@@ -111,9 +112,20 @@ debug_output("aContainer::createAll()\n");
 		}
 	}
 	if(child) {
-		for(w=child; w; w=w->next) {
-			w->create(window,0);
-			w->createAll(component,false);
+		if(type==aWIDGET_VOID) {
+			aWidget *wp = parent;
+			while(wp && wp->type==aWIDGET_VOID) wp = wp->parent;
+			for(w=child; w; w=w->next) {
+				w->parent = wp;
+				w->create(window,0);
+				w->createAll(wp->component,false);
+				w->parent = this;
+			}
+		} else {
+			for(w=child; w; w=w->next) {
+				w->create(window,0);
+				w->createAll(component,false);
+			}
 		}
 	}
 #endif
@@ -129,7 +141,8 @@ debug_output("aContainer::makeLayout(x: %d, y: %d, w: %d, h: %d)\n",x,y,w,h);
 		aWidget *c = child;
 		int i,n,sz[children],min,max,sum,exp,nexp,sp = (children-1)*spacing;
 		int x1 = 0,y1 = 0,w1 = 0,h1 = 0,w2 = width,h2 = height;
-		if(type==aWIDGET_FRAME)
+		if(type==aWIDGET_VOID) x1 += this->x,y1 += this->y;
+		else if(type==aWIDGET_FRAME)
 			x1 += MulDiv(dbu_x,7,4),y1 += MulDiv(dbu_y,11,8),w2 -= MulDiv(dbu_x,7+7,4),h1 -= MulDiv(dbu_y,11+7,8);
 		if((style&aHORIZONTAL)) {
 			for(i=0,c=child,min=0,max=0,sum=0,exp=0,nexp=0; c; ++i,c=c->next) {

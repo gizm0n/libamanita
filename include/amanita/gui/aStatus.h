@@ -2,7 +2,7 @@
 #define _AMANITA_GUI_STATUSBAR_H
 
 /**
- * @file amanita/gui/aStatusbar.h  
+ * @file amanita/gui/aStatus.h  
  * @author Per Löwgren
  * @date Modified: 2012-02-06
  * @date Created: 2012-02-06
@@ -12,11 +12,11 @@
 #include <amanita/gui/aWidget.h>
 
 
-class aStatusbar : public aWidget {
+class aStatus : public aWidget {
 friend class aWindow;
 
 /** @cond */
-aObject_Instance(aStatusbar)
+aObject_Instance(aStatus)
 /** @endcond */
 
 private:
@@ -29,12 +29,12 @@ private:
 /** @endcond */
 
 public:
-	aStatusbar(const int c[]);
-	virtual ~aStatusbar();
+	aStatus(const int c[]);
+	virtual ~aStatus();
 
 	virtual void create(aWindow *wnd,uint32_t st);
 
-	void setStatus(int n,const char *format, ...);
+	void update(int n,const char *str);
 };
 
 #endif /* _AMANITA_GUI_STATUSBAR_H */

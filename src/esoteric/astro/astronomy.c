@@ -212,58 +212,10 @@ static void update(astro_data *ad,int f) {
 }
 
 
-static char astronomy_data_path[257] = "./";
-
-void astronomy_set_data_path(const char *path) {
-	int len = strlen(path);
-	char *p;
-	strcpy(astronomy_data_path,path);
-	p = &astronomy_data_path[len-1];
-#ifdef USE_WIN32
-	if(*p!='\\') ++p,*p++ = '\\',*p = '\0';
-#else
-	if(*p!='/') ++p,*p++ = '/',*p = '\0';
-#endif
-}
-
-/*
-static int fincat(astro_data *ad,const char *fn,int index,char *str) {
-	FILE *fp;
-	char *r,s[257];
-	size_t n;
-	*str = '\0';
-	sprintf(s,"%s%s",astronomy_data_path,fn);
-	fp = fopen(s,"rb");
-	if(!fp) return 0;
-	r = fgets(s,256,fp);
-	if(index>1) fseek(fp,(index-1)*112,SEEK_CUR);
-	n = fread(str,110,1,fp);
-	str[110] = '\0';
-	fclose(fp);
-	return 1;
-}
-*/
 static int get_orbit(astro_data *ad,astro_orbit *el,int index) {
 	memset(el,0,sizeof(astro_orbit));
 	if(index<=0) return 0;
 	else {
-//		char str[257];
-//		char orbnam[80];
-//		int num,year,month;
-//		size_t ret;
-//		double day;
-//		FILE *fp;
-//		sprintf(str,"%sorbits.cat",astronomy_data_path);
-//		fp = fopen(str,"r");
-//		if(!fp) return 0;
-//		if(index>1) fseek(fp,(index-1)*128,SEEK_SET);
-//		ret = fread(str,127,1,fp);
-//		fclose(fp);
-//		str[127] = 0;
-//printf("orbit(%s)\n",str);
-//		sscanf(str,"%d %s %d %d %lf %lf %lf %lf %lf %lf %lf %lf",
-//			&num,orbnam,&year,&month,&day,&el->M,&el->a,&el->ecc,&el->w,&el->W,&el->i,&el->mag);
-
 		const astro_orbit_data *aod = &astro_orbits_data[index];
 		el->M = aod->M;
 		el->a = aod->a;
@@ -284,10 +236,6 @@ static int get_star(astro_data *ad,astro_star *el,int index) {
 	int sign,i;
 	char starnam[80],s[256],*p;
 	double rh,rm,rs,dd,dm,ds,x,z;
-//	if(!fincat(ad,"fixedstars.cat",index,s)) return 0;
-//	sscanf(s,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %s",
-//		&el->epoch,&rh,&rm,&rs,&dd,&dm,&ds,&el->mura,&el->mudec,&el->v,&el->px,&el->mag,starnam);
-
 	const astro_fixedstar_data *afd = &astro_fixedstars_data[index];
 
 	el->epoch = afd->epoch;
