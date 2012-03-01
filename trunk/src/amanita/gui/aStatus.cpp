@@ -6,7 +6,7 @@
 #include <windows.h>
 #include <commctrl.h>
 #endif
-#include <amanita/gui/aStatusbar.h>
+#include <amanita/gui/aStatus.h>
 
 
 #ifdef USE_WIN32
@@ -14,9 +14,9 @@ extern WCHAR *char2w(char *c);
 #endif
 
 
-aObject_Inheritance(aStatusbar,aWidget)
+aObject_Inheritance(aStatus,aWidget)
 
-aStatusbar::aStatusbar(const int c[]) : aWidget(0,aWIDGET_STATUSBAR),cells(0),ncells(0) {
+aStatus::aStatus(const int c[]) : aWidget(0,aWIDGET_STATUSBAR),cells(0),ncells(0) {
 	if(c) {
 		int n = 0;
 		while(c[n++]!=-1);
@@ -32,7 +32,7 @@ aStatusbar::aStatusbar(const int c[]) : aWidget(0,aWIDGET_STATUSBAR),cells(0),nc
 }
 
 
-aStatusbar::~aStatusbar() {
+aStatus::~aStatus() {
 	if(cells) free(cells);
 	cells = 0;
 	ncells = 0;
@@ -42,7 +42,7 @@ aStatusbar::~aStatusbar() {
 #endif
 }
 
-void aStatusbar::create(aWindow *wnd,uint32_t st) {
+void aStatus::create(aWindow *wnd,uint32_t st) {
 #ifdef USE_GTK
 	int i,x;
 	GtkWidget *message_area;
@@ -77,17 +77,7 @@ void aStatusbar::create(aWindow *wnd,uint32_t st) {
 }
 
 
-void aStatusbar::setStatus(int n,const char *format, ...) {
-	char str[129];
-	if(n<0 || n>=ncells) return;
-	if(format && *format) {
-		va_list args;
-   	va_start(args,format);
-		vsnprintf(str,128,format,args);
-   	va_end(args);
-printf("setStatus(\"%s\")\n",str);fflush(stdout);
-	} else *str = '\0';
-
+void aStatus::update(int n,const char *str) {
 #ifdef USE_GTK
 	gtk_label_set_text(GTK_LABEL(_cells[n]),str);
 //	gtk_statusbar_push(GTK_STATUSBAR(component),

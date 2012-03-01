@@ -21,6 +21,10 @@
 
 aNotebookPage::aNotebookPage(aNotebook *nb) {
 	tab.notebook = nb;
+#ifdef USE_GTK
+	tab.button = 0;
+	tab.label = 0;
+#endif
 	tab.index = 0;
 	tab.name = 0;
 	page = 0;
@@ -43,8 +47,35 @@ void aNotebookPage::close() {
 }
 
 
+void aNotebookPage::setTabLabel(const char *str) {
+	if(tab.name) free(tab.name);
+	tab.name = strdup(str);
 #ifdef USE_GTK
-void close_tab_callback(GtkWidget *widget,gpointer data) {
+	gtk_label_set_text(GTK_LABEL(tab.label),str);
+#endif
+#ifdef USE_WIN32
+	TCITEM ti = {TCIF_TEXT};
+#ifdef USE_WCHAR
+	int len = strlen(str)+1;
+	wchar_t wtab[len];
+	char2w(wtab,str,len);
+	ti.pszText = (wchar_t *)wtab;
+#else
+	ti.pszText = (char *)str;
+#endif
+	TabCtrl_SetItem((HWND)tab.notebook->getComponent(),tab.index,&ti);
+#endif
+}
+
+
+#ifdef USE_GTK
+static void switch_page_event_callback(GtkNotebook *notebook,GtkNotebookPage *page,guint num,gpointer data) {
+debug_output("switch_page_event_callback(page: %d)\n",num);
+	int *selected = (int *)data;
+	*selected = num;
+}
+
+static void close_tab_callback(GtkWidget *widget,gpointer data) {
 	aNotebookTab *nt = (aNotebookTab *)data;
 	if(nt) nt->notebook->closePage(nt->index);
 }
@@ -94,6 +125,8 @@ void aNotebook::create(aWindow *wnd,uint32_t st) {
 	g_object_set_property(G_OBJECT(component),"tab-pos",&val);
 	g_value_unset(&val);
 //	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(component),GTK_POS_TOP);
+
+	g_signal_connect(G_OBJECT(component),"switch-page",G_CALLBACK(switch_page_event_callback),&selected);
 #endif
 debug_output("aNotebook::create()\n");
 	aWidget::create(wnd,0);
@@ -141,7 +174,11 @@ debug_output("aNotebook::openPage(page->create(%s))\n",np->page->getInstance().g
 		g_signal_connect(G_OBJECT(bt),"clicked",G_CALLBACK(close_tab_callback),(gpointer)&np->tab);
 		gtk_box_pack_start(GTK_BOX(t),l,TRUE,TRUE,0);
 		gtk_box_pack_start(GTK_BOX(t),bt,FALSE,FALSE,0);
-		gtk_widget_show_all(bt);
+
+		np->tab.button = bt;
+		np->tab.label = l;
+
+		gtk_widget_show_all(t);
 	} else {
 		t = gtk_label_new(np->tab.name);
 	}
@@ -258,7 +295,7 @@ void aNotebook::makeLayout(int x,int y,int w,int h) {
 //debug_output("aNotebook::makeLayout(x: %d, y: %d, w: %d, h: %d)\n",this->x,this->y,width,height);
 	RECT r = client;
 	TabCtrl_AdjustRect((HWND)component,FALSE,&r);
-debug_output("aNotebook::makeLayout(WIN32_CONTROL_TABS - TabCtrl_AdjustRect(l: %d, t: %d, r: %d, b: %d))\n",r.left,r.top,r.right,r.bottom);
+//debug_output("aNotebook::makeLayout(WIN32_CONTROL_TABS - TabCtrl_AdjustRect(l: %d, t: %d, r: %d, b: %d))\n",r.left,r.top,r.right,r.bottom);
 	if(w1!=width || h1!=height)
 		for(i=pages.size()-1; i>=0; --i)
 			((aNotebookPage *)pages[i])->status = 1;

@@ -177,12 +177,12 @@ set(amanita_src
 	src/amanita/gui/aCanvas.cpp
 	src/amanita/gui/aChoice.cpp
 	src/amanita/gui/aContainer.cpp
-	src/amanita/gui/aEntry.cpp
 	src/amanita/gui/aLabel.cpp
 	src/amanita/gui/aList.cpp
 	src/amanita/gui/aMenu.cpp
 	src/amanita/gui/aNotebook.cpp
-	src/amanita/gui/aStatusbar.cpp
+	src/amanita/gui/aStatus.cpp
+	src/amanita/gui/aText.cpp
 	src/amanita/gui/aWidget.cpp
 	src/amanita/gui/aWindow.cpp
 	src/amanita/net/aClient.cpp
@@ -260,13 +260,13 @@ install(FILES
 	include/amanita/gui/aCanvas.h
 	include/amanita/gui/aChoice.h
 	include/amanita/gui/aContainer.h
-	include/amanita/gui/aEntry.h
 	include/amanita/gui/aEvent.h
 	include/amanita/gui/aLabel.h
 	include/amanita/gui/aList.h
 	include/amanita/gui/aMenu.h
 	include/amanita/gui/aNotebook.h
-	include/amanita/gui/aStatusbar.h
+	include/amanita/gui/aStatus.h
+	include/amanita/gui/aText.h
 	include/amanita/gui/aWidget.h
 	include/amanita/gui/aWindow.h
 	DESTINATION include/amanita/gui

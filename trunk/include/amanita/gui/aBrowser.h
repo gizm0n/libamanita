@@ -12,10 +12,16 @@
 #include <amanita/gui/aWidget.h>
 
 enum {
-	aBROWSER_CREATE			= 0x00000001,
-	aBROWSER_CLICK				= 0x00000011,
-	aBROWSER_REDIRECT			= 0x00000012,
-	aBROWSER_LOADED			= 0x00000013,
+	aBROWSER_ENABLE_CONTEXT_MENU	= 0x00000001,
+};
+
+enum {
+	aBROWSER_CREATE					= 0x00000001,
+	aBROWSER_CLICK						= 0x00000011,
+	aBROWSER_REDIRECT					= 0x00000012,
+	aBROWSER_LOADED					= 0x00000013,
+	aBROWSER_CONTEXT_MENU			= 0x00000014,
+	aBROWSER_UPDATE_STATUS			= 0x00000015,
 };
 
 #ifdef USE_WIN32
@@ -51,6 +57,8 @@ public:
 	virtual ~aBrowser();
 
 	virtual void create(aWindow *wnd,uint32_t st);
+
+	bool handleEvent(int msg,const char *url);
 
 	void setUrl(const char *url);
 	void setHtmlContent(const char *html);

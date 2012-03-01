@@ -26,6 +26,10 @@ class aNotebook;
 
 struct aNotebookTab {
 	aNotebook *notebook;
+#ifdef USE_GTK
+	GtkWidget *button;
+	GtkWidget *label;
+#endif
 	uint8_t index;
 	char *name;
 };
@@ -43,6 +47,8 @@ public:
 
 	void open();
 	void close();
+
+	void setTabLabel(const char *str);
 };
 
 

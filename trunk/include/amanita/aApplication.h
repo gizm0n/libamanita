@@ -82,6 +82,8 @@ private:
 	uint32_t app_local_id;				//!< A local ID for the running instance.
 	time_t app_local_time;				//!<
 	time_t app_last_access;				//!< Time the application last was executed.
+
+protected:
 	aWindow *window;						//!< Main window for the application.
 
 public:

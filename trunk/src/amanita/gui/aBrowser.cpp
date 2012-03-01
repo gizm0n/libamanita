@@ -11,25 +11,34 @@
 #include <webkit/webkit.h>
 
 void webview_hover_event_callback(WebKitWebView *webview,gchar *title,gchar *uri,gpointer data) {
-//	aBrowser *browser = (aBrowser *)data;
-/*	app.handleAction(ACTION_SHOW_STATUS,0,(void *)(uri? uri : aString::blank));*/
+debug_output("webview_hover_event_callback(title: \"%s\", uri: \"%s\")\n",title,uri);
+	aBrowser *browser = (aBrowser *)data;
+	browser->handleEvent(aBROWSER_UPDATE_STATUS,uri);
 }
 
 gboolean webview_navigation_decision_event_callback(WebKitWebView *webview,WebKitWebFrame *frame,WebKitNetworkRequest *request,
 																	WebKitWebNavigationAction *action,WebKitWebPolicyDecision *decision,gpointer data) {
-//	aBrowser *browser = (aBrowser *)data;
-/*	int reason = webkit_web_navigation_action_get_reason(action);
+	aBrowser *browser = (aBrowser *)data;
+	int reason = webkit_web_navigation_action_get_reason(action);
 	if(reason>=WEBKIT_WEB_NAVIGATION_REASON_LINK_CLICKED && reason<=WEBKIT_WEB_NAVIGATION_REASON_FORM_RESUBMITTED) {
-		TextPage &page = *(TextPage *)data;
-//		const gchar *uri = webkit_web_navigation_action_get_original_uri(action);
 		const gchar *uri = webkit_network_request_get_uri(request);
-app.printf("TextPage::webview_navigation_decision_event_callback(uri=\"%s\",reason=%d)",uri,reason);
-		webkit_web_policy_decision_ignore(decision);
-		app.handleAction(ACTION_SHOW_STATUS,0,(void *)aString::blank);
-		page.navigate(uri);
-		return TRUE;
-	} else */return FALSE;
+debug_output("webview_navigation_decision_event_callback(uri=\"%s\",reason=%d)\n",uri,reason);
+		if(browser->handleEvent(aBROWSER_CLICK,uri)) {
+			webkit_web_policy_decision_ignore(decision);
+			return TRUE;
+		}
+		browser->handleEvent(aBROWSER_REDIRECT,uri);
+	}
+	return FALSE;
 }
+
+gboolean webview_button_release_event_callback(WebKitWebView *webview,GdkEventButton *event,gpointer data) {
+	aBrowser *browser = (aBrowser *)data;
+	if(event->button==3)
+		return browser->handleEvent(aBROWSER_CONTEXT_MENU,0);
+	return FALSE;
+}
+
 #endif
 
 #ifdef USE_WIN32
@@ -238,10 +247,8 @@ private:
 	aBrowser *browser;
 	volatile LONG ref;
 	bool loading;
-	char url[1024];
-	HRESULT settings[17];
 
-	HRESULT handleEvent(int event) { return settings[event]; }
+	HRESULT handleEvent(int event);
 
 public:
 	_EventSink(aBrowser *b);
@@ -283,8 +290,6 @@ public:
 
 _EventSink::_EventSink(aBrowser *b) : browser(b),ref(0),loading(false) {
 	HRESULT s[17] = { E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL };
-	*url = '\0';
-	memcpy(settings,s,sizeof(settings));
 }
 
 STDMETHODIMP _EventSink::QueryInterface(REFIID riid,PVOID *ppv) {
@@ -303,32 +308,36 @@ STDMETHODIMP _EventSink::GetIDsOfNames(REFIID,OLECHAR **,unsigned int,LCID,DISPI
 }
 
 STDMETHODIMP _EventSink::Invoke(DISPID disp,REFIID riid,LCID lcid,WORD flags,DISPPARAMS *params,VARIANT *result,EXCEPINFO *info,unsigned int *err) {
-//	if(disp!=102 && disp!=113) printInvokeParams(disp,flags,params);
+//debug_output("_EventSink::Invoke(disp: %d)\n",disp);
+//	/*if(disp!=102 && disp!=113) */printInvokeParams(disp,flags,params);
 	switch(disp) {
 		case DISPID_BEFORENAVIGATE2:
 		{
 //			if(loading) { *params->rgvarg[0].pboolVal = TRUE;return; }
 			char *str = w2char(params->rgvarg[5].pvarVal->bstrVal);
-fprintf(stderr,"_EventSink::BeforeNavigate2(loading=%d,str='%s')\n",loading,str);
-fflush(stderr);
+debug_output("_EventSink::BeforeNavigate2(loading=%d,str='%s')\n",loading,str);
 			if(str && *str && strncmp(str,"about:blank",11)!=0) {
-				strcpy(this->url,str);
-				//WPARAM w = GetWindowLong((HWND)browser->component,GWL_ID)&0xFFFF;
-				loading = true;//!SendMessage((HWND)browser->parent,WM_COMMAND,w|(BROWSER_ONCLICK<<16),(LPARAM)this->url);
-				*params->rgvarg[0].pboolVal = VARIANT_FALSE;
-//				if(loading) PostMessage(browser->hparent,WM_COMMAND,w|(BROWSER_ONREDIRECT<<16),(LPARAM)this->url);
+				loading = !browser->handleEvent(aBROWSER_CLICK,str);
+				*params->rgvarg[0].pboolVal = loading? VARIANT_FALSE : VARIANT_TRUE;
+				if(loading) browser->handleEvent(aBROWSER_REDIRECT,str);
 			}
 			free(str);
 			break;
 		}
 		case DISPID_NAVIGATECOMPLETE2:loading = false;break;
 		case DISPID_DOCUMENTCOMPLETE:loading = false;break;
-//		case DISPID_STATUSTEXTCHANGE:break;
+		case DISPID_STATUSTEXTCHANGE:
+		{
+			char *str = w2char(params->rgvarg[0].bstrVal);
+//debug_output("_EventSink::StatusTextChange(str='%s')\n",str);
+			browser->handleEvent(aBROWSER_UPDATE_STATUS,str);
+			free(str);
+			break;
+		}
 //		case DISPID_TITLECHANGE:break;
 //		case DISPID_NEWWINDOW2:*params->rgvarg[0].pboolVal = VARIANT_TRUE;break;
 		case DISPID_AMBIENT_DLCONTROL:result->vt = VT_I4,result->lVal = DLCTL_DLIMAGES|DLCTL_NO_JAVA;break;
 		case DISPID_NAVIGATEERROR:*params->rgvarg[0].pboolVal = VARIANT_TRUE;break;
-break;
 		default:return DISP_E_MEMBERNOTFOUND;
 	}
 	return S_OK;
@@ -341,6 +350,15 @@ STDMETHODIMP _EventSink::GetHostInfo(DOCHOSTUIINFO *info) {
 //	info->dwDoubleClick |= DOCHOSTUIDBLCLK_SHOWCODE;
 	return S_OK;
 */
+}
+
+HRESULT _EventSink::handleEvent(int event) {
+//debug_output("_EventSink::handleEvent(event: %d)\n",event);
+	if(event==HANDLER_SHOWCONTEXTMENU) {
+		if(browser->handleEvent(aBROWSER_CONTEXT_MENU,0)) return S_OK;
+		return (browser->getStyle()&aBROWSER_ENABLE_CONTEXT_MENU)? S_FALSE : S_OK;
+	}
+	return E_NOTIMPL;
 }
 
 void _EventSink::printInvokeParams(DISPID disp,WORD flags,DISPPARAMS *params) {
@@ -574,30 +592,26 @@ void _Container::add() {
 //	HRESULT res;
 //	IClassFactory *cf;
 	CLSID clsid;
-fprintf(stderr,"_Container::add(1)\n");
-fflush(stderr);
+debug_output("_Container::add(1)\n");
 	CLSIDFromString((WCHAR *)L"Shell.Explorer",&clsid);
 //	CoGetClassObject(clsid,CLSCTX_INPROC_SERVER|CLSCTX_LOCAL_SERVER,0,IID_IClassFactory,(PVOID *)&cf);
 //	res = cf->CreateInstance(0,IID_IUnknown,(PVOID *)&unknown);
 //	cf->Release(); 
 	CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER|CLSCTX_LOCAL_SERVER,IID_IUnknown,(PVOID *)&unknown);
 	IOleObject *pioo;
-fprintf(stderr,"_Container::add(2)\n");
-fflush(stderr);
+debug_output("_Container::add(2)\n");
 	unknown->QueryInterface(IID_IOleObject,(PVOID *)&pioo);
 	pioo->SetClientSite(this);
 	pioo->Release();
 	IPersistStreamInit *ppsi;
-fprintf(stderr,"_Container::add(3)\n");
-fflush(stderr);
+debug_output("_Container::add(3)\n");
 	unknown->QueryInterface(IID_IPersistStreamInit,(PVOID *)&ppsi);
 	ppsi->InitNew();
 	ppsi->Release();
 	ConnectEvents();
 	setVisible(true);
 	setFocus(true);
-fprintf(stderr,"_Container::add(4)\n");
-fflush(stderr);
+debug_output("_Container::add(4)\n");
 }
 
 void _Container::remove() {
@@ -675,8 +689,7 @@ HRESULT _Container::getMSIE() {
 
 LRESULT CALLBACK AmanitaBrowserProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam) {
 	aBrowser *b = 0;
-fprintf(stderr,"AmanitaBrowserProc(msg=%u,wparam=%u,lparam=%lu)\n",msg,wparam,lparam);
-fflush(stderr);
+//debug_output("AmanitaBrowserProc(msg=%u,wparam=%u,lparam=%lu)\n",msg,wparam,lparam);
 	if(msg==WM_CREATE) {
 		LPCREATESTRUCT cs = (LPCREATESTRUCT)lparam;
 		b = (aBrowser *)cs->lpCreateParams;
@@ -715,8 +728,7 @@ aBrowser::aBrowser(widget_event_handler weh) : aWidget(weh,aWIDGET_BROWSER) {
 //	scrollX = GetSystemMetrics(SM_CXHSCROLL)+2;
 //	scrollY = GetSystemMetrics(SM_CYVSCROLL)+2;
 
-fprintf(stderr,"aBrowser::aBrowser(widget=%p)\n",(aWidget *)this);
-fflush(stderr);
+debug_output("aBrowser::aBrowser(widget=%p)\n",(aWidget *)this);
 #endif
 }
 
@@ -732,17 +744,24 @@ debug_output("aBrowser::~aBrowser(widget=%p)\n",(aWidget *)this);
 }
 
 void aBrowser::create(aWindow *wnd,uint32_t st) {
-debug_output("aBrowser::create()\n");
+//debug_output("aBrowser::create()\n");
 #ifdef USE_GTK
 	GtkWidget *scroll;
 	scroll = gtk_scrolled_window_new(NULL,NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),GTK_POLICY_AUTOMATIC,GTK_POLICY_ALWAYS);
 	webkit = webkit_web_view_new();
 	WebKitWebSettings *settings = webkit_web_settings_new();
-	g_object_set(settings,"auto-load-images",TRUE,"auto-shrink-images",FALSE,"default-encoding","UTF-8","enable-plugins",FALSE,NULL);
+	g_object_set(G_OBJECT(settings),
+			"auto-load-images",TRUE,
+			"auto-shrink-images",FALSE,
+			"default-encoding","UTF-8",
+			"enable-plugins",FALSE,
+			"enable-default-context-menu",(style&aBROWSER_ENABLE_CONTEXT_MENU)? TRUE : FALSE,
+	NULL);
 	webkit_web_view_set_settings(WEBKIT_WEB_VIEW(webkit),settings);
 	g_signal_connect(G_OBJECT(webkit),"hovering-over-link",G_CALLBACK(webview_hover_event_callback),this);
 	g_signal_connect(G_OBJECT(webkit),"navigation-policy-decision-requested",G_CALLBACK(webview_navigation_decision_event_callback),this);
+	g_signal_connect(G_OBJECT(webkit),"button-release-event",G_CALLBACK(webview_button_release_event_callback),this);
 //	g_signal_connect(G_OBJECT(webkit),"navigation-requested",G_CALLBACK(webview_navigation_event_callback),this);
 	gtk_container_add(GTK_CONTAINER(scroll),webkit);
 	component = (aComponent)scroll;
@@ -763,6 +782,14 @@ debug_output("aBrowser::create()\n");
 	}
 #endif
 	aWidget::create(wnd,0);
+}
+
+
+bool aBrowser::handleEvent(int msg,const char *url) {
+	if(event_handler) {
+		return event_handler(this,msg,(intptr_t)url,0,0)>0;
+	}
+	return false;
 }
 
 void aBrowser::setUrl(const char *url) {

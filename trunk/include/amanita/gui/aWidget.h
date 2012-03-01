@@ -82,7 +82,7 @@ struct widget_event_data {
 #endif
 
 enum widget_type {
-	aWIDGET_CONTROL,								//!< 
+	aWIDGET_VOID,									//!< 
 	aWIDGET_BROWSER,								//!< 
 	aWIDGET_BUTTON,								//!< 
 	aWIDGET_CAIRO,									//!< 
@@ -136,6 +136,7 @@ protected:
 	aWidget *parent;								//!< Handle to parent.
 	aWidget *next;
 	aComponent component;						//!< Handle to native widget.
+	void *data;										//!< Any user data associated with the widget.
 	char *text;
 	uint32_t style;
 	int16_t x;										//!< X-position.
@@ -174,6 +175,8 @@ public:
 	aComponent getComponent() { return component; }
 	widget_event_handler getEventHandler() { return event_handler; }
 	uint32_t getID() { return id; }
+	void setData(void *d) { data = d; }
+	void *getData() { return data; }
 	virtual void setText(const char *str);
 	const char *getText() { return text; }
 	void setFont(aComponent font);
@@ -181,6 +184,7 @@ public:
 	int getHeight() { return height; }
 
 	void setStyle(uint32_t st,uint16_t minw=0,uint16_t minh=0,uint8_t b=0,uint8_t sp=0);
+	uint32_t getStyle() { return style; }
 
 	void show();
 	void hide();
