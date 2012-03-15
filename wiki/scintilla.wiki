@@ -1,4 +1,4 @@
 #labels MediaWiki,Creole,Scintilla
 =Scintilla=
 
-The Scintilla editor has many lexers for syntax hilighting, but the [[MediaWiki]] and [[Creole]] text markup is not included, but Amanita Library supply lexers for these languages.
+The Scintilla editor has many lexers for syntax hilighting, but the [MediaWiki] and [Creole] text markup is not included, but Amanita Library supply lexers for these languages.
