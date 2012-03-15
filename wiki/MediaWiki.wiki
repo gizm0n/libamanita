@@ -1,0 +1,4 @@
+#labels MediaWiki
+=MediaWiki=
+
+MediaWiki is the software behind [http://www.wikipedia.com Wikipedia].
