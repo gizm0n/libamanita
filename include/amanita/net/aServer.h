@@ -57,8 +57,7 @@ enum {
  * This class is used by aServer to handle connections to clients. It contains
  * all client data and which channels the client is in.
  * @see aServer
- * @ingroup net
- */
+ * @ingroup net */
 class aServerConnection {
 friend class aServer;
 
@@ -95,7 +94,7 @@ public:
 	/** @name Socket
 	 * @{ */
 	const tcp_socket_t getSocket() { return sock; }				//!< Get TCP socket.
-	/** @] */
+	/** @} */
 
 	/** @name Client
 	 * @{ */
@@ -128,8 +127,8 @@ public:
 	void setKey(const uint32_t *k,size_t l);						//!< Set encryption key.
 #endif /*SOCKET_NOCIPHER*/
 
-	void joinChannel(aChannel c) { if(c) _channels += c; }	//!< Join a channel.
-	void leaveChannel(aChannel c) { if(c) _channels -= c; }	//!< Leave a channel.
+	void joinChannel(aChannel c) { if(c) _channels << c; }	//!< Join a channel.
+	void leaveChannel(aChannel c) { if(c) _channels >> c; }	//!< Leave a channel.
 	aVector &getChannels() { return _channels; }					//!< Get channels client is in.
 };
 
@@ -159,8 +158,7 @@ enum {
  * This server can handle a large number of clients and use it's own built in protocol.
  * @see aSocket
  * @see aClient
- * @ingroup net
- */
+ * @ingroup net */
 class aServer : public aSocket {
 private:
 	static uint32_t id_index;
@@ -234,7 +232,7 @@ public:
 	void deleteChannel(const char *ch);
 	aChannel getChannel(const char *ch) { return ch && *ch? (aChannel)_channels.get(ch) : 0; }
 	void joinChannel(const char *ch,aConnection c) { if(c) joinChannel(createChannel(ch),c); }
-	void joinChannel(aChannel ch,aConnection c) { if(ch && c && !ch->contains(c)) { *ch += c;c->joinChannel(ch); } }
+	void joinChannel(aChannel ch,aConnection c) { if(ch && c && !ch->contains(c)) { *ch << c;c->joinChannel(ch); } }
 	void leaveChannel(const char *ch,aConnection c) { if(c) leaveChannel(getChannel(ch),c); }
 	void leaveChannel(aChannel ch,aConnection c);
 	size_t channels() { return _channels.size(); }

@@ -13,7 +13,8 @@
 
 
 enum {
-	aNOTEBOOK_CLOSE_BUTTON	= 0x00000001,
+	aNOTEBOOK_HIDE_TABS		= 0x00000001,
+	aNOTEBOOK_CLOSE_BUTTON	= 0x00000002,
 };
 
 enum {
@@ -34,8 +35,13 @@ struct aNotebookTab {
 	char *name;
 };
 
-class aNotebookPage {
+class aNotebookPage : public aObject {
 friend class aNotebook;
+
+/** @cond */
+aObject_Instance(aNotebookPage)
+/** @endcond */
+
 protected:
 	aNotebookTab tab;
 	aWidget *page;

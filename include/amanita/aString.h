@@ -4,7 +4,7 @@
 /**
  * @file amanita/aString.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-03-01
  * @date Created: 2003-11-30
  */ 
 
@@ -13,6 +13,15 @@
 #include <stdint.h>
 #include <amanita/aObject.h>
 
+enum {
+	aSTRING_HTML_QUOTES		= 0x00000001,
+	aSTRING_HTML_AMP			= 0x00000002,
+	aSTRING_HTML_LTGT			= 0x00000004,
+	aSTRING_HTML_NAMED		= 0x000000ff,
+	aSTRING_HTML_CODES		= 0x00000100,
+	aSTRING_HTML_UNICODE		= 0x00000200,
+	aSTRING_HTML_ALL			= 0xffffffff,
+};
 
 /** A generic string class.
  * 
@@ -23,14 +32,16 @@
  * any type of data, both binary data, text data, formatted data of any kind. The string is
  * not ended with a '\0' char, but instead contains an integer value with the length of the
  * string.
- * @ingroup amanita
- */
+ * @ingroup amanita */
 class aString : public aObject {
+friend class aHashtable;
+friend class aVector;
+
 /** @cond */
 aObject_Instance(aString)
 /** @endcond */
 
-private:
+protected:
 	static const char upper_hex[17];
 	static const char lower_hex[17];
 
@@ -40,16 +51,17 @@ private:
 
 	/** Increase capacity of string by n.
 	 * @param n Number of bytes to increase string capacity by. */
-	void resize(size_t n);
+	void resize(size_t l);
+	long move(long n,size_t l);
 
-	/** @name Append integer
+	/** @name Insert integer
 	 * @{ */
 #if __WORDSIZE < 64
-	aString &appendi32(int32_t i);		//!< Append signed 32 bit integer.
-	aString &appendu32(uint32_t i);		//!< Append unsigned 32 bit integer.
+	size_t inserti32(long n,int32_t i);		//!< Insert signed 32 bit integer.
+	size_t insertu32(long n,uint32_t i);	//!< Insert unsigned 32 bit integer.
 #endif
-	aString &appendi64(int64_t i);		//!< Append signed 64 bit integer.
-	aString &appendu64(uint64_t i);		//!< Append unsigned 64 bit integer.
+	size_t inserti64(long n,int64_t i);		//!< Insert signed 64 bit integer.
+	size_t insertu64(long n,uint64_t i);	//!< Insert unsigned 64 bit integer.
 	/** @} */
 
 public:
@@ -66,123 +78,174 @@ public:
 	 * @{ */
 	aString(size_t c=0);
 	aString(const char *s,size_t l=0);
-	aString(aString *s);
-	aString(aString &s);
+	aString(const aString *s);
+	aString(const aString &s);
 	~aString();
 	/** @} */
 
 	/** @name Operators
 	 * @{ */
 	operator const char *() const { return str; }
-	operator int() { return toInt(); }
-	aString &operator=(const aString *s) { clear();if(s) append(s->str,s->len);return *this; }
-	aString &operator=(const aString &s) { return clear().append(s.str,s.len); }
-	aString &operator=(const char *s) { return clear().append(s); }
-	char operator[](size_t i) { return str && i>=0ul && i<len? str[i] : '\0'; }
-	bool operator==(aString *s) { return equals(s); }
-	bool operator==(aString &s) { return equals(s); }
-	bool operator==(const char *s) { return equals(s); }
-	aString &operator+=(const char c) { return append(c); }
-	aString &operator+=(aString *s) { if(s) append(s->str,s->len);return *this; }
-	aString &operator+=(aString &s) { return append(s.str,s.len); }
-	aString &operator+=(const char *s) { return append(s,0); }
+	operator bool() const { return (str && len>0); }
+	operator int() const { return len; }
+	operator unsigned int() const { return len; }
+	operator long() const { return len; }
+	operator unsigned long() const { return len; }
+	aString &operator=(const aString *s) { clear();if(s) insert(0,s->str,s->len);return *this; }
+	aString &operator=(const aString &s) { clear();insert(0,s.str,s.len);return *this; }
+	aString &operator=(const char *s) { clear();insert(0,s,0);return *this; }
+	char operator[](long i) { return charAt(i); }
+	bool operator==(const aString *s) { return equals(s); }
+	bool operator==(const aString &s) { return equals(s); }
+	bool operator==(const char *s) { return equals(s,0,0); }
+	aString &operator<<(char c) { insert(len,c);return *this; }
+	aString &operator<<(const aString *s) { insert(len,s);return *this; }
+	aString &operator<<(const aString &s) { insert(len,s);return *this; }
+	aString &operator<<(const char *s) { insert(len,s);return *this; }
 #if __WORDSIZE == 64
-	aString &operator+=(short i) { return appendi64((int64_t)i); }
-	aString &operator+=(unsigned short i) { return appendu64((uint64_t)i); }
-	aString &operator+=(int i) { return appendi64((int64_t)i); }
-	aString &operator+=(unsigned int i) { return appendu64((uint64_t)i); }
-	aString &operator+=(long int i) { return appendi64((int64_t)i); }
-	aString &operator+=(unsigned long int i) { return appendu64((uint64_t)i); }
+	aString &operator<<(short i) { inserti64(len,(int64_t)i);return *this; }
+	aString &operator<<(unsigned short i) { insertu64(len,(uint64_t)i);return *this; }
+	aString &operator<<(int i) { inserti64(len,(int64_t)i);return *this; }
+	aString &operator<<(unsigned int i) { insertu64(len,(uint64_t)i);return *this; }
+	aString &operator<<(long int i) { inserti64(len,(int64_t)i);return *this; }
+	aString &operator<<(unsigned long int i) { insertu64(len,(uint64_t)i);return *this; }
 #else
-	aString &operator+=(short i) { return appendi32((int32_t)i); }
-	aString &operator+=(unsigned short i) { return appendu32((uint32_t)i); }
-	aString &operator+=(int i) { return appendi32((int32_t)i); }
-	aString &operator+=(unsigned int i) { return appendu32((uint32_t)i); }
-	aString &operator+=(long int i) { return appendi32((int32_t)i); }
-	aString &operator+=(unsigned long int i) { return appendu32((uint32_t)i); }
+	aString &operator<<(short i) { inserti32(len,(int32_t)i);return *this; }
+	aString &operator<<(unsigned short i) { insertu32(len,(uint32_t)i);return *this; }
+	aString &operator<<(int i) { inserti32(len,(int32_t)i);return *this; }
+	aString &operator<<(unsigned int i) { insertu32(len,(uint32_t)i);return *this; }
+	aString &operator<<(long int i) { inserti32(len,(int32_t)i);return *this; }
+	aString &operator<<(unsigned long int i) { insertu32(len,(uint32_t)i);return *this; }
 #endif
-	aString &operator+=(long long int i) { return appendi64((int64_t)i); }
-	aString &operator+=(unsigned long long int i) { return appendu64((uint64_t)i); }
-	aString &operator+=(float f) { return append(f); }
-	aString &operator+=(double d) { return append(d); }
+	aString &operator<<(long long int i) { inserti64(len,(int64_t)i);return *this; }
+	aString &operator<<(unsigned long long int i) { insertu64(len,(uint64_t)i);return *this; }
+	aString &operator<<(float f) { insert(len,f);return *this; }
+	aString &operator<<(double d) { insert(len,d);return *this; }
 	/** @} */
 
-	/** @name Append
+	/** @name Insert
 	 * @{ */
-	aString &append(char c);
-	aString &append(char c,size_t n);
-	aString &append(aString *s) { if(s) append(s->str,s->len);return *this; }
-	aString &append(aString *s,size_t n) { if(s) append(s->str,s->len,n);return *this; }
-	aString &append(aString &s) { return append(s.str,s.len); }
-	aString &append(aString &s,size_t n) { return append(s.str,s.len,n); }
-	aString &append(const char *s,size_t l=0);
-	aString &append(const char *s,size_t l,size_t n);
+	size_t insert(long n,char c);
+	size_t insert(long n,const aString *s) { if(s) return insert(n,s->str,s->len);return 0; }
+	size_t insert(long n,const aString &s) { return insert(n,s.str,s.len); }
+	size_t insert(long n,const char *s,size_t l=0);
+	/** Insert substring offset o, length l of s. */
+	size_t insert(long n,const aString *s,long o,long l) { if(s) return insert(n,s->str,o,l);return 0; }
+	size_t insert(long n,const aString &s,long o,long l) { return insert(n,s.str,o,l); }
+	size_t insert(long n,const char *s,long o,long l);
 #if __WORDSIZE == 64
-	aString &append(short i) { return appendi64((int64_t)i); }
-	aString &append(unsigned short i) { return appendu64((uint64_t)i); }
-	aString &append(int i) { return appendi64((int64_t)i); }
-	aString &append(unsigned int i) { return appendu64((uint64_t)i); }
-	aString &append(long int i) { return appendi64((int64_t)i); }
-	aString &append(unsigned long int i) { return appendu64((uint64_t)i); }
+	size_t insert(long n,short i) { return inserti64(n,(int64_t)i); }
+	size_t insert(long n,unsigned short i) { return insertu64(n,(uint64_t)i); }
+	size_t insert(long n,int i) { return inserti64(n,(int64_t)i); }
+	size_t insert(long n,unsigned int i) { return insertu64(n,(uint64_t)i); }
+	size_t insert(long n,long int i) { return inserti64(n,(int64_t)i); }
+	size_t insert(long n,unsigned long int i) { return insertu64(n,(uint64_t)i); }
 #else
-	aString &append(short i) { return appendi32((int32_t)i); }
-	aString &append(unsigned short i) { return appendu32((uint32_t)i); }
-	aString &append(int i) { return appendi32((int32_t)i); }
-	aString &append(unsigned int i) { return appendu32((uint32_t)i); }
-	aString &append(long int i) { return appendi32((int32_t)i); }
-	aString &append(unsigned long int i) { return appendu32((uint32_t)i); }
+	size_t insert(long n,short i) { return inserti32(n,(int32_t)i); }
+	size_t insert(long n,unsigned short i) { return insertu32(n,(uint32_t)i); }
+	size_t insert(long n,int i) { return inserti32(n,(int32_t)i); }
+	size_t insert(long n,unsigned int i) { return insertu32(n,(uint32_t)i); }
+	size_t insert(long n,long int i) { return inserti32(n,(int32_t)i); }
+	size_t insert(long n,unsigned long int i) { return insertu32(n,(uint32_t)i); }
 #endif
-	aString &append(long long int i) { return appendi64((int64_t)i); }
-	aString &append(unsigned long long int i) { return appendu64((uint64_t)i); }
-	aString &append(double f,int n=2,char c='.');
-	aString &append(FILE *fp,bool uesc=true) { return appendUntil(fp,0,0,uesc); }
-	aString &appendln() { return append(endline); }
+	size_t insert(long n,long long int i) { return inserti64(n,(int64_t)i); }
+	size_t insert(long n,unsigned long long int i) { return insertu64(n,(uint64_t)i); }
+	size_t insert(long n,double f,int d=2,char c='.');
+	size_t insertln(long n) { return insert(n,endline,0); }
 
-	aString &appendHex(uint64_t i,bool upper=true);
-	aString &appendBase(int64_t i,int base);
-	aString &appendBase(uint64_t i,int base);
+	size_t insertHex(long n,uint64_t i,bool upper=true);
+	size_t insertBase(long n,int64_t i,int base);
+	size_t insertBase(long n,uint64_t i,int base);
+	/** @} */
 
-	aString &appendf(const char *f, ...);
-	aString &vappendf(const char *f,va_list list);
+	/** @name Insert
+	 * @{ */
+	size_t append(char c) { return insert(len,c); }
+	size_t append(const aString *s) { if(s) return insert(len,s->str,s->len);return 0; }
+	size_t append(const aString &s) { return insert(len,s.str,s.len); }
+	size_t append(const char *s,size_t l=0) { return insert(len,s,l); }
+	/** Insert substring offset o, length l of s. */
+	size_t append(const aString *s,long o,long l) { if(s) return insert(len,s->str,o,l);return 0; }
+	size_t append(const aString &s,long o,long l) { return insert(len,s.str,o,l); }
+	size_t append(const char *s,long o,long l) { return insert(len,s,o,l); }
+#if __WORDSIZE == 64
+	size_t append(short i) { return inserti64(len,(int64_t)i); }
+	size_t append(unsigned short i) { return insertu64(len,(uint64_t)i); }
+	size_t append(int i) { return inserti64(len,(int64_t)i); }
+	size_t append(unsigned int i) { return insertu64(len,(uint64_t)i); }
+	size_t append(long int i) { return inserti64(len,(int64_t)i); }
+	size_t append(unsigned long int i) { return insertu64(len,(uint64_t)i); }
+#else
+	size_t append(short i) { return inserti32(len,(int32_t)i); }
+	size_t append(unsigned short i) { return insertu32(len,(uint32_t)i); }
+	size_t append(int i) { return inserti32(len,(int32_t)i); }
+	size_t append(unsigned int i) { return insertu32(len,(uint32_t)i); }
+	size_t append(long int i) { return inserti32(len,(int32_t)i); }
+	size_t append(unsigned long int i) { return insertu32(len,(uint32_t)i); }
+#endif
+	size_t append(long long int i) { return inserti64(len,(int64_t)i); }
+	size_t append(unsigned long long int i) { return insertu64(len,(uint64_t)i); }
+	size_t append(double f,int d=2,char c='.') { return insert(len,f,d,c); }
+	size_t append(FILE *fp,bool uesc=true) { return appendUntil(fp,0,0,uesc); }
+	size_t appendln() { return insert(len,endline,0); }
 
-	aString &appendWord(const char **s,bool uesc=true) { return appendUntil(s,whitespace,whitespace,uesc); }
-	aString &appendWord(FILE *fp,bool uesc=true) { return appendUntil(fp,whitespace,whitespace,uesc); }
-	aString &appendTab(const char **s,bool uesc=true) { return appendUntil(s,whitespace+1,whitespace+1,uesc); }
-	aString &appendTab(FILE *fp,bool uesc=true) { return appendUntil(fp,whitespace+1,whitespace+1,uesc); }
-	aString &appendLine(const char **s,bool uesc=true) { return appendUntil(s,whitespace+2,whitespace+2,uesc); }
-	aString &appendLine(FILE *fp,bool uesc=true) { return appendUntil(fp,whitespace+2,whitespace+2,uesc); }
-	aString &appendUntil(const char **s,const char *end,const char *trim=0,bool uesc=true);
-	aString &appendUntil(FILE *fp,const char *end=0,const char *trim=0,bool uesc=true);
+	size_t appendHex(uint64_t i,bool upper=true) { return insertHex(len,i,upper); }
+	size_t appendBase(int64_t i,int base) { return insertBase(len,i,base); }
+	size_t appendBase(uint64_t i,int base) { return insertBase(len,i,base); }
+
+	size_t appendf(const char *f, ...);
+	size_t vappendf(const char *f,va_list list);
+
+	size_t appendWord(const char **s,bool uesc=true) { return appendUntil(s,whitespace,whitespace,uesc); }
+	size_t appendWord(FILE *fp,bool uesc=true) { return appendUntil(fp,whitespace,whitespace,uesc); }
+	size_t appendTab(const char **s,bool uesc=true) { return appendUntil(s,whitespace+1,whitespace+1,uesc); }
+	size_t appendTab(FILE *fp,bool uesc=true) { return appendUntil(fp,whitespace+1,whitespace+1,uesc); }
+	size_t appendLine(const char **s,bool uesc=true) { return appendUntil(s,whitespace+2,whitespace+2,uesc); }
+	size_t appendLine(FILE *fp,bool uesc=true) { return appendUntil(fp,whitespace+2,whitespace+2,uesc); }
+	size_t appendUntil(const char **s,const char *end,const char *trim=0,bool uesc=true);
+	size_t appendUntil(FILE *fp,const char *end=0,const char *trim=0,bool uesc=true);
+	/** @} */
+
+	/** @name Repeat
+	 * @{ */
+	size_t repeat(char c,size_t n);
+	size_t repeat(const aString *s,size_t n) { if(s) repeat(s->str,s->len,n);return *this; }
+	size_t repeat(const aString &s,size_t n) { return repeat(s.str,s.len,n); }
+	size_t repeat(const char *s,size_t l,size_t n);
 	/** @} */
 
 	/** @name Input and Output
 	 * @{ */
-	aString &include(const char *fn);
-	aString &includef(const char *format, ...);
+	size_t include(const char *fn);
+	size_t includef(const char *format, ...);
 
-	aString &print(FILE *fp);
-	aString &println(FILE *fp);
-	/** @} */
-
-	/** @name String formats
-	 * @{ */
-	static void printUTF8(char *d,const char *s,size_t offset,size_t len);
+	size_t print(FILE *fp);
+	size_t println(FILE *fp);
 	/** @} */
 
 	/** @name Compare
 	 * @{ */
-	long indexOf(aString *s) { return s? indexOf(s->str,s->len) : -1l; }
-	long indexOf(aString &s) { return indexOf(s.str,s.len); }
-	long indexOf(const char *s,size_t l=0ul);
-	bool startsWith(aString *s) { return s? startsWith(s->str,s->len) : false; }
-	bool startsWith(aString &s) { return startsWith(s.str,s.len); }
-	bool startsWith(const char *s,size_t l=0ul);
-	bool equals(aString *s) { return s? equals(s->str) : false; }
-	bool equals(aString &s) { return equals(s.str); }
-	bool equals(const char *s);
-	int compare(aString *s) { return s? compare(s->str) : 256; }
-	int compare(aString &s) { return compare(s.str); }
-	int compare(const char *s);
+	long find(char c,long o=0,long l=0);
+	long find(const aString *s,long o=0,long l=0) { return s? find(s->str,o,l,s->len) : -1; }
+	long find(const aString &s,long o=0,long l=0) { return find(s.str,o,l,s.len); }
+	long find(const char *s,long o=0,long l=0,long sl=0);
+	long findChar(const char *s,long o=0,long l=0);
+	bool equals(const aString *s,long o=0,long l=0) { return s? equals(s->str,o,l!=0? l : s->len) : false; }
+	bool equals(const aString &s,long o=0,long l=0) { return equals(s.str,o,l!=0? l : s.len); }
+	bool equals(const char *s,long o=0,long l=0);
+	int compare(const aString *s,long o=0,long l=0) { return s? compare(s->str,o,l!=0? l : s->len) : -1; }
+	int compare(const aString &s,long o=0,long l=0) { return compare(s.str,o,l!=0? l : s.len); }
+	int compare(const char *s,long o=0,long l=0);
+	/** Match nested tags. For the string "abc [b]def [b]ghi[/b] jkl[/b] mno." will return 25, the index after "jkl".
+	 * @param tag1 Opening tag, does not have to be complete, such as "[b", but make sure c1 is set.
+	 * @param tag2 Closing tag, does not have to be complete, such as "[/b", but make sure c2 is set.
+	 * @param o Offset, if negative offset is counted from ending of string.
+	 * @param l Length to search in string, if zero or negative length is calculated from the entire string length and backward.
+	 * @param c1 String of chars to accept completing of tag1, e.g. " \n\t]" will accept "[b" to match with any of these chars, but "[bar" will not match.
+	 * @param c1 String of chars to accept completing of tag2, e.g. " \n\t]" will accept "[/b" to match with any of these chars, but "[/bar" will not match.
+	 * @return Zero based index of beginning of last nested tag.
+	 */
+	long matchNestedTags(const char *tag1,const char *tag2,long o=0,long l=0,const char *c1=0,const char *c2=0);
 	/** @} */
 
 	/** @name Count
@@ -193,26 +256,44 @@ public:
 
 	/** @name Replace
 	 * @{ */
-	aString &replace(const char *s,const char *r);
+	size_t replace(const char *s,const char *r);
+	size_t replace(const char *s, ...);
+	size_t replace(const char **arr);
+	/** @} */
+
+	/** @name Strip
+	 * @{ */
+	size_t stripComments();
+	size_t stripHTML();
+	size_t stripHTMLComments();
+	/** @} */
+
+	/** @name Substring
+	 * @{ */
+	size_t substr(aString *s,long o,long l) { if(s) return substr(*s,o,l);return 0; }
+	size_t substr(aString &s,long o,long l);
+	size_t substr(char *s,long o,long l);
 	/** @} */
 
 	/** @name Encoding
 	 * @{ */
-	aString &escape();
-	aString &unescape();
-	aString &quote(const char c);
-	aString &unquote();
-	aString &encodeURL();
-	aString &decodeURL();
-	aString &encodeHTML();
-	aString &decodeHTML();
+	void newline(const char *nl);
+	void escape();
+	void unescape();
+	void quote(const char c);
+	void unquote();
+	void encodeURL();
+	void decodeURL();
+	void encodeHTML(int f=aSTRING_HTML_ALL);
+	void decodeHTML();
 	/** @} */
 
 	/** @name Capacity
 	 * @{ */
-	aString &trim() { len = trim(str);return *this; }
-	aString &clear() { if(str) *str = '\0',len = 0ul;return *this; }
-	aString &free();
+	void trim() { len = trim(str); }
+	void trim(long &o,long &l);
+	void clear() { if(str) *str = '\0',len = 0; }
+	void free();
 	void setCapacity(size_t n);
 	void increaseCapacity(size_t n) { resize(n); }
 
@@ -222,9 +303,10 @@ public:
 
 	/** @name Types
 	 * @{ */
+	char charAt(long i);
 	const char *toCharArray() { return str; }
-	int toInt();
-	size_t toIntArray(int *n,char c=',');
+	long toInt();
+	size_t toIntArray(long *n,char c=',');
 	/** @} */
 
 	/** @name Tokens
@@ -246,7 +328,9 @@ public:
 	static char *stristr(char *str1,const char *str2);
 	static int countTokens(char *str,const char *delim,bool cins=false);
 	static char **split(char **list,char *str,const char *delim,bool cins=false);
+	static size_t reverse(char *str);
 	static size_t trim(char *str);
+	static void printUTF8(char *d,const char *s,size_t o,size_t l);
 	/** @} */
 
 	/** @name Test char
@@ -269,34 +353,6 @@ public:
 	static bool isCntrl(unsigned char c) { return c<='\x1F' || c=='\x7f'; }
 	/** @} */
 };
-
-
-/** @name String addition operator
- * @{ */
-aString operator+(aString &s,const char c);
-aString operator+(const char c,aString &s);
-aString operator+(aString &s,aString *s1);
-aString operator+(aString *s,aString &s1);
-aString operator+(aString &s,aString &s1);
-aString operator+(aString &s,const char *s1);
-aString operator+(const char *s,aString &s1);
-aString operator+(aString &s,int16_t i);
-aString operator+(int16_t i,aString &s);
-aString operator+(aString &s,uint16_t i);
-aString operator+(uint16_t i,aString &s);
-aString operator+(aString &s,int32_t i);
-aString operator+(int32_t i,aString &s);
-aString operator+(aString &s,uint32_t i);
-aString operator+(uint32_t i,aString &s);
-aString operator+(aString &s,int64_t i);
-aString operator+(int64_t i,aString &s);
-aString operator+(aString &s,uint64_t i);
-aString operator+(uint64_t i,aString &s);
-aString operator+(aString &s,float f);
-aString operator+(float f,aString &s);
-aString operator+(aString &s,double d);
-aString operator+(double d,aString &s);
-/** @} */
 
 
 #endif /* _AMANITA_STRING_H */

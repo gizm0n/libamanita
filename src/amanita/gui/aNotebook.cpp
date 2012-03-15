@@ -19,7 +19,10 @@
 
 
 
-aNotebookPage::aNotebookPage(aNotebook *nb) {
+aObject_Inheritance(aNotebookPage,aObject)
+
+
+aNotebookPage::aNotebookPage(aNotebook *nb) : aObject() {
 	tab.notebook = nb;
 #ifdef USE_GTK
 	tab.button = 0;
@@ -55,15 +58,9 @@ void aNotebookPage::setTabLabel(const char *str) {
 #endif
 #ifdef USE_WIN32
 	TCITEM ti = {TCIF_TEXT};
-#ifdef USE_WCHAR
-	int len = strlen(str)+1;
-	wchar_t wtab[len];
-	char2w(wtab,str,len);
-	ti.pszText = (wchar_t *)wtab;
-#else
-	ti.pszText = (char *)str;
-#endif
+	ti.pszText = (tchar_t *)tstrdup(str);
 	TabCtrl_SetItem((HWND)tab.notebook->getComponent(),tab.index,&ti);
+	tfree(ti.pszText);
 #endif
 }
 
@@ -98,35 +95,24 @@ debug_output("aNotebook::~aNotebook()\n");
 
 
 void aNotebook::create(aWindow *wnd,uint32_t st) {
+	if(style&aNOTEBOOK_HIDE_TABS) {
+		style &= ~aNOTEBOOK_CLOSE_BUTTON;
+		type = aWIDGET_CONTAINER;
+	}
+
 #ifdef USE_GTK
-	GValue val = G_VALUE_INIT;
 	component = gtk_notebook_new();
-	gtk_widget_set_name((GtkWidget *)component,"notebook");
 
-	g_value_init(&val,G_TYPE_BOOLEAN);
-	g_value_set_boolean(&val,TRUE); 
-//	g_object_set_property(G_OBJECT(component),"homogeneous",&val);
-	g_object_set_property(G_OBJECT(component),"scrollable",&val);
-//	g_object_set_property(G_OBJECT(component),"reorderable",&val);
-	g_value_unset(&val);
+	if(style&aNOTEBOOK_HIDE_TABS) {
+		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(component),FALSE);
+	} else {
+		gtk_notebook_set_show_border(GTK_NOTEBOOK(component),FALSE);
+		gtk_notebook_set_scrollable(GTK_NOTEBOOK(component),TRUE);
+		gtk_notebook_set_tab_border(GTK_NOTEBOOK(component),3);
+		gtk_notebook_set_tab_pos(GTK_NOTEBOOK(component),GTK_POS_TOP);
 
-	g_value_init(&val,G_TYPE_BOOLEAN);
-	g_value_set_boolean(&val,FALSE); 
-	g_object_set_property(G_OBJECT(component),"show-border",&val);
-	g_value_unset(&val);
-
-	g_value_init(&val,G_TYPE_INT);
-	g_value_set_int(&val,3); 
-	g_object_set_property(G_OBJECT(component),"tab-border",&val);
-	g_value_unset(&val);
-
-	g_value_init(&val,G_TYPE_INT);
-	g_value_set_int(&val,GTK_POS_TOP); 
-	g_object_set_property(G_OBJECT(component),"tab-pos",&val);
-	g_value_unset(&val);
-//	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(component),GTK_POS_TOP);
-
-	g_signal_connect(G_OBJECT(component),"switch-page",G_CALLBACK(switch_page_event_callback),&selected);
+		g_signal_connect(G_OBJECT(component),"switch-page",G_CALLBACK(switch_page_event_callback),&selected);
+	}
 #endif
 debug_output("aNotebook::create()\n");
 	aWidget::create(wnd,0);
@@ -146,7 +132,7 @@ int aNotebook::openPage(const char *tab,aWidget *page) {
 
 int aNotebook::openPage(aNotebookPage *np) {
 	np->tab.index = pages.size();
-	pages += np;
+	pages << np;
 	np->page->parent = this;
 debug_output("aNotebook::openPage(page->create(%s))\n",np->page->getInstance().getName());
 	np->page->create(window,0);
@@ -190,16 +176,12 @@ debug_output("aNotebook::openPage(page->create(%s))\n",np->page->getInstance().g
 	np->status = 1;
 //	SetParent((HWND)page->getComponent(),(HWND)parent->getComponent());
 debug_output("aNotebook::openPage(%s)\n",np->tab.name);
-	TCITEM ti = {TCIF_TEXT};
-#ifdef USE_WCHAR
-	int len = strlen(np->tab.name)+1;
-	wchar_t wtab[len];
-	char2w(wtab,np->tab.name,len);
-	ti.pszText = (wchar_t *)wtab;
-#else
-	ti.pszText = (char *)np->tab.name;
-#endif
-	TabCtrl_InsertItem((HWND)component,np->tab.index,&ti);
+	if(type==aWIDGET_NOTEBOOK) {
+		TCITEM ti = {TCIF_TEXT};
+		ti.pszText = tstrdup(np->tab.name);
+		TabCtrl_InsertItem((HWND)component,np->tab.index,&ti);
+		tfree(ti.pszText);
+	}
 #endif
 	selectPage(np->tab.index);
 	return selected;
@@ -220,7 +202,7 @@ debug_output("aNotebook::selectPage((index: %d)\n",n);
 		selected = n;
 #endif
 #ifdef USE_WIN32
-		TabCtrl_SetCurSel((HWND)component,n);
+		if(type==aWIDGET_NOTEBOOK) TabCtrl_SetCurSel((HWND)component,n);
 		if(selected>=0) np->page->hide();
 		np = (aNotebookPage *)pages[n];
 debug_output("aNotebook::selectPage(action: %d, tab: %s, width: %d, height: %d)\n",aNOTEBOOK_PAGE_SHOW,np->tab.name,client.right-client.left,client.bottom-client.top);
@@ -265,7 +247,7 @@ debug_output("aNotebook::closePage(n: %d, pages: %d)\n",n,(int)pages.size());
 		gtk_notebook_remove_page(GTK_NOTEBOOK(component),n);
 #endif
 #ifdef USE_WIN32
-		TabCtrl_DeleteItem((HWND)component,n);
+		if(type==aWIDGET_NOTEBOOK) TabCtrl_DeleteItem((HWND)component,n);
 #endif
 		pages.removeAt(n);
 		delete np;
@@ -281,7 +263,6 @@ debug_output("aNotebook::closePage(index=%d -> i=%d)\n",np->tab.index,i);
 
 
 #ifdef USE_WIN32
-
 void aNotebook::tabEvent() {
 	int i = TabCtrl_GetCurSel((HWND)component);
 	selectPage(i);
@@ -294,7 +275,7 @@ void aNotebook::makeLayout(int x,int y,int w,int h) {
 	aWidget::makeLayout(x,y,w,h);
 //debug_output("aNotebook::makeLayout(x: %d, y: %d, w: %d, h: %d)\n",this->x,this->y,width,height);
 	RECT r = client;
-	TabCtrl_AdjustRect((HWND)component,FALSE,&r);
+	if(type==aWIDGET_NOTEBOOK) TabCtrl_AdjustRect((HWND)component,FALSE,&r);
 //debug_output("aNotebook::makeLayout(WIN32_CONTROL_TABS - TabCtrl_AdjustRect(l: %d, t: %d, r: %d, b: %d))\n",r.left,r.top,r.right,r.bottom);
 	if(w1!=width || h1!=height)
 		for(i=pages.size()-1; i>=0; --i)

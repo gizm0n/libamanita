@@ -48,7 +48,7 @@ aWidget *aContainer::remove(uint32_t id) {
 
 void aContainer::create(aWindow *wnd,uint32_t st) {
 	if(text) type = aWIDGET_FRAME;
-	else if(!(style&aCONTAINER_HARD)) type = aWIDGET_VOID;
+	else if(parent && parent->type==aWIDGET_CONTAINER) type = aWIDGET_VOID;
 
 #ifdef USE_GTK
 	if((style&aHORIZONTAL)) {
@@ -136,7 +136,7 @@ debug_output("aContainer::createAll()\n");
 void aContainer::makeLayout(int x,int y,int w,int h) {
 debug_output("aContainer::makeLayout(x: %d, y: %d, w: %d, h: %d)\n",x,y,w,h);
 	aWidget::makeLayout(x,y,w,h);
-	if(border) this->x += border,this->y += border,width -= border*2,height -= border*2;
+//	if(border) this->x += border,this->y += border,width -= border*2,height -= border*2;
 	if(child) {
 		aWidget *c = child;
 		int i,n,sz[children],min,max,sum,exp,nexp,sp = (children-1)*spacing;
@@ -205,41 +205,45 @@ debug_output("aContainer::makeLayout(y1: %d, h1: %d  %s)\n",y1,h1,c->text? c->te
 }
 
 int aContainer::getMinimumWidth() {
-	if((style&aFIXED)) return min_width;
-	aWidget *w;
-	int box = 0;
-	if(type==aWIDGET_FRAME) box = MulDiv(dbu_x,7+7,4);
-	if((style&aHORIZONTAL)) {
-		int n = border*2+(children-1)*spacing;
-		for(w=child; w; w=w->next) n += w->getMinimumWidth();
-		return box+n;
-	} else if((style&aVERTICAL)) {
-		int n,max = 0; // We want to know the largest item to know minimum width of container.
-		for(w=child; w; w=w->next) {
-			n = w->getMinimumWidth();
-			if(n>max) max = n;
+	if(!(style&aFIXED)) {
+		aWidget *w;
+		int box = 0;
+		if(type==aWIDGET_FRAME) box = MulDiv(dbu_x,7+7,4);
+		if((style&aHORIZONTAL)) {
+			int n = border*2+(children-1)*spacing;
+			for(w=child; w; w=w->next) n += w->getMinimumWidth();
+			return box+n;
+		} else if((style&aVERTICAL)) {
+			int n,max = 0; // We want to know the largest item to know minimum width of container.
+			for(w=child; w; w=w->next) {
+				n = w->getMinimumWidth();
+				if(n>max) max = n;
+			}
+			return box+max;
 		}
-		return box+max;
-	} else return min_width;
+	}
+	return min_width+border*2;
 }
 
 int aContainer::getMinimumHeight() {
-	if((style&aFIXED)) return min_height;
-	aWidget *w;
-	int box = 0;
-	if(type==aWIDGET_FRAME) box = MulDiv(dbu_y,11+7,8);
-	if((style&aVERTICAL)) {
-		int n = border*2+(children-1)*spacing;
-		for(w=child; w; w=w->next) n += w->getMinimumHeight();
-		return box+n;
-	} else if((style&aHORIZONTAL)) {
-		int n,max = 0; // We want to know the largest item to know minimum width of container.
-		for(w=child; w; w=w->next) {
-			n = w->getMinimumHeight();
-			if(n>max) max = n;
+	if(!(style&aFIXED)) {
+		aWidget *w;
+		int box = 0;
+		if(type==aWIDGET_FRAME) box = MulDiv(dbu_y,11+7,8);
+		if((style&aVERTICAL)) {
+			int n = border*2+(children-1)*spacing;
+			for(w=child; w; w=w->next) n += w->getMinimumHeight();
+			return box+n;
+		} else if((style&aHORIZONTAL)) {
+			int n,max = 0; // We want to know the largest item to know minimum width of container.
+			for(w=child; w; w=w->next) {
+				n = w->getMinimumHeight();
+				if(n>max) max = n;
+			}
+			return box+max;
 		}
-		return box+max;
-	} else return min_height;
+	}
+	return min_height+border*2;
 }
 
 void aContainer::move() {

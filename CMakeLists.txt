@@ -90,6 +90,22 @@ if(WEBKIT_FOUND)
 	add_definitions(${WEBKIT_CFLAGS_OTHER})
 endif(WEBKIT_FOUND)
 
+PKG_CHECK_MODULES(SOURCEVIEW gtksourceview-2.0)
+if(SOURCEVIEW_FOUND)
+	include_directories(${SOURCEVIEW_INCLUDE_DIRS})
+	link_directories(${SOURCEVIEW_LIBRARY_DIRS})
+	add_definitions(${SOURCEVIEW_CFLAGS_OTHER})
+	set(HAVE_SOURCEVIEW 1)
+endif(SOURCEVIEW_FOUND)
+
+CHECK_INCLUDE_FILE("Scintilla.h" HAVE_SCINTILLA)
+if(HAVE_SCINTILLA)
+	if(WIN32)
+	else()
+		set(SCINTILLA_LIB scintilla)
+	endif()
+endif(HAVE_SCINTILLA)
+
 include_directories(
 	"${PROJECT_SOURCE_DIR}/include"
 	"${PROJECT_BINARY_DIR}/include"
@@ -122,8 +138,12 @@ else()
 		set(USE_WCHAR 1)
 		set(GUI_WIN32 1)
 		set(USE_WIN32 1)
-		link_libraries(intl comctl32 ws2_32)
+		link_libraries(intl comctl32 ws2_32 ole32)
 		add_definitions(-DWIN32_LEAN_AND_MEAN)
+
+		set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> <FLAGS> <DEFINES> -O coff -o <OBJECT> <SOURCE>")
+		enable_language(RC)
+
 		if(MSVC)
 			add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -subsystem:windows")
@@ -170,7 +190,11 @@ set(amanita_src
 	src/amanita/aString_HTMLentities.cpp
 	src/amanita/aThread.cpp
 	src/amanita/aVector.cpp
+	src/amanita/aWiki.cpp
 	src/amanita/aWord.cpp
+	src/amanita/db/aDatabase.cpp
+	src/amanita/db/aRecord.cpp
+	src/amanita/db/aResult.cpp
 	src/amanita/gui/aBrowser.cpp
 	src/amanita/gui/aButton.cpp
 	src/amanita/gui/aCairo.cpp
@@ -181,6 +205,7 @@ set(amanita_src
 	src/amanita/gui/aList.cpp
 	src/amanita/gui/aMenu.cpp
 	src/amanita/gui/aNotebook.cpp
+	src/amanita/gui/aPanel.cpp
 	src/amanita/gui/aStatus.cpp
 	src/amanita/gui/aText.cpp
 	src/amanita/gui/aWidget.cpp
@@ -189,9 +214,6 @@ set(amanita_src
 	src/amanita/net/aHttp.cpp
 	src/amanita/net/aServer.cpp
 	src/amanita/net/aSocket.cpp
-	src/amanita/sqlite/aRecord.cpp
-	src/amanita/sqlite/aResultset.cpp
-	src/amanita/sqlite/aSQLite.cpp
 )
 
 add_library(amanita STATIC ${amanita_src})
@@ -249,8 +271,16 @@ install(FILES
 	include/amanita/aString.h
 	include/amanita/aThread.h
 	include/amanita/aVector.h
+	include/amanita/aWiki.h
 	include/amanita/aWord.h
 	DESTINATION include/amanita
+)
+
+install(FILES
+	include/amanita/db/aDatabase.h
+	include/amanita/db/aRecord.h
+	include/amanita/db/aResult.h
+	DESTINATION include/amanita/db
 )
 
 install(FILES
@@ -265,6 +295,7 @@ install(FILES
 	include/amanita/gui/aList.h
 	include/amanita/gui/aMenu.h
 	include/amanita/gui/aNotebook.h
+	include/amanita/gui/aPanel.h
 	include/amanita/gui/aStatus.h
 	include/amanita/gui/aText.h
 	include/amanita/gui/aWidget.h
@@ -299,13 +330,6 @@ install(FILES
 )
 
 install(FILES
-	include/amanita/sqlite/aRecord.h
-	include/amanita/sqlite/aResultset.h
-	include/amanita/sqlite/aSQLite.h
-	DESTINATION include/amanita/sqlite
-)
-
-install(FILES
 	include/ipomoea/hashtable_t.h
 	include/ipomoea/string_t.h
 	include/ipomoea/vector_t.h
@@ -328,6 +352,14 @@ install(TARGETS amanita ipomoea esoteric
 	DESTINATION lib
 )
 
+if(WIN32)
+	if(MINGW)
+		install(FILES
+			data/Win32Icons.bmp
+			DESTINATION share/amanita
+		)
+	endif()
+endif()
 
 
 PKG_CHECK_MODULES(GEANY geany)
@@ -368,7 +400,65 @@ endif()
 
 
 
-add_subdirectory(examples) 
+
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/examples)
+
+if(WIN32)
+	if(MINGW)
+		# resource compilation for mingw
+		add_custom_command(
+			OUTPUT ${PROJECT_BINARY_DIR}/CMakeFiles/examples_resource.obj
+			COMMAND ${CMAKE_RC_COMPILER} -I${PROJECT_SOURCE_DIR}/examples
+			-i${PROJECT_SOURCE_DIR}/examples/_resource.rc
+			-o ${PROJECT_BINARY_DIR}/CMakeFiles/examples_resource.obj)
+		set(RC_FILE ${PROJECT_BINARY_DIR}/CMakeFiles/examples_resource.obj)
+	else()
+		set(RC_FILE examples/_resource.rc)
+	endif()
+endif()
+
+if(WIN32)
+	add_executable(browser WIN32 examples/browser.cpp ${RC_FILE})
+else()
+	add_executable(browser examples/browser.cpp)
+endif()
+target_link_libraries(browser amanita ${GTK2_LIBRARIES} ${WEBKIT_LIBRARIES})
+
+add_executable(client examples/client.cpp)
+target_link_libraries(client amanita ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES})
+
+add_executable(database examples/database.cpp)
+target_link_libraries(database amanita sqlite3)
+
+add_executable(entropy examples/entropy.cpp)
+target_link_libraries(entropy amanita)
+
+if(WIN32)
+	add_executable(gui WIN32 examples/gui.cpp ${RC_FILE})
+else()
+	add_executable(gui examples/gui.cpp)
+endif()
+target_link_libraries(gui amanita ${GTK2_LIBRARIES} ${WEBKIT_LIBRARIES} ${SCINTILLA_LIB} ${SOURCEVIEW_LIBRARIES})
+
+add_executable(horoscope examples/horoscope.c)
+target_link_libraries(horoscope esoteric m)
+
+add_executable(http examples/http.cpp)
+target_link_libraries(http amanita ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES})
+
+add_executable(regex examples/regex.cpp)
+target_link_libraries(regex amanita)
+
+add_executable(server examples/server.cpp)
+target_link_libraries(server amanita ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES})
+
+add_executable(string examples/string.cpp)
+target_link_libraries(string amanita)
+
+add_executable(wiki examples/wiki.cpp)
+target_link_libraries(wiki amanita)
+
+
 
 if(GETTEXT_FOUND AND ENABLE_NLS)
 	add_subdirectory(po)

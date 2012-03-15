@@ -122,6 +122,11 @@ hash_t aHashtable::hash(const char *s) {
 	return h;
 }
 
+void aHashtable::put(node &n) {
+	if(n.k_type==TYPE_CHAR_P) put((const char *)n.key,n.value,n.v_type);
+	else put(n.key,n.value,n.k_type,n.v_type);
+}
+
 void aHashtable::put(value_t key,value_t value,type_t kt,type_t vt) {
 	if(sz && !(style&HASH_STYLE_KEY_MULTIPLES)) {
 		node *n = table[key%cap];
@@ -229,7 +234,7 @@ size_t aHashtable::get(value_t key,type_t kt,aVector &v) {
 	int i = 0;
 	node *n = table[key%cap];
 	while(n) {
-		if(n->k_type==kt && n->key==key) v.insert(n->value,v.sz,n->v_type),i++;
+		if(n->k_type==kt && n->key==key) v.insert(n->value,v.sz,n->v_type),++i;
 		n = n->next;
 	}
 	return i;
@@ -240,10 +245,10 @@ size_t aHashtable::get(const char *key,aVector &v) {
 	size_t i = 0;
 	node *n = table[hash(key)%cap];
 	if(style&HASH_STYLE_CASE_INSENSITIVE) while(n) {
-		if(n->k_type==TYPE_CHAR_P && !aString::stricmp((char *)n->key,key)) v.insert(n->value,v.sz,n->v_type),i++;
+		if(n->k_type==TYPE_CHAR_P && !aString::stricmp((char *)n->key,key)) v.insert(n->value,v.sz,n->v_type),++i;
 		n = n->next;
 	} else while(n) {
-		if(n->k_type==TYPE_CHAR_P && !strcmp((char *)n->key,key)) v.insert(n->value,v.sz,n->v_type),i++;
+		if(n->k_type==TYPE_CHAR_P && !strcmp((char *)n->key,key)) v.insert(n->value,v.sz,n->v_type),++i;
 		n = n->next;
 	}
 	return i;
@@ -256,7 +261,7 @@ value_t aHashtable::getByIndex(size_t index,type_t &type) {
 	node *n = 0;
 	for(; 1; index--) {
 		if(n) n = n->next;
-		if(!n) for(; !n && i<cap; i++) n = table[i];
+		if(!n) for(; !n && i<cap; ++i) n = table[i];
 		if(index==0) break;
 	}
 	if(!n) return 0;
@@ -353,7 +358,7 @@ value_t aHashtable::remove(const char *key,type_t &type) {
 void aHashtable::removeAll() {
 	if(table) {
 		node *n1,*n2;
-		for(size_t i=0; i<cap; i++) if((n1=table[i]))
+		for(size_t i=0; i<cap; ++i) if((n1=table[i]))
 			do { n2 = n1->next;delete n1;n1 = n2; } while(n1);
 		free(table);
 		table = 0;
@@ -376,11 +381,11 @@ void aHashtable::rehash(style_t st) {
 
 		node *n1,*n2;
 		if(st!=style) {
-			for(i=0; i<cap; i++) if((n1=t1[i])) while(n1) {
+			for(i=0; i<cap; ++i) if((n1=t1[i])) while(n1) {
 				if(n1->k_type==TYPE_CHAR_P) n1->hash = hash((char *)n1->key);
 				n2 = n1->next,h = n1->hash%c,n1->next = table[h],table[h] = n1,n1 = n2;
 			}
-		} else  for(i=0; i<cap; i++) if((n1=t1[i])) while(n1)
+		} else  for(i=0; i<cap; ++i) if((n1=t1[i])) while(n1)
 			n2 = n1->next,h = n1->hash%c,n1->next = table[h],table[h] = n1,n1 = n2;
 
 		free(t1);
@@ -403,7 +408,7 @@ size_t aHashtable::print(FILE *fp) {
 	if(!fp) return 0;
 	size_t i,s = sz;
 	node *n;
-	for(i=0; i<cap; i++) {
+	for(i=0; i<cap; ++i) {
 		fprintf(fp,"Table[%lu]",(unsigned long)i);
 		if((n=table[i])) while(n) {
 			switch(n->k_type) {
@@ -461,13 +466,14 @@ size_t aHashtable::load(FILE *fp) {
 	while(!feof(fp)) {
 //fprintf(stderr,"aHashtable::load(readPair)\n");
 //fflush(stderr);
-		key.clear().appendUntil(fp,"=:",aString::whitespace);
+		key.clear();
+		key.appendUntil(fp,"=:",aString::whitespace);
 		val.clear();
 		if(!feof(fp)) val.appendUntil(fp,aString::whitespace+2,aString::whitespace);
-		if(key.length()>0) {
+		if(key) {
 			put(key,val);
 			n++;
-//fprintf(stderr,"aHashtable::load(key='%s',val='%s')\n",key.toCharArray(),val.toCharArray());
+//fprintf(stderr,"aHashtable::load(key='%s',val='%s')\n",key.str,val.str);
 //fflush(stderr);
 		}
 	}
@@ -485,7 +491,7 @@ size_t aHashtable::save(const char *fn) {
 size_t aHashtable::save(FILE *fp) {
 	if(!fp) return 0;
 	node *n;
-	if(table) for(size_t i=0; i<cap; i++) if((n=table[i])) while(n) {
+	if(table) for(size_t i=0; i<cap; ++i) if((n=table[i])) while(n) {
 		switch(n->k_type) {
 			case TYPE_VOID_P:fprintf(fp,"%p=",(void *)n->key);break;
 			case TYPE_INTPTR:fprintf(fp,"%" PRIuPTR "=",(intptr_t)n->key);break;
@@ -522,10 +528,11 @@ size_t aHashtable::merge(const char *str) {
 	aString key(64),val(256);
 	size_t n = 0;
 	while(*s!='\0') {
-		key.clear().appendUntil(&s,"=:",aString::whitespace);
+		key.clear();
+		key.appendUntil(&s,"=:",aString::whitespace);
 		val.clear();
 		if(*s!='\0') val.appendUntil(&s,aString::whitespace+2,aString::whitespace);
-		if(key.length()>0) {
+		if(key) {
 			put(key,val);
 			n++;
 		}
@@ -533,12 +540,24 @@ size_t aHashtable::merge(const char *str) {
 	return n;
 }
 
-size_t merge(aHashtable &ht) {
-	return 0;
+size_t aHashtable::merge(aHashtable &ht) {
+	size_t n = 0;
+	if(ht.table) {
+		node *n1;
+		for(long i=ht.cap-1; i>=0; --i) if((n1=ht.table[i]))
+			do { put(*n1);n1 = n1->next,++n; } while(n1);
+	}
+	return n;
 }
 
-size_t merge(aVector &vec) {
-	return 0;
+size_t aHashtable::merge(aVector &vec) {
+	size_t n = 0;
+	aVector::node *n1;
+	for(long i=vec.sz-1; i>=0; --i) {
+		n1 = &vec.list[i];
+		put(i,n1->value,_TYPE_INTPTR,n1->type);
+	}
+	return n;
 }
 
 

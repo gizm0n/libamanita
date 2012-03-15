@@ -58,7 +58,7 @@ typedef wchar_t tchar_t;
 #define TEXT(s) L##s
 #define _T(s) L##s
 #else
-typedef unsigned char tchar_t;
+typedef char tchar_t;
 #define TEOF EOF
 #define TEXT(s) s
 #define _T(s) s
@@ -66,9 +66,11 @@ typedef unsigned char tchar_t;
 
 #ifdef WIN32
 extern wchar_t *char2w(const char *c);
-extern void char2w(wchar_t *w,const char *c,int l);
+extern void char2w(wchar_t *w,const char *c,int l=0);
 extern char *w2char(const wchar_t *w);
-extern void w2char(char *c,const wchar_t *w,int l);
+extern void w2char(char *c,const wchar_t *w,int l=0);
+extern tchar_t *tstrdup(const char *s,int l=0);
+extern void tfree(tchar_t *s);
 #endif
 
 #define __STDC_FORMAT_MACROS

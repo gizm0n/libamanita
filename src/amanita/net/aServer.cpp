@@ -292,7 +292,7 @@ debug_output("aServer::deleteChannel(name=%s)\n",ch);
 void aServer::leaveChannel(aChannel ch,aConnection c) {
 	if(ch && c) {
 debug_output("aServer::leaveChannel(1,name=%s,size(%lu))\n",ch->getName(),(unsigned long)ch->size());
-		*ch -= c;
+		*ch << c;
 		c->leaveChannel(ch);
 debug_output("aServer::leaveChannel(2,size(%lu))\n",(unsigned long)ch->size());
 		if(ch->size()==0) deleteChannel(ch->getName());
@@ -315,7 +315,7 @@ debug_output("aServer::addClient(id=%" PRIu32 ",nick=%s)\n",id,nick);
 		_sockets.put(c->sock,(void *)c);
 		_clients.put(c->id,(void *)c);
 		_clients.put(c->nick,(void *)c);
-		_main += c;
+		_main << c;
 /*#ifdef USE_SDL
 		if(_main.size()+1>setsz) createSocketSet();
 		SDLNet_TCP_AddSocket(set,s);
@@ -339,7 +339,7 @@ debug_output("aServer::killClient(id=%" PRIu32 ")\n",c->id);
 	_sockets.remove(c->sock);
 	_clients.remove(c->id);
 	_clients.remove(c->nick);
-	_main -= c;
+	_main >> c;
 	if(c->_channels.size()>0)
 		for(int i=c->_channels.size()-1; i>=0; i--)
 			leaveChannel((aChannel)c->_channels[i],c);

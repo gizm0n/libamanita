@@ -21,8 +21,12 @@
 #include <amanita/gui/aButton.h>
 #include <amanita/gui/aChoice.h>
 #include <amanita/gui/aList.h>
+#include <amanita/gui/aPanel.h>
 
 
+#ifdef USE_WIN32
+static tchar_t tooltip_string[1025];
+#endif
 
 
 #ifdef USE_GTK
@@ -132,17 +136,21 @@ void aWindow::open(aWindow *p) {
 	DWORD st = WS_OVERLAPPEDWINDOW;
 	LPCTSTR cl = aWINDOW_CLASS;
 	int x = CW_USEDEFAULT,y = CW_USEDEFAULT;
+	tchar_t *t = tstrdup(nm);
 	if(!(class_registers&aWINDOW_CLASS_REGISTER)) {
-		WNDCLASSEX wndclassx = {
-			sizeof(WNDCLASSEX),
-			CS_HREDRAW|CS_VREDRAW,
-			AmanitaMainWndProc,
-			0,0,hMainInstance,
-			LoadIcon(0,IDI_APPLICATION),
-			LoadCursor(0,IDC_ARROW),
-			(HBRUSH)(COLOR_BTNFACE+1),
-			0,cl,LoadIcon(0,IDI_APPLICATION)
-		};
+		WNDCLASSEX wndclassx;
+		wndclassx.cbSize				= sizeof(wndclassx);
+		wndclassx.style				= CS_HREDRAW|CS_VREDRAW;
+		wndclassx.lpfnWndProc		= AmanitaMainWndProc;
+		wndclassx.cbClsExtra			= 0;
+		wndclassx.cbWndExtra			= 0;
+		wndclassx.hInstance			= hMainInstance;
+		wndclassx.hIcon				= (HICON)LoadImage(hMainInstance,MAKEINTRESOURCE(aWINDOW_APP_ICON),IMAGE_ICON,0,0,LR_SHARED);
+		wndclassx.hIconSm				= (HICON)LoadImage(hMainInstance,MAKEINTRESOURCE(aWINDOW_APP_ICON),IMAGE_ICON,16,16,LR_SHARED);
+		wndclassx.hCursor				= LoadCursor(0,IDC_ARROW);
+		wndclassx.hbrBackground		= (HBRUSH)(COLOR_BTNFACE+1);
+		wndclassx.lpszClassName		= cl;
+		wndclassx.lpszMenuName		= 0;
 		RegisterClassEx(&wndclassx);
 		class_registers |= aWINDOW_CLASS_REGISTER;
 	}
@@ -155,20 +163,14 @@ void aWindow::open(aWindow *p) {
 	if((style&aWINDOW_DIALOG)) ex = WS_EX_DLGMODALFRAME|WS_EX_WINDOWEDGE;
 	if(!(style&aWINDOW_RESIZABLE))
 		st = (WS_OVERLAPPEDWINDOW|WS_SYSMENU)& ~(WS_MINIMIZEBOX|WS_MAXIMIZEBOX|WS_THICKFRAME);
-#ifdef USE_WCHAR
-	int len = strlen(nm)+1;
-	wchar_t tnm[len];
-	char2w(tnm,nm,len);
-#else
-	char *tnm = nm;
-#endif
-	hwnd = CreateWindowEx(ex,cl,tnm,st,
+	hwnd = CreateWindowEx(ex,cl,t,st,
 		x,y,width,height,(HWND)(parent? parent->component : 0),0,hMainInstance,this);
 	if((style&aWINDOW_MODAL) && parent) {
 		EnableWindow((HWND)parent->component,false);
 		SetFocus((HWND)parent->component);
 		SetFocus(hwnd);
 	}
+	tfree(t);
 
 	if(!hwnd) MessageBox(NULL,_T("Window Creation Failed!"),_T("Error!"),MB_ICONEXCLAMATION|MB_OK);
 #endif
@@ -293,13 +295,14 @@ bool aWindow::handleEvent(aWindow *wnd,UINT msg,WPARAM wparam,LPARAM lparam) {
 }
 
 bool aWindow::command(WPARAM wparam,LPARAM lparam) {
-	int t = (LOWORD(wparam))>>9;
-//debug_output("aWindow::command(type: %d, id: %d)\n",t,LOWORD(wparam)&0x1ff);
+	int t = aWIDGET_ID_TYPE(LOWORD(wparam));
+//debug_output("aWindow::command(type: %d, id: %d)\n",t,aWIDGET_ID_INDEX(LOWORD(wparam)));
+//fflush(stderr);
 	switch(t) {
 		case aWIDGET_MENU:
 			widget_event_handler weh;
 			if(menu && (weh=menu->getEventHandler())) {
-				aMenuItem *mi = menu->getItem(LOWORD(wparam)&0x1ff);
+				aMenuItem *mi = menu->getItem(aWIDGET_ID_INDEX(LOWORD(wparam)));
 				weh(menu,aMENU_EVENT_ACTION,mi->id,(intptr_t)mi->name,(intptr_t)mi->data);
 				return true;
 			}
@@ -308,7 +311,7 @@ bool aWindow::command(WPARAM wparam,LPARAM lparam) {
 		case aWIDGET_CHECKBOX:
 		case aWIDGET_RADIOBUTTON:
 			if(HIWORD(wparam)==BN_CLICKED) {
-				aButton *b = (aButton *)getWidget((aComponent)lparam);
+				aButton *b = (aButton *)getWidget((aComponent)wparam);
 				widget_event_handler weh = b->getEventHandler();
 				if(weh) {
 					if(b->isCheckBox() || b->isRadioButton())
@@ -321,7 +324,7 @@ bool aWindow::command(WPARAM wparam,LPARAM lparam) {
 		case aWIDGET_COMBOBOX:
 		case aWIDGET_COMBOBOX_ENTRY:
 			if(HIWORD(wparam)==CBN_SELENDOK) {
-				aChoice *ch = (aChoice *)getWidget((aComponent)lparam);
+				aChoice *ch = (aChoice *)getWidget((aComponent)wparam);
 				widget_event_handler weh = ch->getEventHandler();
 				if(weh) {
 					weh(ch,aCHOICE_CHANGED,0,0,0);
@@ -331,11 +334,27 @@ bool aWindow::command(WPARAM wparam,LPARAM lparam) {
 			break;
 		case aWIDGET_LISTBOX:
 			if(HIWORD(wparam)==LBN_SELCHANGE) {
-				aChoice *ch = (aChoice *)getWidget((aComponent)lparam);
+				aChoice *ch = (aChoice *)getWidget((aComponent)wparam);
 				widget_event_handler weh = ch->getEventHandler();
 				if(weh) {
 					weh(ch,aCHOICE_CHANGED,0,0,0);
 					return true;
+				}
+			}
+			break;
+		case aWIDGET_PANEL:
+			if(HIWORD(wparam)==BN_CLICKED) {
+				aPanelButton *pb = (aPanelButton *)getWidget(LOWORD(wparam));
+//				aPanel *p = (aPanel *)getWidget((aComponent)lparam);
+//debug_output("aWindow::command(pb: %p, id: %x, lparam: %p)\n",pb,LOWORD(wparam),lparam);
+//fflush(stderr);
+//				aPanelButton *pb = &p->buttons[aWIDGET_ID_INDEX(LOWORD(wparam))];
+				if(pb) {
+					widget_event_handler weh = pb->panel->getEventHandler();
+					if(weh) {
+						weh(pb->panel,aPANEL_CLICKED,pb->action,(intptr_t)pb->data,0);
+						return true;
+					}
 				}
 			}
 			break;
@@ -344,7 +363,9 @@ bool aWindow::command(WPARAM wparam,LPARAM lparam) {
 }
 
 bool aWindow::notify(LPNMHDR nmhdr) {
-	int t = nmhdr->idFrom>>9;
+	int t = aWIDGET_ID_TYPE(nmhdr->idFrom);
+//debug_output("aWindow::notify(type: %d, id: %d)\n",t,aWIDGET_ID_INDEX(nmhdr->idFrom));
+//fflush(stderr);
 	switch(t) {
 		case aWIDGET_NOTEBOOK:
 			if(nmhdr->code==TCN_SELCHANGE) {
@@ -365,6 +386,25 @@ bool aWindow::notify(LPNMHDR nmhdr) {
 				return true;
 			}
 			break;
+		case aWIDGET_PANEL:
+			if(nmhdr->code==TTN_NEEDTEXT) {
+//				aPanel *p = (aPanel *)getWidget((aComponent)nmhdr->hwndFrom);
+//				aPanelButton *pb = &p->buttons[aWIDGET_ID_INDEX(nmhdr->idFrom)];
+				aPanelButton *pb = (aPanelButton *)getWidget(nmhdr->idFrom);
+				LPNMTTDISPINFO ttt = (LPNMTTDISPINFO)nmhdr;
+				if(pb && pb->tooltip) {
+#ifdef USE_WCHAR
+					char2w(tooltip_string,pb->tooltip);
+#else
+					strncpy(tooltip_string,pb->tooltip,1024);
+#endif
+					
+					ttt->lpszText = tooltip_string;
+					ttt->hinst = NULL;
+//debug_output("aWindow::notify(hwnd: %p, pb: %p, id: %d, lParam: %p)\n",nmhdr->hwndFrom,pb,nmhdr->idFrom,ttt->lParam);
+//fflush(stderr);
+				} else ttt->lpszText = NULL;
+			}
 	}
 	return false;
 }

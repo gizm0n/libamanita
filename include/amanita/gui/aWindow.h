@@ -18,6 +18,11 @@ enum {
 	aWINDOW_CENTER				= 0x00000010,
 };
 
+enum {
+	aWINDOW_APP_ICON			= 101,
+};
+
+
 class aApplication;
 class aMenu;
 class aStatus;

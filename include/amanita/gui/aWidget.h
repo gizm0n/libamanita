@@ -11,6 +11,12 @@
 #include <stdint.h>
 #include <amanita/aHashtable.h>
 
+
+#define aWIDGET_MAKE_ID(type,index) (((type)<<9)|(index))
+#define aWIDGET_ID_TYPE(id) ((id)>>9)
+#define aWIDGET_ID_INDEX(id) ((id)&0x01ff)
+
+
 #ifdef USE_GTK
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
@@ -24,8 +30,10 @@
 #include <windows.h>
 
 enum {
-	aWINDOW_CLASS_REGISTER	= 0x00000001,
-	aBROWSER_CLASS_REGISTER	= 0x00000010,
+	aBROWSER_CLASS_REGISTER		= 0x00000010,
+	aSCINTILLA_CLASS_REGISTER	= 0x00000020,
+	aTEXT_CLASS_REGISTER			= 0x00000040,
+	aWINDOW_CLASS_REGISTER		= 0x00000001,
 };
 
 #define aBROWSER_CLASS _T("WebControl32")
@@ -35,28 +43,35 @@ extern uint32_t class_registers;
 
 extern int dbu_x;
 extern int dbu_y;
-#endif
+#endif /* USE_WIN32 */
 
 
 
 enum {
-	aHORIZONTAL			= 0x00010000,
-	aVERTICAL			= 0x00020000,
-	aTABLE				= 0x00040000,
-	aHOMOGENOUS			= 0x00080000,
+	aHORIZONTAL			= 0x00010000,	//!< Style used to order widgets horizontally.
+	aVERTICAL			= 0x00020000,	//!< Style used to order widgets vertically.
+	aTABLE				= 0x00040000,	//!< Style used to order widgets in a table.
+	aHOMOGENOUS			= 0x00080000,	//!< All widgets are generated with a homogenous size, width or height or both depending on style.
 
-	aLEFT					= 0x00100000,
-	aRIGHT				= 0x00200000,
-	aCENTER				= 0x00300000,
-	aTOP					= 0x00400000,
-	aBOTTOM				= 0x00800000,
-	aMIDDLE				= 0x00c00000,
-	aALIGNED				= 0x00f00000,
+	aLEFT					= 0x00100000,	//!< Align widgets to left.
+	aRIGHT				= 0x00200000,	//!< Align widgets to right.
+	aCENTER				= 0x00300000,	//!< Align widgets to center.
+	aTOP					= 0x00400000,	//!< Align widgets to top.
+	aBOTTOM				= 0x00800000,	//!< Align widgets to bottom.
+	aMIDDLE				= 0x00c00000,	//!< Align widgets to middle.
+	aALIGNED				= 0x00f00000,	//!< Mask for widgets that have and alignment set.
 
-	aFIXED				= 0x01000000,
-	aEXPAND				= 0x02000000,
-	aFILL					= 0x04000000,
-	aHIDE					= 0x80000000,
+	aFIXED				= 0x01000000,	//!< Fixed size of widget, in GTK+ this means minimum size, in win32 exact size in pixels.
+	aEXPAND				= 0x02000000,	//!< Expand space for this widget in relations to siblings, other siblings without this flag will shrink to minimum size.
+	aFILL					= 0x04000000,	//!< Fill the expanded space with the widget, if not set widget will have its minimum size.
+	aHIDE					= 0x80000000,	//!< Hide component.
+};
+
+enum {
+	aFONT_BOLD			= 0x00000001,	//!< Flag used by <tt>setFont()</tt> to set font to bold.
+	aFONT_ITALIC		= 0x00000002,	//!< Flag used by <tt>setFont()</tt> to set font to italic.
+	aFONT_UNDERLINE	= 0x00000004,	//!< Flag used by <tt>setFont()</tt> to set font to underline.
+	aFONT_STRIKE		= 0x00000008,	//!< Flag used by <tt>setFont()</tt> to set font to strike through.
 };
 
 
@@ -73,6 +88,7 @@ class aWindow;
 typedef uint32_t (*widget_event_handler)(aWidget *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t p3);
 
 #ifdef USE_WIN32
+/** Data used when capturing event. */
 struct widget_event_data {
 	WNDPROC proc;
 	aWidget *widget;
@@ -82,33 +98,44 @@ struct widget_event_data {
 #endif
 
 enum widget_type {
-	aWIDGET_VOID,									//!< 
-	aWIDGET_BROWSER,								//!< 
-	aWIDGET_BUTTON,								//!< 
-	aWIDGET_CAIRO,									//!< 
-	aWIDGET_CANVAS,								//!< 
-	aWIDGET_CHECKBOX,								//!< 
-	aWIDGET_COMBOBOX,								//!< 
-	aWIDGET_COMBOBOX_ENTRY,						//!< 
-	aWIDGET_CONTAINER,							//!< 
-	aWIDGET_ENTRY,									//!< 
-	aWIDGET_FRAME,									//!< 
-	aWIDGET_IMAGE,									//!< 
-	aWIDGET_LABEL,									//!< 
-	aWIDGET_LISTBOX,								//!< 
-	aWIDGET_LISTVIEW,								//!< 
-	aWIDGET_MENU,									//!< 
-	aWIDGET_NOTEBOOK,								//!< 
-	aWIDGET_PROGRESS,								//!< 
-	aWIDGET_RADIOBUTTON,							//!< 
-	aWIDGET_SEPARATOR,							//!< 
-	aWIDGET_STATUSBAR,							//!< 
-	aWIDGET_TABLE,									//!< 
-	aWIDGET_TEXT,									//!< 
-	aWIDGET_TREE,									//!< 
-	aWIDGET_WINDOW,								//!< 
+	aWIDGET_VOID,							//!< An empty component, the widget using it is purely virtual, e.g. used for layout or similar.
+	aWIDGET_BROWSER,						//!< The browser component, on GTK+ use the WebKitGtk, on win32 use the Internet Explorer WebControl.
+	aWIDGET_BUTTON,						//!< An ordinary Button.
+	aWIDGET_CAIRO,							//!< A Cairo canvas, for drawing with Cairo.
+	aWIDGET_CANVAS,						//!< A Canvas for drawing using GDK with GTK+, and GDI with win32.
+	aWIDGET_CHECKBOX,						//!< An ordinary Checkbox.
+	aWIDGET_COMBOBOX,						//!< An ordinary Combobox.
+	aWIDGET_COMBOBOX_ENTRY,				//!< An ordinary Combobox with an Entry.
+	aWIDGET_CONTAINER,					//!< A container class, on GTK+ use the VBox, HBox and Table classes, on win32 a Static.
+	aWIDGET_ENTRY,							//!< An ordinary Text Entry box.
+	aWIDGET_FRAME,							//!< A Frame with a label.
+	aWIDGET_IMAGE,							//!< 
+	aWIDGET_LABEL,							//!< An ordinary Label.
+	aWIDGET_LISTBOX,						//!< An ordinary Listbox, not used in GTK+.
+	aWIDGET_LISTVIEW,						//!< An ordinary Listview.
+	aWIDGET_MENU,							//!< An ordinary Menu.
+	aWIDGET_NOTEBOOK,						//!< A Notebook, this is a set of tabs to switch between pages.
+	aWIDGET_PANEL,							//!< 
+	aWIDGET_PROGRESS,						//!< 
+	aWIDGET_RADIOBUTTON,					//!< An ordinary Radiobutton
+	aWIDGET_SCINTILLA,					//!< Using the Scintilla component, need to be built separately.
+	aWIDGET_SEPARATOR,					//!< 
+	aWIDGET_STATUSBAR,					//!< An ordinary Statusbar.
+	aWIDGET_TABLE,							//!< 
+	aWIDGET_TEXT,							//!< A Text component, on GTK+ it's a GtkTextView, or GtkSourceView depending on settings, on win32 it's a RichEdit control.
+	aWIDGET_TREE,							//!< 
+	aWIDGET_WINDOW,						//!< A Window that can be either a Dialog window or an ordinary window.
 };
 
+
+/** The Amanita Library GUI-interface base class from which all other widgets inherit.
+ * 
+ * Inherits the aObject class, and so is part of the aObject-rtti-interface, and all
+ * classes that inherit aWidget is too.
+ * 
+ * Look at examples/gui.cpp to see how to use the GUI-classes.
+ * @ingroup gui
+ */
 class aWidget : public aObject {
 friend class aContainer;
 friend class aWindow;
@@ -119,75 +146,190 @@ aObject_Instance(aWidget)
 /** @endcond */
 
 private:
-	static aHashtable components;
-
 #ifdef USE_WIN32
+	/** A virtual method used by widgets that are user-drawn. Only used in win32.
+	 * @param dis A LPDRAWITEMSTRUCT used for drawing.
+	 * @return This method should return true if it has been used to draw, otherwise false. */
 	virtual bool drawItem(LPDRAWITEMSTRUCT dis) { return true; }
 #endif
 
 protected:
-	widget_event_handler event_handler;
+	widget_event_handler event_handler;		//!< Event handler callback, used to send the client application event messages.
 #ifdef USE_WIN32
-	widget_event_data *event_data;
+	widget_event_data *event_data;			//!< Win32 specific, stores data used when capturing events.
 #endif
-	uint32_t id;
-	widget_type type;								//!< Type of widget
-	aWindow *window;
-	aWidget *parent;								//!< Handle to parent.
-	aWidget *next;
-	aComponent component;						//!< Handle to native widget.
+	uint16_t id;									//!< Unique ID number for widget.
+	widget_type type;								//!< Type of widget.
+	aWindow *window;								//!< Window this widget is created by.
+	aWidget *parent;								//!< Parent of this widget.
+	aWidget *next;									//!< Next component in a linked chain of sibling components that share the same parent.
+	aComponent component;						//!< Handle to native widget, on GTK+ a GtkWidget, on win32 a HANDLE, usually a HWND.
 	void *data;										//!< Any user data associated with the widget.
-	char *text;
-	uint32_t style;
+	char *text;										//!< Text used when creating widget, deleted once component is created.
+	uint32_t style;								//!< Style value, see each widget which styles can be set.
 	int16_t x;										//!< X-position.
 	int16_t y;										//!< Y-position.
 	uint16_t width;								//!< Width.
 	uint16_t height;								//!< Height.
-	uint16_t min_width;
-	uint16_t min_height;
-	uint8_t border;								//!< Border.
-	uint8_t spacing;								//!< Spacing.
+	uint16_t min_width;							//!< Minimum width, the smallest width widget will accept, used for layout.
+	uint16_t min_height;							//!< Minimum height, the smallest height widget will accept, used for layout.
+	uint8_t border;								//!< Border, free space in pixels around widget, used for layout.
+	uint8_t spacing;								//!< Spacing, space in pixels between sibling widgets, used for layout.
 
-	void addComponent(aComponent c) { components.put(c,this); }
-	void deleteComponent(aComponent c) { components.remove(c); }
+	/** Create a unique ID.
+	 * @return A unique ID. */
+	uint16_t makeID();
+
+	/** Add a component to global storage. */
+	void addComponent(uint16_t id,aComponent c);
+
+	/** Add a widget to global storage. */
+	void addWidget();
+
+	/** Remove a widget from global storage. */
+	void removeWidget();
 
 #ifdef USE_WIN32
+	/** Capture events for widget. Only used in win32. */
 	void captureEvents();
 
+	/** Make layout for widget. Only used in win32.
+	 * @param x X-position of widget.
+	 * @param y Y-position of widget.
+	 * @param w Width of widget.
+	 * @param h Height of widget.
+	 */
 	virtual void makeLayout(int x,int y,int w,int h);
-	virtual int getMinimumWidth() { return min_width; }
-	virtual int getMinimumHeight() { return min_height; }
+
+	/** Get minimum width of widget. Only used in win32.
+	 * @return The minimum width.
+	 */
+	virtual int getMinimumWidth();
+
+	/** Get minimum height of widget. Only used in win32.
+	 * @return The minimum height.
+	 */
+	virtual int getMinimumHeight();
+
+	/** Move widget to the dimensions set by makeLayout. Only used in win32.
+	 * @see makeLayout()
+	 * @return The minimum width.
+	 */
 	virtual void move();
 #endif
 
+	/** Protected constructor, this class can not be instantiated directly, but must be inherited.
+	 * @param weh Event handler callback function.
+	 * @param t Type of widget. */
 	aWidget(widget_event_handler weh,widget_type t);
 
-public:	
+public:
+	/** Destructor for class aWidget. */
 	virtual ~aWidget();
 
+	/** Creates the native component from values set in aWidget.
+	 * @param wnd Window widget is created by.
+	 * @param st Style to define the creation of widget. */
 	virtual void create(aWindow *wnd,uint32_t st);
+
+	/** Create all children and sibling widgets.
+	 * @param p Parent component.
+	 * @param n Boolean value, if set to true will create siblings, otherwise only children.
+	 */
 	virtual void createAll(aComponent p,bool n);
 
-	aWidget *getWidget(aComponent c) { return (aWidget *)components.get(c); }
+	/** Get the widget associated to an ID.
+	 * @param id ID of component to look up.
+	 * @return The widget associatd with the ID.
+	 */
+	aWidget *getWidget(uint16_t id);
 
+	/** Get the widget associated to a component.
+	 * @param c Component to look up.
+	 * @return The widget associatd with the component.
+	 */
+	aWidget *getWidget(aComponent c);
+
+	/** Get the window of this widget.
+	 * @return A aWindow object.
+	 */
 	aWindow *getWindow() { return window; }
-	aWidget *getParent() { return parent; }
-	aComponent getComponent() { return component; }
-	widget_event_handler getEventHandler() { return event_handler; }
-	uint32_t getID() { return id; }
-	void setData(void *d) { data = d; }
-	void *getData() { return data; }
-	virtual void setText(const char *str);
-	const char *getText() { return text; }
-	void setFont(aComponent font);
-	int getWidth() { return width; }
-	int getHeight() { return height; }
 
+	/** Get the parent widget of this widget.
+	 * @return A aWidget.
+	 */
+	aWidget *getParent() { return parent; }
+
+	/** Get component the widget class contains. On GTK+ this is a GtkWidget, on win32 it's a HANDLE, usually a HWND.
+	 * @return The component associated with this widget.
+	 */
+	aComponent getComponent() { return component; }
+
+	/** Get event handle callback function used by this widget to send events to client application.
+	 * @return Event handle callback function.
+	 */
+	widget_event_handler getEventHandler() { return event_handler; }
+
+	/** Get the unique ID for the widget.
+	 * @return This widgets ID. */
+	uint16_t getID() { return id; }
+
+	/** Store any kind of data.
+	 * @param d A void * value containing a pointer to some user defined data. */
+	void setData(void *d) { data = d; }
+
+	/** Get data associated with this widget by user.
+	 * @see setData()
+	 * @return A void *.
+	 */
+	void *getData() { return data; }
+
+	/** Set text shown on or in the widget. 
+	 * @param str Text for widget.
+	 */
+	virtual void setText(const char *str);
+
+	/** Get the text for the widget.
+	 * @return A string. */
+	const char *getText();
+
+	/** Set the style for the widget, used when creating widget, and for layout management.
+	 * @param st Style flags, see each widget for which flags can be set.
+	 * @param minw Minimum width.
+	 * @param minh Minimum height.
+	 * @param b Border, free space in pixels around widget.
+	 * @param sp Spacing, space in pixels between sibling widgets.
+	 */
 	void setStyle(uint32_t st,uint16_t minw=0,uint16_t minh=0,uint8_t b=0,uint8_t sp=0);
+
+	/** Get the widget's style.
+	 * @see setStyle()
+	 * @return An int value of the style.
+	 */
 	uint32_t getStyle() { return style; }
 
+	/** Get the width of the widget.
+	 * @return Width of widget.
+	 */
+	int getWidth() { return width; }
+
+	/** Get the height of the widget.
+	 * @return Height of widget.
+	 */
+	int getHeight() { return height; }
+
+	/** Show widget. */
 	void show();
+
+	/** Hide widget. */
 	void hide();
+
+	/** Set the font of this widget. This method must be called after component has been created.
+	 * @param font String with the name of font face, e.g. "Sans Serif".
+	 * @param sz Size in points of font.
+	 * @param st Style of font, can be any of (aFONT_BOLD|aFONT_ITALIC|aFONT_UNDERLINE|aFONT_STRIKE).
+	 */
+	virtual void setFont(const char *font,int sz,int st=0);
 };
 
 

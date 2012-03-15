@@ -85,8 +85,7 @@ enum HTTP_MIMES {
 
 
 /** HTTP Protocol class.
- * This is a cute little class for communicating with a server through the HTTP protocol,
- * using the SDL and SDL_net libraries.
+ * This is a class for communicating with a server through the HTTP protocol.
  *
  * Code to demonstrate how this class can be used:
  * @code
@@ -94,14 +93,15 @@ enum HTTP_MIMES {
 #include "amanita/net/aHttp.h"
 
 int main(int argc, char *argv[]) {
+	aApplication app;
 	aHttp http;
-	aSocket::init();
+	app.open(argc,argv,aINIT_SOCKETS);
 	http.setUserAgent("aHttp Class User-Agent, v.0.1");
 
 	http.setFormValue("test1","test1");
 	http.setFormValue("test2","test2=(test1&test2)");
-	http.setFormFile("file","file.txt","text/plain",false);
-	http.setFormFile("image","image.png","image/png",true);
+	http.setFormFile("file","/path/to/file/file.txt","text/plain",false);
+	http.setFormFile("image","/path/to/file/image.png","image/png",true);
 
 	http.post("www.host.com","script.php");
 
@@ -115,14 +115,6 @@ int main(int argc, char *argv[]) {
  */
 class aHttp {
 private:
-	struct packet {
-		char *file;
-		char *content;
-		bool loaded;
-		bool binary;
-		void *data;
-		long len;
-	};
 	int timeout;				//!< Timeout for server responce
 	aHashtable headers;		//!< Request headers
 	aHashtable form;			//!< Post form
