@@ -9,7 +9,7 @@ uint16_t aClass::id_index = 0;
 
 aClass::aClass(const char *nm,aClass *s) : name(nm),super(s) {
 	id = aClass::id_index++;
-debug_output("aClass::aClass(name: %s, id: %" PRIu32 ", super: %s [%" PRIu32 ",%p,%p,%d])\n",name,id,super? super->name : "-",super? super->id : -1,super,super? super->sub : 0,super? super->nsub : 0);
+//debug_output("aClass::aClass(name: %s, id: %" PRIu32 ", super: %s [%" PRIu32 ",%p,%p,%d])\n",name,id,super? super->name : "-",super? super->id : -1,super,super? super->sub : 0,super? super->nsub : 0);
 	if(super) {
 		if(!super->sub) super->sub = (aClass **)malloc(sizeof(aClass *));
 		else super->sub = (aClass **)realloc(super->sub,(super->nsub+1)*sizeof(aClass *));

@@ -11,13 +11,6 @@
 #include <amanita/gui/aWidget.h>
 
 
-enum {
-	/** Win32 specific, if set will create a Static on which children are placed, otherwise
-	 * this widget is purely wirtual and only used for layout management, and children are
-	 * placed on the first solid parent componenet in the hierarchy. */
-	aCONTAINER_HARD				= 0x00000001,
-};
-
 
 class aContainer : public aWidget {
 friend class aWindow;

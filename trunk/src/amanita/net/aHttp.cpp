@@ -123,6 +123,15 @@ const char *http_mimes[] = {
 	"multipart/mixed",
 };
 
+struct packet {
+	char *file;
+	char *content;
+	bool loaded;
+	bool binary;
+	void *data;
+	long len;
+};
+
 
 aHttp::aHttp() : timeout(-1),multipart(0),ver(.0f),status(0) {}
 
@@ -259,30 +268,35 @@ debug_output("Boundary 1: %s\n",boundary.toCharArray());
 		}
 		iter = form.iterate();
 		while((p=(void *)iter.next())) if(iter.valueType()==TYPE_CHAR_P)
-			file.append(s[0]).append(boundary).append(s[1]). // "--".boundary."\r\n"
-				append(http_headers[HTTP_CONTENT_DISPOSITION]).append(s[3]).append(s[7]).
-					append(';').append(s[5]).append((const char *)iter.key()).append('"').append(s[2]).
-						append((const char *)p).append(s[1]);
+			file << s[0] << boundary << s[1] // "--".boundary."\r\n"
+				<< http_headers[HTTP_CONTENT_DISPOSITION] << s[3] << s[7]
+					<< ';' << s[5] << (const char *)iter.key() << '"' << s[2]
+						<< (const char *)p << s[1];
 		iter = form.iterate();
 		while((p=(void *)iter.next())) if(iter.valueType()==TYPE_VOID_P) {
-			file.append(s[0]).append(boundary).append(s[1]). // "--".boundary."\r\n"
-				append(http_headers[HTTP_CONTENT_DISPOSITION]).append(s[3]).append(s[7]).
-					append(';').append(s[5]).append((const char *)iter.key()).append('"').
-						append(';').append(s[6]).append(((packet *)p)->file).append('"').append(s[1]).
-							append(http_headers[HTTP_CONTENT_TYPE]).append(s[3]).append(((packet *)p)->content).append(s[1]);
-			if(((packet *)p)->binary) file.append(s[8]).append(s[1]);
-			file.append(s[1]).append((const char *)((packet *)p)->data,((packet *)p)->len).append(s[1]);
+			file << s[0] << boundary << s[1] // "--".boundary."\r\n"
+				<< http_headers[HTTP_CONTENT_DISPOSITION] << s[3] << s[7]
+					<< ';' << s[5] << (const char *)iter.key() << '"'
+						<< ';' << s[6] << ((packet *)p)->file << '"' << s[1]
+							<< http_headers[HTTP_CONTENT_TYPE] << s[3] << ((packet *)p)->content << s[1];
+			if(((packet *)p)->binary) file << s[8] << s[1];
+			file << s[1];
+			file.append((const char *)((packet *)p)->data,((packet *)p)->len);
+			file << s[1];
 		}
-		file.append(s[0]).append(boundary).append(s[0]).append(s[1]);
+		file << s[0] << boundary << s[0] << s[1];
 		char mime[32+boundary.length()];
 		sprintf(mime,"%s;%s%s",http_mimes[HTTP_MULTIPART_FORM_DATA],s[4],boundary.toCharArray());
 		headers.put(http_headers[HTTP_CONTENT_TYPE],mime);
 	} else {
 		aString key,value;
-		if(form.size()>0) while(iter.next()) {
-			if(file.length()>0) file.append('&');
-			key = (const char *)iter.key(),value = (const char *)iter.value();
-			file.append(key.encodeURL()).append("=").append(value.encodeURL());
+		if(form) while(iter.next()) {
+			if(file) file << '&';
+			key = (const char *)iter.key();
+			key.encodeURL();
+			value = (const char *)iter.value();
+			value.encodeURL();
+			file << key << '=' << value;
 		}
 		headers.put(http_headers[HTTP_CONTENT_TYPE],http_mimes[HTTP_FORM_URLENCODED]);
 	}
@@ -363,11 +377,11 @@ debug_output("aHttp::request(host=%s,url=%s)\n",host,url);
 				sprintf(buf,"%lu",(unsigned long)len);
 				headers.put(http_headers[HTTP_CONTENT_LENGTH],buf);
 				aString header(2048);
-				header.append(http_methods[method]).append(" /").append(url).append(" HTTP/1.1\r\n");
+				header << http_methods[method] << " /" << url << " HTTP/1.1\r\n";
 				aHashtable::iterator iter = headers.iterate();
 				while(iter.next())
-					header.append((const char *)iter.key()).append(": ").append((const char *)iter.value()).append("\r\n");
-				header.append("\r\n");
+					header << (const char *)iter.key() << ": " << (const char *)iter.value() << "\r\n";
+				header << "\r\n";
 debug_output("aHttp::request(header=\"%s\",len=%lu)\n",header.toCharArray(),(unsigned long)header.length());
 				if(data && len) {
 debug_output("aHttp::request(data=\"%s\",len=%lu)\n",data,(unsigned long)len);
@@ -424,10 +438,10 @@ debug_output("aHttp::request(header: %s = %s)\n",p1,p2);
 							if(!strncmp(buf,"HTTP/",5)) sscanf(buf,"HTTP/%f %d",&ver,&status);
 						}
 
-						p1 = response.getString(http_headers[HTTP_TRANSFER_ENCODING]);
+						p1 = (char *)response.getString(http_headers[HTTP_TRANSFER_ENCODING]);
 debug_output("aHttp::request(encoding: %s)\n",p1);
 						//chunked = p1? strcmp(p1,"identity")!=0 : true;
-						p2 = response.getString(http_headers[HTTP_CONTENT_LENGTH]);
+						p2 = (char *)response.getString(http_headers[HTTP_CONTENT_LENGTH]);
 debug_output("aHttp::request(content length: %s)\n",p2);
 						n = p2? atol(p2) : 0;
 						chunked = p2? false : true;

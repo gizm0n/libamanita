@@ -59,14 +59,15 @@ void aChoice::create(aWindow *wnd,uint32_t st) {
 
 #ifdef USE_WIN32
 	if(items && items->size()) {
-		for(i=0,n=items->size(); i<n; ++i) {
-			str = (char *)(*items)[i];
 #ifdef USE_WCHAR
-			int len = strlen(str)+1;
-			wchar_t wstr[len];
-			char2w(wstr,str,len);
+		wchar_t wstr[257];
+#endif
+		for(i=0,n=items->size(); i<n; ++i) {
+#ifdef USE_WCHAR
+			char2w(wstr,(char *)(*items)[i]);
 			SendMessage((HWND)component,CB_ADDSTRING,0,(LPARAM)wstr);
 #else
+			str = (char *)(*items)[i];
 			SendMessage((HWND)component,CB_ADDSTRING,0,(LPARAM)str);
 #endif
 		}
@@ -98,19 +99,13 @@ void aChoice::addItem(const char *str) {
 			else gtk_combo_box_append_text(GTK_COMBO_BOX(component),(gchar *)str);
 #endif
 #ifdef USE_WIN32
-#ifdef USE_WCHAR
-			int len = strlen(str)+1;
-			wchar_t wstr[len];
-			char2w(wstr,str,len);
-debug_output("aChoice::addItem(wstr: %ls)\n",wstr);
-			SendMessage((HWND)component,CB_ADDSTRING,0,(LPARAM)wstr);
-#else
-			SendMessage((HWND)component,CB_ADDSTRING,0,(LPARAM)str);
-#endif
+			tchar_t *t = tstrdup(str);
+			SendMessage((HWND)component,CB_ADDSTRING,0,(LPARAM)t);
+			tfree(t);
 #endif
 		} else {
 			if(!items) items = new aVector();
-			*items += str;
+			*items << str;
 		}
 	}
 }

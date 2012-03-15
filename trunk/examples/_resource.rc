@@ -1,0 +1,6 @@
+#include <windows.h>
+#include "_resource.h"
+
+AMANITA_ICON	ICON		"../data/Amanita.ico"
+STOCK_ICONS		BITMAP	"../data/Win32Icons.bmp"
+

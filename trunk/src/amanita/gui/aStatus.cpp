@@ -9,10 +9,6 @@
 #include <amanita/gui/aStatus.h>
 
 
-#ifdef USE_WIN32
-extern WCHAR *char2w(char *c);
-#endif
-
 
 aObject_Inheritance(aStatus,aWidget)
 
@@ -63,7 +59,6 @@ void aStatus::create(aWindow *wnd,uint32_t st) {
 		}
 		g_list_free (children);
 	}
-	addComponent(component);
 #endif
 
 	aWidget::create(wnd,0);
@@ -85,14 +80,9 @@ void aStatus::update(int n,const char *str) {
 #endif
 
 #ifdef USE_WIN32
-#ifdef USE_WCHAR
-	int len = strlen(str)+1;
-	wchar_t wstr[len];
-	char2w(wstr,str,len);
-	SendMessage((HWND)component,SB_SETTEXT,n,(LPARAM)wstr);
-#else
-	SendMessage((HWND)component,SB_SETTEXT,n,(LPARAM)str);
-#endif
+	tchar_t *t = tstrdup(str);
+	SendMessage((HWND)component,SB_SETTEXT,n,(LPARAM)t);
+	tfree(t);
 #endif
 }
 

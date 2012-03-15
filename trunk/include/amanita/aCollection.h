@@ -95,8 +95,7 @@ typedef uint32_t style_t;
  * It extends the aObject-class so it can be implemented in the class-hierarchy of that class. All subclasses of
  * aCollection obviously has to implement the aObject-class style to maintain rtti-structure, though not doing so
  * only means pointing to the super-class aClass instead.
- * @ingroup amanita
- */
+ * @ingroup amanita */
 class aCollection : public aObject {
 /** @cond */
 aObject_Instance(aCollection)
@@ -109,6 +108,15 @@ protected:
 public:
 	/** Constructor. */
 	aCollection() : aObject(),sz(0),cap(0) {}
+
+	/** @name Operators
+	 * @{ */
+	operator bool() const { return (bool)(sz>0); }
+	operator int() const { return (int)sz; }
+	operator unsigned int() const { return (unsigned int)sz; }
+	operator long() const { return (long)sz; }
+	operator unsigned long() const { return (unsigned long)sz; }
+	/** @} */
 
 	/** Size of the collection.
 	 * @return Size of the collection. */

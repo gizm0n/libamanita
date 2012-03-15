@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <amanita/gui/aMenu.h>
-#include <amanita/gui/aStatusbar.h>
 #include <amanita/gui/aWindow.h>
 
 
@@ -86,7 +85,6 @@ void aMenu::create(aWindow *wnd,uint32_t st) {
 	component = (aComponent)CreateMenu();
 #endif
 
-	addComponent(component);
 	window = wnd;
 
 	for(i=0,m=items; m && i<nitems; ++i) {
@@ -154,9 +152,9 @@ debug_output("aMenu::create(m: %p, wstr: %ls)\n",m,wstr);
 #ifdef USE_WCHAR
 				char2w(wstr,str,256);
 debug_output("aMenu::create(m: %p, parent: %p, submenu: %p, wstr: %ls)\n",m,m->parent,m->parent? m->parent->submenu : 0,wstr);
-				AppendMenu((HMENU)m->parent->submenu,MF_STRING,(aWIDGET_MENU<<9)|m->index,wstr);
+				AppendMenu((HMENU)m->parent->submenu,MF_STRING,aWIDGET_MAKE_ID(aWIDGET_MENU,m->index),wstr);
 #else
-				AppendMenu((HMENU)m->parent->submenu,MF_STRING,(aWIDGET_MENU<<9)|m->index,str);
+				AppendMenu((HMENU)m->parent->submenu,MF_STRING,aWIDGET_MAKE_ID(aWIDGET_MENU,m->index),str);
 #endif
 			}
 //			if(!m->sensitive) gtk_widget_set_sensitive(m->item,false);

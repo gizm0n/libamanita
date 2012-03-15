@@ -38,7 +38,7 @@ aString::aString(const char *s,size_t l) : aObject() {
 	} else str = 0,len = 0,cap = 0;
 }
 
-aString::aString(aString *s) : aObject() {
+aString::aString(const aString *s) : aObject() {
 	if(!s || !s->str) str = 0,len = 0,cap = 0;
 	else {
 		len = s->len,cap = s->cap,str = (char *)malloc(cap+1);
@@ -47,7 +47,7 @@ aString::aString(aString *s) : aObject() {
 	}
 }
 
-aString::aString(aString &s) : aObject() {
+aString::aString(const aString &s) : aObject() {
 	if(!s.str) str = 0,len = 0,cap = 0;
 	else {
 		len = s.len,cap = s.cap,str = (char *)malloc(cap+1);
@@ -61,122 +61,145 @@ aString::~aString() {
 	str = 0,len = 0,cap = 0;
 }
 
-aString &aString::append(char c) {
-	if(len==cap) resize(0);
-	if(c!='\0') str[len++] = c;
-	str[len] = '\0';
-	return *this;
-}
-aString &aString::append(char c,size_t n) {
-	resize(n);
-	while(n--) str[len++] = c;
-	str[len] = '\0';
-	return *this;
+size_t aString::insert(long n,char c) {
+	if(c!='\0') {
+		if(len==cap) resize(0);
+		if(n==len) {
+			str[len] = c;
+			str[++len] = '\0';
+		} else {
+			n = move(n,1);
+			str[n] = c;
+		}
+	}
+	return 1;
 }
 
-aString &aString::append(const char *s,size_t l) {
+size_t aString::insert(long n,const char *s,size_t l) {
 	if(s) {
 		if(!l) l = strlen(s);
 		resize(l);
-		memcpy(&str[len],s,l);
-		len += l;
-		str[len] = '\0';
-	}
-	return *this;
-}
-aString &aString::append(const char *s,size_t l,size_t n) {
-	if(s && n>0) {
-		if(!l) l = strlen(s);
-		resize(l*n);
-		while(n--) {
+		if(n==len) {
 			memcpy(&str[len],s,l);
 			len += l;
+			str[len] = '\0';
+		} else {
+			n = move(n,l);
+			memcpy(&str[n],s,l);
 		}
-		str[len] = '\0';
 	}
-	return *this;
+	return l;
+}
+
+size_t aString::insert(long n,const char *s,long o,long l) {
+	if(s && *s) {
+		if(o<0 || l<=0) {
+			long l1 = (long)strlen(s);
+			if(o<0) o = l1+o;
+			if(l<=0) l = l1-o+l;
+		}
+		resize(l);
+		if(n==len) {
+			memcpy(&str[len],&s[o],l);
+			len += l;
+			str[len] = '\0';
+		} else {
+			n = move(n,l);
+			memcpy(&str[n],&s[o],l);
+		}
+	}
+	return l;
 }
 
 #if __WORDSIZE < 64
-aString &aString::appendi32(int32_t i) {
-	if(i==0) return append('0');
+size_t aString::inserti32(long n,int32_t i) {
+	if(i>=0 && i<=9) return insert(n,(char)('0'+i));
 	char s[13],*p = s+12,c = 0;
 	*p-- = '\0';
 	if(i<0) c = '-',i = -i;
 	for(; i; i/=10) *p-- = '0'+(i%10);
 	if(c) *p-- = c;
-	return append(p+1);
+	return insert(n,p+1);
 }
 
-aString &aString::appendu32(uint32_t i) {
-	if(i==0) return append('0');
+size_t aString::insertu32(long n,uint32_t i) {
+	if(i<=9) return insert(n,(char)('0'+i));
 	char s[12],*p = s+11;
 	*p-- = '\0';
 	for(; i; i/=10) *p-- = '0'+(i%10);
-	return append(p+1);
+	return insert(n,p+1);
 }
 #endif
 
-aString &aString::appendi64(int64_t i) {
-	if(i==0) return append('0');
+size_t aString::inserti64(long n,int64_t i) {
+	if(i>=0 && i<=9) return insert(n,(char)('0'+i));
 	char s[22],*p = s+21,c = 0;
 	*p-- = '\0';
 	if(i<0) c = '-',i = -i;
 	for(; i; i/=10) *p-- = '0'+(i%10);
 	if(c) *p-- = c;
-	return append(p+1);
+	return insert(n,p+1);
 }
 
-aString &aString::appendu64(uint64_t i) {
-	if(i==0) return append('0');
+size_t aString::insertu64(long n,uint64_t i) {
+	if(i<=9) return insert(n,(char)('0'+i));
 	char s[21],*p = s+20;
 	*p-- = '\0';
 	for(; i; i/=10) *p-- = '0'+(i%10);
-	return append(p+1);
+	return insert(n,p+1);
 }
 
-aString &aString::append(double f,int n,char c) {
+size_t aString::insert(long n,double f,int d,char c) {
 	int64_t n1 = (int64_t)f;
 	uint32_t n2,m = 1;
-	if(n>10) n = 10;
-	while(0<n--) m *= 10;
+	char s[34],*p = s+33;
+	if(d>10) d = 10;
+	while(0<d--) m *= 10;
 	n2 = (uint32_t)round(fabs(f-n1)*m);
-	return append(n1).append(c).append(n2);
+
+	*p-- = '\0';
+	for(; d && n2; --d,n2/=10) *p-- = '0'+(n2%10);
+	*p-- = c;
+	if(n1<0) c = '-',n1 = -n1;
+	else c = 0;
+	for(; n1; n1/=10) *p-- = '0'+(n1%10);
+	if(c) *p-- = c;
+	return insert(n,p+1);
 }
 
-aString &aString::appendHex(uint64_t i,bool upper) {
-	if(i==0) return append('0');
-	char h[17],*p = h+16;
+size_t aString::insertHex(long n,uint64_t i,bool upper) {
 	const char *s = upper? upper_hex : lower_hex;
+	if(i<=0xf) return insert(n,s[i&0xf]);
+	char h[17],*p = h+16;
 	*p-- = '\0';
 	for(; i; i>>=4) *p-- = s[i&0xf];
-	return append(p+1);
+	return insert(n,p+1);
 }
 
-aString &aString::appendBase(int64_t i,int base) {
-	if(i==0) return append('0');
-	char s[22],*p = s+21,c = 0,n;
+size_t aString::insertBase(long n,int64_t i,int base) {
+	if(i==0) return insert(n,'0');
+	char s[22],*p = s+21,c = 0,b;
 	*p-- = '\0';
 	if(i<0) c = '-',i = -i;
-	for(; i; i/=base) n = i%base,*p-- = n<=9? '0'+n : 'A'+n-10;
+	for(; i; i/=base) b = i%base,*p-- = b<=9? '0'+b : 'A'+b-10;
 	if(c) *p-- = c;
-	return append(p+1);
+	return insert(n,p+1);
 }
 
-aString &aString::appendBase(uint64_t i,int base) {
-	if(i==0) return append('0');
-	char s[22],*p = s+21,n;
+size_t aString::insertBase(long n,uint64_t i,int base) {
+	if(i==0) return insert(n,'0');
+	char s[22],*p = s+21,b;
 	*p-- = '\0';
-	for(; i; i/=base) n = i%base,*p-- = n<=9? '0'+n : 'A'+n-10;
-	return append(p+1);
+	for(; i; i/=base) b = i%base,*p-- = b<=9? '0'+b : 'A'+b-10;
+	return insert(n,p+1);
 }
 
-aString &aString::appendf(const char *f, ...) {
+size_t aString::appendf(const char *f, ...) {
 	va_list list;
 	va_start(list,f);
-	vappendf(f,list);
+	size_t l = vappendf(f,list);
 	va_end(list);
-	return *this;
+	return l;
 }
 
 enum {
@@ -191,13 +214,14 @@ enum {
 	F_z				= 0x2000,
 };
 
-aString &aString::vappendf(const char *f,va_list list) {
-	if(!f || !*f) return *this;
+size_t aString::vappendf(const char *f,va_list list) {
+	if(!f || !*f) return 0;
 	int c;
-	uint32_t flags,*w,w1,w2,w2default,l;
+	uint32_t flags,*w,w1,w2,w2default,ln;
 	char pad;
+	size_t l = len;
 	while(1) {
-debug_output("aString::vappendf(f=%s)\n",f);
+//debug_output("aString::vappendf(f=%s)\n",f);
 		while((c=*f++) && c!='%') {
 			if(len==cap) resize(0);
 			str[len++] = c;
@@ -229,8 +253,8 @@ debug_output("aString::vappendf(f=%s)\n",f);
 			case 'c':
 			case 'C':
 				if(c=='c' || c=='C') c = va_arg(list,int);
-				if(w1>0) append((const char)c,w1);
-				else append(c);
+				if(w1>0) insert(len,(const char)c,w1);
+				else insert(len,c);
 				break;
 			case 'd':
 			case 'D':
@@ -239,39 +263,39 @@ debug_output("aString::vappendf(f=%s)\n",f);
 			{
 				if(flags&F_z) {
 					size_t n = va_arg(list,size_t);
-					if((flags&F_PLUS) && n>=0) append('+');
-					append(n);
+					if((flags&F_PLUS) && n>=0) insert(len,'+');
+					insert(len,n);
 				} else if(flags&F_ll) {
 					long long n = va_arg(list,long long);
-					if((flags&F_PLUS) && n>=0) append('+');
-					append(n);
+					if((flags&F_PLUS) && n>=0) insert(len,'+');
+					insert(len,n);
 				} else if(flags&F_l) {
 					long n = va_arg(list,long);
-					if((flags&F_PLUS) && n>=0) append('+');
-					append(n);
+					if((flags&F_PLUS) && n>=0) insert(len,'+');
+					insert(len,n);
 				} else {
 					int n = va_arg(list,int);
-					if((flags&F_PLUS) && n>=0) append('+');
-					append(n);
+					if((flags&F_PLUS) && n>=0) insert(len,'+');
+					insert(len,n);
 				}
 				break;
 			}
 			case 'u':
 			case 'U':
 			{
-				if(flags&F_PLUS) append('+');
+				if(flags&F_PLUS) insert(len,'+');
 				if(flags&F_z) {
 					size_t n = va_arg(list,size_t);
-					append(n);
+					insert(len,n);
 				} else if(flags&F_ll) {
 					unsigned long long n = va_arg(list,unsigned long long);
-					append(n);
+					insert(len,n);
 				} else if(flags&F_l) {
 					unsigned long n = va_arg(list,unsigned long);
-					append(n);
+					insert(len,n);
 				} else {
 					unsigned int n = va_arg(list,unsigned int);
-					append(n);
+					insert(len,n);
 				}
 				break;
 			}
@@ -279,48 +303,49 @@ debug_output("aString::vappendf(f=%s)\n",f);
 			case 'X':
 			{
 				uint64_t n = 0;
-				if(flags&F_PLUS) append('+');
+				if(flags&F_PLUS) insert(len,'+');
 				if(flags&F_z) n = (uint64_t)va_arg(list,size_t);
 				else if(flags&F_ll) n = (uint64_t)va_arg(list,unsigned long long);
 				else if(flags&F_l) n = (uint64_t)va_arg(list,unsigned long);
 				else n = (uint64_t)va_arg(list,unsigned int);
-				appendHex(n,16);
+				insertHex(len,n,16);
 				break;
 			}
 			case 'f':
 			case 'F':
 			{
 				double n = va_arg(list,double);
-debug_output("n=%f,flags=%" PRIx32 "\n",n,flags);
-				if((flags&F_PLUS) && n>=0.) append('+');
-				append(n,(int)(w2default? ((flags&F_L)? 6 : w2default) : w2));
+//debug_output("n=%f,flags=%" PRIx32 "\n",n,flags);
+				if((flags&F_PLUS) && n>=0.) insert(len,'+');
+				insert(len,n,(int)(w2default? ((flags&F_L)? 6 : w2default) : w2));
 				break;
 			}
 			case 's':
 			case 'S':
 			{
 				char *s = va_arg(list,char *);
-debug_output("s=%s\n",s);
-				l = strlen(s);
-				if(w2 && l>w2) l = w2;
-				if(w1 && !(flags&F_MINUS) && l<w1) append(pad,w1-l);
-				append(s,l);
-				if(w1 && (flags&F_MINUS) && l<w1) append(pad,w1-l);
+//debug_output("s=%s\n",s);
+				ln = strlen(s);
+				if(w2 && ln>w2) ln = w2;
+				if(w1 && !(flags&F_MINUS) && ln<w1) insert(len,pad,w1-ln);
+				insert(len,s,ln);
+				if(w1 && (flags&F_MINUS) && ln<w1) insert(len,pad,w1-ln);
 				break;
 			}
 		}
 	}
 	str[len] = '\0';
-	return *this;
+	return len-l;
 }
 
-aString &aString::appendUntil(const char **s,const char *end,const char *trim,bool uesc) {
-	if(!s || !*s || !**s) return *this;
+size_t aString::appendUntil(const char **s,const char *end,const char *trim,bool uesc) {
+	if(!s || !*s || !**s) return 0;
 	if(!trim) trim = end;
+	size_t l = len;
 	if(!end || !*end) {
-		append(*s);
-		*s += strlen(*s);
-		return *this;
+		insert(len,*s);
+		l = strlen(*s),*s += l;
+		return l;
 	}
 	const char *s2 = *s;
 	int c,c2 = -1,t = trim && *trim? 0 : 1;
@@ -374,11 +399,11 @@ aString &aString::appendUntil(const char **s,const char *end,const char *trim,bo
 	str[len] = '\0';
 //debug_output("[%s]\n",str);
 	*s = s2;
-	return *this;
+	return len-l;
 }
 
-aString &aString::appendUntil(FILE *fp,const char *end,const char *trim,bool uesc) {
-	if(!fp) return *this;
+size_t aString::appendUntil(FILE *fp,const char *end,const char *trim,bool uesc) {
+	if(!fp) return 0;
 	if(!trim) trim = end;
 	if(!end) {
 		fpos_t pos;
@@ -390,6 +415,7 @@ aString &aString::appendUntil(FILE *fp,const char *end,const char *trim,bool ues
 			fsetpos(fp,&pos);
 		}
 	}
+	size_t l = len;
 	int c,c2 = -1,t = trim && *trim? 0 : 1;
 	unsigned long l2 = 0;
 //debug_output("aString::appendUntil: ");
@@ -440,17 +466,37 @@ aString &aString::appendUntil(FILE *fp,const char *end,const char *trim,bool ues
 	if(trim && *trim!='\0') while(len>l2 && strchr(trim,str[len-1])) len--;
 	str[len] = '\0';
 //debug_output("[%s]\n",str);
-	return *this;
+	return len-l;
 }
 
-aString &aString::include(const char *fn) {
+size_t aString::repeat(char c,size_t n) {
+	resize(n);
+	for(size_t i=0; i<n; ++i) str[len++] = c;
+	str[len] = '\0';
+	return n;
+}
+
+size_t aString::repeat(const char *s,size_t l,size_t n) {
+	if(s && n>0) {
+		if(!l) l = strlen(s);
+		resize(l*n);
+		for(size_t i=0; i<n; ++i) {
+			memcpy(&str[len],s,l);
+			len += l;
+		}
+		str[len] = '\0';
+	}
+	return l*n;
+}
+
+size_t aString::include(const char *fn) {
 	FILE *fp = fopen(fn,"r");
-	append(fp,true);
+	size_t l = append(fp,true);
 	fclose(fp);
-	return *this;
+	return l;
 }
 
-aString &aString::includef(const char *format, ...) {
+size_t aString::includef(const char *format, ...) {
 	char buf[128];
 	va_list args;
    va_start(args,format);
@@ -459,73 +505,113 @@ aString &aString::includef(const char *format, ...) {
 	return include(buf);
 }
 
-aString &aString::print(FILE *fp) {
+size_t aString::print(FILE *fp) {
+	if(fp) return fwrite(str,len,1,fp);
+	return 0;
+}
+
+size_t aString::println(FILE *fp) {
+	size_t n = 0;
 	if(fp) {
-		size_t n;
-		n = fwrite(str,len,1,fp);
+		n += fwrite(str,len,1,fp);
+		n += fwrite(endline,strlen(endline),1,fp);
 	}
-	return *this;
+	return n;
 }
 
-aString &aString::println(FILE *fp) {
-	if(fp) {
-		size_t n;
-		n = fwrite(str,len,1,fp);
-		n = fwrite(endline,strlen(endline),1,fp);
-	}
-	return *this;
-}
-
-void aString::printUTF8(char *d,const char *s,size_t offset,size_t len) {
-	char c;
-	size_t i,n;
-	if(offset) for(i=0; *s!='\0' && i<offset; i++) {
-		if(*s&0x80) {
-			for(c=(*s<<1),n=1; c&0x80 && n<8; c<<=1,n++);
-			while(n--) s++;
-		} else s++;
-	}
-	if(len) for(i=0; *s!='\0' && i<len; i++) {
-		if(*s&0x80) {
-			for(c=(*s<<1),n=1; c&0x80 && n<8; c<<=1,n++);
-			while(n--) *d++ = *s++;
-		} else *d++ = *s++;
-	}
-	*d = '\0';
-}
-
-long aString::indexOf(const char *s,size_t l) {
-	if(str && *str && s && *s) {
-		if(!l) l = strlen(s);
-		for(size_t i=0,n=len-l; i<n; i++)
-			if(str[i]==*s && str[i+1]==s[1] && strncmp(&str[i],s,l)==0) return i;
+long aString::find(char c,long o,long l) {
+	if(str && *str && c!='\0') {
+		if(o<0) o = (long)len+o;
+		if(l<=0) l = (long)len-o+l;
+		if(o>=0 && l>0 && o+l<=len) {
+			for(size_t i=o,n=o+l; i<n; ++i)
+				if(str[i]==c) return i;
+		}
 	}
 	return -1;
 }
 
-bool aString::startsWith(const char *s,size_t l) { return str && s? (strncmp(str,s,l? l : strlen(s))==0) : false; }
-bool aString::equals(const char *s) { return str && s? strcmp(str,s)==0 : false; }
-int aString::compare(const char *s) { return str && s? strcmp(str,s) : (str? -256 : 256); }
+long aString::find(const char *s,long o,long l,long sl) {
+	if(str && *str && s && *s) {
+		if(o<0) o = (long)len+o;
+		if(l<=0) l = (long)len-o+l;
+		if(sl<=0) sl = (long)strlen(s)+sl;
+		if(o>=0 && l>0 && sl>0 && o+l<=len) {
+			for(size_t i=o,n=o+l; i<n; ++i)
+				if(str[i]==*s && strncmp(&str[i],s,sl)==0) return i;
+		}
+	}
+	return -1;
+}
 
-size_t aString::count(const char *s) {
-	if(!s || !*s || !str || !len) return 0;
-	char *p = str;
-	size_t n = 0,sl = strlen(s);
-	for(; *p && (p=strstr(p,s)); p+=sl,n++);
-	return n;
+long aString::findChar(const char *s,long o,long l) {
+	if(str && *str && s && *s) {
+		if(o<0) o = (long)len+o;
+		if(l<=0) l = (long)len-o+l;
+		if(o>=0 && l>0 && o+l<=len) {
+			for(size_t i=o,n=o+l; i<n; ++i)
+				if(strchr(s,str[i])) return i;
+		}
+	}
+	return -1;
+}
+
+bool aString::equals(const char *s,long o,long l) {
+	if(str && *str && s && *s) {
+		if(o<0) o = (long)len+o;
+		if(l<=0) l = (long)strlen(s)+l;
+		if(o>=0 && l>0 && o+l<=len)
+			return strncmp(&str[o],s,l)==0;
+	}
+	return false;
+}
+
+int aString::compare(const char *s,long o,long l) {
+	if(str && *str && s && *s) {
+		if(o<0) o = (long)len+o;
+		if(l<=0) l = (long)strlen(s)+l;
+		if(o>=0 && l>0 && o+l<=len)
+			return strncmp(&str[o],s,l);
+	}
+	return str? -1 : 1;
+}
+
+long aString::matchNestedTags(const char *tag1,const char *tag2,long o,long l,const char *c1,const char *c2) {
+	size_t i,n,l1 = strlen(tag1),l2 = strlen(tag2);
+	int nest;
+	if(o<0) o = (long)len+o;
+	if(l<=0) l = (long)len-o+l;
+	for(i=o,n=o+l,nest=0; i<n; ++i) {
+		if(str[i]==*tag1 && !strncmp(&str[i],tag1,l1) &&
+				(!c1 || strchr(c1,str[i+l1]))) i += l1-1,++nest;
+		else if(str[i]==*tag2 && !strncmp(&str[i],tag2,l2) &&
+				(!c2 || strchr(c2,str[i+l2]))) {
+			if(--nest==0) return i;
+			i += l2-1;
+		}
+	}
+	return -1;
 }
 
 size_t aString::count(char c) {
 	if(c=='\0' || !str || !len) return 0;
 	char *p = str;
 	size_t n = 0;
-	for(; *p; p++) if(*p==c) n++;
+	for(; *p; p++) if(*p==c) ++n;
 	return n;
 }
 
-aString &aString::replace(const char *s,const char *r) {
-	if(!s || !*s || !r) return *this;
-	size_t n;
+size_t aString::count(const char *s) {
+	if(!s || !*s || !str || !len) return 0;
+	char *p = str;
+	size_t n = 0,sl = strlen(s);
+	for(; *p && (p=strstr(p,s)); p+=sl,++n);
+	return n;
+}
+
+size_t aString::replace(const char *s,const char *r) {
+	if(!s || !*s || !r) return 0;
+	size_t n,l = len;
 	n = count(s);
 	if(n>0) {
 		char *p = str,*p1 = p,*p2;
@@ -536,16 +622,159 @@ aString &aString::replace(const char *s,const char *r) {
 		len = 0;
 		for(; *p1 && (p2=strstr(p1,s)); p1=p2+sl) {
 			n = (size_t)(p2-p1);
-			if(n) append(p1,n);
-			append(r);
+			if(n) insert(len,p1,n);
+			insert(len,r);
 		}
-		if(*p1) append(p1);
+		if(*p1) insert(len,p1);
 		::free(p);
 	}
-	return *this;
+	return len-l;
 }
 
-aString &aString::escape() {
+size_t aString::replace(const char *s, ...) {
+	size_t i,n,c = 32,l = len;
+	va_list vl;
+	const char **arr = (const char **)malloc(c*sizeof(const char *)),*vp = s;
+	va_start(vl,s);
+//debug_output("aString::replace(arr[%d]: \"%s\")\n",0,s);
+	for(n=1,arr[0]=vp; 1; ++n) {
+		vp = va_arg(vl,const char *);
+		arr[n] = vp;
+		if(!vp) break;
+//debug_output("aString::replace(arr[%d]: \"%s\")\n",(int)n,vp? vp : "NULL");
+		if(n==c) c <<= 1,arr = (const char **)realloc(arr,c*sizeof(const char *));
+	}
+	va_end(vl);
+	replace(arr);
+	::free(arr);
+	return len-l;
+}
+
+size_t aString::replace(const char **arr) {
+	size_t i,n,c = 32,l = len;
+	for(n=0; arr[n]; ++n);
+	if(n>1) {
+		char *p = str;
+		size_t p1;
+		int ln[n],r;
+//debug_output("aString::replace(n: %d,cap: %d)\n",(int)n,(int)cap);
+		for(i=0; i<n; ++i) ln[i] = strlen(arr[i]);
+		str = (char *)malloc(cap+1),len = 0;
+		for(p1=0,r=0; p[p1]!='\0'; ++p1) {
+			for(i=0; i<n; i+=2)
+				if(p[p1]==*arr[i] && !strncmp(&p[p1],arr[i],ln[i])) {
+					if(len+ln[i+1]+2==cap) resize(ln[i+1]+2);
+					memcpy(&str[len],arr[i+1],ln[i+1]);
+					p1 += ln[i]-1,len += ln[i+1],r = 1;
+					break;
+				}
+			if(r) r = 0;
+			else {
+				if(len+2==cap) resize(0);
+				str[len++] = p[p1];
+			}
+		}
+		str[len] = '\0';
+		::free(p);
+	}
+	return len-l;
+}
+
+size_t aString::stripComments() {
+	char *p1,*p2,*p3;
+	size_t n;
+	for(p1=str,p2=p1,n=0; *p1!='\0'; ++p1) {
+		if(*p1=='/' && p1[1]=='/' || p1[1]=='*') {
+			if(p1[1]=='/') {
+				for(p1+=2; *p1!='\n' && *p1!='\r'; ++p1);
+				*p2++ = *p1,++n;
+			} else {
+				p3 = strstr(p1+2,"*/");
+				if(!p3) break;
+				else p1 = p3+1,++n;
+			}
+		} else *p2++ = *p1;
+	}
+	*p2 = '\0';
+	return n;
+}
+
+size_t aString::stripHTML() {
+	char *p1,*p2,*p3,*p4;
+	size_t n;
+	for(p1=str,p2=p1,n=0; *p1!='\0'; ++p1) {
+		if(*p1=='<') {
+			p3 = strchr(p1+1,'>');
+			p4 = strchr(p1+1,'<');
+			if(!p3) break;
+			else if(p4 && p4<p3) *p2++ = *p1;
+			else p1 = p3;
+			++n;
+		} else *p2++ = *p1;
+	}
+	*p2 = '\0';
+	return n;
+}
+
+size_t aString::stripHTMLComments() {
+	char *p1,*p2,*p3;
+	size_t n;
+	for(p1=str,p2=p1,n=0; *p1!='\0'; ++p1) {
+		if(*p1=='<' && p1[1]=='!' && p1[2]=='-' && p1[3]=='-') {
+			p3 = strstr(p1+4,"-->");
+			if(!p3) break;
+			else p1 = p3+2;
+			++n;
+		} else *p2++ = *p1;
+	}
+	*p2 = '\0';
+	return n;
+}
+
+size_t aString::substr(aString &s,long o,long l) {
+	if(str && *str) {
+		if(o<0) o = len+o;
+		if(l<=0) l = len-o+l;
+		if(l+2>s.cap) s.resize(l+2);
+		memcpy(s.str,&str[o],l);
+		s.str[l] = '\0',s.len = l;
+		return l;
+	}
+	s.clear();
+	return 0;
+}
+
+size_t aString::substr(char *s,long o,long l) {
+	if(str && *str) {
+		if(o<0) o = len+o;
+		if(l<=0) l = len-o+l;
+		memcpy(s,&str[o],l);
+		s[l] = '\0';
+		return l;
+	}
+	*s = '\0';
+	return 0;
+}
+
+void aString::newline(const char *nl) {
+	size_t p1,p2,l = strlen(nl);
+	char *p = str;
+	str = (char *)malloc(cap+1);
+	for(p1=0,p2=0; p1<len; ++p1) {
+		if(p2+l+2==cap) resize(0);
+		if(p[p1]=='\n' || p[p1]=='\r') {
+			if((p[p1]=='\n' && p[p1+1]=='\r') ||
+				(p[p1]=='\r' && p[p1+1]=='\n')) ++p1;
+			if(l>1) memcpy(&str[p2],nl,l);
+			else str[p2] = *nl;
+			p2 += l;
+		} else str[p2++] = p[p1];
+	}
+	str[p2] = '\0';
+	::free(p);
+}
+
+void aString::escape() {
 	if(str && len) {
 		size_t i,n = 0;
 		for(i=0; i<len; i++) if(isEscSpace(str[i])) n++;
@@ -560,10 +789,9 @@ aString &aString::escape() {
 			str[len] = '\0';
 		}
 	}
-	return *this;
 }
 
-aString &aString::unescape() {
+void aString::unescape() {
 	if(str && len) {
 		size_t i,n;
 		char c;
@@ -577,20 +805,18 @@ aString &aString::unescape() {
 		}
 		str[len] = '\0';
 	}
-	return *this;
 }
 
-aString &aString::quote(const char c) {
+void aString::quote(const char c) {
 	if(c && str && len) {
 		if(len+2>=cap) resize(0);
 		*str = c;
 		for(size_t i=0; i<len; i++) str[i+1] = str[i];
 		str[++len] = c,str[++len] = '\0';
 	}
-	return *this;
 }
 
-aString &aString::unquote() {
+void aString::unquote() {
 	if(str && len>1) {
 		char c = *str;
 		if((c=='"' || c=='\'') && str[len-1]==c) {
@@ -598,10 +824,9 @@ aString &aString::unquote() {
 			str[len-=2] = '\0';
 		}
 	}
-	return *this;
 }
 
-aString &aString::encodeURL() {
+void aString::encodeURL() {
 	if(str && len) {
 		size_t i,n = 0;
 		for(i=0; i<len; i++) if(isURLEncoded(str[i]) && str[i]!=' ') n += 2;
@@ -620,10 +845,9 @@ aString &aString::encodeURL() {
 			}
 		}
 	}
-	return *this;
 }
 
-aString &aString::decodeURL() {
+void aString::decodeURL() {
 	if(str && len) {
 		size_t n = 0;
 		int c1,c2;
@@ -640,35 +864,46 @@ aString &aString::decodeURL() {
 		}
 		len -= n;
 	}
-	return *this;
 }
 
-aString &aString::encodeHTML() {
+#define select_entity(p) \
+c = (unsigned char)p;\
+if((c=='\'' || c=='"') && !(f&aSTRING_HTML_QUOTES)) e = 0;\
+else if((c=='&') && !(f&aSTRING_HTML_AMP)) e = 0;\
+else if((c=='<' || c=='>') && !(f&aSTRING_HTML_LTGT)) e = 0;\
+else {\
+	e = &HTMLentities[c];\
+	if(e->len) {\
+		if(*e->name=='#' && !(f&aSTRING_HTML_CODES)) e = 0;\
+	}\
+}
+
+void aString::encodeHTML(int f) {
 	if(str && len) {
 		size_t i,n = 0;
+		unsigned char c;
 		const entity *e;
-		for(i=0; i<len; i++) {
-			e = &HTMLentities[(unsigned char)str[i]];
-			if(e->len) n += e->len+1;
+		for(i=0; i<len; ++i) {
+			select_entity(str[i])
+			if(e && e->len) n += e->len+1;
 		}
 		if(n) {
 			if(len+n>=cap) resize(n);
 			char *p1=&str[len-1],*p2=&str[len+n];
 			*p2-- = '\0',len += n;
 			while(p1>=str) {
-				e = &HTMLentities[(unsigned char)*p1];
-				if(e->len) {
+				select_entity(*p1)
+				if(e && e->len) {
 					*p2 = ';',p2 -= e->len;
 					memcpy(p2,e->name,e->len);
-					--p2,*p2-- = '&',p1--;
+					--p2,*p2-- = '&',--p1;
 				} else *p2-- = *p1--;
 			}
 		}
 	}
-	return *this;
 }
 
-aString &aString::decodeHTML() {
+void aString::decodeHTML() {
 	if(str && len) {
 		size_t i,n = 0;
 		const entity *e;
@@ -698,25 +933,45 @@ aString &aString::decodeHTML() {
 		}
 		len -= n;
 	}
-	return *this;
 }
 
-aString &aString::free() {
+void aString::trim(long &o,long &l) {
+	if(str && *str) {
+		if(o<0) o = (long)len+o;
+		if(l<=0) l = (long)len-o;
+		if(o>=0 && l>0 && o+l<=len)
+		while(isSpace(str[o]) && o<len) ++o,--l;
+		while(isSpace(str[o+l]) && l>0) --l;
+	}
+}
+
+void aString::free() {
 	::free(str);
 	str = 0,len = 0,cap = 0;
-	return *this;
 }
 
-void aString::resize(size_t n) {
-	if(n<0 || len+n+n<cap) return;
+void aString::resize(size_t l) {
+	if(l<0 || len+l+l<cap) return;
 	if(!cap) cap = 1;
-	if(n && len+n>=cap) cap = len+n+1;
+	if(l && len+l>=cap) cap = len+l+1;
 	if(cap<1024) cap <<= 1;
 	else cap += 1024;
 	if(!str) str = (char *)malloc(cap+1);
 	else str = (char *)realloc(str,cap+1);
 	str[cap] = '\0';
-//debug_output("aString::resize(len=%d,n=%d,cap=%d)\n",len,n,cap);
+//debug_output("aString::resize(len=%d,l=%d,cap=%d)\n",len,l,cap);
+}
+
+long aString::move(long n,size_t l) {
+	if(n<0) n = len+n;
+	if(n>=0 && n<=len && l>0) {
+		if(len+l+2>=cap) resize(l);
+		if(n<len) {
+			memmove(&str[n+l],&str[n],len+1-n);
+			len += l;
+		}
+	}
+	return n;
 }
 
 void aString::setCapacity(size_t n) {
@@ -728,24 +983,29 @@ void aString::setCapacity(size_t n) {
 //debug_output("aString::resize(len=%d,n=%d,cap=%d)\n",len,n,cap);
 }
 
-int aString::toInt() {
-	char *p = str;
-	while(isSpace(*p)) p++;
-	if(*p=='0' && *++p=='x') return fromHex(++p);
-	return atoi(p);
+char aString::charAt(long i) {
+	if(i<0) i = (long)len+i;
+	return str && i>=0 && i<(long)len? str[i] : '\0';
 }
 
-size_t aString::toIntArray(int *n,char c) {
+long aString::toInt() {
+	char *p = str;
+	while(isSpace(*p)) ++p;
+	if(*p=='0' && *++p=='x') return fromHex(++p);
+	return atol(p);
+}
+
+size_t aString::toIntArray(long *n,char c) {
 	if(!n || c=='\0' || !str || !len) return 0;
 	size_t i;
 	char *p1 = str,*p2;
-	while(*p1 && !isDigit(*p1)) p1++;
+	while(*p1 && !isDigit(*p1)) ++p1;
 	if(!*p1) return 0;
-	for(i=0; p1 && *p1; i++,p1=p2) {
+	for(i=0; p1 && *p1; ++i,p1=p2) {
 		p2 = strchr(p1,c);
 		if(p2) *p2++ = '\0';
 		if(*p1=='0' && *++p1=='x') n[i] = fromHex(++p1);
-		else n[i] = atoi(p1);
+		else n[i] = atol(p1);
 	}
 	return i;
 }
@@ -810,45 +1070,44 @@ char **aString::split(char **list,char *str,const char *delim,bool cins) {
 	return list;
 }
 
+size_t aString::reverse(char *str) {
+	if(!str || !*str) return 0;
+	size_t l = strlen(str);
+	char *p1 = str,*p2 = &str[l-1],c;
+	while(p1<p2) c = *p1,*p1++ = *p2,*p2-- = c;
+	return l;
+}
+
 size_t aString::trim(char *str) {
 	if(!str || !*str) return 0;
 	size_t l = 0;
 	char *p = str;
-	while(*p && isSpace(*p)) p++;
-	while(*p) *str++ = *p++,l++;
+	while(*p && isSpace(*p)) ++p;
+	while(*p) *str++ = *p++,++l;
 	if(l) {
-		while(isSpace(*--str)) l--;
+		while(isSpace(*--str)) --l;
 		*++str = '\0';
 	} else *str = '\0';
 	return l;
 }
 
-
-aString operator+(aString &s,const char c) { aString s1(s.length()+1);s1.append(s).append(c);return s1; }
-aString operator+(const char c,aString &s) { aString s1(s.length()+1);s1.append(c).append(s);return s1; }
-aString operator+(aString &s,aString *s1) { aString s2(s.length()+(s1? s1->length() : 0));s2.append(s).append(s1);return s2; }
-aString operator+(aString *s,aString &s1) { aString s2((s? s->length() : 0)+s1.length());s2.append(s).append(s1);return s2; }
-aString operator+(aString &s,aString &s1) { aString s2(s.length()+s1.length());s2.append(s).append(s1);return s2; }
-aString operator+(aString &s,const char *s1) { aString s2(s);s2.append(s1);return s2; }
-aString operator+(const char *s,aString &s1) { aString s2(s);s2.append(s1);return s2; }
-aString operator+(aString &s,int16_t i) { aString s1(s.length()+6);s1.append(s).append((int32_t)i);return s1; }
-aString operator+(int16_t i,aString &s) { aString s1(6+s.length());s1.append((int32_t)i).append(s);return s1; }
-aString operator+(aString &s,uint16_t i) { aString s1(s.length()+5);s1.append(s).append((uint16_t)i);return s1; }
-aString operator+(uint16_t i,aString &s) { aString s1(5+s.length());s1.append((uint16_t)i).append(s);return s1; }
-aString operator+(aString &s,int32_t i) { aString s1(s.length()+11);s1.append(s).append(i);return s1; }
-aString operator+(int32_t i,aString &s) { aString s1(11+s.length());s1.append(i).append(s);return s1; }
-aString operator+(aString &s,uint32_t i) { aString s1(s.length()+10);s1.append(s).append(i);return s1; }
-aString operator+(uint32_t i,aString &s) { aString s1(10+s.length());s1.append(i).append(s);return s1; }
-aString operator+(aString &s,int64_t i) { aString s1(s.length()+21);s1.append(s).append(i);return s1; }
-aString operator+(int64_t i,aString &s) { aString s1(21+s.length());s1.append(i).append(s);return s1; }
-aString operator+(aString &s,uint64_t i) { aString s1(s.length()+20);s1.append(s).append(i);return s1; }
-aString operator+(uint64_t i,aString &s) { aString s1(20+s.length());s1.append(i).append(s);return s1; }
-aString operator+(aString &s,float f) { aString s1(s.length()+16ul);s1.append(s).append(f);return s1; }
-aString operator+(float f,aString &s) { aString s1(16ul+s.length());s1.append(f).append(s);return s1; }
-aString operator+(aString &s,double d) { aString s1(s.length()+32ul);s1.append(s).append(d);return s1; }
-aString operator+(double d,aString &s) { aString s1(32ul+s.length());s1.append(d).append(s);return s1; }
-
-
+void aString::printUTF8(char *d,const char *s,size_t o,size_t l) {
+	char c;
+	size_t i,n;
+	if(o) for(i=0; *s!='\0' && i<o; i++) {
+		if(*s&0x80) {
+			for(c=(*s<<1),n=1; c&0x80 && n<8; c<<=1,n++);
+			while(n--) s++;
+		} else s++;
+	}
+	if(l) for(i=0; *s!='\0' && i<l; i++) {
+		if(*s&0x80) {
+			for(c=(*s<<1),n=1; c&0x80 && n<8; c<<=1,n++);
+			while(n--) *d++ = *s++;
+		} else *d++ = *s++;
+	}
+	*d = '\0';
+}
 
 
 

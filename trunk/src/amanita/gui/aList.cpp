@@ -67,7 +67,7 @@ void aList::create(aWindow *wnd,uint32_t st) {
 	GtkTreeSelection *selection;
 
 	component = (aComponent)gtk_scrolled_window_new(NULL,NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(component),GTK_POLICY_AUTOMATIC,GTK_POLICY_ALWAYS);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(component),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(component),GTK_SHADOW_IN);
 	list = gtk_tree_view_new();
 
@@ -104,7 +104,7 @@ void aList::create(aWindow *wnd,uint32_t st) {
 			lvc.iSubItem = i;
 			lvc.cx       = column_widths[i];
 #ifdef USE_WCHAR
-			char2w(wstr,columns[i],strlen(columns[i])+1);
+			char2w(wstr,columns[i]);
 			lvc.pszText  = wstr;
 #else
 			lvc.pszText  = columns[i];
@@ -175,7 +175,7 @@ debug_output("column[%d]: %s\n",n,p1);
 #endif
 #ifdef USE_WIN32
 #ifdef USE_WCHAR
-				char2w(wstr,p1,strlen(p1)+1);
+				char2w(wstr,p1);
 				ListView_SetItemText((HWND)component,lv.iItem,n,wstr);
 #else
 				ListView_SetItemText((HWND)component,lv.iItem,n,p1);

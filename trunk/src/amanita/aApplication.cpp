@@ -179,6 +179,9 @@ debug_output("aApplication::init(AMANITA_INIT_GETTEXT,project=%s,localedir=%s)",
 	gtk_init(&argc,&argv);
 	if((app_init_params&aINIT_GUI)) {
 		gtk_rc_parse_string (""
+			"style \"scrollbar-style\" {\n"
+			"  GtkScrolledWindow::scrollbar-spacing = 0\n"
+			"}\n\n"
 			"style \"notebook-style\" {\n"
 			"  GtkWidget::focus-padding = 0\n"
 			"  GtkWidget::focus-line-width = 0\n"
@@ -193,7 +196,8 @@ debug_output("aApplication::init(AMANITA_INIT_GETTEXT,project=%s,localedir=%s)",
 //			"  xthickness = 0\n"
 //			"  ythickness = 0\n"
 			"}\n\n"
-			"widget \"*.notebook\" style \"notebook-style\""
+			"widget \"*GtkScrolledWindow*\" style \"scrollbar-style\""
+			"widget \"*GtkNotebook*\" style \"notebook-style\""
 			"widget \"*.tab-close-button\" style \"tab-close-button-style\""
 		);
 	}
@@ -275,7 +279,7 @@ int aApplication::main() {
 			for(i=0,m=items,a=accel; i<nitems; ++i,++m) if(m->acc!=-1) {
 				a->fVirt = (m->acc_mod==aKEY_CONTROL? FCONTROL : (m->acc_mod==aKEY_ALT? FALT : 0))|FVIRTKEY;
 				a->key = m->acc;
-				a->cmd = (aWIDGET_MENU<<9)|m->index;
+				a->cmd = aWIDGET_MAKE_ID(aWIDGET_MENU,m->index);
 				++a;
 			}
 			hacc = CreateAcceleratorTable(accel,n);
