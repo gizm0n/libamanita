@@ -3,6 +3,8 @@
 =Installation of Amanita Library=
 Here follows instructions on how to compile and install on different platforms.
 
+It is not required, but there are optional libraries that you may wish to install. Libamanita will compile without them. These are GtkSourceView and Scintilla.
+
 ==Linux==
 ===autotools===
 To download, compile and install, open a terminal and run the following sequence of commands:
@@ -10,7 +12,6 @@ To download, compile and install, open a terminal and run the following sequence
 sudo apt-get update
 sudo apt-get install build-essential \
    libsdl1.2-dev \
-   libsdl-net1.2-dev \
    libsdl-ttf2.0-dev \
    libsdl-image1.2-dev \
    libsqlite3-dev
