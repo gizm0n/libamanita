@@ -14,6 +14,7 @@
 #include <commctrl.h>
 #endif
 #include <amanita/aApplication.h>
+#include <amanita/aResource.h>
 #include <amanita/gui/aWindow.h>
 #include <amanita/gui/aMenu.h>
 #include <amanita/gui/aStatus.h>
@@ -88,6 +89,7 @@ aWindow::aWindow(aApplication *a,widget_event_handler weh) : aContainer(weh,aWID
 	window = 0;
 	menu = 0;
 	status = 0;
+	icons = 0;
 }
 
 aWindow::~aWindow() {
@@ -98,6 +100,7 @@ debug_output("aWindow::~aWindow()\n");
 	menu = 0;
 	if(status) delete status;
 	status = 0;
+	clearIcons();
 }
 
 
@@ -127,6 +130,7 @@ void aWindow::open(aWindow *p) {
 	g_signal_connect(G_OBJECT(wnd),"delete_event",G_CALLBACK(delete_event_callback),this);
 	create(this,0);
 	createAll(0,true);
+	if(icons) setIcons(icons);
 	gtk_widget_show_all(wnd);
 #endif
 #ifdef USE_WIN32
@@ -138,6 +142,18 @@ void aWindow::open(aWindow *p) {
 	int x = CW_USEDEFAULT,y = CW_USEDEFAULT;
 	tchar_t *t = tstrdup(nm);
 	if(!(class_registers&aWINDOW_CLASS_REGISTER)) {
+		HICON hicon = 0,hicon_sm = 0;
+		if(icons) {
+			aWindowIcon *icon,*icon_b,*icon_sm;
+			for(icon=icons; icon->size>0; ++icon)
+				if(icon->size==16) icon_sm = icon;
+				else if(!icon_b || icon_b->size<icon->size) icon_b = icon;
+			if(icon_b) hicon = (HICON)LoadImage(hMainInstance,MAKEINTRESOURCE(icon_b->id),IMAGE_ICON,0,0,LR_SHARED);
+			if(icon_sm) hicon_sm = (HICON)LoadImage(hMainInstance,MAKEINTRESOURCE(icon_sm->id),IMAGE_ICON,16,16,LR_SHARED);
+			clearIcons();
+		}
+		if(!hicon) hicon = LoadIcon(NULL,IDI_APPLICATION);
+		if(!hicon_sm) hicon_sm = LoadIcon(NULL,IDI_APPLICATION);
 		WNDCLASSEX wndclassx;
 		wndclassx.cbSize				= sizeof(wndclassx);
 		wndclassx.style				= CS_HREDRAW|CS_VREDRAW;
@@ -145,8 +161,8 @@ void aWindow::open(aWindow *p) {
 		wndclassx.cbClsExtra			= 0;
 		wndclassx.cbWndExtra			= 0;
 		wndclassx.hInstance			= hMainInstance;
-		wndclassx.hIcon				= (HICON)LoadImage(hMainInstance,MAKEINTRESOURCE(aWINDOW_APP_ICON),IMAGE_ICON,0,0,LR_SHARED);
-		wndclassx.hIconSm				= (HICON)LoadImage(hMainInstance,MAKEINTRESOURCE(aWINDOW_APP_ICON),IMAGE_ICON,16,16,LR_SHARED);
+		wndclassx.hIcon				= hicon;
+		wndclassx.hIconSm				= hicon_sm;
 		wndclassx.hCursor				= LoadCursor(0,IDC_ARROW);
 		wndclassx.hbrBackground		= (HBRUSH)(COLOR_BTNFACE+1);
 		wndclassx.lpszClassName		= cl;
@@ -236,6 +252,58 @@ void aWindow::updateStatus(int n,const char *format, ...) {
 //debug_output("setStatus(\"%s\")\n",str);
 		} else *str = '\0';
 		status->update(n,str);
+	}
+}
+
+void aWindow::setIcons(const aWindowIcon icons[]) {
+	int n = 0;
+	if(icons) for(const aWindowIcon *icon=icons; icon->size>0; ++icon,++n);
+	else return;
+	if(component) {
+		const aWindowIcon *icon;
+#ifdef USE_GTK
+		GError *error = 0;
+		GdkPixbuf *pixbuf;
+		GList *iconlist = 0;
+		for(icon=icons; icon->size>0; ++icon) {
+			if(icon->xpm) pixbuf = gdk_pixbuf_new_from_xpm_data(icon->xpm);
+			else if(icon->png) pixbuf = gdk_pixbuf_new_from_file(icon->png,&error);
+			else pixbuf = 0;
+			if(pixbuf) iconlist = g_list_append(iconlist,pixbuf);
+		}
+		if(!component) gtk_window_set_default_icon_list(iconlist);
+		else gtk_window_set_icon_list(GTK_WINDOW(wnd),iconlist);
+#endif
+#ifdef USE_WIN32
+		HICON hicon;
+		for(icon=icons; icon->size>0; ++icon) {
+			if(icon->size==16) {
+				hicon = (HICON)LoadImage(hMainInstance,MAKEINTRESOURCE(icon->id),IMAGE_ICON,16,16,LR_SHARED);
+				SendMessage((HWND)component,WM_SETICON,ICON_SMALL,(LPARAM)hicon);
+			} else {
+				hicon = (HICON)LoadImage(hMainInstance,MAKEINTRESOURCE(icon->id),IMAGE_ICON,0,0,LR_SHARED);
+				SendMessage((HWND)component,WM_SETICON,ICON_BIG,(LPARAM)hicon);
+			}
+		}
+#endif
+		if(this->icons) clearIcons();
+	} else {
+		aWindowIcon *icon;
+		this->icons = (aWindowIcon *)malloc((n+1)*sizeof(aWindowIcon));
+		memcpy(this->icons,icons,(n+1)*sizeof(aWindowIcon));
+		for(icon=this->icons; icon->size>0; ++icon)
+			if(icon->png) icon->png = strdup(icon->png);
+		
+	}
+}
+
+void aWindow::clearIcons() {
+	if(icons) {
+		aWindowIcon *icon;
+		for(icon=icons; icon->size>0; ++icon)
+			if(icon->png) free((char *)icon->png);
+		free(icons);
+		icons = 0;
 	}
 }
 

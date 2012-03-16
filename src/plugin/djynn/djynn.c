@@ -14,7 +14,7 @@ GeanyFunctions *geany_functions;
 PLUGIN_VERSION_CHECK(147)
 
 PLUGIN_SET_INFO(_("Djynn"),
-	_("A Plugin suite for for Geany, with many features and functions."),
+	_("A small project manager, with some additional functionality, commenting and sorting."),
 	_("0.1"),
 	_("Per Löwgren <per.lowgren@gmail.com>"));
 

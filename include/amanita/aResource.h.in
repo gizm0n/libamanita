@@ -1,0 +1,14 @@
+#ifndef _AMANITA_RESOURCE_H
+#define _AMANITA_RESOURCE_H
+// libamanita
+
+#define AMANITA_APP_ICON		"@AMANITA_APP_ICON@"
+#define AMANITA_STOCK_ICONS	"@AMANITA_STOCK_ICONS@"
+
+#define aAPP_ICON					101
+#define aSTOCK_ICONS				102
+
+
+#endif /* _AMANITA_RESOURCE_H */
+
+
