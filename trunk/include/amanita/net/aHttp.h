@@ -1,7 +1,7 @@
 #ifndef _AMANITA_NET_HTTP_H
 #define _AMANITA_NET_HTTP_H
 /**
- * @file amanita/net/aHttp.h  
+ * @file amanita/net/aHttp.h
  * @author Per Löwgren
  * @date Modified: 2010-08-01
  * @date Created: 2008-04-09
@@ -90,7 +90,7 @@ enum HTTP_MIMES {
  * Code to demonstrate how this class can be used:
  * @code
 #include <stdio.h>
-#include "amanita/net/aHttp.h"
+#include <amanita/net/aHttp.h>
 
 int main(int argc, char *argv[]) {
 	aApplication app;
@@ -109,10 +109,10 @@ int main(int argc, char *argv[]) {
 	fwrite(http.getFile(),http.getFileSize(),1,fp);
 	fclose(fp);
 	aSocket::close();
+	return 0;
 }
  * @endcode
- * @ingroup net
- */
+ * @ingroup net */
 class aHttp {
 private:
 	int timeout;				//!< Timeout for server responce

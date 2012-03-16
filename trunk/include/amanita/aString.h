@@ -4,7 +4,7 @@
 /**
  * @file amanita/aString.h  
  * @author Per Löwgren
- * @date Modified: 2012-03-01
+ * @date Modified: 2012-03-16
  * @date Created: 2003-11-30
  */ 
 
@@ -25,13 +25,14 @@ enum {
 
 /** A generic string class.
  * 
- * This string class is built to replace the standard C++ string class. It contains a great
+ * This string class is built to replace the standard C++ string class. It contains a
  * number of methods for string handling and conversion between formats.
  * 
- * Something that differs this string class from ordinary C strings is that it can contain
- * any type of data, both binary data, text data, formatted data of any kind. The string is
- * not ended with a '\0' char, but instead contains an integer value with the length of the
- * string.
+ * For all methonds in the aString class that has o-offset or l-length parameters of the type
+ * long, a negative value counts from the end of the string. For example, in a string 
+ * "abc def ghi jkl mno pqr stu vwx y. abc def" (that has length 42), a call to
+ * <tt>find("abc",-20,-2)</tt> will search in the string for "abc" from the position 22 until
+ * position 40. A value of zero for the l-length parameter, searches until the end of the string. 
  * @ingroup amanita */
 class aString : public aObject {
 friend class aHashtable;
@@ -42,9 +43,6 @@ aObject_Instance(aString)
 /** @endcond */
 
 protected:
-	static const char upper_hex[17];
-	static const char lower_hex[17];
-
 	char *str;		//!< Char array containing the string data.
 	size_t len;		//!< Length of string. Len must always be >= 0 and <= cap.
 	size_t cap;		//!< Capacity of string, when len==cap it's time to increase size of capacity.
@@ -52,13 +50,17 @@ protected:
 	/** Increase capacity of string by n.
 	 * @param n Number of bytes to increase string capacity by. */
 	void resize(size_t l);
+	/** Move a section of the string, and resize capasity if needed.
+	 * Used by all <tt>insert()</tt>-methods.
+	 * @param n Position to start moving, a negative value counts from the end.
+	 * @param l Length in bytes to move. */
 	long move(long n,size_t l);
 
 	/** @name Insert integer
 	 * @{ */
 #if __WORDSIZE < 64
-	size_t inserti32(long n,int32_t i);		//!< Insert signed 32 bit integer.
-	size_t insertu32(long n,uint32_t i);	//!< Insert unsigned 32 bit integer.
+	size_t inserti32(long n,int32_t i);		//!< Insert signed 32 bit integer. (Only in 32bit-systems)
+	size_t insertu32(long n,uint32_t i);	//!< Insert unsigned 32 bit integer. (Only in 32bit-systems)
 #endif
 	size_t inserti64(long n,int64_t i);		//!< Insert signed 64 bit integer.
 	size_t insertu64(long n,uint64_t i);	//!< Insert unsigned 64 bit integer.
@@ -69,31 +71,58 @@ public:
 		const char *name;
 		size_t len;
 	};
-	static const entity HTMLentities[256];
-	static const char *blank;
-	static const char *endline;
-	static const char *whitespace;
+	static const char *blank;			//!< A blank string, e.g. "".
+	static const char *endline;		//!< A line ending, e.g. "\n" for Linux, and "\r\n" for Windows.
+	static const char *whitespace;	//!< White space characters, e.g. " \t\n\r".
 
-	/** @name Constructors and Destructors
+	/** @name Constructors & Destructors
 	 * @{ */
+	/** Create a string with capacity c.
+	 * @param c Optional value for initial capacity of string.
+	 * To avoid reallocating string, set to intended size to use. */
 	aString(size_t c=0);
+	/** Create a string and initiate to s.
+	 * @param s String to set as initial value.
+	 * @param l Length of s, if zero length of s is counted using <tt>strlen()</tt>. */
 	aString(const char *s,size_t l=0);
+	/** Create a string and initiate to s.
+	 * @param s String to set as initial value. */
 	aString(const aString *s);
+	/** Create a string and initiate to s.
+	 * @param s String to set as initial value. */
 	aString(const aString &s);
 	~aString();
 	/** @} */
 
 	/** @name Operators
 	 * @{ */
+	/** Return string as a const char *. */
 	operator const char *() const { return str; }
+	/** Return true if length is >0. */
 	operator bool() const { return (str && len>0); }
+	/** Return length as an int. */
 	operator int() const { return len; }
+	/** Return length as an unsigned int. */
 	operator unsigned int() const { return len; }
+	/** Return length as a long. */
 	operator long() const { return len; }
+	/** Return length as an unsigned long. */
 	operator unsigned long() const { return len; }
+	/** Set string to s.
+	 * @param s String to set as value.
+	 * @return A reference to this string. */
 	aString &operator=(const aString *s) { clear();if(s) insert(0,s->str,s->len);return *this; }
+	/** Set string to s.
+	 * @param s String to set as value.
+	 * @return A reference to this string. */
 	aString &operator=(const aString &s) { clear();insert(0,s.str,s.len);return *this; }
+	/** Set string to s.
+	 * @param s String to set as value.
+	 * @return A reference to this string. */
 	aString &operator=(const char *s) { clear();insert(0,s,0);return *this; }
+	/** Get char at position i.
+	 * @param i Position in string. If less than zery, count from end of string.
+	 * @return Char at position i. */
 	char operator[](long i) { return charAt(i); }
 	bool operator==(const aString *s) { return equals(s); }
 	bool operator==(const aString &s) { return equals(s); }
@@ -158,7 +187,7 @@ public:
 	size_t insertBase(long n,uint64_t i,int base);
 	/** @} */
 
-	/** @name Insert
+	/** @name Append
 	 * @{ */
 	size_t append(char c) { return insert(len,c); }
 	size_t append(const aString *s) { if(s) return insert(len,s->str,s->len);return 0; }
@@ -214,7 +243,7 @@ public:
 	size_t repeat(const char *s,size_t l,size_t n);
 	/** @} */
 
-	/** @name Input and Output
+	/** @name Input & Output
 	 * @{ */
 	size_t include(const char *fn);
 	size_t includef(const char *format, ...);
@@ -223,7 +252,7 @@ public:
 	size_t println(FILE *fp);
 	/** @} */
 
-	/** @name Find & Match methods.
+	/** @name Find & Match
 	 * @{ */
 	/** Find a char.
 	 * @param c Char to find.
@@ -249,19 +278,25 @@ public:
 	long findChar(const char *s,long o=0,long l=0);
 
 	/** Match nested tags.
-	 * For the string "abc [b]def [b]ghi[/b] jkl[/b] mno." will return 25, the index after "jkl".
+	 * Returns the position at the beginning of the last ending tag. For the string
+	 * "abc [b]def [b]ghi[/b] jkl[/b] mno." will return 25, the position at the last "[/b]".
+	 * 
+	 * For example, you may wish to match the last tag for a nested table in a HTML-document, from position p,
+	 * and so you call <tt>matchNestedTags("<table","</table>",p,0," \n\t>")</tt>.
+	 * 
+	 * Another example can be matching nested curly-braces, then you call <tt>matchNestedTags("{","}",p)</tt>.
 	 * @param tag1 Opening tag, does not have to be complete, such as "[b", but make sure c1 is set.
 	 * @param tag2 Closing tag, does not have to be complete, such as "[/b", but make sure c2 is set.
 	 * @param o Offset, if negative offset is counted from ending of string.
 	 * @param l Length to search in string, if zero or negative length is calculated from the entire string length and backward.
-	 * @param c1 String of chars to accept completing of tag1, e.g. " \n\t]" will accept "[b" to match with any of these chars, but "[bar" will not match.
-	 * @param c1 String of chars to accept completing of tag2, e.g. " \n\t]" will accept "[/b" to match with any of these chars, but "[/bar" will not match.
+	 * @param c1 String of chars to accept completing of tag1, e.g. " \n\t]" will accept "[b" to match with any of these chars, so "[b ar]" will match, but "[bar]" will not match.
+	 * @param c1 String of chars to accept completing of tag2, e.g. " \n\t]" will accept "[/b" to match with any of these chars, so "[/b ar]" will match, "but "[/bar]" will not match.
 	 * @return Zero based index of beginning of last nested tag.
 	 */
 	long matchNestedTags(const char *tag1,const char *tag2,long o=0,long l=0,const char *c1=0,const char *c2=0);
 	/** @} */
 
-	/** @name Equals methods.
+	/** @name Equals
 	 * @{ */
 	/** @see bool equals(const char *,long,long) */
 	bool equals(const aString *s,long o=0,long l=0) { return s? equals(s->str,o,l!=0? l : s->len) : false; }
@@ -277,7 +312,7 @@ public:
 	/** @} */
 
 
-	/** @name Compare methods.
+	/** @name Compare
 	 * @{ */
 	/** @see int compare(const char *,long,long) */
 	int compare(const aString *s,long o=0,long l=0) { return s? compare(s->str,o,l!=0? l : s->len) : -1; }
@@ -293,7 +328,7 @@ public:
 	int compare(const char *s,long o=0,long l=0);
 	/** @} */
 
-	/** @name Count methods.
+	/** @name Count
 	 * @{ */
 	/** Count the number of times c appears in string.
 	 * @param c Char to look for.
@@ -305,28 +340,28 @@ public:
 	size_t count(const char *s);
 	/** @} */
 
-	/** @name Replace methods.
+	/** @name Replace
 	 * @{ */
 	size_t replace(const char *s,const char *r);
 	size_t replace(const char *s, ...);
 	size_t replace(const char **arr);
 	/** @} */
 
-	/** @name Strip methods.
+	/** @name Strip
 	 * @{ */
 	size_t stripComments();
 	size_t stripHTML();
 	size_t stripHTMLComments();
 	/** @} */
 
-	/** @name Substring methods.
+	/** @name Substring
 	 * @{ */
 	size_t substr(aString *s,long o,long l) { if(s) return substr(*s,o,l);return 0; }
 	size_t substr(aString &s,long o,long l);
 	size_t substr(char *s,long o,long l);
 	/** @} */
 
-	/** @name Encoding methods.
+	/** @name Encoding
 	 * @{ */
 	void newline(const char *nl);
 	void escape();
@@ -339,7 +374,7 @@ public:
 	void decodeHTML();
 	/** @} */
 
-	/** @name Capacity methods.
+	/** @name Capacity
 	 * @{ */
 	void trim() { len = trim(str); }
 	void trim(long &o,long &l);
@@ -352,7 +387,7 @@ public:
 	size_t capacity() { return cap; }
 	/** @} */
 
-	/** @name Type conversion methods.
+	/** @name Type conversion
 	 * @{ */
 	char charAt(long i);
 	const char *toCharArray() { return str; }
@@ -360,12 +395,12 @@ public:
 	size_t toIntArray(long *n,char c=',');
 	/** @} */
 
-	/** @name Tokenizing methods.
+	/** @name Tokenizing
 	 * @{ */
 	static size_t nextWord(const char **s,const char *c=whitespace);
 	/** @} */
 
-	/** @name Static functions.
+	/** @name Static functions
 	 * @{ */
 	static char toLower(const char c) { return (c>='A' && c<='Z')? c+32 : c; }
 	static char toUpper(const char c) { return (c>='a' && c<='z')? c-32 : c; }
@@ -384,7 +419,7 @@ public:
 	static void printUTF8(char *d,const char *s,size_t o,size_t l);
 	/** @} */
 
-	/** @name Test char methods.
+	/** @name Test char
 	 * @{ */
 	static bool isLower(char c) { return (c>='a' && c<='z'); }
 	static bool isUpper(char c) { return (c>='A' && c<='Z'); }
@@ -396,7 +431,7 @@ public:
 	static bool isSpace(unsigned char c) { return c==' ' || c=='\n' || c=='\t' || c=='\r' || c=='\f' || c=='\v'; }
 	static bool isEscSpace(unsigned char c) { return c=='\t' || c=='\n' || c=='\r' || c=='\f' || c=='\v'; }
 	static bool isURLEncoded(unsigned char c) { return (c<'0' && c!='-' && c!='.') || (c>'9' && c<'A') || (c>'Z' && c<'a' && c!='_') || c>'z'; }
-	static bool isHTMLEntity(unsigned char c) { return HTMLentities[c].name!=0; }
+	static bool isHTMLEntity(unsigned char c);
 	static bool isBreak(unsigned char c) { return c=='\n' || c=='\r'; }
 	static bool isPunct(unsigned char c) { return isPrint(c) && !isLower(c) && !isUpper(c) && c!=' ' && !isDigit(c); }
 	static bool isPrint(unsigned char c) { return c>='\x20' && c<='\x7e'; }

@@ -2,7 +2,7 @@
 #define _AMANITA_APPLICATION_H
 
 /**
- * @file amanita/aApplication.h  
+ * @file amanita/aApplication.h
  * @author Per Löwgren
  * @date Modified: 2010-08-01
  * @date Created: 2008-12-01
