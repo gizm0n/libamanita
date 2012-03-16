@@ -20,8 +20,7 @@ cd ~/Desktop
 svn checkout http://libamanita.googlecode.com/svn/trunk/ libamanita
 cd libamanita
 
-./autogen.sh
-./configure
+cmake .
 make
 sudo make install
 
@@ -38,10 +37,14 @@ sudo apt-get install build-essential \
    mingw32-binutils \
    mingw32-runtime
 }}}
-Now look in your /usr map (terminal: "ls -la /usr"), there should be a map called "i586-mingw32msvc" or similar. This map consists of the cross compile environment with MinGW binaries, DLLs, libraries and headers. Place all cross compile libraries in this map, look at MSYS below for where to find dependencies.
-Add parameters for ./configure (adjust for your version of MinGW-cross-compile environment):
+Now look in your /usr map (terminal: "ls -la /usr"), there should be a map called "i586-mingw32msvc" or similar. This map consists of the cross compile environment with MinGW binaries, DLLs, libraries and headers. Place all cross compile libraries in this map, look at MSYS below for where to find dependencies, and you can also look here for other dependencies:
+ http://ftp.gnome.org/pub/gnome/binaries/win32/
+
+Run cmake (adjust for your version of MinGW-cross-compile environment in the file mingw32.cmake):
 {{{
-./configure --target=i586-mingw32msvc --host=i586-mingw32msvc --prefix=/usr/i586-mingw32msvc
+cmake -DCMAKE_TOOLCHAIN_FILE=mingw32.cmake .
+make
+sudo make install
 }}}
 
 ==Windows==
@@ -67,7 +70,7 @@ Run configure with MinGW-prefix, like so (adjust for where your MinGW is install
 The other alternative, that is slightly more simple, is to use the available Devpaks for the libraries SDL-1.2, SDL_net, SDL_ttf, SDL_image and sqlite3 that you can find here:
  http://devpaks.org/
 
-You can use Devpaks with any MinGW distribution, including Dev-C++, Code::Blocks etc. In fact, there is a libamanita.dev file among the sources that opens a project in Dev-C++. You may find and download Dev-C++ here:
+You can use Devpaks with any MinGW distribution, including Dev-C++, Code::Blocks etc. You may find and download Dev-C++ here:
  http://www.bloodshed.net/dev/
 
 ==Mac OSX==
@@ -75,7 +78,6 @@ Not tested to build on mac yet.
 
 ==Dependencies==
   * libsdl1.2-dev
-  * libsdl-net1.2-dev
   * libsdl-ttf2.0-dev
   * libsdl-image1.2-dev
   * libsqlite3-dev
