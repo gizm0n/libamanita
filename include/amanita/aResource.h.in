@@ -1,6 +1,12 @@
 #ifndef _AMANITA_RESOURCE_H
 #define _AMANITA_RESOURCE_H
-// libamanita
+
+/**
+ * @file amanita/aResource.h.in
+ * @author Per Löwgren
+ * @date Modified: 2012-03-16
+ * @date Created: 2012-03-01
+ */ 
 
 #define AMANITA_APP_ICON		"@AMANITA_APP_ICON@"
 #define AMANITA_STOCK_ICONS	"@AMANITA_STOCK_ICONS@"

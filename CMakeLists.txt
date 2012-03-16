@@ -216,7 +216,6 @@ set(amanita_src
 	src/amanita/aRandom.cpp
 	src/amanita/aRegex.cpp
 	src/amanita/aString.cpp
-	src/amanita/aString_HTMLentities.cpp
 	src/amanita/aThread.cpp
 	src/amanita/aVector.cpp
 	src/amanita/aWiki.cpp

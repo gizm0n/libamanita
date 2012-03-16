@@ -2,16 +2,17 @@
 #define _AMANITA_DB_DATABASE_H
 
 /**
- * @file amanita/db/aDatabase.h  
+ * @file amanita/db/aDatabase.h
  * @author Per Löwgren
  * @date Modified: 2012-03-01
  * @date Created: 2008-09-07
  */ 
 
+#include <amanita/aRecord.h>
+#include <amanita/aResult.h>
+
 
 struct sqlite3;
-class aResult;
-
 
 /** This class opens a SQLite database and executes queries to the database.
  * @ingroup db

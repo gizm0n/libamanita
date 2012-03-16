@@ -2,7 +2,7 @@
 #define _AMANITA_DB_RECORD_H
 
 /**
- * @file amanita/db/aRecord.h  
+ * @file amanita/db/aRecord.h
  * @author Per Löwgren
  * @date Modified: 2012-03-01
  * @date Created: 2008-09-07
