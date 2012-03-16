@@ -20,6 +20,13 @@
 #include <amanita/gui/aList.h>
 #include <amanita/gui/aPanel.h>
 
+//#ifdef USE_GTK
+//#include "../icons/16x16/amanita.xpm"
+//#endif
+#ifdef USE_WIN32
+#include "_resource.h"
+#endif
+
 #ifdef USE_SCINTILLA
 #include <SciLexer.h>
 #endif
@@ -271,31 +278,43 @@ void GuiApp::create() {
 	window = new aWindow(this,window_events);
 	setMainWindow(window);
 	window->setStyle(aWINDOW_RESIZABLE|aWINDOW_CENTER,900,600);
-
-	const aMenuItem items[] = {
-		{ -1,MENU_ID_FILE,"File",true,-1 },
-			{ MENU_ID_FILE,MENU_ID_NEW,"New",true,aKEY_n,aKEY_CONTROL },
-			{ MENU_ID_FILE,MENU_ID_SAVE,"Save",true,aKEY_s,aKEY_CONTROL },
-			{ MENU_ID_FILE,MENU_ID_LOAD,"Load",true,aKEY_l,aKEY_CONTROL },
-			{ MENU_ID_FILE,-1 },
-			{ MENU_ID_FILE,MENU_ID_PAGE,"Select Page",true,-1 },
-			{ MENU_ID_PAGE,MENU_ID_PAGE1,"Page 1",true,-1 },
-			{ MENU_ID_PAGE,MENU_ID_PAGE2,"Page 2",true,-1 },
-			{ MENU_ID_PAGE,MENU_ID_PAGE3,"Page 3",true,-1 },
-			{ MENU_ID_PAGE,MENU_ID_PAGE4,"Page 4",true,-1 },
-			{ MENU_ID_FILE,-1 },
-			{ MENU_ID_FILE,MENU_ID_PRINT,"Print",true,aKEY_p,aKEY_CONTROL },
-			{ MENU_ID_FILE,-1 },
-			{ MENU_ID_FILE,MENU_ID_QUIT,"Quit",true,aKEY_q,aKEY_CONTROL },
-		{ -1,MENU_ID_HELP,"Help",true,-1 },
-			{ MENU_ID_HELP,MENU_ID_CONTENT,"Content",true,aKEY_F1,0 },
-			{ MENU_ID_HELP,-1 },
-			{ MENU_ID_HELP,MENU_ID_ABOUT,"About",true,-1 },
-		{ -1,-1 }
-	};
-	window->setMenu(new aMenu(menu_events,items));
-
 	{
+		const aWindowIcon icons[] = {
+#ifdef USE_GTK
+//			{ 16,0,amanita_xpm },
+			{ 16,0,0,"../icons/48x48/amanita.png" },
+			{ 48,0,0,"../icons/48x48/amanita.png" },
+#endif
+#ifdef USE_WIN32
+			{ 16,aAPP_ICON },
+			{ 48,aAPP_ICON },
+#endif
+		{0}};
+		window->setIcons(icons);
+
+		const aMenuItem items[] = {
+			{ -1,MENU_ID_FILE,"File",true,-1 },
+				{ MENU_ID_FILE,MENU_ID_NEW,"New",true,aKEY_n,aKEY_CONTROL },
+				{ MENU_ID_FILE,MENU_ID_SAVE,"Save",true,aKEY_s,aKEY_CONTROL },
+				{ MENU_ID_FILE,MENU_ID_LOAD,"Load",true,aKEY_l,aKEY_CONTROL },
+				{ MENU_ID_FILE,-1 },
+				{ MENU_ID_FILE,MENU_ID_PAGE,"Select Page",true,-1 },
+				{ MENU_ID_PAGE,MENU_ID_PAGE1,"Page 1",true,-1 },
+				{ MENU_ID_PAGE,MENU_ID_PAGE2,"Page 2",true,-1 },
+				{ MENU_ID_PAGE,MENU_ID_PAGE3,"Page 3",true,-1 },
+				{ MENU_ID_PAGE,MENU_ID_PAGE4,"Page 4",true,-1 },
+				{ MENU_ID_FILE,-1 },
+				{ MENU_ID_FILE,MENU_ID_PRINT,"Print",true,aKEY_p,aKEY_CONTROL },
+				{ MENU_ID_FILE,-1 },
+				{ MENU_ID_FILE,MENU_ID_QUIT,"Quit",true,aKEY_q,aKEY_CONTROL },
+			{ -1,MENU_ID_HELP,"Help",true,-1 },
+				{ MENU_ID_HELP,MENU_ID_CONTENT,"Content",true,aKEY_F1,0 },
+				{ MENU_ID_HELP,-1 },
+				{ MENU_ID_HELP,MENU_ID_ABOUT,"About",true,-1 },
+			{ -1,-1 }
+		};
+		window->setMenu(new aMenu(menu_events,items));
+
 		const int cols[] = { 200,150,200,-1 };
 		window->setStatus(new aStatus(cols));
 	}
@@ -473,7 +492,7 @@ fprintf(stderr,"window->add(notebook);\n");
 		sci_func(sci,SCI_STYLESETFORE,SCE_MEDIAWIKI_PARAM,0x003399);
 		sci_func(sci,SCI_STYLESETFORE,SCE_MEDIAWIKI_SEPARATOR,0x6633009);
 		sci_func(sci,SCI_STYLESETBOLD,SCE_MEDIAWIKI_SEPARATOR,1);
-		n = 4+sci_func(sci,SCI_TEXTWIDTH,STYLE_LINENUMBER,(sptr_t)"1234");
+		n = sci_func(sci,SCI_TEXTWIDTH,STYLE_LINENUMBER,(sptr_t)"1234");
 		sci_func(sci,SCI_SETMARGINWIDTHN,0,n);
 		sci_func(sci,SCI_SETMARGINWIDTHN,1,0);
 		sci_func(sci,SCI_SETMARGINWIDTHN,2,0);

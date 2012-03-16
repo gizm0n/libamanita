@@ -8,6 +8,7 @@
  * @date Created: 2012-01-28
  */ 
 
+#include <amanita/aResource.h>
 #include <amanita/gui/aContainer.h>
 
 enum {
@@ -18,10 +19,13 @@ enum {
 	aWINDOW_CENTER				= 0x00000010,
 };
 
-enum {
-	aWINDOW_APP_ICON			= 101,
-};
 
+struct aWindowIcon {
+	int size;
+	int id;
+	const char **xpm;
+	const char *png;
+};
 
 class aApplication;
 class aMenu;
@@ -43,6 +47,8 @@ private:
 	aMenu *menu;
 	aStatus *status;
 
+	aWindowIcon *icons;
+
 #ifdef USE_GTK
 	GtkWidget *wnd;
 #endif
@@ -59,6 +65,8 @@ private:
 	virtual void makeLayout(int x,int y,int w,int h);
 #endif
 
+	void clearIcons();
+
 public:
 	aWindow(aApplication *a,widget_event_handler weh);
 	virtual ~aWindow();
@@ -72,6 +80,8 @@ public:
 	void setStatus(aStatus *sb);
 	void updateStatus(int n,const char *format, ...);
 	aStatus *getStatus() { return status; }
+
+	void setIcons(const aWindowIcon icons[]);
 
 	virtual void create(aWindow *wnd,uint32_t st);
 	virtual void createAll(aComponent p,bool n);

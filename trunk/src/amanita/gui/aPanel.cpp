@@ -8,6 +8,7 @@
 #include <commctrl.h>
 #endif
 #include <amanita/aApplication.h>
+#include <amanita/aResource.h>
 #include <amanita/gui/aPanel.h>
 #include <amanita/gui/aWindow.h>
 
@@ -17,7 +18,7 @@ void button_clicked_callback(GtkWidget *widget,gpointer data) {
 	aPanelButton *pb = (aPanelButton *)data;
 	aPanel *p = pb->panel;
 	widget_event_handler weh = p->getEventHandler();
-	weh(p,aPANEL_CLICKED,pb->action,pb->data,0);
+	weh(p,aPANEL_CLICKED,pb->action,(intptr_t)pb->data,0);
 }
 #endif
 
@@ -82,7 +83,7 @@ void aPanel::create(aWindow *wnd,uint32_t st) {
 
 	for(n=0; buttons[n].style; ++n);
 
-	HIMAGELIST il = ImageList_LoadBitmap(hMainInstance,MAKEINTRESOURCE(3101),24,24,0xff00ff);
+	HIMAGELIST il = ImageList_LoadBitmap(hMainInstance,MAKEINTRESOURCE(aSTOCK_ICONS),24,24,0xff00ff);
 //	HIMAGELIST il = ImageList_LoadBitmap(hMainInstance,MAKEINTRESOURCE(1001),24,24,0xff00ff);
 //	HIMAGELIST il = ImageList_LoadImage(hMainInstance,MAKEINTRESOURCE(WIN32_STOCK_ICONS),24,24,0xff00ff,IMAGE_BITMAP,LR_SHARED);
 	SendMessage((HWND)component,TB_SETIMAGELIST,0,(LPARAM)il);

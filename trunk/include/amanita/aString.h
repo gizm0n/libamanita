@@ -223,20 +223,33 @@ public:
 	size_t println(FILE *fp);
 	/** @} */
 
-	/** @name Compare
+	/** @name Find & Match methods.
 	 * @{ */
+	/** Find a char.
+	 * @param c Char to find.
+	 * @param o Offset position.
+	 * @param l Length in string to search.
+	 * @return Position in string where char is, or -1 if no found. */
 	long find(char c,long o=0,long l=0);
+	/** @see long find(const char *,long,long,long) */
 	long find(const aString *s,long o=0,long l=0) { return s? find(s->str,o,l,s->len) : -1; }
+	/** @see long find(const char *,long,long,long) */
 	long find(const aString &s,long o=0,long l=0) { return find(s.str,o,l,s.len); }
+	/** Find a string.
+	 * @param s String to find.
+	 * @param o Offset position.
+	 * @param l Length in string to search.
+	 * @return Position in string where string is, or -1 if no found. */
 	long find(const char *s,long o=0,long l=0,long sl=0);
+	/** Find any char from s int string.
+	 * @param s Any chars in string s will be matched.
+	 * @param o Offset position.
+	 * @param l Length in string to search.
+	 * @return Position in string where char is, or -1 if no found. */
 	long findChar(const char *s,long o=0,long l=0);
-	bool equals(const aString *s,long o=0,long l=0) { return s? equals(s->str,o,l!=0? l : s->len) : false; }
-	bool equals(const aString &s,long o=0,long l=0) { return equals(s.str,o,l!=0? l : s.len); }
-	bool equals(const char *s,long o=0,long l=0);
-	int compare(const aString *s,long o=0,long l=0) { return s? compare(s->str,o,l!=0? l : s->len) : -1; }
-	int compare(const aString &s,long o=0,long l=0) { return compare(s.str,o,l!=0? l : s.len); }
-	int compare(const char *s,long o=0,long l=0);
-	/** Match nested tags. For the string "abc [b]def [b]ghi[/b] jkl[/b] mno." will return 25, the index after "jkl".
+
+	/** Match nested tags.
+	 * For the string "abc [b]def [b]ghi[/b] jkl[/b] mno." will return 25, the index after "jkl".
 	 * @param tag1 Opening tag, does not have to be complete, such as "[b", but make sure c1 is set.
 	 * @param tag2 Closing tag, does not have to be complete, such as "[/b", but make sure c2 is set.
 	 * @param o Offset, if negative offset is counted from ending of string.
@@ -248,34 +261,72 @@ public:
 	long matchNestedTags(const char *tag1,const char *tag2,long o=0,long l=0,const char *c1=0,const char *c2=0);
 	/** @} */
 
-	/** @name Count
+	/** @name Equals methods.
 	 * @{ */
+	/** @see bool equals(const char *,long,long) */
+	bool equals(const aString *s,long o=0,long l=0) { return s? equals(s->str,o,l!=0? l : s->len) : false; }
+	/** @see bool equals(const char *,long,long) */
+	bool equals(const aString &s,long o=0,long l=0) { return equals(s.str,o,l!=0? l : s.len); }
+	/** Compare string (or substring) with s and return true if equal, or false. If o and l is set,
+	 * a substring is compared, otherwise the entire string.
+	 * @param s String to compare.
+	 * @param o Offset position.
+	 * @param l Length in string to compare.
+	 * @return True if equal, otherwise false. */
+	bool equals(const char *s,long o=0,long l=0);
+	/** @} */
+
+
+	/** @name Compare methods.
+	 * @{ */
+	/** @see int compare(const char *,long,long) */
+	int compare(const aString *s,long o=0,long l=0) { return s? compare(s->str,o,l!=0? l : s->len) : -1; }
+	/** @see int compare(const char *,long,long) */
+	int compare(const aString &s,long o=0,long l=0) { return compare(s.str,o,l!=0? l : s.len); }
+	/** Compare string (or substring) with s and return result. If o and l is set,
+	 * a substring is compared, otherwise the entire string.
+	 * @see int strncmp (const char *,const char *,size_t)
+	 * @param s String to compare.
+	 * @param o Offset position.
+	 * @param l Length in string to compare.
+	 * @return Zero if equal, a positive value if string is greater than s, otherwise a negative value. */
+	int compare(const char *s,long o=0,long l=0);
+	/** @} */
+
+	/** @name Count methods.
+	 * @{ */
+	/** Count the number of times c appears in string.
+	 * @param c Char to look for.
+	 * @return Number of times c is found in string. */
 	size_t count(char c);
+	/** Count the number of times s appears in string.
+	 * @param s String to look for.
+	 * @return Number of times s is found in string. */
 	size_t count(const char *s);
 	/** @} */
 
-	/** @name Replace
+	/** @name Replace methods.
 	 * @{ */
 	size_t replace(const char *s,const char *r);
 	size_t replace(const char *s, ...);
 	size_t replace(const char **arr);
 	/** @} */
 
-	/** @name Strip
+	/** @name Strip methods.
 	 * @{ */
 	size_t stripComments();
 	size_t stripHTML();
 	size_t stripHTMLComments();
 	/** @} */
 
-	/** @name Substring
+	/** @name Substring methods.
 	 * @{ */
 	size_t substr(aString *s,long o,long l) { if(s) return substr(*s,o,l);return 0; }
 	size_t substr(aString &s,long o,long l);
 	size_t substr(char *s,long o,long l);
 	/** @} */
 
-	/** @name Encoding
+	/** @name Encoding methods.
 	 * @{ */
 	void newline(const char *nl);
 	void escape();
@@ -288,7 +339,7 @@ public:
 	void decodeHTML();
 	/** @} */
 
-	/** @name Capacity
+	/** @name Capacity methods.
 	 * @{ */
 	void trim() { len = trim(str); }
 	void trim(long &o,long &l);
@@ -301,7 +352,7 @@ public:
 	size_t capacity() { return cap; }
 	/** @} */
 
-	/** @name Types
+	/** @name Type conversion methods.
 	 * @{ */
 	char charAt(long i);
 	const char *toCharArray() { return str; }
@@ -309,12 +360,12 @@ public:
 	size_t toIntArray(long *n,char c=',');
 	/** @} */
 
-	/** @name Tokens
+	/** @name Tokenizing methods.
 	 * @{ */
 	static size_t nextWord(const char **s,const char *c=whitespace);
 	/** @} */
 
-	/** @name Static functions
+	/** @name Static functions.
 	 * @{ */
 	static char toLower(const char c) { return (c>='A' && c<='Z')? c+32 : c; }
 	static char toUpper(const char c) { return (c>='a' && c<='z')? c-32 : c; }
@@ -333,7 +384,7 @@ public:
 	static void printUTF8(char *d,const char *s,size_t o,size_t l);
 	/** @} */
 
-	/** @name Test char
+	/** @name Test char methods.
 	 * @{ */
 	static bool isLower(char c) { return (c>='a' && c<='z'); }
 	static bool isUpper(char c) { return (c>='A' && c<='Z'); }

@@ -128,6 +128,10 @@ if(UNIX)
 		set(GUI_GTK 1)
 		set(USE_GTK 1)
 		set(USE_GLIB 1)
+
+		set(PACKAGE_DATADIR ${CMAKE_INSTALL_PREFIX}/share)
+		set(PACKAGE_ICONSDIR ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor)
+		set(PACKAGE_LOCALEDIR ${CMAKE_INSTALL_PREFIX}/share/locale)
 	endif()
 	link_libraries(${CMAKE_THREAD_LIBS} ${CMAKE_DL_LIBS})
 else()
@@ -151,9 +155,29 @@ else()
 #		if(CMAKE_C_COMPILER_ID STREQUAL GNU)
 #			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-subsystem,windows")
 #		endif()
+
+		set(PACKAGE_DATADIR "data")
+		set(PACKAGE_ICONSDIR "icons")
+		set(PACKAGE_LOCALEDIR "data\\locale")
 	else()
 		message("Unknown")
 		set(GUI "Unknown")
+	endif()
+endif()
+
+
+if(UNIX)
+	if(APPLE)
+	else()
+		install(FILES icons/16x16/amanita.xpm DESTINATION share/pixmaps)
+		install(FILES icons/16x16/amanita.png DESTINATION share/icons/hicolor/16x16/apps)
+		install(FILES icons/48x48/amanita.png DESTINATION share/icons/hicolor/48x48/apps)
+	endif()
+else()
+	if(MINGW)
+		install(FILES icons/amanita.ico icons/stock_icons.bmp DESTINATION share/amanita)
+		set(AMANITA_APP_ICON ${CMAKE_INSTALL_PREFIX}/share/amanita/amanita.ico)
+		set(AMANITA_STOCK_ICONS ${CMAKE_INSTALL_PREFIX}/share/amanita/stock_icons.bmp)
 	endif()
 endif()
 
@@ -166,6 +190,11 @@ configure_file(
 configure_file(
 	"${PROJECT_SOURCE_DIR}/include/amanita/aConfig.h.in"
 	"${PROJECT_BINARY_DIR}/include/amanita/aConfig.h"
+)
+
+configure_file(
+	"${PROJECT_SOURCE_DIR}/include/amanita/aResource.h.in"
+	"${PROJECT_BINARY_DIR}/include/amanita/aResource.h"
 )
 
 
@@ -352,15 +381,6 @@ install(TARGETS amanita ipomoea esoteric
 	DESTINATION lib
 )
 
-if(WIN32)
-	if(MINGW)
-		install(FILES
-			data/Win32Icons.bmp
-			DESTINATION share/amanita
-		)
-	endif()
-endif()
-
 
 PKG_CHECK_MODULES(GEANY geany)
 if(GEANY_FOUND)
@@ -391,9 +411,7 @@ if(GEANY_FOUND)
 			target_link_libraries(djynn ipomoea ${GTK2_LIBRARIES} ${GEANY_LIBRARIES})
 		endif()
 
-		install(TARGETS djynn
-			DESTINATION /usr/lib/geany
-		)
+		install(TARGETS djynn DESTINATION /usr/lib/geany)
 	endif()
 endif()
 
@@ -409,6 +427,7 @@ if(WIN32)
 		add_custom_command(
 			OUTPUT ${PROJECT_BINARY_DIR}/CMakeFiles/examples_resource.obj
 			COMMAND ${CMAKE_RC_COMPILER} -I${PROJECT_SOURCE_DIR}/examples
+			-I${PROJECT_SOURCE_DIR}/include -I${PROJECT_BINARY_DIR}/include
 			-i${PROJECT_SOURCE_DIR}/examples/_resource.rc
 			-o ${PROJECT_BINARY_DIR}/CMakeFiles/examples_resource.obj)
 		set(RC_FILE ${PROJECT_BINARY_DIR}/CMakeFiles/examples_resource.obj)
