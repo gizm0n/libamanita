@@ -177,7 +177,7 @@ void transliterate_hebrew(aWiki &w,char *p) {
 		else if(*p1=='T' && p1[1]=='h') n = 21,++p1;
 		else if((p2=strchr(hebrew_chars,*p1))) n = p2-hebrew_chars;
 		if(n!=-1) {
-			if(p1[1]=='\0' || aString::isSpace(p1[1])) {
+			if((n==-1 || n==17) && (p1[1]=='\0' || aString::isSpace(p1[1]))) {
 				if(n==17) n2 = 4;
 				else if((p2=strchr(hebrew_final_chars,*p1))) n2 = p2-hebrew_final_chars;
 			}

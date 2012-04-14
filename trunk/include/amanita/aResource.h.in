@@ -2,7 +2,7 @@
 #define _AMANITA_RESOURCE_H
 
 /**
- * @file amanita/aResource.h.in
+ * @file amanita/aResource.h
  * @author Per Löwgren
  * @date Modified: 2012-03-16
  * @date Created: 2012-03-01

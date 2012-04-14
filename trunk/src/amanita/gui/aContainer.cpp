@@ -48,7 +48,8 @@ aWidget *aContainer::remove(uint32_t id) {
 
 void aContainer::create(aWindow *wnd,uint32_t st) {
 	if(text) type = aWIDGET_FRAME;
-	else if(parent && parent->type==aWIDGET_CONTAINER) type = aWIDGET_VOID;
+	else if(parent && *parent==aContainer::getClass()) type = aWIDGET_VOID;
+debug_output("aContainer::create(type: %d)\n",type);
 
 #ifdef USE_GTK
 	if((style&aHORIZONTAL)) {

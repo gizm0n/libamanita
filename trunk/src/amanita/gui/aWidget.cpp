@@ -189,11 +189,11 @@ void aWidget::create(aWindow *wnd,uint32_t st) {
 	tchar_t *t = tstrdup(text);
 	st |= wc->style;
 	if(!(style&aHIDE)) st |= WS_VISIBLE;
-debug_output("aWidget::create(id: %d, window: %p, widget: %p, control: %s, component: %p, text: %" PRIts ")\n",id,window,this,win32_classes[wc->control],component,text? t : _T("-"));
 	if(wc->style!=0) {
 		component = (aComponent)CreateWindowEx(wc->style_x,win32_classes[wc->control],
 			t? t : _T(""),st,0,0,0,0,(HWND)parent->component,(HMENU)(uint32_t)id,hMainInstance,this);
 	}
+debug_output("aWidget::create(id: %d, window: %p, widget: %p, control: %" PRIts ", component: %p, text: %" PRIts ")\n",id,window,this,win32_classes[wc->control],component,text? t : _T("-"));
 //	SetParent((HWND)component,(HWND)window->component);
 	if(!min_width && wc->min_width) min_width = wc->min_width;
 	if(!min_height && wc->min_height) min_height = wc->min_height;

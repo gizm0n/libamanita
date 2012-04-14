@@ -227,13 +227,13 @@ set(amanita_src
 	src/amanita/gui/aButton.cpp
 	src/amanita/gui/aCairo.cpp
 	src/amanita/gui/aCanvas.cpp
-	src/amanita/gui/aChoice.cpp
 	src/amanita/gui/aContainer.cpp
 	src/amanita/gui/aLabel.cpp
 	src/amanita/gui/aList.cpp
 	src/amanita/gui/aMenu.cpp
 	src/amanita/gui/aNotebook.cpp
 	src/amanita/gui/aPanel.cpp
+	src/amanita/gui/aSelect.cpp
 	src/amanita/gui/aStatus.cpp
 	src/amanita/gui/aText.cpp
 	src/amanita/gui/aWidget.cpp
@@ -296,6 +296,7 @@ install(FILES
 	include/amanita/aPath.h
 	include/amanita/aRandom.h
 	include/amanita/aRegex.h
+	${PROJECT_BINARY_DIR}/include/amanita/aResource.h
 	include/amanita/aString.h
 	include/amanita/aThread.h
 	include/amanita/aVector.h
@@ -316,14 +317,13 @@ install(FILES
 	include/amanita/gui/aButton.h
 	include/amanita/gui/aCairo.h
 	include/amanita/gui/aCanvas.h
-	include/amanita/gui/aChoice.h
 	include/amanita/gui/aContainer.h
-	include/amanita/gui/aEvent.h
 	include/amanita/gui/aLabel.h
 	include/amanita/gui/aList.h
 	include/amanita/gui/aMenu.h
 	include/amanita/gui/aNotebook.h
 	include/amanita/gui/aPanel.h
+	include/amanita/gui/aSelect.h
 	include/amanita/gui/aStatus.h
 	include/amanita/gui/aText.h
 	include/amanita/gui/aWidget.h
@@ -340,21 +340,22 @@ install(FILES
 )
 
 install(FILES
-	include/amanita/sdl/aButton.h
-	include/amanita/sdl/aComponent.h
-	include/amanita/sdl/aDisplay.h
-	include/amanita/sdl/aFont.h
-	include/amanita/sdl/aGraphics.h
-	include/amanita/sdl/aIconButton.h
-	include/amanita/sdl/aImage.h
-	include/amanita/sdl/aScroll.h
-	include/amanita/sdl/aTabset.h
-	include/amanita/sdl/aText.h
-	include/amanita/sdl/aTextbox.h
-	include/amanita/sdl/aTextfield.h
-	include/amanita/sdl/aTooltip.h
-	include/amanita/sdl/aWindow.h
-	DESTINATION include/amanita/sdl
+	include/amanita/gfx/aGfxButton.h
+	include/amanita/gfx/aGfxComponent.h
+	include/amanita/gfx/aGfxDisplay.h
+	include/amanita/gfx/aGfxEvent.h
+	include/amanita/gfx/aGfxFont.h
+	include/amanita/gfx/aGfxGraphics.h
+	include/amanita/gfx/aGfxIconButton.h
+	include/amanita/gfx/aGfxImage.h
+	include/amanita/gfx/aGfxScroll.h
+	include/amanita/gfx/aGfxTabset.h
+	include/amanita/gfx/aGfxText.h
+	include/amanita/gfx/aGfxTextbox.h
+	include/amanita/gfx/aGfxTextfield.h
+	include/amanita/gfx/aGfxTooltip.h
+	include/amanita/gfx/aGfxWindow.h
+	DESTINATION include/amanita/gfx
 )
 
 install(FILES

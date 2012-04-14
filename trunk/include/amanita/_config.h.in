@@ -2,7 +2,7 @@
 #define _AMANITA__CONFIG_H
 
 /**
- * @file amanita/_config.h.h
+ * @file amanita/_config.h
  * @author Per Löwgren
  * @date Modified: 2012-03-16
  * @date Created: 2012-03-01

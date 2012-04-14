@@ -16,7 +16,7 @@
 #include <amanita/gui/aButton.h>
 #include <amanita/gui/aLabel.h>
 #include <amanita/gui/aText.h>
-#include <amanita/gui/aChoice.h>
+#include <amanita/gui/aSelect.h>
 #include <amanita/gui/aList.h>
 #include <amanita/gui/aPanel.h>
 
@@ -235,7 +235,7 @@ fprintf(stderr,"button_events(%s, %d)\n",w->getText(),(int)p1);
 }
 
 static uint32_t choice_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
-fprintf(stderr,"choice_events(%s)\n",((aChoice *)w)->getItem());
+fprintf(stderr,"choice_events(%s)\n",((aSelect *)w)->getItem());
 	return 0;
 }
 
@@ -270,7 +270,7 @@ void GuiApp::create() {
 /*	aContainer *vbox2;
 	aButton *button,*group;
 	aLabel *label;
-	aChoice *choice;
+	aSelect *choice;
 	aList *list;*/
 	aText *text;
 	aPanel *panel;
@@ -282,7 +282,7 @@ void GuiApp::create() {
 		const aWindowIcon icons[] = {
 #ifdef USE_GTK
 //			{ 16,0,amanita_xpm },
-			{ 16,0,0,"../icons/48x48/amanita.png" },
+			{ 16,0,0,"../icons/16x16/amanita.png" },
 			{ 48,0,0,"../icons/48x48/amanita.png" },
 #endif
 #ifdef USE_WIN32
@@ -364,7 +364,7 @@ fprintf(stderr,"window->add(notebook);\n");
 		button->setText(str);
 		vbox1->add(button);
 	}
-	choice = new aChoice(choice_events);
+	choice = new aSelect(choice_events);
 	for(i=0; i<10; ++i) {
 		sprintf(str,"Choice %d",i+1);
 		choice->addItem(str);
@@ -379,8 +379,8 @@ fprintf(stderr,"window->add(notebook);\n");
 	sprintf(str,"Text %d",++n);
 	text->setText(str);
 	vbox1->add(text);
-	choice = new aChoice(choice_events);
-	choice->setStyle(aFILL|aCHOICE_ENTRY);
+	choice = new aSelect(choice_events);
+	choice->setStyle(aFILL|aSELECT_ENTRY);
 	for(i=0; i<10; ++i) {
 		sprintf(str,"Choice Entry %d",i+1);
 		choice->addItem(str);

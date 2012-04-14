@@ -85,8 +85,8 @@ public:
 
 	virtual void create(aWindow *wnd,uint32_t st);
 
-	int openPage(const char *tab,aWidget *page);
-	int openPage(aNotebookPage *np);
+	int openPage(const char *tab,aWidget *page,bool sel=true);
+	int openPage(aNotebookPage *np,bool sel=true);
 	void selectPage(int n);
 	void selectPage(aNotebookPage *np) { selectPage(np->tab.index); }
 	const char *getTab(int n=-1);

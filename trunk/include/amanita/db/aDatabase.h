@@ -8,8 +8,8 @@
  * @date Created: 2008-09-07
  */ 
 
-#include <amanita/aRecord.h>
-#include <amanita/aResult.h>
+#include <amanita/db/aRecord.h>
+#include <amanita/db/aResult.h>
 
 
 struct sqlite3;
