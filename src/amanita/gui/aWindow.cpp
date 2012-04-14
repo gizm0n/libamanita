@@ -20,7 +20,7 @@
 #include <amanita/gui/aStatus.h>
 #include <amanita/gui/aNotebook.h>
 #include <amanita/gui/aButton.h>
-#include <amanita/gui/aChoice.h>
+#include <amanita/gui/aSelect.h>
 #include <amanita/gui/aList.h>
 #include <amanita/gui/aPanel.h>
 
@@ -392,20 +392,20 @@ bool aWindow::command(WPARAM wparam,LPARAM lparam) {
 		case aWIDGET_COMBOBOX:
 		case aWIDGET_COMBOBOX_ENTRY:
 			if(HIWORD(wparam)==CBN_SELENDOK) {
-				aChoice *ch = (aChoice *)getWidget((aComponent)wparam);
+				aSelect *ch = (aSelect *)getWidget((aComponent)wparam);
 				widget_event_handler weh = ch->getEventHandler();
 				if(weh) {
-					weh(ch,aCHOICE_CHANGED,0,0,0);
+					weh(ch,aSELECT_CHANGED,0,0,0);
 					return true;
 				}
 			}
 			break;
 		case aWIDGET_LISTBOX:
 			if(HIWORD(wparam)==LBN_SELCHANGE) {
-				aChoice *ch = (aChoice *)getWidget((aComponent)wparam);
+				aSelect *ch = (aSelect *)getWidget((aComponent)wparam);
 				widget_event_handler weh = ch->getEventHandler();
 				if(weh) {
-					weh(ch,aCHOICE_CHANGED,0,0,0);
+					weh(ch,aSELECT_CHANGED,0,0,0);
 					return true;
 				}
 			}

@@ -285,6 +285,5 @@ public:
 	/** @} */
 };
 
-
 #endif /* _AMANITA_OBJECT_H */
 

@@ -9,6 +9,7 @@
  */ 
 
 
+#include <amanita/aConfig.h>
 #include <amanita/gui/aWidget.h>
 
 #ifdef USE_SCINTILLA

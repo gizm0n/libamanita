@@ -6,39 +6,39 @@
 #ifdef USE_WIN32
 #include <windows.h>
 #endif
-#include <amanita/gui/aChoice.h>
+#include <amanita/gui/aSelect.h>
 
 
 
 #ifdef USE_GTK
 static void choice_changed_callback(GtkWidget *widget,gpointer data) {
-	aChoice *ch = (aChoice *)data;
+	aSelect *ch = (aSelect *)data;
 	widget_event_handler weh = ch->getEventHandler();
-	weh(ch,aCHOICE_CHANGED,0,0,0);
+	weh(ch,aSELECT_CHANGED,0,0,0);
 }
 #endif
 
 
-aObject_Inheritance(aChoice,aWidget)
+aObject_Inheritance(aSelect,aWidget)
 
-aChoice::aChoice(widget_event_handler weh) : aWidget(weh,aWIDGET_COMBOBOX) {
+aSelect::aSelect(widget_event_handler weh) : aWidget(weh,aWIDGET_COMBOBOX) {
 	items = 0;
 	item = 0;
 	selected = -1;
 }
 
-aChoice::~aChoice() {
+aSelect::~aSelect() {
 	if(items) delete items;
 	items = 0;
 	if(item) free(item);
 	item = 0;
 }
 
-void aChoice::create(aWindow *wnd,uint32_t st) {
+void aSelect::create(aWindow *wnd,uint32_t st) {
 	int i,n,t = style&0xf;
 	char *str;
-	if(t==aCHOICE_COMBOBOX) type = aWIDGET_COMBOBOX;
-	else if(t==aCHOICE_ENTRY) type = aWIDGET_COMBOBOX_ENTRY;
+	if(t==aSELECT_COMBOBOX) type = aWIDGET_COMBOBOX;
+	else if(t==aSELECT_ENTRY) type = aWIDGET_COMBOBOX_ENTRY;
 #ifdef USE_GTK
 	if(type==aWIDGET_COMBOBOX) component = (aComponent)gtk_combo_box_text_new();
 	else component = (aComponent)gtk_combo_box_entry_new_text();
@@ -78,7 +78,7 @@ void aChoice::create(aWindow *wnd,uint32_t st) {
 	items = 0;
 }
 
-void aChoice::setItems(const char *arr[]) {
+void aSelect::setItems(const char *arr[]) {
 	if(items) delete items;
 	if(component) {
 #ifdef USE_GTK
@@ -91,7 +91,7 @@ void aChoice::setItems(const char *arr[]) {
 	for(; *arr; ++arr) addItem(*arr);
 }
 
-void aChoice::addItem(const char *str) {
+void aSelect::addItem(const char *str) {
 	if(str) {
 		if(component) {
 #ifdef USE_GTK
@@ -110,7 +110,7 @@ void aChoice::addItem(const char *str) {
 	}
 }
 
-void aChoice::select(int n) {
+void aSelect::select(int n) {
 	int sz = 0;
 	if(component) {
 #ifdef USE_GTK
@@ -122,7 +122,7 @@ void aChoice::select(int n) {
 	} else selected = n>=0 && items && n<items->size()? n : -1;
 }
 
-int aChoice::getSelected() {
+int aSelect::getSelected() {
 	if(component) {
 #ifdef USE_GTK
 		selected = gtk_combo_box_get_active(GTK_COMBO_BOX(component));
@@ -135,7 +135,7 @@ int aChoice::getSelected() {
 	return selected;
 }
 
-const char *aChoice::getItem() {
+const char *aSelect::getItem() {
 	if(item) free(item);
 	item = 0;
 	if(component) {

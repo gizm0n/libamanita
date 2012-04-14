@@ -1,8 +1,8 @@
-#ifndef _AMANITA_GUI_CHOICE_H
-#define _AMANITA_GUI_CHOICE_H
+#ifndef _AMANITA_GUI_SELECT_H
+#define _AMANITA_GUI_SELECT_H
 
 /**
- * @file amanita/gui/aChoice.h  
+ * @file amanita/gui/aSelect.h  
  * @author Per Löwgren
  * @date Modified: 2012-02-13
  * @date Created: 2012-02-13
@@ -14,21 +14,21 @@
 
 
 enum {
-	aCHOICE_COMBOBOX		= 0x00000001,
-	aCHOICE_ENTRY			= 0x00000002,
+	aSELECT_COMBOBOX		= 0x00000001,
+	aSELECT_ENTRY			= 0x00000002,
 };
 
 enum {
-	aCHOICE_CHANGED		= 0x00000001,
+	aSELECT_CHANGED		= 0x00000001,
 };
 
 
-class aChoice : public aWidget {
+class aSelect : public aWidget {
 friend class aContainer;
 friend class aWindow;
 
 /** @cond */
-aObject_Instance(aChoice)
+aObject_Instance(aSelect)
 /** @endcond */
 
 private:
@@ -37,8 +37,8 @@ private:
 	int selected;
 
 public:	
-	aChoice(widget_event_handler weh);
-	virtual ~aChoice();
+	aSelect(widget_event_handler weh);
+	virtual ~aSelect();
 
 	virtual void create(aWindow *wnd,uint32_t st);
 
@@ -50,5 +50,5 @@ public:
 };
 
 
-#endif /* _AMANITA_GUI_CHOICE_H */
+#endif /* _AMANITA_GUI_SELECT_H */
 

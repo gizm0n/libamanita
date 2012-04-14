@@ -123,14 +123,14 @@ debug_output("aNotebook::create()\n");
 }
 
 
-int aNotebook::openPage(const char *tab,aWidget *page) {
+int aNotebook::openPage(const char *tab,aWidget *page,bool sel) {
 	aNotebookPage *np = new aNotebookPage(this);
 	np->tab.name = strdup(tab);
 	np->page = page;
-	openPage(np);
+	openPage(np,sel);
 }
 
-int aNotebook::openPage(aNotebookPage *np) {
+int aNotebook::openPage(aNotebookPage *np,bool sel) {
 	np->tab.index = pages.size();
 	pages << np;
 	np->page->parent = this;
@@ -183,7 +183,7 @@ debug_output("aNotebook::openPage(%s)\n",np->tab.name);
 		tfree(ti.pszText);
 	}
 #endif
-	selectPage(np->tab.index);
+	if(sel) selectPage(np->tab.index);
 	return selected;
 }
 
@@ -273,10 +273,10 @@ void aNotebook::makeLayout(int x,int y,int w,int h) {
 	client.left = x,client.top = y,client.right = x+w,client.bottom = y+h;
 	aNotebookPage *np = selected>=0? (aNotebookPage *)pages[selected] : 0;
 	aWidget::makeLayout(x,y,w,h);
-//debug_output("aNotebook::makeLayout(x: %d, y: %d, w: %d, h: %d)\n",this->x,this->y,width,height);
-	RECT r = client;
+debug_output("aNotebook::makeLayout(x: %d, y: %d, w: %d, h: %d)\n",this->x,this->y,width,height);
+	RECT r = { 0,0,client.right-client.left,client.bottom-client.top };
 	if(type==aWIDGET_NOTEBOOK) TabCtrl_AdjustRect((HWND)component,FALSE,&r);
-//debug_output("aNotebook::makeLayout(WIN32_CONTROL_TABS - TabCtrl_AdjustRect(l: %d, t: %d, r: %d, b: %d))\n",r.left,r.top,r.right,r.bottom);
+debug_output("aNotebook::makeLayout(WIN32_CONTROL_TABS - TabCtrl_AdjustRect(l: %d, t: %d, r: %d, b: %d))\n",r.left,r.top,r.right,r.bottom);
 	if(w1!=width || h1!=height)
 		for(i=pages.size()-1; i>=0; --i)
 			((aNotebookPage *)pages[i])->status = 1;
