@@ -249,7 +249,9 @@ target_link_libraries(amanita ${CMAKE_THREAD_LIBS_INIT})
 
 
 set(ipomoea_src
+	src/ipomoea/base64.c
 	src/ipomoea/hashtable_t.c
+	src/ipomoea/rle.c
 	src/ipomoea/string_t.c
 	src/ipomoea/vector_t.c
 )
@@ -359,7 +361,9 @@ install(FILES
 )
 
 install(FILES
+	include/ipomoea/base64.h
 	include/ipomoea/hashtable_t.h
+	include/ipomoea/rle.h
 	include/ipomoea/string_t.h
 	include/ipomoea/vector_t.h
 	DESTINATION include/ipomoea
