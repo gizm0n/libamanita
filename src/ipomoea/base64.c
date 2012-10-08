@@ -1,4 +1,5 @@
 
+#include <ipomoea/base64.h>
 
 #define __ -1
 
@@ -31,10 +32,10 @@ size_t base64_decoded_size(size_t len) {
 	return (len/4)*3;
 }
 
-void base64_encode(unsigned char *dst,const unsigned char *src,int len) {
+void base64_encode(unsigned char *dst,const unsigned char *src,size_t len) {
 	unsigned char *d = dst;
 	const unsigned char *s = src;
-	int i;
+	size_t i;
 	for(i=0; i<len; i+=3,s+=3,d+=4) {
 		d[0] = (unsigned char)base64_code[(int)(s[0]>>2)];
 		d[1] = (unsigned char)base64_code[(int)(((s[0]&0x03)<<4)|((s[1]&0xf0)>>4))];

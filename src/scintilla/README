@@ -1,0 +1,21 @@
+
+To install the lexers to Scintilla, check this webpage:
+http://www.scintilla.org/SciTELexer.html
+
+LexerMediaWiki.cxx have been compiled with Scintilla
+version 3.0.4, and later versions may not compile properly
+or to run bug free.
+
+
+1. Edit scintilla/include/Scintilla.iface
+2. Run scintilla/include/HFacer.py
+3. Run scintilla/src/LexGen.py
+
+
+For cross-compiling Scintilla with MinGW on Linux:
+
+Edit scintilla/win32/makefile
+Replace "g++" with "i686-w64-mingw32-g++"
+and replace "windres" with "i686-w64-mingw32-windres"
+
+

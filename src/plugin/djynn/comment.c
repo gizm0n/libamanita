@@ -546,7 +546,7 @@ void djynn_comment_init(GeanyData *data,int *menu_index) {
 	filetype_style *fts;
 	
 	styles = ht_new(0);
-	for(i=0; 1; i++) {
+	for(i=0; 1; ++i) {
 		fts = &filetype_styles[i];
 		if(fts->name==NULL) break;
 		ht_put(styles,fts->name,(void *)&comment_styles[fts->style]);
@@ -557,7 +557,7 @@ void djynn_comment_init(GeanyData *data,int *menu_index) {
 		*menu_index += 1;
 	}
 
-	for(i=DJYNN_TOGGLE_COMMENT; i<=DJYNN_INSERT_DOXYGEN_COMMENT; i++) {
+	for(i=DJYNN_TOGGLE_COMMENT; i<=DJYNN_INSERT_DOXYGEN_COMMENT; ++i) {
 		m = &djynn.menu_items[i];
 		if(m->menu_stock==NULL) m->menu_item = gtk_menu_item_new_with_label(m->label);
 		else m->menu_item = ui_image_menu_item_new(m->menu_stock,m->label);

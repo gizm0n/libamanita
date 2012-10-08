@@ -3,22 +3,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ipomoea/hashtable_t.h>
-#include <ipomoea/vector_t.h>
+#include <ipomoea/base64.h>
 #include "djynn.h"
 
-
-
-enum {
-	SORT		= 1,
-	CASE		= 2,
-	REVERSE	= 4
-};
 
 static char *eol;
 static int eol_len = 0;
 
-static void sort_text(int st) {
+static void item_activate_cb(GtkMenuItem *menuitem, gpointer gdata) {
+	djynn_base64_action((int)((intptr_t)gdata));
+}
+
+void djynn_base64_action(int id) {
 	GeanyDocument *doc = document_get_current();
 	if(doc==NULL) return;
 	else {
@@ -36,41 +32,26 @@ static void sort_text(int st) {
 		if(sel) text = sci_get_contents_range(sci,start,end);
 		else text = sci_get_contents(sci,sci_get_length(sci)+1);
 		if(text!=NULL) {
-			vector_t *vec = vec_new(0);
+			int l = strlen(text);
 			char *s;
-			vec_split_all(vec,text,eol);
-			if(st&SORT) {
-				if(st&CASE) vec_sort(vec);
-				else vec_isort(vec);
+			if(id==DJYNN_BASE64_DECODE) {
+				i = base64_decoded_size(l);
+				s = malloc(i+1);
+				base64_decode(s,text);
+			} else {
+				i = base64_encoded_size(l);
+				s = malloc(i+1);
+				base64_encode(s,text,l);
 			}
-			if(st&REVERSE) vec_reverse(vec);
-			//dialogs_show_msgbox(GTK_MESSAGE_INFO,"Vector[0][%s]",(char *)vec_get(vec,0));
-			s = vec_join(vec,eol);
-			//dialogs_show_msgbox(GTK_MESSAGE_INFO,"Sort[%s]",s);
 			if(sel) sci_replace_sel(sci,(const gchar *)s);
 			else sci_set_text(sci,(const gchar *)s);
 			free(s);
-			vec_delete(vec);
 			g_free(text);
 		}
 	}
 }
 
-static void item_activate_cb(GtkMenuItem *menuitem, gpointer gdata) {
-	djynn_sort_action((int)((intptr_t)gdata));
-}
-
-void djynn_sort_action(int id) {
-	switch(id) {
-		case DJYNN_SORT_ASC:sort_text(SORT);break;
-		case DJYNN_SORT_ASC_CASE:sort_text(SORT|CASE);break;
-		case DJYNN_SORT_DESC:sort_text(SORT|REVERSE);break;
-		case DJYNN_SORT_DESC_CASE:sort_text(SORT|REVERSE|CASE);break;
-		case DJYNN_REVERSE:sort_text(REVERSE);break;
-	}
-}
-
-void djynn_sort_init(GeanyData *data,int *menu_index) {
+void djynn_base64_init(GeanyData *data,int *menu_index) {
 	int i;
 	djynn_menu_item *m;
 
@@ -79,7 +60,7 @@ void djynn_sort_init(GeanyData *data,int *menu_index) {
 		*menu_index += 1;
 	}
 
-	for(i=DJYNN_SORT_ASC; i<=DJYNN_REVERSE; ++i) {
+	for(i=DJYNN_BASE64_ENCODE; i<=DJYNN_BASE64_DECODE; ++i) {
 		m = &djynn.menu_items[i];
 		if(m->menu_stock==NULL) m->menu_item = gtk_menu_item_new_with_label(m->label);
 		else m->menu_item = ui_image_menu_item_new(m->menu_stock,m->label);
@@ -90,6 +71,6 @@ void djynn_sort_init(GeanyData *data,int *menu_index) {
 }
 
 
-void djynn_sort_cleanup() {
+void djynn_base64_cleanup() {
 }
 

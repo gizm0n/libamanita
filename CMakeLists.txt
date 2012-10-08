@@ -46,7 +46,7 @@ set(PACKAGE_URL "http://code.google.com/p/libamanita/")
 set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 set(PACKAGE_TARNAME "${PACKAGE}")
 
-option(DJYNN "Build Djynn-plugin for Geany IDE" ON) 
+option(EXAMPLES "Build Amanita Library examples" ON) 
 option(ENABLE_NLS "Enable building of translations" ON)
 
 CHECK_INCLUDE_FILE("dlfcn.h" HAVE_DLFCN_H)
@@ -77,7 +77,10 @@ CHECK_FUNCTION_EXISTS(strstr HAVE_STRSTR)
 CHECK_FUNCTION_EXISTS(vprintf HAVE_VPRINTF)
 
 find_package(GTK2 2.6 REQUIRED gtk)
-include_directories(${GTK2_INCLUDE_DIRS})
+if(GTK2_FOUND)
+	include_directories(${GTK2_INCLUDE_DIRS})
+	add_definitions(-DGTK)
+endif()
 #PKG_CHECK_MODULES(GTK2 REQUIRED gtk+-2.0)
 #include_directories(${GTK2_INCLUDE_DIRS})
 #link_directories(${GTK2_LIBRARY_DIRS})
@@ -155,6 +158,12 @@ else()
 #		if(CMAKE_C_COMPILER_ID STREQUAL GNU)
 #			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-subsystem,windows")
 #		endif()
+		if(MINGW)
+			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static-libgcc")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
+			set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_C_FLAGS} -static-libgcc -s")
+			set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -static-libgcc -static-libstdc++ -s")
+		endif()
 
 		set(PACKAGE_DATADIR "data")
 		set(PACKAGE_ICONSDIR "icons")
@@ -386,101 +395,66 @@ install(TARGETS amanita ipomoea esoteric
 )
 
 
-PKG_CHECK_MODULES(GEANY geany)
-if(GEANY_FOUND)
-	message("Has Geany installed")
-	include_directories(${GEANY_INCLUDE_DIRS})
-	link_directories(${GEANY_LIBRARY_DIRS})
-	add_definitions(${GEANY_CFLAGS_OTHER})
-	if(DJYNN)
 
-		set(djynn_src
-			src/plugin/djynn/projectmanager_dlg.c
-			src/plugin/djynn/projectmanager.c
-			src/plugin/djynn/comment.c
-			src/plugin/djynn/sort.c
-			src/plugin/djynn/djynn.c
-		)
-		add_library(djynn SHARED ${djynn_src})
-		set_target_properties(djynn PROPERTIES PREFIX "")
+if(EXAMPLES)
+	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/examples)
 
-		if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
-			message("Build Djynn with -fPIC flag")
-			add_library(ipomoea_djynn_pic STATIC ${ipomoea_src})
-			set_target_properties(ipomoea_djynn_pic PROPERTIES COMPILE_FLAGS -fpic)
-			set_target_properties(djynn PROPERTIES COMPILE_FLAGS -fpic)
-			target_link_libraries(djynn ipomoea_djynn_pic ${GTK_LIBRARIES} ${GEANY_LIBRARIES})
+	if(WIN32)
+		if(MINGW)
+			# resource compilation for mingw
+			add_custom_command(
+				OUTPUT ${PROJECT_BINARY_DIR}/CMakeFiles/examples_resource.obj
+				COMMAND ${CMAKE_RC_COMPILER} -I${PROJECT_SOURCE_DIR}/examples
+				-I${PROJECT_SOURCE_DIR}/include -I${PROJECT_BINARY_DIR}/include
+				-i${PROJECT_SOURCE_DIR}/examples/_resource.rc
+				-o ${PROJECT_BINARY_DIR}/CMakeFiles/examples_resource.obj)
+			set(RC_FILE ${PROJECT_BINARY_DIR}/CMakeFiles/examples_resource.obj)
 		else()
-			message("Build Djynn")
-			target_link_libraries(djynn ipomoea ${GTK2_LIBRARIES} ${GEANY_LIBRARIES})
+			set(RC_FILE examples/_resource.rc)
 		endif()
-
-		install(TARGETS djynn DESTINATION /usr/lib/geany)
 	endif()
-endif()
 
-
-
-
-
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/examples)
-
-if(WIN32)
-	if(MINGW)
-		# resource compilation for mingw
-		add_custom_command(
-			OUTPUT ${PROJECT_BINARY_DIR}/CMakeFiles/examples_resource.obj
-			COMMAND ${CMAKE_RC_COMPILER} -I${PROJECT_SOURCE_DIR}/examples
-			-I${PROJECT_SOURCE_DIR}/include -I${PROJECT_BINARY_DIR}/include
-			-i${PROJECT_SOURCE_DIR}/examples/_resource.rc
-			-o ${PROJECT_BINARY_DIR}/CMakeFiles/examples_resource.obj)
-		set(RC_FILE ${PROJECT_BINARY_DIR}/CMakeFiles/examples_resource.obj)
+	if(WIN32)
+		add_executable(browser WIN32 examples/browser.cpp ${RC_FILE})
 	else()
-		set(RC_FILE examples/_resource.rc)
+		add_executable(browser examples/browser.cpp)
 	endif()
+	target_link_libraries(browser amanita ${GTK2_LIBRARIES} ${WEBKIT_LIBRARIES})
+
+	add_executable(client examples/client.cpp)
+	target_link_libraries(client amanita ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES})
+
+	add_executable(database examples/database.cpp)
+	target_link_libraries(database amanita sqlite3)
+
+	add_executable(entropy examples/entropy.cpp)
+	target_link_libraries(entropy amanita)
+
+	if(WIN32)
+		add_executable(gui WIN32 examples/gui.cpp ${RC_FILE})
+	else()
+		add_executable(gui examples/gui.cpp)
+	endif()
+	target_link_libraries(gui amanita ${GTK2_LIBRARIES} ${WEBKIT_LIBRARIES} ${SCINTILLA_LIB} ${SOURCEVIEW_LIBRARIES})
+
+	add_executable(horoscope examples/horoscope.c)
+	target_link_libraries(horoscope esoteric m)
+
+	add_executable(http examples/http.cpp)
+	target_link_libraries(http amanita ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES})
+
+	add_executable(regex examples/regex.cpp)
+	target_link_libraries(regex amanita)
+
+	add_executable(server examples/server.cpp)
+	target_link_libraries(server amanita ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES})
+
+	add_executable(string examples/string.cpp)
+	target_link_libraries(string amanita)
+
+	add_executable(wiki examples/wiki.cpp)
+	target_link_libraries(wiki amanita)
 endif()
-
-if(WIN32)
-	add_executable(browser WIN32 examples/browser.cpp ${RC_FILE})
-else()
-	add_executable(browser examples/browser.cpp)
-endif()
-target_link_libraries(browser amanita ${GTK2_LIBRARIES} ${WEBKIT_LIBRARIES})
-
-add_executable(client examples/client.cpp)
-target_link_libraries(client amanita ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES})
-
-add_executable(database examples/database.cpp)
-target_link_libraries(database amanita sqlite3)
-
-add_executable(entropy examples/entropy.cpp)
-target_link_libraries(entropy amanita)
-
-if(WIN32)
-	add_executable(gui WIN32 examples/gui.cpp ${RC_FILE})
-else()
-	add_executable(gui examples/gui.cpp)
-endif()
-target_link_libraries(gui amanita ${GTK2_LIBRARIES} ${WEBKIT_LIBRARIES} ${SCINTILLA_LIB} ${SOURCEVIEW_LIBRARIES})
-
-add_executable(horoscope examples/horoscope.c)
-target_link_libraries(horoscope esoteric m)
-
-add_executable(http examples/http.cpp)
-target_link_libraries(http amanita ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES})
-
-add_executable(regex examples/regex.cpp)
-target_link_libraries(regex amanita)
-
-add_executable(server examples/server.cpp)
-target_link_libraries(server amanita ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES})
-
-add_executable(string examples/string.cpp)
-target_link_libraries(string amanita)
-
-add_executable(wiki examples/wiki.cpp)
-target_link_libraries(wiki amanita)
-
 
 
 if(GETTEXT_FOUND AND ENABLE_NLS)
