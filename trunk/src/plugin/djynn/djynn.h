@@ -17,6 +17,8 @@ enum {
 	DJYNN_PM_DELETE,
 	DJYNN_PM_MOVE_UP,
 	DJYNN_PM_MOVE_DOWN,
+	DJYNN_BASE64_ENCODE,
+	DJYNN_BASE64_DECODE,
 	DJYNN_TOGGLE_COMMENT,
 	DJYNN_TOGGLE_BLOCK,
 	DJYNN_INSERT_DOXYGEN_COMMENT,
@@ -37,6 +39,8 @@ enum {
 	DJYNN_KB_PM_MOVE_UP,
 	DJYNN_KB_PM_MOVE_DOWN,
 	DJYNN_KB_PM_RELOAD_WORKSPACE,
+	DJYNN_KB_BASE64_ENCODE,
+	DJYNN_KB_BASE64_DECODE,
 	DJYNN_KB_TOGGLE_COMMENT,
 	DJYNN_KB_TOGGLE_BLOCK,
 	DJYNN_KB_INSERT_DOXYGEN_COMMENT,
@@ -148,7 +152,6 @@ extern GeanyPlugin *geany_plugin;
 extern GeanyData *geany_data;
 extern GeanyFunctions *geany_functions;
 
-
 void djynn_open_config();
 void djynn_save_config();
 void djynn_close_config();
@@ -168,6 +171,10 @@ void djynn_projectmanager_open_new_project_dlg();
 void djynn_projectmanager_open_new_folder_dlg();
 void djynn_projectmanager_add_folder(const gchar *name);
 
+void djynn_base64_init(GeanyData *data,int *menu_index);
+void djynn_base64_cleanup();
+void djynn_base64_action(int id);
+
 void djynn_comment_init(GeanyData *data,int *menu_index);
 void djynn_comment_cleanup();
 void djynn_comment_action(int id);
@@ -177,6 +184,6 @@ void djynn_sort_cleanup();
 void djynn_sort_action(int id);
 
 
-#endif /* _PROJECTMANAGER_H */
+#endif /* _DJYNN_H */
 
 
