@@ -1,6 +1,8 @@
 #ifndef _MANDRAGORA_ASTRO_ASTRONOMY_H_
 #define _MANDRAGORA_ASTRO_ASTRONOMY_H_
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <mandragora/calendar.h>
 
@@ -102,5 +104,8 @@ void astronomy_get_planets(astronomy *a,const int *pl,int data);
 const char *constellation_name(int id);
 const char *constellation_abbreviation(int id);
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* _MANDRAGORA_ASTRO_ASTRONOMY_H_ */
 

@@ -1,8 +1,10 @@
 #ifndef _IPOMOEA_VECTOR_T_H
 #define _IPOMOEA_VECTOR_T_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>
-
 
 enum {
 	VEC_TYPE_EMPTY,
@@ -51,5 +53,8 @@ int vec_capacity(vector_t *vec);
 void vec_print(vector_t *vec);
 void vec_print_indent(vector_t *vec,int ind);
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* _IPOMOEA_VECTOR_T_H */
 

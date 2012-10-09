@@ -171,51 +171,51 @@ typedef enum tagDOCHOSTUITYPE {
 
 
 extern "C" {
-	const GUID IID_IDocHostUIHandler = { 0xBD3F23C0,0xD43E,0x11CF,{0x89,0x3B,0x00,0xAA,0x00,0xBD,0xCE,0x1A} };
-	const GUID IID_IDocHostShowUI = { 0xC4D244B0,0xD43E,0x11CF,{0x89,0x3B,0x00,0xAA,0x00,0xBD,0xCE,0x1A} };
+const GUID IID_IDocHostUIHandler = { 0xBD3F23C0,0xD43E,0x11CF,{0x89,0x3B,0x00,0xAA,0x00,0xBD,0xCE,0x1A} };
+const GUID IID_IDocHostShowUI = { 0xC4D244B0,0xD43E,0x11CF,{0x89,0x3B,0x00,0xAA,0x00,0xBD,0xCE,0x1A} };
 
-	typedef struct _DOCHOSTUIINFO {
-		ULONG cbSize;
-		DWORD dwFlags;
-		DWORD dwDoubleClick;
-		OLECHAR *pchHostCss;
-		OLECHAR *pchHostNS;
-	} DOCHOSTUIINFO;
+typedef struct _DOCHOSTUIINFO {
+	ULONG cbSize;
+	DWORD dwFlags;
+	DWORD dwDoubleClick;
+	OLECHAR *pchHostCss;
+	OLECHAR *pchHostNS;
+} DOCHOSTUIINFO;
 
-	#undef INTERFACE
-	#define INTERFACE IDocHostUIHandler
-	DECLARE_INTERFACE_(IDocHostUIHandler,IUnknown) {
-		STDMETHOD(QueryInterface)(THIS_ REFIID,PVOID*) PURE;
-		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
-		STDMETHOD_(ULONG,Release)(THIS) PURE;
-		STDMETHOD(ShowContextMenu)(THIS_ DWORD,POINT *,IUnknown *,IDispatch *) PURE;
-		STDMETHOD(GetHostInfo)(THIS_ DOCHOSTUIINFO *) PURE;
-		STDMETHOD(ShowUI)(THIS_ DWORD,IOleInPlaceActiveObject *,IOleCommandTarget *,IOleInPlaceFrame *,IOleInPlaceUIWindow *) PURE;
-		STDMETHOD(HideUI)(THIS) PURE;
-		STDMETHOD(UpdateUI)(THIS) PURE;
-		STDMETHOD(EnableModeless)(THIS_ BOOL) PURE;
-		STDMETHOD(OnDocWindowActivate)(THIS_ BOOL) PURE;
-		STDMETHOD(OnFrameWindowActivate)(THIS_ BOOL) PURE;
-		STDMETHOD(ResizeBorder)(THIS_ LPCRECT,IOleInPlaceUIWindow *,BOOL) PURE;
-		STDMETHOD(TranslateAccelerator)(THIS_ LPMSG,const GUID *,DWORD) PURE;
-		STDMETHOD(GetOptionKeyPath)(THIS_ LPOLESTR *,DWORD) PURE;
-		STDMETHOD(GetDropTarget)(THIS_ IDropTarget *,IDropTarget **) PURE;
-		STDMETHOD(GetExternal)(THIS_ IDispatch **) PURE;
-		STDMETHOD(TranslateUrl)(THIS_ DWORD,OLECHAR *,OLECHAR **) PURE;
-		STDMETHOD(FilterDataObject)(THIS_ IDataObject *,IDataObject **) PURE;
-	};
+#undef INTERFACE
+#define INTERFACE IDocHostUIHandler
+DECLARE_INTERFACE_(IDocHostUIHandler,IUnknown) {
+	STDMETHOD(QueryInterface)(THIS_ REFIID,PVOID*) PURE;
+	STDMETHOD_(ULONG,AddRef)(THIS) PURE;
+	STDMETHOD_(ULONG,Release)(THIS) PURE;
+	STDMETHOD(ShowContextMenu)(THIS_ DWORD,POINT *,IUnknown *,IDispatch *) PURE;
+	STDMETHOD(GetHostInfo)(THIS_ DOCHOSTUIINFO *) PURE;
+	STDMETHOD(ShowUI)(THIS_ DWORD,IOleInPlaceActiveObject *,IOleCommandTarget *,IOleInPlaceFrame *,IOleInPlaceUIWindow *) PURE;
+	STDMETHOD(HideUI)(THIS) PURE;
+	STDMETHOD(UpdateUI)(THIS) PURE;
+	STDMETHOD(EnableModeless)(THIS_ BOOL) PURE;
+	STDMETHOD(OnDocWindowActivate)(THIS_ BOOL) PURE;
+	STDMETHOD(OnFrameWindowActivate)(THIS_ BOOL) PURE;
+	STDMETHOD(ResizeBorder)(THIS_ LPCRECT,IOleInPlaceUIWindow *,BOOL) PURE;
+	STDMETHOD(TranslateAccelerator)(THIS_ LPMSG,const GUID *,DWORD) PURE;
+	STDMETHOD(GetOptionKeyPath)(THIS_ LPOLESTR *,DWORD) PURE;
+	STDMETHOD(GetDropTarget)(THIS_ IDropTarget *,IDropTarget **) PURE;
+	STDMETHOD(GetExternal)(THIS_ IDispatch **) PURE;
+	STDMETHOD(TranslateUrl)(THIS_ DWORD,OLECHAR *,OLECHAR **) PURE;
+	STDMETHOD(FilterDataObject)(THIS_ IDataObject *,IDataObject **) PURE;
+};
 
 
-	#undef INTERFACE
-	#define INTERFACE IDocHostShowUI
-	DECLARE_INTERFACE_(IDocHostShowUI,IUnknown) {
-		STDMETHOD(QueryInterface)(THIS_ REFIID,PVOID*) PURE;
-		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
-		STDMETHOD_(ULONG,Release)(THIS) PURE;
-		STDMETHOD(ShowHelp)(THIS_ HWND,LPOLESTR,UINT,DWORD,POINT,IDispatch *) PURE;
-		STDMETHOD(ShowMessage)(THIS_ HWND,LPOLESTR,LPOLESTR,DWORD,LPOLESTR,DWORD,LRESULT *) PURE;
-	};
-}
+#undef INTERFACE
+#define INTERFACE IDocHostShowUI
+DECLARE_INTERFACE_(IDocHostShowUI,IUnknown) {
+	STDMETHOD(QueryInterface)(THIS_ REFIID,PVOID*) PURE;
+	STDMETHOD_(ULONG,AddRef)(THIS) PURE;
+	STDMETHOD_(ULONG,Release)(THIS) PURE;
+	STDMETHOD(ShowHelp)(THIS_ HWND,LPOLESTR,UINT,DWORD,POINT,IDispatch *) PURE;
+	STDMETHOD(ShowMessage)(THIS_ HWND,LPOLESTR,LPOLESTR,DWORD,LPOLESTR,DWORD,LRESULT *) PURE;
+};
+} /* extern "C" */
 
 class aBrowser;
 

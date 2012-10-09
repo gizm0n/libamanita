@@ -1,8 +1,10 @@
 #ifndef _IPOMOEA_HASHTABLE_T_H
 #define _IPOMOEA_HASHTABLE_T_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>
-
 
 enum {
 	HT_TYPE_EMPTY,
@@ -49,5 +51,9 @@ int ht_capacity(const hashtable_t *ht);
 void ht_print(const hashtable_t *ht);
 void ht_print_indent(const hashtable_t *ht,int ind);
 
+
+#ifdef __cplusplus
+}
+#endif
 #endif /* _IPOMOEA_HASHTABLE_T_H */
 
