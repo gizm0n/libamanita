@@ -1,6 +1,8 @@
 #ifndef _MANDRAGORA_CALENDAR_H
 #define _MANDRAGORA_CALENDAR_H
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 enum {	
 	SUNDAY			= 0,
@@ -47,6 +49,8 @@ int calendar_days_in_month(calendar *c);
 int calendar_days_in_year(calendar *c);
 double calendar_fractional_year(calendar *c);
 
-
+#ifdef __cplusplus
+}
+#endif
 #endif /* _MANDRAGORA_CALENDAR_H */
 

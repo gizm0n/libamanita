@@ -1,8 +1,10 @@
 #ifndef _IPOMOEA_STRING_T_H
 #define _IPOMOEA_STRING_T_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>
-
 
 typedef struct string {
 	size_t size;
@@ -41,5 +43,9 @@ int str_length(string_t *str);
 int str_capacity(string_t *str);
 void str_print(string_t *str);
 
+
+#ifdef __cplusplus
+}
+#endif
 #endif /* _IPOMOEA_STRING_T_H */
 

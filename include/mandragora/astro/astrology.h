@@ -1,6 +1,8 @@
 #ifndef _MANDRAGORA_ASTRO_ASTROLOGY_H
 #define _MANDRAGORA_ASTRO_ASTROLOGY_H
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>
 #include <mandragora/calendar.h>
@@ -262,7 +264,9 @@ int astro_koch(astro_house *h,double ra,double ob,double la);
 double astro_angle(double p1,double p2);
 double astro_composite_angle(double a1,double a2);
 
-
+#ifdef __cplusplus
+}
+#endif
 #endif /* _MANDRAGORA_ASTRO_ASTROLOGY_H */
 
 
