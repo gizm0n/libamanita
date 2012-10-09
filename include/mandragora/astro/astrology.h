@@ -1,10 +1,10 @@
-#ifndef _ESOTERIC_ASTRO_ASTROLOGY_H
-#define _ESOTERIC_ASTRO_ASTROLOGY_H
+#ifndef _MANDRAGORA_ASTRO_ASTROLOGY_H
+#define _MANDRAGORA_ASTRO_ASTROLOGY_H
 
 
 #include <stdint.h>
-#include <esoteric/calendar.h>
-#include <esoteric/astro/astronomy.h>
+#include <mandragora/calendar.h>
+#include <mandragora/astro/astronomy.h>
 
 
 /** ASTRO_CATEGORIES */
@@ -263,6 +263,6 @@ double astro_angle(double p1,double p2);
 double astro_composite_angle(double a1,double a2);
 
 
-#endif /* _ESOTERIC_ASTRO_ASTROLOGY_H */
+#endif /* _MANDRAGORA_ASTRO_ASTROLOGY_H */
 
 

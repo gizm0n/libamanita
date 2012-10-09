@@ -1,5 +1,5 @@
-#ifndef _ESOTERIC_CALENDAR_H
-#define _ESOTERIC_CALENDAR_H
+#ifndef _MANDRAGORA_CALENDAR_H
+#define _MANDRAGORA_CALENDAR_H
 
 
 enum {	
@@ -48,5 +48,5 @@ int calendar_days_in_year(calendar *c);
 double calendar_fractional_year(calendar *c);
 
 
-#endif /* _ESOTERIC_CALENDAR_H */
+#endif /* _MANDRAGORA_CALENDAR_H */
 

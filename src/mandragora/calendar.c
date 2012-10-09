@@ -1,7 +1,7 @@
 
 #include <math.h>
-#include <esoteric/calendar.h>
-#include <esoteric/astro/astronomy.h>
+#include <mandragora/calendar.h>
+#include <mandragora/astro/astronomy.h>
 
 
 static const int month_length[14] = { 31,28,31,30,31,30,31,31,30,31,30,31,0 };

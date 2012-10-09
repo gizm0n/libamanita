@@ -268,27 +268,27 @@ set(ipomoea_src
 add_library(ipomoea STATIC ${ipomoea_src})
 
 
-set(esoteric_src
-	src/esoteric/calendar.c
-	src/esoteric/astro/planets/earth404.c
-	src/esoteric/astro/planets/jupiter404.c
-	src/esoteric/astro/planets/mars404.c
-	src/esoteric/astro/planets/mercury404.c
-	src/esoteric/astro/planets/moon404.c
-	src/esoteric/astro/planets/neptune404.c
-	src/esoteric/astro/planets/pluto404.c
-	src/esoteric/astro/planets/saturn404.c
-	src/esoteric/astro/planets/uranus404.c
-	src/esoteric/astro/planets/venus404.c
-	src/esoteric/astro/astrology.c
-	src/esoteric/astro/astronomy.c
-	src/esoteric/astro/astronomy_data.c
-	src/esoteric/astro/astronomy_fixedstars.c
-	src/esoteric/astro/astronomy_orbits.c
-	src/esoteric/astro/horoscope.c
+set(mandragora_src
+	src/mandragora/calendar.c
+	src/mandragora/astro/planets/earth404.c
+	src/mandragora/astro/planets/jupiter404.c
+	src/mandragora/astro/planets/mars404.c
+	src/mandragora/astro/planets/mercury404.c
+	src/mandragora/astro/planets/moon404.c
+	src/mandragora/astro/planets/neptune404.c
+	src/mandragora/astro/planets/pluto404.c
+	src/mandragora/astro/planets/saturn404.c
+	src/mandragora/astro/planets/uranus404.c
+	src/mandragora/astro/planets/venus404.c
+	src/mandragora/astro/astrology.c
+	src/mandragora/astro/astronomy.c
+	src/mandragora/astro/astronomy_data.c
+	src/mandragora/astro/astronomy_fixedstars.c
+	src/mandragora/astro/astronomy_orbits.c
+	src/mandragora/astro/horoscope.c
 )
 
-add_library(esoteric STATIC ${esoteric_src})
+add_library(mandragora STATIC ${mandragora_src})
 
 
 install(FILES
@@ -379,18 +379,18 @@ install(FILES
 )
 
 install(FILES
-	include/esoteric/calendar.h
-	DESTINATION include/esoteric
+	include/mandragora/calendar.h
+	DESTINATION include/mandragora
 )
 
 install(FILES
-	include/esoteric/astro/astrology.h
-	include/esoteric/astro/astronomy.h
-	include/esoteric/astro/horoscope.h
-	DESTINATION include/esoteric/astro
+	include/mandragora/astro/astrology.h
+	include/mandragora/astro/astronomy.h
+	include/mandragora/astro/horoscope.h
+	DESTINATION include/mandragora/astro
 )
 
-install(TARGETS amanita ipomoea esoteric
+install(TARGETS amanita ipomoea mandragora
 	DESTINATION lib
 )
 
@@ -438,7 +438,7 @@ if(EXAMPLES)
 	target_link_libraries(gui amanita ${GTK2_LIBRARIES} ${WEBKIT_LIBRARIES} ${SCINTILLA_LIB} ${SOURCEVIEW_LIBRARIES})
 
 	add_executable(horoscope examples/horoscope.c)
-	target_link_libraries(horoscope esoteric m)
+	target_link_libraries(horoscope mandragora m)
 
 	add_executable(http examples/http.cpp)
 	target_link_libraries(http amanita ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES})

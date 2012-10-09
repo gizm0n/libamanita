@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <esoteric/calendar.h>
-#include <esoteric/astro/astronomy.h>
-#include <esoteric/astro/astrology.h>
+#include <mandragora/calendar.h>
+#include <mandragora/astro/astronomy.h>
+#include <mandragora/astro/astrology.h>
 #include "astronomy_data.h"
 
 

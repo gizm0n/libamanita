@@ -1,5 +1,5 @@
 
-#include <esoteric/astro/astronomy.h>
+#include <mandragora/astro/astronomy.h>
 #include "astronomy_data.h"
 
 
