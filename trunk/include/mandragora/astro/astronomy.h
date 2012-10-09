@@ -1,8 +1,8 @@
-#ifndef _ESOTERIC_ASTRO_ASTRONOMY_H_
-#define _ESOTERIC_ASTRO_ASTRONOMY_H_
+#ifndef _MANDRAGORA_ASTRO_ASTRONOMY_H_
+#define _MANDRAGORA_ASTRO_ASTRONOMY_H_
 
 
-#include <esoteric/calendar.h>
+#include <mandragora/calendar.h>
 
 
 /** ASTRONOMY_DATA */
@@ -102,5 +102,5 @@ void astronomy_get_planets(astronomy *a,const int *pl,int data);
 const char *constellation_name(int id);
 const char *constellation_abbreviation(int id);
 
-#endif /* _ESOTERIC_ASTRO_ASTRONOMY_H_ */
+#endif /* _MANDRAGORA_ASTRO_ASTRONOMY_H_ */
 

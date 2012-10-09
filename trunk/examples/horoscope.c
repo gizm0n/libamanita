@@ -1,7 +1,7 @@
-/** An example program on how to use the astronomy and astrology functions in libesoteric.
+/** An example program on how to use the astronomy and astrology functions in libmandragora.
  * 
  * Compile:
- * gcc astro.c -o astro -I /usr/local/include -I /usr/include -lesoteric -lm
+ * gcc astro.c -o astro -I /usr/local/include -I /usr/include -lmandragora -lm
  */
 
 #include <stdio.h>
@@ -10,7 +10,7 @@
 #include <math.h>
 #include <time.h>
 #include <sys/time.h>
-#include <esoteric/astro/horoscope.h>
+#include <mandragora/astro/horoscope.h>
 
 
 const char *zodiac_names[] = { "Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces" };

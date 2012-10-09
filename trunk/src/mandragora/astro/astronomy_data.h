@@ -1,7 +1,7 @@
-#ifndef _ESOTERIC_ASTRO_ASTRONOMY_DATA_H_
-#define _ESOTERIC_ASTRO_ASTRONOMY_DATA_H_
+#ifndef _MANDRAGORA_ASTRO_ASTRONOMY_DATA_H_
+#define _MANDRAGORA_ASTRO_ASTRONOMY_DATA_H_
 
-#include <esoteric/astro/astronomy.h>
+#include <mandragora/astro/astronomy.h>
 
 #define WILLIAMS 1
 #define SIMON 0
@@ -173,6 +173,6 @@ typedef struct astro_fixedstar_data {
 extern const astro_fixedstar_data astro_fixedstars_data[];
 
 
-#endif /* _ESOTERIC_ASTRO_ASTRONOMY_DATA_H_ */
+#endif /* _MANDRAGORA_ASTRO_ASTRONOMY_DATA_H_ */
 
 
