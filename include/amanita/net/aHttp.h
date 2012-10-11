@@ -93,9 +93,9 @@ enum HTTP_MIMES {
 #include <amanita/net/aHttp.h>
 
 int main(int argc, char *argv[]) {
-	aApplication app;
+	aApplication app(aINIT_SOCKETS);
 	aHttp http;
-	app.open(argc,argv,aINIT_SOCKETS);
+	app.open(argc,argv);
 	http.setUserAgent("aHttp Class User-Agent, v.0.1");
 
 	http.setFormValue("test1","test1");

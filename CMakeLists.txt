@@ -132,7 +132,7 @@ if(UNIX)
 		set(USE_GTK 1)
 		set(USE_GLIB 1)
 
-		set(PACKAGE_DATADIR ${CMAKE_INSTALL_PREFIX}/share)
+		set(PACKAGE_DATADIR ${CMAKE_INSTALL_PREFIX}/share/amanita)
 		set(PACKAGE_ICONSDIR ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor)
 		set(PACKAGE_LOCALEDIR ${CMAKE_INSTALL_PREFIX}/share/locale)
 	endif()
@@ -165,8 +165,8 @@ else()
 			set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -static-libgcc -static-libstdc++ -s")
 		endif()
 
-		set(PACKAGE_DATADIR "data")
-		set(PACKAGE_ICONSDIR "icons")
+		set(PACKAGE_DATADIR data)
+		set(PACKAGE_ICONSDIR icons)
 		set(PACKAGE_LOCALEDIR "data\\locale")
 	else()
 		message("Unknown")
@@ -181,12 +181,17 @@ if(UNIX)
 		install(FILES icons/16x16/amanita.xpm DESTINATION share/pixmaps)
 		install(FILES icons/16x16/amanita.png DESTINATION share/icons/hicolor/16x16/apps)
 		install(FILES icons/48x48/amanita.png DESTINATION share/icons/hicolor/48x48/apps)
+
+		set(AMANITA_APP_ICON ${PACKAGE_ICONSDIR}/16x16/amanita.png)
 	endif()
 else()
 	if(MINGW)
-		install(FILES icons/amanita.ico icons/stock_icons.bmp DESTINATION share/amanita)
-		set(AMANITA_APP_ICON ${CMAKE_INSTALL_PREFIX}/share/amanita/amanita.ico)
-		set(AMANITA_STOCK_ICONS ${CMAKE_INSTALL_PREFIX}/share/amanita/stock_icons.bmp)
+		install(FILES
+			icons/amanita.ico
+			icons/stock_icons.bmp
+			DESTINATION ${PACKAGE_ICONSDIR})
+		set(AMANITA_APP_ICON "${CMAKE_INSTALL_PREFIX}/${PACKAGE_ICONSDIR}/amanita.ico")
+		set(AMANITA_STOCK_ICONS "${CMAKE_INSTALL_PREFIX}/${PACKAGE_ICONSDIR}/stock_icons.bmp")
 	endif()
 endif()
 
@@ -390,7 +395,10 @@ install(FILES
 	DESTINATION include/mandragora/astro
 )
 
-install(TARGETS amanita ipomoea mandragora
+install(TARGETS
+	amanita
+	ipomoea
+	mandragora
 	DESTINATION lib
 )
 

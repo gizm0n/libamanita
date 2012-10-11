@@ -169,14 +169,14 @@ class GuiApp : public aApplication {
 private:
 	aNotebook *notebook;
 public:
-	GuiApp(const char *prj,const char *nm=0) : aApplication(prj,nm) {}
+	GuiApp(uint32_t params,const char *prj,const char *nm) : aApplication(params,prj,nm) {}
 	virtual ~GuiApp() {}
 	void create();
 	void selectPage(int n) { notebook->selectPage(n); }
 };
 
 
-GuiApp app("GUI","aWidget Example");
+GuiApp app(aINIT_GUI,"GUI","aWidget Example");
 
 
 static uint32_t window_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
@@ -320,7 +320,7 @@ void GuiApp::create() {
 	}
 
 	notebook = new aNotebook(notebook_events);
-	notebook->setStyle(aFILL|/*aNOTEBOOK_CLOSE_BUTTON*/aNOTEBOOK_HIDE_TABS);
+	notebook->setStyle(aFILL|/*aNOTEBOOK_CLOSE_BUTTON|*/aNOTEBOOK_HIDE_TABS);
 fprintf(stderr,"window->add(notebook);\n");
 	window->add(notebook);
 	window->open(0);
@@ -530,7 +530,7 @@ fprintf(stderr,"window->add(notebook);\n");
 int main(int argc,char *argv[]) {
 	int ret;
 	aObject::printClasses(stdout);
-	app.open(argc,argv,aINIT_GUI);
+	app.open(argc,argv);
 	ret = app.main();
 	app.close();
 	return ret;
