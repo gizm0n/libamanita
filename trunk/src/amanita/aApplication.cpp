@@ -25,7 +25,7 @@
 #include <amanita/aApplication.h>
 #include <amanita/gui/aWindow.h>
 #include <amanita/gui/aMenu.h>
-//#include <amanita/aFile.h>
+#include <amanita/aFile.h>
 //#include <amanita/aVector.h>
 //#include <amanita/net/aHttp.h>
 
@@ -52,12 +52,12 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE hp,LPSTR cmd,int show) {
 //#define _QUOTE_MACRO(x) #x
 //#define QUOTE_MACRO(x) _QUOTE_MACRO(x)
 
-aApplication::aApplication() : app_thread()/*: app_lang_data(),app_properties()*/ {
-//	FILE *fp;
-//	char str[257],home[257],data[257];
-//	int n;
+aApplication::aApplication(uint32_t params,const char *prj,const char *nm) : app_thread() {
+	FILE *fp;
+	char str[257],home[257],data[257];
+	int n;
 
-	app_init_params = 0;
+	app_init_params = params;
 	app_out = 0;
 	app_project = 0;
 	app_name = 0;
@@ -68,80 +68,62 @@ aApplication::aApplication() : app_thread()/*: app_lang_data(),app_properties()*
 	app_last_access = 0;
 	window = 0;
 
-/*
-	getExecutable(str,256);
-	setProperty(property_key[APP_EXE],str);
-debug_output("app_exe=%s\n",getExecutable());
+	setProjectName(prj);
+	setApplicationName(nm);
 
-	getHomeDir(str,256);
+	if((app_init_params&aINIT_DIRECTORIES)) {
+		char fonts[257];
+		aFile::getHomeDir(str,256);
 #if defined USE_GTK
-	sprintf(home,"%s/.%s/",str,app_project);
+		sprintf(home,"%s/.%s/",str,app_project);
 #elif defined USE_WIN32
-	sprintf(home,"%s\\",str);
+		sprintf(home,"%s\\",str);
 #endif
-	setProperty(property_key[APP_DIR_HOME],home);
-	if(!aFile::exists(home)) aFile::mkdir(home);
-debug_output("app_dir_home=%s\n",getHomeDir());
+//	setProperty(property_key[APP_DIR_HOME],home);
+		if(!aFile::exists(home)) aFile::mkdir(home);
 
 #if defined USE_GTK
-	n = 0;
-	snprintf(data,256,"/usr/share/%s/",app_project);
-	if(!aFile::exists(data)) {
-		n = 1;
-		snprintf(data,256,"/usr/local/share/%s/",app_project);
+		n = 0;
+		snprintf(data,256,"/usr/share/%s/",app_project);
 		if(!aFile::exists(data)) {
-			n = 2;
-			snprintf(data,256,"%s/.local/share/%s/",home,app_project);
+			snprintf(data,256,"/usr/local/share/%s/",app_project);
 			if(!aFile::exists(data)) {
-				n = 3;
-				strcpy(data,home);
+				snprintf(data,256,"%s/.local/share/%s/",home,app_project);
+				if(!aFile::exists(data)) sprintf(data,"%sdata" FILE_DIRSEP,home);
 			}
 		}
-	}
 #elif defined USE_WIN32
-	n = 3;
-	strcpy(data,home);
+		sprintf(data,"%sdata" FILE_DIRSEP,home);
 #endif
-	setProperty(property_key[APP_DIR_DATA],data);
-	if(n==3 && !aFile::exists(data)) aFile::mkdir(data);
-debug_output("app_dir_data=%s\n",getDataDir());
 
-	char fonts[257];
-	getFontsDir(str,256);
-	sprintf(fonts,"%s" FILE_DIRSEP,str);
-	setProperty(property_key[APP_DIR_FONTS],fonts);
-	if(!aFile::exists(fonts)) aFile::mkdir(fonts);
-debug_output("app_dir_fonts=%s\n",getFontsDir());
+		aFile::getFontsDir(str,256);
+		sprintf(fonts,"%s" FILE_DIRSEP,str);
+		if(!aFile::exists(fonts)) aFile::mkdir(fonts);
+debug_output("app_dir_fonts=%s\n",fonts);
+	} else {
+		aFile::getCurrentDir(str,256);
+		sprintf(home,"%s" FILE_DIRSEP,str);
+		strcpy(data,home);
+	}
 
-	sprintf(str,"%slang" FILE_DIRSEP,data);
-	setProperty(property_key[APP_DIR_LANG],str);
-	if(n==3 && !aFile::exists(str)) aFile::mkdir(str);
-debug_output("app_dir_lang=%s\n",getLanguageDir());
-
-	sprintf(str,"%s%s.log",home,app_name);
-	app_last_access = aFile::modified(str);
-debug_output("logfile=%s\nlast_access=%" PRIu64 "\n\n",str,(uint64_t)app_last_access);
-	app_out = fopen(str,"w");
-	fp = freopen(str,"a",app_out);
-	fp = freopen(str,"a",stdout);
-	fp = freopen(str,"a",stderr);
+	app_home_dir = strdup(home);
+debug_output("app_home_dir: %s\n",home);
+	app_data_dir = strdup(data);
+debug_output("app_data_dir: %s\n",data);
+	
+	if((app_init_params&aINIT_LOG)) {
+		sprintf(str,"%s%s.log",app_home_dir,app_name);
+		app_last_access = aFile::modified(str);
+debug_output("logfile: %s\nlast_access %" PRIu64 "\n\n",str,(uint64_t)app_last_access);
+		app_out = fopen(str,"w");
+		fp = freopen(str,"a",app_out);
+		fp = freopen(str,"a",stdout);
+		fp = freopen(str,"a",stderr);
 debug_output("aApplication::aApplication()");
-*/
-}
-
-aApplication::aApplication(const char *prj,const char *nm) : app_thread() {
-	app_init_params = 0;
-	app_out = 0;
-	app_project = 0;
-	app_name = 0;
-	app_user_agent = 0;
-	setApplicationName(nm);
-	setProjectName(prj);
-	app_locale_dir = 0;
-	app_local_id = 0;
-	app_local_time = 0;
-	app_last_access = 0;
-	window = 0;
+	} else {
+		aFile::getExecutable(str,256);
+		app_last_access = aFile::accessed(str);
+	}
 }
 
 aApplication::~aApplication() {
@@ -153,6 +135,10 @@ debug_output("aApplication::~aApplication()\n");
 	if(app_project) free(app_project);
 	app_project = 0;
 
+	if(app_home_dir) free(app_home_dir);
+	app_home_dir = 0;
+	if(app_data_dir) free(app_data_dir);
+	app_data_dir = 0;
 	if(app_locale_dir) free(app_locale_dir);
 	app_locale_dir = 0;
 
@@ -165,9 +151,7 @@ debug_output("Completely finalized, could not have gone better! You the Man!\n")
 }
 
 
-uint32_t aApplication::open(int argc,char *argv[],uint32_t params) {
-	app_init_params = params;
-
+uint32_t aApplication::open(int argc,char *argv[]) {
 	if((app_init_params&aINIT_GETTEXT)) {
 debug_output("aApplication::init(AMANITA_INIT_GETTEXT,project=%s,localedir=%s)",app_project,app_locale_dir);
 		setlocale(LC_ALL,"");
@@ -187,8 +171,8 @@ debug_output("aApplication::init(AMANITA_INIT_GETTEXT,project=%s,localedir=%s)",
 			"  GtkWidget::focus-line-width = 0\n"
 			"  GtkNotebook::tab-curvature = 0\n"
 			"  GtkNotebook::tab-overlap = -1\n"
-			"  xthickness = 0\n"
-			"  ythickness = 0\n"
+//			"  xthickness = 0\n"
+//			"  ythickness = 0\n"
 			"}\n\n"
 			"style \"tab-close-button-style\" {\n"
 			"  GtkWidget::focus-padding = 0\n"
@@ -196,9 +180,9 @@ debug_output("aApplication::init(AMANITA_INIT_GETTEXT,project=%s,localedir=%s)",
 //			"  xthickness = 0\n"
 //			"  ythickness = 0\n"
 			"}\n\n"
-			"widget \"*GtkScrolledWindow*\" style \"scrollbar-style\""
-			"widget \"*GtkNotebook*\" style \"notebook-style\""
-			"widget \"*.tab-close-button\" style \"tab-close-button-style\""
+			"widget \"*GtkScrolledWindow*\" style \"scrollbar-style\"\n"
+			"widget \"*GtkNotebook*\" style \"notebook-style\"\n"
+			"widget \"*.tab-close-button\" style \"tab-close-button-style\"\n"
 		);
 	}
 	g_type_init();
@@ -400,7 +384,17 @@ void aApplication::setUserAgent(const char *ua) {
 	app_user_agent = strdup(ua);
 }
 
-void aApplication::setDirectories(const char *dir) {
+void aApplication::setHomeDir(const char *dir) {
+	if(app_home_dir) free(app_home_dir);
+	app_home_dir = strdup(dir);
+}
+
+void aApplication::setDataDir(const char *dir) {
+	if(app_data_dir) free(app_data_dir);
+	app_data_dir = strdup(dir);
+}
+
+void aApplication::setLocaleDir(const char *dir) {
 	if(app_locale_dir) free(app_locale_dir);
 	app_locale_dir = strdup(dir);
 }

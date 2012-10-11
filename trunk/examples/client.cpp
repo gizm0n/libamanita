@@ -49,8 +49,8 @@ int main(int argc, char *argv[]) {
 	} else {
 		char text[1024-SOCKET_HEADER-1],*s;
 		uint8_t data[1024],*p;
-		aApplication app;
-		app.open(argc,argv,aINIT_SOCKETS);
+		aApplication app(aINIT_SOCKETS);
+		app.open(argc,argv);
 		client = new aClient(client_listener);
 		client->start(argv[1]);
 		while(1) {

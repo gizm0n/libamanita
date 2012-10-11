@@ -21,12 +21,12 @@ class BrowserApp : public aApplication {
 private:
 	aBrowser *browser;
 public:
-	BrowserApp(const char *prj,const char *nm=0) : aApplication(prj,nm),browser(0) {}
+	BrowserApp(uint32_t params,const char *prj,const char *nm) : aApplication(params,prj,nm),browser(0) {}
 	void create();
 };
 
 
-BrowserApp app("Browser","aBrowser Example");
+BrowserApp app(aINIT_GUI,"Browser","aBrowser Example");
 
 
 static uint32_t window_events(aWidget *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t p3) {
@@ -52,7 +52,7 @@ void BrowserApp::create() {
 
 int main(int argc,char *argv[]) {
 	int ret;
-	app.open(argc,argv,aINIT_GUI);
+	app.open(argc,argv);
 	ret = app.main();
 	app.close();
 	return ret;

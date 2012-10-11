@@ -35,17 +35,18 @@ extern HINSTANCE hMainInstance;
 
 
 enum {
-	aINIT_CONSOLE			= 0x00000001,	//!<
-	aINIT_WINDOWED			= 0x00000002,	//!<
-	aINIT_FULLSCREEN		= 0x00000004,	//!<
-	aINIT_DIRECTORIES		= 0x00000010,	//!<
-	aINIT_GETTEXT			= 0x00000020,	//!<
-	aINIT_THREADS			= 0x00000100,	//!<
-	aINIT_SOCKETS			= 0x00000200,	//!<
-	aINIT_GUI				= 0x00001000,	//!<
-	aINIT_SDL				= 0x00100008,	//!<
-	aINIT_SDL_TTF			= 0x00300000,	//!<
-	aINIT_SDL_IMAGE		= 0x00500000,	//!<
+	aINIT_DIRECTORIES		= 0x00000001,	//!< Automatically manage directories, eg. ~/.project etc. Don't set this flag if you manage directories manually.
+	aINIT_LOG				= 0x00000002,	//!< Open a log-file for stdout and stderr.
+	aINIT_CONSOLE			= 0x00000010,	//!< Create a console application.
+	aINIT_WINDOWED			= 0x00000020,	//!< Create a windowed application.
+	aINIT_FULLSCREEN		= 0x00000040,	//!< Create a fullscreen application.
+	aINIT_GETTEXT			= 0x00000200,	//!<
+	aINIT_THREADS			= 0x00001000,	//!<
+	aINIT_SOCKETS			= 0x00002000,	//!<
+	aINIT_GUI				= 0x00010000,	//!<
+	aINIT_SDL				= 0x01000008,	//!<
+	aINIT_SDL_TTF			= 0x03000000,	//!<
+	aINIT_SDL_IMAGE		= 0x05000000,	//!<
 };
 
 
@@ -77,6 +78,8 @@ private:
 	char *app_project;					//!< Project name.
 	char *app_name;						//!< Application name, the name of this application. There can be many applications within the same project.
 	char *app_user_agent;				//!< User Agent named in communication over http.
+	char *app_home_dir;					//!< Home directory, on Linux ~/.prj where prj is the name of the project, .\ for windows.
+	char *app_data_dir;					//!< Data directory, on Linux /usr/share/prj where prj is the name of the project, .\data for windows.
 	char *app_locale_dir;				//!< Directory where locale files are stored.
 	aThread app_thread;					//!< The mutex is mainly used as a standard lock/unlock of the application.
 	uint32_t app_local_id;				//!< A local ID for the running instance.
@@ -87,12 +90,17 @@ protected:
 	aWindow *window;						//!< Main window for the application.
 
 public:
-	aApplication();
-	aApplication(const char *prj,const char *nm);
+	/** Constructor, initiates the application.
+	 * It automatically looks for directories associated with the project, and 
+	 * @param params Parameters for how to initiate application.
+	 * @param prj Name of the project.
+	 * @param nm Name of the application.
+	 */
+	aApplication(uint32_t params=0,const char *prj=0,const char *nm=0);
 	virtual ~aApplication();
 
 	/** Initialize application, initialize resources. */
-	uint32_t open(int argc,char *argv[],uint32_t params);
+	uint32_t open(int argc,char *argv[]);
 	uint32_t close();						//!< Close application, uninitialize and shut down the application, free resources.
 	int main();								//!< Start main loop.
 	void quit();							//!< Exit the main loop.
@@ -121,7 +129,11 @@ public:
 	void setUserAgent(const char *ua);
 	const char *getUserAgent() { return app_user_agent; }
 
-	void setDirectories(const char *dir);
+	void setHomeDir(const char *dir);
+	const char *getHomeDir() { return app_home_dir; }
+	void setDataDir(const char *dir);
+	const char *getDataDir() { return app_data_dir; }
+	void setLocaleDir(const char *dir);
 	const char *getLocaleDir() { return app_locale_dir; }
 
 	void setLocalID(uint32_t id) { app_local_id = id; }
