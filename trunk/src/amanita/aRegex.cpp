@@ -400,7 +400,7 @@ PRINTF("Compiling...\n");
 	REBlock *first = blocks,*last = first,*temp;
 	uint32_t pos = 0,p = 0,n = 0,l = 0,d = 1;
 	unsigned short min = 1,max = 1;
-	char c = *exp,b=REGEX_RNDBR,sh = 0,ush = 0,oa = 0,ca = 0;
+	char c = *exp,b=REGEX_RNDBR,sh = 0,ush = 0/*,oa = 0*/,ca = 0;
 	while(true) {
 //PUTCHAR(c);
 		switch(c) {
@@ -411,7 +411,7 @@ PRINTF("Compiling...\n");
 				--pos;
 				break;
 			case ']':p = pos+1,n = 1,l = pos,ca = 1;break;
-			case '(':p = pos+1,n = (d==1 && refs<9? REGEX_BACKREFS : 1),l = pos,b = REGEX_RNDBR,sh = 1,oa = 1;break;
+			case '(':p = pos+1,n = (d==1 && refs<9? REGEX_BACKREFS : 1),l = pos,b = REGEX_RNDBR,sh = 1/*,oa = 1*/;break;
 			case ')':p = pos+1,n = 1,l = pos,ush = 1,ca = 2;break;
 			/*case '{':
 PRINTF("{  last->pos=%d(\"%s\"),last->len=%d,p=%d,pos=%d(\"%s\") \n",
@@ -467,7 +467,7 @@ PRINTF("Block: %s\n",&exp[p]);
 			}
 			last = temp;
 			if(sh) first = last,first->first = first,first->flags |= REGEX_FIRST,d++;
-			p = 0,n = 0,c = '.',b = REGEX_RNDBR,sh = 0,ush = 0,oa = 0;
+			p = 0,n = 0,c = '.',b = REGEX_RNDBR,sh = 0,ush = 0/*,oa = 0*/;
 		}
 		if(!c) break;
 		c = exp[++pos];

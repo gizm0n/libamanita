@@ -289,7 +289,7 @@ public:
 };
 
 _EventSink::_EventSink(aBrowser *b) : browser(b),ref(0),loading(false) {
-	HRESULT s[17] = { E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL };
+//	HRESULT s[17] = { E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL,E_NOTIMPL };
 }
 
 STDMETHODIMP _EventSink::QueryInterface(REFIID riid,PVOID *ppv) {
@@ -842,7 +842,6 @@ void aBrowser::setHtmlContent(const wchar_t *html) {
 		SAFEARRAY *a;
 		VARIANT url;
 		VARIANT *v;
-		BSTR bstr = 0;
 
 		_container->event->loading = true;
 		stamp = (intptr_t)html;

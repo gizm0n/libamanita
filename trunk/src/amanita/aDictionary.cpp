@@ -79,11 +79,14 @@ void aDictionary::createIndex() {
 		if(!n->range) n->offset = i;
 		n->range++;
 	}
-FILE *fp = fopen("dictionary.txt","w");
+const char *fn = "dictionary.txt";
+FILE *fp = fopen(fn,"wb");
+if(fp) {
 for(i=0; i<sz; i++) fprintf(fp,"word(%lu,\"%s\",length=%lu,value=%" PRIuPTR ")\n",(unsigned long)i,words[i].key,(unsigned long)words[i].len,words[i].value);
 for(i=0; i<sz; i++) fprintf(fp,"value(%lu,\"%s\",length=%lu,value=%" PRIuPTR ")\n",(unsigned long)i,values[i]->key,(unsigned long)values[i]->len,values[i]->value);
 for(i=0; i<256; i++) fprintf(fp,"k_index(%lu=%c,offset=%lu,value=%lu)\n",(unsigned long)i,(char)i,(unsigned long)k_index[i].offset,(unsigned long)k_index[i].range);
 fclose(fp);
+} else perror(fn);
 }
 
 value_t aDictionary::getValue(const char *w,size_t l) {

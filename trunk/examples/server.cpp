@@ -76,14 +76,15 @@ uint32_t server_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 }
 
 int main(int argc, char *argv[]) {
-	char text[1024],*s;
+	char text[1024];
 	aApplication app(aINIT_SOCKETS);
 	app.open(argc,argv);
 	server = new aServer(server_listener);
 	server->start(2012);
-	s = gets(text);
+	gets(text);
 	server->stop();
 	delete(server);
 	app.close();
+	return 0;
 }
 

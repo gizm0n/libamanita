@@ -88,7 +88,6 @@ aNotebook::aNotebook(widget_event_handler weh) : aWidget(weh,aWIDGET_NOTEBOOK),p
 aNotebook::~aNotebook() {
 debug_output("aNotebook::~aNotebook()\n");
 	int i;
-	aNotebookPage *np;
 	for(i=pages.size()-1; i>=0; --i)
 		delete (aNotebookPage *)pages[i];
 }
@@ -127,7 +126,7 @@ int aNotebook::openPage(const char *tab,aWidget *page,bool sel) {
 	aNotebookPage *np = new aNotebookPage(this);
 	np->tab.name = strdup(tab);
 	np->page = page;
-	openPage(np,sel);
+	return openPage(np,sel);
 }
 
 int aNotebook::openPage(aNotebookPage *np,bool sel) {
@@ -188,11 +187,14 @@ debug_output("aNotebook::openPage(%s)\n",np->tab.name);
 }
 
 void aNotebook::selectPage(int n) {
-	if(pages.size()>0 && n>=0 && n<pages.size() && n!=selected) {
+	if(pages.size()>0 && n>=0 && n<(int)pages.size() && n!=selected) {
 		aNotebookPage *np;
 		if(selected>=0) {
 			np = (aNotebookPage *)pages[selected];
 			if(event_handler) event_handler(this,aNOTEBOOK_PAGE_HIDE,(intptr_t)np->page,np->tab.index,(intptr_t)np->tab.name);
+#ifdef USE_WIN32
+			np->page->hide();
+#endif
 		}
 #ifdef USE_GTK
 debug_output("aNotebook::selectPage((index: %d)\n",n);
@@ -203,9 +205,8 @@ debug_output("aNotebook::selectPage((index: %d)\n",n);
 #endif
 #ifdef USE_WIN32
 		if(type==aWIDGET_NOTEBOOK) TabCtrl_SetCurSel((HWND)component,n);
-		if(selected>=0) np->page->hide();
 		np = (aNotebookPage *)pages[n];
-debug_output("aNotebook::selectPage(action: %d, tab: %s, width: %d, height: %d)\n",aNOTEBOOK_PAGE_SHOW,np->tab.name,client.right-client.left,client.bottom-client.top);
+debug_output("aNotebook::selectPage(action: %d, tab: %s, width: %ld, height: %ld)\n",aNOTEBOOK_PAGE_SHOW,np->tab.name,client.right-client.left,client.bottom-client.top);
 		selected = n;
 		ShowWindow((HWND)np->page->getComponent(),SW_SHOW);
 		if(np->status==1) {
@@ -222,7 +223,7 @@ debug_output("aNotebook::selectPage(action: %d, tab: %s, width: %d, height: %d)\
 }
 
 const char *aNotebook::getTab(int n) {
-	if(n<0 || n>=pages.size()) n = selected;
+	if(n<0 || n>=(int)pages.size()) n = selected;
 	if(pages.size()>0)
 		return (const char *)((aNotebookPage *)pages[n])->tab.name;
 	return 0;
@@ -230,14 +231,14 @@ const char *aNotebook::getTab(int n) {
 
 aNotebookPage *aNotebook::getPage(int n) {
 debug_output("aNotebook::getPage(n: %d, pages: %d, selected: %d)\n",n,(int)pages.size(),selected);
-	if(n<0 || n>=pages.size()) n = selected;
+	if(n<0 || n>=(int)pages.size()) n = selected;
 	if(pages.size()>0)
 		return (aNotebookPage *)pages[n];
 	return 0;
 }
 
 void aNotebook::closePage(int n) {
-	if(n<0 || n>=pages.size()) n = selected;
+	if(n<0 || n>=(int)pages.size()) n = selected;
 	if(pages.size()>0) {
 debug_output("aNotebook::closePage(n: %d, pages: %d)\n",n,(int)pages.size());
 		int i;
@@ -276,7 +277,7 @@ void aNotebook::makeLayout(int x,int y,int w,int h) {
 debug_output("aNotebook::makeLayout(x: %d, y: %d, w: %d, h: %d)\n",this->x,this->y,width,height);
 	RECT r = { 0,0,client.right-client.left,client.bottom-client.top };
 	if(type==aWIDGET_NOTEBOOK) TabCtrl_AdjustRect((HWND)component,FALSE,&r);
-debug_output("aNotebook::makeLayout(WIN32_CONTROL_TABS - TabCtrl_AdjustRect(l: %d, t: %d, r: %d, b: %d))\n",r.left,r.top,r.right,r.bottom);
+debug_output("aNotebook::makeLayout(WIN32_CONTROL_TABS - TabCtrl_AdjustRect(l: %ld, t: %ld, r: %ld, b: %ld))\n",r.left,r.top,r.right,r.bottom);
 	if(w1!=width || h1!=height)
 		for(i=pages.size()-1; i>=0; --i)
 			((aNotebookPage *)pages[i])->status = 1;

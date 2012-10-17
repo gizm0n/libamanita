@@ -11,40 +11,49 @@
 #include <stdint.h>
 #include <amanita/aObject.h>
 
+enum {
+	aHASH_STYLE_CASE_SENSITIVE		= 0,	//!< 
+	aHASH_STYLE_CASE_INSENSITIVE	= 1,	//!< 
+	aHASH_STYLE_KEY_MULTIPLES		= 2,	//!< 
+};
+
 /** Enumeration used by the iteration class and subclasses for extended iteration positions. */
 enum {
-	ITER_INDEX_EMPTY			= -4,		//!< Iteration points to an empty value.
-	ITER_INDEX_START			= -3,		//!< Iteration points at the start of the aCollection.
-	ITER_INDEX_AFTER_LAST	= -2,		//!< Iteration points at one step after last value in the aCollection.
-	ITER_INDEX_BEFORE_FIRST	= -1,		//!< Iteration points at one step before first value in the aCollection.
+	aITER_INDEX_EMPTY			= -4,			//!< Iteration points to an empty value.
+	aITER_INDEX_START			= -3,			//!< Iteration points at the start of the aCollection.
+	aITER_INDEX_AFTER_LAST	= -2,			//!< Iteration points at one step after last value in the aCollection.
+	aITER_INDEX_BEFORE_FIRST	= -1,		//!< Iteration points at one step before first value in the aCollection.
 };
 
 /** Enumeration used by all subclasses of the aCollection class to tell what type a value contains. */
 enum {
-	TYPE_EMPTY			= 0x00,	//!< Value is empty, meaning this position in the aCollection is not filled with a value..
-	TYPE_VOID_P,					//!< (void *)
-	TYPE_INT8,						//!< (int8_t)
-	TYPE_UINT8,						//!< (uint8_t)
-	TYPE_INT16,						//!< (int16_t)
-	TYPE_UINT16,					//!< (uint16_t)
-	TYPE_INT32,						//!< (int32_t)
-	TYPE_UINT32,					//!< (uint32_t)
-	TYPE_INT64,						//!< (int64_t)
-	TYPE_UINT64,					//!< (uint64_t)
-	TYPE_PTRDIFF,					//!< (ptrdiff_t)
-	TYPE_INTPTR,					//!< (intptr_t)
-	TYPE_FLOAT,						//!< (float)
-	TYPE_DOUBLE,					//!< (double)
-	TYPE_LDOUBLE,					//!< (long double)
-	TYPE_CHAR_P,					//!< (char *)
-	TYPE_OBJECT_P,					//!< (aObject *)
+	aEMPTY			= 0x00,		//!< Value is empty, meaning this position in the aCollection is not filled with a value..
+	aVOID,							//!< (void *)
+	aINT8,							//!< (int8_t)
+	aUINT8,							//!< (uint8_t)
+	aINT16,							//!< (int16_t)
+	aUINT16,							//!< (uint16_t)
+	aINT32,							//!< (int32_t)
+	aUINT32,							//!< (uint32_t)
+	aINT64,							//!< (int64_t)
+	aUINT64,							//!< (uint64_t)
+	aPTRDIFF,						//!< (ptrdiff_t)
+	aINTPTR,							//!< (intptr_t)
+	aFLOAT,							//!< (float)
+	aDOUBLE,							//!< (double)
+	aLDOUBLE,						//!< (long double)
+	aCHAR_P,							//!< (char *)
+	aOBJECT,							//!< (aObject *)
+	aSTRING,							//!< (aString *)
+	aVECTOR,							//!< (aVector *)
+	aHASHTABLE,						//!< (aHashtable *)
 
 	/** @name Type flags
 	 * Can be XOR:ed to any other type.
 	 * @{ */
-	TYPE_NAN			= 0x20,		//!< Not a Number
-	TYPE_INF			= 0x40,		//!< Infinite (Generally a result of x/0)
-	TYPE_NEG			= 0x80,		//!< Negative
+	aNAN			= 0x20,			//!< Not a Number
+	aINF			= 0x40,			//!< Infinite (Generally a result of x/0)
+	aNEG			= 0x80,			//!< Negative
 	/** @} */
 };
 
@@ -52,26 +61,29 @@ enum {
 typedef unsigned char type_t;
 
 /** @cond */
-#define _TYPE_EMPTY ((type_t)TYPE_EMPTY)
-#define _TYPE_VOID_P ((type_t)TYPE_VOID_P)
-#define _TYPE_INT8 ((type_t)TYPE_INT8)
-#define _TYPE_UINT8 ((type_t)TYPE_UINT8)
-#define _TYPE_INT16 ((type_t)TYPE_INT16)
-#define _TYPE_UINT16 ((type_t)TYPE_UINT16)
-#define _TYPE_INT32 ((type_t)TYPE_INT32)
-#define _TYPE_UINT32 ((type_t)TYPE_UINT32)
-#define _TYPE_INT64 ((type_t)TYPE_INT64)
-#define _TYPE_UINT64 ((type_t)TYPE_UINT64)
-#define _TYPE_PTRDIFF ((type_t)TYPE_PTRDIFF)
-#define _TYPE_INTPTR ((type_t)TYPE_INTPTR)
-#define _TYPE_FLOAT ((type_t)TYPE_FLOAT)
-#define _TYPE_DOUBLE ((type_t)TYPE_DOUBLE)
-#define _TYPE_LDOUBLE ((type_t)TYPE_LDOUBLE)
-#define _TYPE_CHAR_P ((type_t)TYPE_CHAR_P)
-#define _TYPE_OBJECT_P ((type_t)TYPE_OBJECT_P)
-#define _TYPE_NAN ((type_t)TYPE_NAN)
-#define _TYPE_INF ((type_t)TYPE_INF)
-#define _TYPE_NEG ((type_t)TYPE_NEG)
+#define _aEMPTY ((type_t)aEMPTY)
+#define _aVOID ((type_t)aVOID)
+#define _aINT8 ((type_t)aINT8)
+#define _aUINT8 ((type_t)aUINT8)
+#define _aINT16 ((type_t)aINT16)
+#define _aUINT16 ((type_t)aUINT16)
+#define _aINT32 ((type_t)aINT32)
+#define _aUINT32 ((type_t)aUINT32)
+#define _aINT64 ((type_t)aINT64)
+#define _aUINT64 ((type_t)aUINT64)
+#define _aPTRDIFF ((type_t)aPTRDIFF)
+#define _aINTPTR ((type_t)aINTPTR)
+#define _aFLOAT ((type_t)aFLOAT)
+#define _aDOUBLE ((type_t)aDOUBLE)
+#define _aLDOUBLE ((type_t)aLDOUBLE)
+#define _aCHAR_P ((type_t)aCHAR_P)
+#define _aOBJECT ((type_t)aOBJECT)
+#define _aSTRING ((type_t)aSTRING)
+#define _aVECTOR ((type_t)aVECTOR)
+#define _aHASHTABLE ((type_t)aHASHTABLE)
+#define _aNAN ((type_t)aNAN)
+#define _aINF ((type_t)aINF)
+#define _aNEG ((type_t)aNEG)
 /** @endcond */
 
 /** Is a variant, it may contain any value from the type-enumeration.

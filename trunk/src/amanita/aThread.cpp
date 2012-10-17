@@ -129,27 +129,25 @@ void aThread::deleteMutex() {
 
 void aThread::lock() {
 	if(!mutex) createMutex();
-	int n;
 /*#ifdef USE_SDL
-	n =  SDL_mutexP(mutex);*/
+	SDL_mutexP(mutex);*/
 #ifdef USE_PTHREADS
-	n =  pthread_mutex_lock(mutex);
+	pthread_mutex_lock(mutex);
 #endif
 #ifdef USE_WIN32_THREADS
-	n = WaitForSingleObject(mutex,INFINITE);
+	WaitForSingleObject(mutex,INFINITE);
 #endif
 }
 
 void aThread::unlock() {
 	if(!mutex) return;
-	int n;
 /*#ifdef USE_SDL
-	n = SDL_mutexV(mutex);*/
+	SDL_mutexV(mutex);*/
 #ifdef USE_PTHREADS
-	n = pthread_mutex_unlock(mutex);
+	pthread_mutex_unlock(mutex);
 #endif
 #ifdef USE_WIN32_THREADS
-	n = ReleaseMutex(mutex);
+	ReleaseMutex(mutex);
 #endif
 }
 

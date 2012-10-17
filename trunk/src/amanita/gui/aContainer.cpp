@@ -40,9 +40,11 @@ debug_output("aContainer::add(child=%p)\n",child);
 }
 
 aWidget *aContainer::remove(aWidget *w) {
+	return 0;
 }
 
 aWidget *aContainer::remove(uint32_t id) {
+	return 0;
 }
 
 
@@ -140,7 +142,7 @@ debug_output("aContainer::makeLayout(x: %d, y: %d, w: %d, h: %d)\n",x,y,w,h);
 //	if(border) this->x += border,this->y += border,width -= border*2,height -= border*2;
 	if(child) {
 		aWidget *c = child;
-		int i,n,sz[children],min,max,sum,exp,nexp,sp = (children-1)*spacing;
+		int i,n = 0,sz[children],min,max,sum,exp,nexp,sp = (children-1)*spacing;
 		int x1 = 0,y1 = 0,w1 = 0,h1 = 0,w2 = width,h2 = height;
 		if(type==aWIDGET_VOID) x1 += this->x,y1 += this->y;
 		else if(type==aWIDGET_FRAME)

@@ -117,6 +117,13 @@ include_directories(
 if(CMAKE_TOOLCHAIN_FILE)
 endif()
 
+if(CMAKE_C_COMPILER_ID STREQUAL GNU)
+	SET(CMAKE_CXX_FLAGS "-Wall -fno-rtti")
+	SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+	SET(CMAKE_CXX_FLAGS_RELEASE "-O1")
+	SET(CMAKE_CXX_FLAGS_DEBUG  "-Werror -O0 -g")
+endif()
+
 if(UNIX)
 	set(USE_UNIX 1)
 	if(APPLE)
@@ -227,6 +234,7 @@ set(amanita_src
 	src/amanita/aMath.cpp
 	src/amanita/aObject.cpp
 	src/amanita/aPath.cpp
+	src/amanita/aProperties.cpp
 	src/amanita/aRandom.cpp
 	src/amanita/aRegex.cpp
 	src/amanita/aString.cpp
@@ -310,6 +318,7 @@ install(FILES
 	include/amanita/aMath.h
 	include/amanita/aObject.h
 	include/amanita/aPath.h
+	include/amanita/aProperties.h
 	include/amanita/aRandom.h
 	include/amanita/aRegex.h
 	${PROJECT_BINARY_DIR}/include/amanita/aResource.h
@@ -445,11 +454,21 @@ if(EXAMPLES)
 	endif()
 	target_link_libraries(gui amanita ${GTK2_LIBRARIES} ${WEBKIT_LIBRARIES} ${SCINTILLA_LIB} ${SOURCEVIEW_LIBRARIES})
 
+	add_executable(hashtable examples/hashtable.cpp)
+	target_link_libraries(hashtable amanita)
+
 	add_executable(horoscope examples/horoscope.c)
 	target_link_libraries(horoscope mandragora m)
 
 	add_executable(http examples/http.cpp)
 	target_link_libraries(http amanita ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES})
+
+	add_executable(properties examples/properties.cpp)
+	target_link_libraries(properties amanita)
+	ADD_CUSTOM_COMMAND(TARGET properties
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/examples/properties.cfg ${PROJECT_BINARY_DIR}/properties.cfg
+	)
 
 	add_executable(regex examples/regex.cpp)
 	target_link_libraries(regex amanita)

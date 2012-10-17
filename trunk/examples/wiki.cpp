@@ -202,7 +202,7 @@ void astro_symbols(aWiki &w,char *p) {
 
 void template_callback(aWikiParams &p) {
 	char str[p.param_length+1];
-	int n,n2;
+	int n;
 	if(p.param_length) p.text->substr(str,p.param,p.param_length);
 	else *str = '\0';
 fprintf(stderr,"template_callback(tag: %s, param: \"%s\")\n",p.tag,str);
@@ -217,7 +217,7 @@ void tag_nowiki_callback(aWikiParams &p) {
 	if(p.length>0) {
 		aString ref;
 		ref.append(p.text,p.offset,p.length);
-		ref.encodeHTML(aSTRING_HTML_LTGT);
+		ref.encodeHTML(aHTML_LTGT);
 		p.wiki->addRef(ref);
 //fprintf(stderr,"tag_nowiki_callback(ref: \"%s\")\n",ref.toCharArray());
 	}
@@ -227,7 +227,7 @@ void tag_pre_callback(aWikiParams &p) {
 	if(p.length>0) {
 		aString ref;
 		ref.append(p.text,p.offset,p.length);
-		ref.encodeHTML(aSTRING_HTML_LTGT);
+		ref.encodeHTML(aHTML_LTGT);
 		ref.insert(0,"\n<pre>");
 		ref.append("</pre>\n");
 		p.wiki->addRef(ref);

@@ -1,5 +1,5 @@
-#ifndef _AMANITA_NET_HTTP_H
-#define _AMANITA_NET_HTTP_H
+#ifndef _AMANITA_NET_aHTTP_H
+#define _AMANITA_NET_aHTTP_H
 /**
  * @file amanita/net/aHttp.h
  * @author Per Löwgren
@@ -15,72 +15,72 @@
 class aApplication;
 
 
-enum HTTP_METHOD {
-	HTTP_METHOD_HEADER,
-	HTTP_METHOD_GET,
-	HTTP_METHOD_POST,
+enum aHTTP_METHOD {
+	aHTTP_METHOD_HEADER,
+	aHTTP_METHOD_GET,
+	aHTTP_METHOD_POST,
 };
 
-enum HTTP_HEADER {
-	HTTP_ACCEPT,
-	HTTP_ACCEPT_CHARSET,
-	HTTP_ACCEPT_ENCODING,
-	HTTP_ACCEPT_LANGUAGE,
-	HTTP_ACCEPT_RANGES,
-	HTTP_AGE,
-	HTTP_ALLOW,
-	HTTP_AUTHORIZATION,
-	HTTP_CACHE_CONTROL,
-	HTTP_CONNECTION,
-	HTTP_CONTENT_DISPOSITION,
-	HTTP_CONTENT_ENCODING,
-	HTTP_CONTENT_LANGUAGE,
-	HTTP_CONTENT_LENGTH,
-	HTTP_CONTENT_LOCATION,
-	HTTP_CONTENT_MD5,
-	HTTP_CONTENT_RANGE,
-	HTTP_CONTENT_TYPE,
-	HTTP_COOKIE,
-	HTTP_DATE,
-	HTTP_ETAG,
-	HTTP_EXPECT,
-	HTTP_EXPIRES,
-	HTTP_FROM,
-	HTTP_HOST,
-	HTTP_IF_MATCH,
-	HTTP_IF_MODIFIED_SINCE,
-	HTTP_IF_NONE_MATCH,
-	HTTP_IF_RANGE,
-	HTTP_IF_UNMODIFIED_SINCE,
-	HTTP_LAST_MODIFIED,
-	HTTP_LOCATION,
-	HTTP_MAX_FORWARDS,
-	HTTP_PRAGMA,
-	HTTP_PROXY_AUTHENTICATE,
-	HTTP_PROXY_AUTHORIZATION,
-	HTTP_RANGE,
-	HTTP_REFERER,
-	HTTP_REFRESH,
-	HTTP_RETRY_AFTER,
-	HTTP_SERVER,
-	HTTP_SET_COOKIE,
-	HTTP_TE,
-	HTTP_TRAILER,
-	HTTP_TRANSFER_ENCODING,
-	HTTP_UPGRADE,
-	HTTP_USER_AGENT,
-	HTTP_VARY,
-	HTTP_VIA,
-	HTTP_WARN,
-	HTTP_WARNING,
-	HTTP_WWW_AUTHENTICATE,
+enum aHTTP_HEADER {
+	aHTTP_ACCEPT,
+	aHTTP_ACCEPT_CHARSET,
+	aHTTP_ACCEPT_ENCODING,
+	aHTTP_ACCEPT_LANGUAGE,
+	aHTTP_ACCEPT_RANGES,
+	aHTTP_AGE,
+	aHTTP_ALLOW,
+	aHTTP_AUTHORIZATION,
+	aHTTP_CACHE_CONTROL,
+	aHTTP_CONNECTION,
+	aHTTP_CONTENT_DISPOSITION,
+	aHTTP_CONTENT_ENCODING,
+	aHTTP_CONTENT_LANGUAGE,
+	aHTTP_CONTENT_LENGTH,
+	aHTTP_CONTENT_LOCATION,
+	aHTTP_CONTENT_MD5,
+	aHTTP_CONTENT_RANGE,
+	aHTTP_CONTENT_TYPE,
+	aHTTP_COOKIE,
+	aHTTP_DATE,
+	aHTTP_ETAG,
+	aHTTP_EXPECT,
+	aHTTP_EXPIRES,
+	aHTTP_FROM,
+	aHTTP_HOST,
+	aHTTP_IF_MATCH,
+	aHTTP_IF_MODIFIED_SINCE,
+	aHTTP_IF_NONE_MATCH,
+	aHTTP_IF_RANGE,
+	aHTTP_IF_UNMODIFIED_SINCE,
+	aHTTP_LAST_MODIFIED,
+	aHTTP_LOCATION,
+	aHTTP_MAX_FORWARDS,
+	aHTTP_PRAGMA,
+	aHTTP_PROXY_AUTHENTICATE,
+	aHTTP_PROXY_AUTHORIZATION,
+	aHTTP_RANGE,
+	aHTTP_REFERER,
+	aHTTP_REFRESH,
+	aHTTP_RETRY_AFTER,
+	aHTTP_SERVER,
+	aHTTP_SET_COOKIE,
+	aHTTP_TE,
+	aHTTP_TRAILER,
+	aHTTP_TRANSFER_ENCODING,
+	aHTTP_UPGRADE,
+	aHTTP_USER_AGENT,
+	aHTTP_VARY,
+	aHTTP_VIA,
+	aHTTP_WARN,
+	aHTTP_WARNING,
+	aHTTP_WWW_AUTHENTICATE,
 };
 
-enum HTTP_MIMES {
-	HTTP_FORM_URLENCODED,
-	HTTP_OCTET_STREAM,
-	HTTP_MULTIPART_FORM_DATA,
-	HTTP_MULTIPART_MIXED,
+enum aHTTP_MIMES {
+	aHTTP_FORM_URLENCODED,
+	aHTTP_OCTET_STREAM,
+	aHTTP_MULTIPART_FORM_DATA,
+	aHTTP_MULTIPART_MIXED,
 };
 
 
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
 
 	http.post("www.host.com","script.php");
 
-	FILE *fp = fopen("response.txt","w");
+	FILE *fp = fopen("response.txt","wb");
 	fwrite(http.getFile(),http.getFileSize(),1,fp);
 	fclose(fp);
 	aSocket::close();
@@ -146,12 +146,12 @@ public:
 
 	/** Set a request header.
 	 * @see aHttp::setRequestHeader(const char *key,const char *value)
-	 * @see HTTP_HEADER
+	 * @see aHTTP_HEADER
 	 */
-	void setRequestHeader(HTTP_HEADER key,const char *value);
+	void setRequestHeader(aHTTP_HEADER key,const char *value);
 
 	/** Set the User-Agent header. */
-	void setUserAgent(const char *agent) { setRequestHeader(HTTP_USER_AGENT,agent); }
+	void setUserAgent(const char *agent) { setRequestHeader(aHTTP_USER_AGENT,agent); }
 
 	/** Set a form value.
 	 * Neither the key nor the value should be URL encoded.
@@ -232,7 +232,7 @@ public:
 	 * @param method The http-method to be used.
 	 * @param data The data that is sent with the request.
 	 * @param len Length of the data sent with the request.
-	 * @see HTTP_METHOD
+	 * @see aHTTP_METHOD
 	 *
 	 * @code
 	 * aHttp http;
@@ -240,7 +240,7 @@ public:
 	 * http.request("www.host.com","script.php",POST);
 	 * @endcode
 	 */
-	const char *request(const char *host,const char *url,HTTP_METHOD method,const char *data=0,size_t len=0);
+	const char *request(const char *host,const char *url,aHTTP_METHOD method,const char *data=0,size_t len=0);
 
 	/** Get the HTTP version returned by the response. */
 	float getHTTPVersion() { return ver; }
@@ -249,9 +249,9 @@ public:
 	/** Get response header. */
 	const char *getResponseHeader(const char *key);
 	/** Get response header.
-	 * @see HTTP_HEADER
+	 * @see aHTTP_HEADER
 	 */
-	const char *getResponseHeader(HTTP_HEADER key);
+	const char *getResponseHeader(aHTTP_HEADER key);
 	/** Get the file-body returned by the get, post or request methods. */
 	const char *getFile() { return body.toCharArray(); }
 	/** Get size of the file-body returned by the get, post or request methods. */
@@ -259,5 +259,5 @@ public:
 };
 
 
-#endif /* _AMANITA_NET_HTTP_H */
+#endif /* _AMANITA_NET_aHTTP_H */
 

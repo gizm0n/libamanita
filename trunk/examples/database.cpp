@@ -8,14 +8,14 @@
 
 int main(int argc, char *argv[]) {
 	int i,j,exists = 0;
-	const char *file = "./database.db";
-	FILE *fp = fopen(file,"r");
+	const char *fn = "database.db";
+	FILE *fp = fopen(fn,"rb");
 	if(fp) {
 		exists = 1;
 		fclose(fp);
-	}
+	} else perror(fn);
 
-	aDatabase db(file);
+	aDatabase db(fn);
 	aResult rs;
 	aRecord *r;
 
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 		fprintf(stdout,"\n");
 		for(j=0; j<r->columns(); ++j) fprintf(stdout,"----------- ");
 		fprintf(stdout,"\n");
-		for(i=0; i<rs.rows(); ++i) {
+		for(i=0; i<(int)rs.rows(); ++i) {
 			r = rs.getRow(i);
 			for(j=0; j<r->columns(); ++j) fprintf(stdout,"%-12s",r->getColumn(j));
 			fprintf(stdout,"\n");

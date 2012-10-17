@@ -43,18 +43,16 @@ uint32_t client_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 
 
 int main(int argc, char *argv[]) {
-	if(argc!=2) {
-		printf("Invalid parameters.\nUsage: client HOST:PORT:USER_ID:NICK\n");
-		return 0;
-	} else {
-		char text[1024-SOCKET_HEADER-1],*s;
+	if(argc!=2) printf("Invalid parameters.\nUsage: client HOST:PORT:USER_ID:NICK\n");
+	else {
+		char text[1024-SOCKET_HEADER-1];
 		uint8_t data[1024],*p;
 		aApplication app(aINIT_SOCKETS);
 		app.open(argc,argv);
 		client = new aClient(client_listener);
 		client->start(argv[1]);
 		while(1) {
-			s = gets(text);	
+			gets(text);
 			if(!strcmp(text,"exit")) break;
 			p = data;
 			pack_header(&p,0);
@@ -65,5 +63,6 @@ int main(int argc, char *argv[]) {
 		delete(client);
 		app.close();
 	}
+	return 0;
 }
 

@@ -95,8 +95,11 @@ printf("aGfxImage::readXIM(fn=%s)\n",fn);
 fflush(stdout);
 	char str[1024];
 	sprintf(str,"%s%s",p,fn);
-	FILE *fp = fopen(str,"r");
-	if(!fp) return 0;
+	FILE *fp = fopen(str,"rb");
+	if(!fp) {
+		perror(str);
+		return 0;
+	}
 // printf("aGfxImage::readXIM()\n");
 // fflush(stdout);
 	int nlines = 0,f,r = 0,b;
@@ -521,7 +524,7 @@ bool aGfxImage::save(const char *fn,SDL_Surface *s) {
 				png_destroy_write_struct(&png_ptr,&info_ptr);
 			} else fprintf(stderr,"png_create_write_struct error!\n");
 			fclose(fp);
-		} else fprintf(stderr,"fopen error");
+		} else perror(fn);
 		return ret;
 	}
 	return false;

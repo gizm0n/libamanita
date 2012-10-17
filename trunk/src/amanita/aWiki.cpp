@@ -8,10 +8,10 @@
 #include <amanita/aWiki.h>
 #include <amanita/net/aSocket.h>
 
-
+/*
 static const char *wiki_tags[] = {
 0};
-
+*/
 static const char *html_tags[] = {
 	"abbr","b","big","blockquote","br","caption","center","cite","code","dd","del","div","dl","dt","em","font",
 	"h1","h2","h3","h4","h5","h6","hr","i","ins","li","ol","p","pre","rb","rp","rt","ruby","s","small","span",
@@ -31,7 +31,7 @@ static const char *protocols[] = {
 	"ftps://",			"{^url:ftps}",
 	"news://",			"{^url:news}",
 0};
-
+/*
 static const char *urls_refs = 0;
 
 static const char *symbols[] = {
@@ -88,13 +88,13 @@ static const char *symbols[] = {
 	"devil",				"smiley17",
 	"z",					"smiley19",
 0};
-
+*/
 static const char *list_chars = "*#;:";
 static const char *list_types[] = { "ul","ol","dl","dl"};
 static const char *list_rows[] = { "li","li","dt","dd" };
-
+/*
 static const char *wiki_tag_handlers = 0;
-
+*/
 static const char *char_style = "'''''";
 
 
@@ -160,7 +160,7 @@ void aWikiData::clearSmileys() {
 }
 
 void aWikiData::setSmileys(const char **s,wiki_smiley_callback cb) {
-	int i,j,n1,n2;
+	int i,n1,n2;
 	char s1[33];
 	aString s2;
 	clearSmileys();
@@ -301,7 +301,6 @@ void aWikiLink::parse(aWikiData &data,char *text) {
 char *aWikiLink::getName(const char *name) {
 	if(name && *name) {
 		char *p = strdup(name),*p1 = p,*p2 = p,c,c0 = '\0';
-		int n;
 		while(*p2!='\0') {
 			c = *p2++;
 			if(c==' ' || c=='-') c = '_';
@@ -343,7 +342,7 @@ static const int file_types[] = {
 
 
 aWikiFile::aWikiFile(aWikiLink &l,const char *dir[]) {
-	int i,n;
+	int n;
 	char *p;
 	link = &l;
 	path = 0;
@@ -418,7 +417,7 @@ aWikiFile::aWikiFile(aWikiLink &l,const char *dir[]) {
 					}
 					fclose(fp);
 //debug_output("aWikiFile::aWikiFile(width: %d, height: %d)\n",image_width,image_height);
-				}
+				} else perror(path);
 			}
 		}
 	}
@@ -687,11 +686,7 @@ void aWiki::format(const char *text,uint32_t f) {
 }
 
 void aWiki::format(uint32_t f) {
-	int i;
-	const char *s;
-
 	if(!length()) return;
-
 	flags = f;
 
 timeval tv1,tv2;
@@ -702,7 +697,7 @@ gettimeofday(&tv1,0);
 	aString s1;
 
 	newline("\n");
-	stripHTMLComments();
+	stripComments(aLANG_HTML);
 
 //debug_output("w1: \"%s\"\n",w1.toCharArray());
 
@@ -904,11 +899,11 @@ size_t aWiki::formatTable(aVector &lines,size_t ln,int lvl,char *ind) {
 void aWiki::formatTableStyle(aString &style,char *line) {
 	style.clear();
 	if(*line!='\0') {
-		style.append(line);
+		style << line;
 		style.trim();
 		if(style) {
 			style.stripHTML();
-			insert(0,' ');
+			style.insert(0,' ');
 		}
 	}
 }
@@ -917,7 +912,7 @@ void aWiki::formatTableStyle(aString &style,char *line) {
 size_t aWiki::formatList(aVector &lines,size_t ln,int lvl,char *ind,char *lists) {
 	char *line = (char *)lines[ln];
 	char type = line[lvl];
-	int i,n;
+	size_t i,n;
 
 	for(i=0; list_chars[i]!=type; ++i)
 		if(list_chars[i]=='\0') return ln;
@@ -928,7 +923,7 @@ size_t aWiki::formatList(aVector &lines,size_t ln,int lvl,char *ind,char *lists)
 
 	for(n=lines.size(); ln<n; ++ln) {
 		line = (char *)lines[ln];
-		if(strlen(line)<=lvl || strncmp(lists,line,lvl+1)!=0) break;
+		if(strlen(line)<=(size_t)lvl || strncmp(lists,line,lvl+1)!=0) break;
 		ln = formatListRow(lines,ln,lvl,ind,lists);
 	}
 
@@ -941,7 +936,7 @@ size_t aWiki::formatList(aVector &lines,size_t ln,int lvl,char *ind,char *lists)
 size_t aWiki::formatListRow(aVector &lines,size_t ln,int lvl,char *ind,char *lists) {
 	char *line = (char *)lines[ln];
 	char type = line[lvl];
-	int i,n,r = 0;
+	int i,r = 0;
 	aString s;
 
 	for(i=0; list_chars[i]!=type; ++i)
@@ -983,7 +978,7 @@ void aWiki::formatInline(aString &text,bool pg,long o,long l) {
 
 	if(o<0) o = (long)text.length()+o;
 	if(l<=0) l = (long)text.length()+l;
-	if(o<0 || l<=0 || o+l>text.length()) return;
+	if(o<0 || l<=0 || o+l>(long)text.length()) return;
 
 	if(pg) *this << "\n<p>";
 
@@ -992,7 +987,7 @@ void aWiki::formatInline(aString &text,bool pg,long o,long l) {
 		c = text[(long)p.offset];
 //debug_putc(c);
 		if(c=='\'') { // <-- Character (inline) formatting – applies anywhere.
-			for(i=1; p.offset+i<l && i<5 && text[p.offset+i]=='\''; ++i);
+			for(i=1; (long)(p.offset+i)<l && i<5 && text[p.offset+i]=='\''; ++i);
 			if(i>1) {
 				if(i>5) i = 5;
 				else if(i==4) i = 3;
@@ -1177,7 +1172,7 @@ void aWiki::matchURL(aWikiParams &p) {
 }
 
 void aWiki::matchWikiTag(aWikiParams &p) {
-	long i,j,k,n,len = p.text->length(),l,html = -1;
+	long i,j,k,n/*,len = p.text->length()*/,l,html = -1;
 	char c = p.text->charAt(p.offset+1);
 	aWikiTagHandler *th = 0;
 	i = c=='/'? p.offset+2 : p.offset+1;
@@ -1247,7 +1242,7 @@ debug_output("matchWikiLink(n: %ld)\n",n);
 
 void aWiki::matchBBTag(aWikiParams &p) {
 	if(p.text->charAt(p.offset+1)=='/') return;
-	long i,j,n,len = p.text->length(),l,bb;
+	long i,n/*,len = p.text->length()*/,l,bb;
 	i = p.offset+1;
 	n = p.text->findChar(" \n\t=]",i);
 	p.text->substr(p.tag,i,n-i);

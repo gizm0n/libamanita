@@ -1,7 +1,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <amanita/aRegex.h>
+#include <amanita/aString.h>
 
 int main(int argc, char *argv[]) {
 	aString str;
@@ -22,14 +22,16 @@ alert('Hello world!'); // Hello world alert javascript\n\
 </body>";
 
 	fprintf(stdout,"File:\n%s\nEOF\n",str.toCharArray());
-	str.stripComments();
-	fprintf(stdout,"Strip Comments:\n%s\nEOF\n",str.toCharArray());
-	str.stripHTMLComments();
-	fprintf(stdout,"Strip HTML Comments:\n%s\nEOF\n",str.toCharArray());
+	str.stripComments(aLANG_C);
+	fprintf(stdout,"\nStrip C Comments:\n%s\nEOF\n",str.toCharArray());
+	str.stripComments(aLANG_HTML);
+	fprintf(stdout,"\nStrip HTML Comments:\n%s\nEOF\n",str.toCharArray());
 	str.stripHTML();
-	fprintf(stdout,"Strip HTML:\n%s\nEOF\n",str.toCharArray());
+	fprintf(stdout,"\nStrip HTML:\n%s\nEOF\n",str.toCharArray());
 	str.newline("<br/>\n");
-	fprintf(stdout,"Newline <br/>:\n%s\nEOF\n",str.toCharArray());
+	fprintf(stdout,"\nNewline <br/>:\n%s\nEOF\n",str.toCharArray());
+	str.encodeHTML();
+	fprintf(stdout,"\nEncode HTML:\n%s\nEOF\n",str.toCharArray());
 	fflush(stdout);
 	return 0;
 }

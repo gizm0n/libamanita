@@ -15,39 +15,39 @@ value_t aHashtable::iterator::first(type_t kt,type_t vt) {
 		if(COMPARE(kt,vt,at)) return at->value;
 		at = at->next;
 	} while(at);
-	index = ITER_INDEX_EMPTY;
+	index = aITER_INDEX_EMPTY;
 	return 0;
 }
 
 value_t aHashtable::iterator::next() {
-	if(!ht->sz) index = ITER_INDEX_EMPTY;
-	else if(index!=ITER_INDEX_AFTER_LAST) {
-		if(index<0) index = ITER_INDEX_BEFORE_FIRST;
+	if(!ht->sz) index = aITER_INDEX_EMPTY;
+	else if(index!=aITER_INDEX_AFTER_LAST) {
+		if(index<0) index = aITER_INDEX_BEFORE_FIRST;
 		if(index>=0 && at && at->next) return (at=at->next)->value;
 		while((++index)<(long)ht->cap)
 			if((at=ht->table[index])) return at->value;
-		index = ITER_INDEX_AFTER_LAST;
+		index = aITER_INDEX_AFTER_LAST;
 	}
 	return 0;
 }
 
 value_t aHashtable::iterator::next(type_t kt,type_t vt) {
-	if(!ht->sz) index = ITER_INDEX_EMPTY;
-	else if(index!=ITER_INDEX_AFTER_LAST) {
-		if(index<0) index = ITER_INDEX_BEFORE_FIRST;
+	if(!ht->sz) index = aITER_INDEX_EMPTY;
+	else if(index!=aITER_INDEX_AFTER_LAST) {
+		if(index<0) index = aITER_INDEX_BEFORE_FIRST;
 		if(index>=0 && at && at->next)
 			while((at=at->next)) if(COMPARE(kt,vt,at)) return at->value;
 		while((++index)<(long)ht->cap)
 			if((at=ht->table[index]))
 				do if(COMPARE(kt,vt,at)) return at->value;while((at=at->next));
-		index = ITER_INDEX_AFTER_LAST;
+		index = aITER_INDEX_AFTER_LAST;
 	}
 	return 0;
 }
 
 value_t aHashtable::iterator::previous(type_t kt,type_t vt) {
-	if(!ht->sz) index = ITER_INDEX_EMPTY;
-	else if(index!=ITER_INDEX_BEFORE_FIRST) {
+	if(!ht->sz) index = aITER_INDEX_EMPTY;
+	else if(index!=aITER_INDEX_BEFORE_FIRST) {
 		if(index<0) index = ht->cap-1,at = 0;
 		else if(at && at==ht->table[index]) index--,at = 0;
 		for(node *n1,*n2; index>=0; index--) if((n1=ht->table[index])) do {
@@ -56,7 +56,7 @@ value_t aHashtable::iterator::previous(type_t kt,type_t vt) {
 			at = n2;
 			if(COMPARE(kt,vt,at)) return at->value;
 		} while(n2!=n1);
-		index = ITER_INDEX_BEFORE_FIRST;
+		index = aITER_INDEX_BEFORE_FIRST;
 	}
 	return 0;
 }
@@ -71,7 +71,7 @@ value_t aHashtable::iterator::last(type_t kt,type_t vt) {
 			if(COMPARE(kt,vt,at)) return at->value;
 		} while(n2!=n1);
 	}
-	index = ITER_INDEX_EMPTY;
+	index = aITER_INDEX_EMPTY;
 	return 0;
 }
 
@@ -86,7 +86,7 @@ value_t aHashtable::iterator::remove() {
 		value_t v = n1->value;
 		delete n1;
 		ht->sz--;
-		if(!ht->sz) index = ITER_INDEX_EMPTY;
+		if(!ht->sz) index = aITER_INDEX_EMPTY;
 		return v;
 	}
 	return 0;
@@ -104,76 +104,68 @@ aHashtable::iterator aHashtable::iterate() { return iterator(this); }
 
 void aHashtable::setCaseInsensitiveKeys(bool b) {
 	style_t st = style;
-	st |= HASH_STYLE_CASE_INSENSITIVE;
-	if(!b) st ^= HASH_STYLE_CASE_INSENSITIVE;
-	if(((style&HASH_STYLE_CASE_INSENSITIVE)? true : false)!=b && sz>0) rehash(st);
+	st |= aHASH_STYLE_CASE_INSENSITIVE;
+	if(!b) st ^= aHASH_STYLE_CASE_INSENSITIVE;
+	if(((style&aHASH_STYLE_CASE_INSENSITIVE)? true : false)!=b && sz>0) rehash(st);
 	else style = st;
 }
 
 void aHashtable::setAllowKeyMultiples(bool b) {
-	style |= HASH_STYLE_KEY_MULTIPLES;
-	if(!b) style ^= HASH_STYLE_KEY_MULTIPLES;
-}
-
-hash_t aHashtable::hash(const char *s) {
-	hash_t h = 0;
-	if(style&HASH_STYLE_CASE_INSENSITIVE) while(*s) h = 31*h+aString::toLower(*s),s++;
-	else while(*s) h = 31*h+(*s),s++;
-	return h;
+	style |= aHASH_STYLE_KEY_MULTIPLES;
+	if(!b) style ^= aHASH_STYLE_KEY_MULTIPLES;
 }
 
 void aHashtable::put(node &n) {
-	if(n.k_type==TYPE_CHAR_P) put((const char *)n.key,n.value,n.v_type);
+	if(n.k_type==aCHAR_P) put((const char *)n.key,n.value,n.v_type);
 	else put(n.key,n.value,n.k_type,n.v_type);
 }
 
 void aHashtable::put(value_t key,value_t value,type_t kt,type_t vt) {
-	if(sz && !(style&HASH_STYLE_KEY_MULTIPLES)) {
+	if(sz && !(style&aHASH_STYLE_KEY_MULTIPLES)) {
 		node *n = table[key%cap];
 		while(n) {
 			if(n->k_type==kt && n->key==key) break;
 			n = n->next;
 		}
 		if(n) {
-			if(n->v_type==TYPE_CHAR_P) free((char *)n->value);
+			if(n->v_type==aCHAR_P) free((char *)n->value);
 #if _WORDSIZE < 64
-			//else if(n->v_type==TYPE_INT64) free((long long *)n->value);
-			//else if(n->v_type==TYPE_DOUBLE) free((double *)n->value);
+			//else if(n->v_type==aINT64) free((long long *)n->value);
+			//else if(n->v_type==aDOUBLE) free((double *)n->value);
 #endif
 			n->value = value,n->v_type = vt;
 			return;
 		}
 	}
 	if(sz==full) rehash(style);
-	hash_t h = key%cap;
-	table[h] = new node(key,key,value,kt,vt,table[h]);
+	int c = key%cap;
+	table[c] = new node(key,(hash_t)key,value,kt,vt,table[c]);
 	sz++;
 }
 
 void aHashtable::put(const char *key,value_t value,type_t vt) {
-	if(sz && !(style&HASH_STYLE_KEY_MULTIPLES)) {
-		node *n = table[hash(key)%cap];
-		if(style&HASH_STYLE_CASE_INSENSITIVE) while(n) {
-			if(n->k_type==TYPE_CHAR_P && !aString::stricmp((char *)n->key,key)) break;
-			n = n->next;
-		} else while(n) {
-			if(n->k_type==TYPE_CHAR_P && !strcmp((char *)n->key,key)) break;
-			n = n->next;
-		}
+	hash_t h;
+	if(sz && !(style&aHASH_STYLE_KEY_MULTIPLES)) {
+		h = aString::crc32(key,style&aHASH_STYLE_CASE_INSENSITIVE);
+		node *n = table[h%cap];
+		if(style&aHASH_STYLE_CASE_INSENSITIVE) for(; n; n=n->next)
+			if(n->k_type==aCHAR_P && n->hash==h && !aString::stricmp((char *)n->key,key)) break;
+		else for(; n; n=n->next)
+			if(n->k_type==aCHAR_P && n->hash==h && !strcmp((char *)n->key,key)) break;
 		if(n) {
-			if(n->v_type==TYPE_CHAR_P) free((char *)n->value);
+			if(n->v_type==aCHAR_P) free((char *)n->value);
 #if _WORDSIZE < 64
-			//else if(n->v_type==TYPE_INT64) free((long long *)n->value);
-			//else if(n->v_type==TYPE_DOUBLE) free((double *)n->value);
+			//else if(n->v_type==aINT64) free((long long *)n->value);
+			//else if(n->v_type==aDOUBLE) free((double *)n->value);
 #endif
 			n->value = value,n->v_type = vt;
 			return;
 		}
 	}
 	if(sz==full) rehash(style);
-	char *k = strdup(key);
-	hash_t hs = hash(k),h = hs%cap;
-	table[h] = new node((value_t)k,hs,value,TYPE_CHAR_P,vt,table[h]);
+	h = aString::crc32(key,style&aHASH_STYLE_CASE_INSENSITIVE);
+	int c = h%cap;
+	table[c] = new node((value_t)strdup(key),h,value,aCHAR_P,vt,table[c]);
 	sz++;
 }
 
@@ -189,19 +181,20 @@ value_t aHashtable::get(value_t key,type_t kt) {
 
 value_t aHashtable::get(const char *key) {
 	if(!sz) return 0;
-	node *n = table[hash(key)%cap];
-	if(style&HASH_STYLE_CASE_INSENSITIVE) while(n) {
-		if(n->k_type==TYPE_CHAR_P && !aString::stricmp((char *)n->key,key)) return n->value;
+	hash_t h = aString::crc32(key,style&aHASH_STYLE_CASE_INSENSITIVE);
+	node *n = table[h%cap];
+	if(style&aHASH_STYLE_CASE_INSENSITIVE) while(n) {
+		if(n->k_type==aCHAR_P && n->hash==h && !aString::stricmp((char *)n->key,key)) return n->value;
 		n = n->next;
 	} else while(n) {
-		if(n->k_type==TYPE_CHAR_P && !strcmp((char *)n->key,key)) return n->value;
+		if(n->k_type==aCHAR_P && n->hash==h && !strcmp((char *)n->key,key)) return n->value;
 		n = n->next;
 	}
 	return 0;
 }
 
 value_t aHashtable::get(value_t key,type_t kt,type_t &type) {
-	type = TYPE_EMPTY;
+	type = aEMPTY;
 	if(!sz) return 0;
 	node *n = table[key%cap];
 	while(n) {
@@ -214,14 +207,15 @@ value_t aHashtable::get(value_t key,type_t kt,type_t &type) {
 }
 
 value_t aHashtable::get(const char *key,type_t &type) {
-	type = TYPE_EMPTY;
+	type = aEMPTY;
 	if(!sz) return 0;
-	node *n = table[hash(key)%cap];
-	if(style&HASH_STYLE_CASE_INSENSITIVE) while(n) {
-		if(n->k_type==TYPE_CHAR_P && !aString::stricmp((char *)n->key,key)) break;
+	hash_t h = aString::crc32(key,style&aHASH_STYLE_CASE_INSENSITIVE);
+	node *n = table[h%cap];
+	if(style&aHASH_STYLE_CASE_INSENSITIVE) while(n) {
+		if(n->k_type==aCHAR_P && n->hash==h && !aString::stricmp((char *)n->key,key)) break;
 		n = n->next;
 	} else while(n) {
-		if(n->k_type==TYPE_CHAR_P && !strcmp((char *)n->key,key)) break;
+		if(n->k_type==aCHAR_P && n->hash==h && !strcmp((char *)n->key,key)) break;
 		n = n->next;
 	}
 	if(!n) return 0;
@@ -243,19 +237,20 @@ size_t aHashtable::get(value_t key,type_t kt,aVector &v) {
 size_t aHashtable::get(const char *key,aVector &v) {
 	if(!sz) return 0;
 	size_t i = 0;
-	node *n = table[hash(key)%cap];
-	if(style&HASH_STYLE_CASE_INSENSITIVE) while(n) {
-		if(n->k_type==TYPE_CHAR_P && !aString::stricmp((char *)n->key,key)) v.insert(n->value,v.sz,n->v_type),++i;
+	hash_t h = aString::crc32(key,style&aHASH_STYLE_CASE_INSENSITIVE);
+	node *n = table[h%cap];
+	if(style&aHASH_STYLE_CASE_INSENSITIVE) while(n) {
+		if(n->k_type==aCHAR_P && n->hash==h && !aString::stricmp((char *)n->key,key)) v.insert(n->value,v.sz,n->v_type),++i;
 		n = n->next;
 	} else while(n) {
-		if(n->k_type==TYPE_CHAR_P && !strcmp((char *)n->key,key)) v.insert(n->value,v.sz,n->v_type),++i;
+		if(n->k_type==aCHAR_P && n->hash==h && !strcmp((char *)n->key,key)) v.insert(n->value,v.sz,n->v_type),++i;
 		n = n->next;
 	}
 	return i;
 }
 
 value_t aHashtable::getByIndex(size_t index,type_t &type) {
-	type = TYPE_EMPTY;
+	type = aEMPTY;
 	if(index>=sz) return 0;
 	size_t i = 0;
 	node *n = 0;
@@ -289,18 +284,19 @@ value_t aHashtable::remove(value_t key,type_t kt) {
 
 value_t aHashtable::remove(const char *key) {
 	if(!sz) return 0;
-	hash_t h = hash(key)%cap;
-	node *n1 = table[h];
+	hash_t h = aString::crc32(key,style&aHASH_STYLE_CASE_INSENSITIVE);
+	int c = h%cap;
+	node *n1 = table[c];
 	if(!n1) return 0;
-	if(n1->k_type==TYPE_CHAR_P &&
-		(((style&HASH_STYLE_CASE_INSENSITIVE) && !aString::stricmp((char *)n1->key,key)) ||
-			(!(style&HASH_STYLE_CASE_INSENSITIVE) && !strcmp((char *)n1->key,key)))) table[h] = n1->next;
+	if(n1->k_type==aCHAR_P && n1->hash==h &&
+		(((style&aHASH_STYLE_CASE_INSENSITIVE) && !aString::stricmp((char *)n1->key,key)) ||
+			(!(style&aHASH_STYLE_CASE_INSENSITIVE) && !strcmp((char *)n1->key,key)))) table[c] = n1->next;
 	else {
 		node *n2;
-		if(style&HASH_STYLE_CASE_INSENSITIVE)
+		if(style&aHASH_STYLE_CASE_INSENSITIVE)
 			do { n2 = n1,n1 = n1->next; }
-				while(n1 && n1->k_type!=TYPE_CHAR_P && !aString::stricmp((char *)n1->key,key));
-		else do { n2 = n1,n1 = n1->next; } while(n1 && n1->k_type!=TYPE_CHAR_P && !strcmp((char *)n1->key,key));
+				while(n1 && n1->k_type!=aCHAR_P && n1->hash!=h && aString::stricmp((char *)n1->key,key));
+		else do { n2 = n1,n1 = n1->next; } while(n1 && n1->k_type!=aCHAR_P && n1->hash!=h && strcmp((char *)n1->key,key));
 		if(!n1) return 0;
 		n2->next = n1->next;
 	}
@@ -311,7 +307,7 @@ value_t aHashtable::remove(const char *key) {
 }
 
 value_t aHashtable::remove(value_t key,type_t kt,type_t &type) {
-	type = TYPE_EMPTY;
+	type = aEMPTY;
 	if(!sz) return 0;
 	value_t k = key;
 	node *n1 = table[k%cap];
@@ -331,20 +327,21 @@ value_t aHashtable::remove(value_t key,type_t kt,type_t &type) {
 }
 
 value_t aHashtable::remove(const char *key,type_t &type) {
-	type = TYPE_EMPTY;
+	type = aEMPTY;
 	if(!sz) return 0;
-	int h = hash(key)%cap;
-	node *n1 = table[h];
+	hash_t h = aString::crc32(key,style&aHASH_STYLE_CASE_INSENSITIVE);
+	int c = h%cap;
+	node *n1 = table[c];
 	if(!n1) return 0;
-	if(n1->k_type==TYPE_CHAR_P &&
-		(((style&HASH_STYLE_CASE_INSENSITIVE) && !aString::stricmp((char *)n1->key,key)) ||
-			(!(style&HASH_STYLE_CASE_INSENSITIVE) && !strcmp((char *)n1->key,key)))) table[h] = n1->next;
+	if(n1->k_type==aCHAR_P && n1->hash==h &&
+		(((style&aHASH_STYLE_CASE_INSENSITIVE) && !aString::stricmp((char *)n1->key,key)) ||
+			(!(style&aHASH_STYLE_CASE_INSENSITIVE) && !strcmp((char *)n1->key,key)))) table[c] = n1->next;
 	else {
 		node *n2;
-		if(style&HASH_STYLE_CASE_INSENSITIVE)
+		if(style&aHASH_STYLE_CASE_INSENSITIVE)
 			do { n2 = n1,n1 = n1->next; }
-				while(n1 && n1->k_type!=TYPE_CHAR_P && !aString::stricmp((char *)n1->key,key));
-		else do { n2 = n1,n1 = n1->next; } while(n1 && n1->k_type!=TYPE_CHAR_P && !strcmp((char *)n1->key,key));
+				while(n1 && n1->k_type!=aCHAR_P && n1->hash!=h && aString::stricmp((char *)n1->key,key));
+		else do { n2 = n1,n1 = n1->next; } while(n1 && n1->k_type!=aCHAR_P && n1->hash!=h && strcmp((char *)n1->key,key));
 		if(!n1) return 0;
 		n2->next = n1->next;
 	}
@@ -382,7 +379,8 @@ void aHashtable::rehash(style_t st) {
 		node *n1,*n2;
 		if(st!=style) {
 			for(i=0; i<cap; ++i) if((n1=t1[i])) while(n1) {
-				if(n1->k_type==TYPE_CHAR_P) n1->hash = hash((char *)n1->key);
+				if(n1->k_type==aCHAR_P)
+					n1->hash = aString::crc32((char *)n1->key,style&aHASH_STYLE_CASE_INSENSITIVE);
 				n2 = n1->next,h = n1->hash%c,n1->next = table[h],table[h] = n1,n1 = n2;
 			}
 		} else  for(i=0; i<cap; ++i) if((n1=t1[i])) while(n1)
@@ -397,10 +395,14 @@ void aHashtable::rehash(style_t st) {
 }
 
 size_t aHashtable::print(const char *fn) {
-	FILE *fp;
-	if(!fn || !*fn || !(fp=fopen(fn,"w"))) return 0;
-	size_t s = print(fp);
-	fclose(fp);
+	size_t s = 0;
+	if(fn && *fn) {
+		FILE *fp;
+		if((fp=fopen(fn,"wb"))) {
+			s = print(fp);
+			fclose(fp);
+		} else perror(fn);
+	}
 	return s;
 }
 
@@ -412,29 +414,29 @@ size_t aHashtable::print(FILE *fp) {
 		fprintf(fp,"Table[%lu]",(unsigned long)i);
 		if((n=table[i])) while(n) {
 			switch(n->k_type) {
-				case TYPE_VOID_P:fprintf(fp," %p",(void *)n->key);break;
-				case TYPE_INTPTR:fprintf(fp," %" PRIuPTR,(intptr_t)n->key);break;
+				case aVOID:fprintf(fp," %p",(void *)n->key);break;
+				case aINTPTR:fprintf(fp," %" PRIdPTR,(intptr_t)n->key);break;
 #if _WORDSIZE == 64
-				case TYPE_DOUBLE:fprintf(fp," %f",*((double *)((void *)&n->key)));break;
+				case aDOUBLE:fprintf(fp," %f",*((double *)((void *)&n->key)));break;
 #else
-				//case TYPE_INT64:fprintf(fp," %" PRId64,*(long long *)n->key);break;
-				case TYPE_FLOAT:fprintf(fp," %f",*((float *)((void *)&n->key)));break;
-				//case TYPE_DOUBLE:fprintf(fp," %f",*((double *)((void *)&n->key)));break;
+				//case aINT64:fprintf(fp," %" PRId64,*(long long *)n->key);break;
+				case aFLOAT:fprintf(fp," %f",*((float *)((void *)&n->key)));break;
+				//case aDOUBLE:fprintf(fp," %f",*((double *)((void *)&n->key)));break;
 #endif
-				case TYPE_CHAR_P:fprintf(fp," \"%s\"",(char *)n->key);break;
+				case aCHAR_P:fprintf(fp," \"%s\"",(char *)n->key);break;
 			}
 			switch(n->v_type) {
-				case TYPE_VOID_P:fprintf(fp,"=%p",(void *)n->value);break;
-				case TYPE_INTPTR:fprintf(fp,"=%" PRIuPTR,(intptr_t)n->value);break;
+				case aVOID:fprintf(fp,"=%p",(void *)n->value);break;
+				case aINTPTR:fprintf(fp,"=%" PRIdPTR,(intptr_t)n->value);break;
 #if _WORDSIZE == 64
-				case TYPE_DOUBLE:fprintf(fp,"=%f",*((double *)((void *)&n->value)));break;
+				case aDOUBLE:fprintf(fp,"=%f",*((double *)((void *)&n->value)));break;
 #else
-				//case TYPE_INT64:fprintf(fp,"=%lu",(unsigned long)n->value);break;
-				case TYPE_FLOAT:fprintf(fp,"=%f",*((float *)((void *)&n->value)));break;
-				//case TYPE_DOUBLE:fprintf(fp,"=%f",*((double *)((void *)&n->value)));break;
+				//case aINT64:fprintf(fp,"=%lu",(unsigned long)n->value);break;
+				case aFLOAT:fprintf(fp,"=%f",*((float *)((void *)&n->value)));break;
+				//case aDOUBLE:fprintf(fp,"=%f",*((double *)((void *)&n->value)));break;
 #endif
-				case TYPE_CHAR_P:fprintf(fp,"=\"%s\"",(char *)n->value);break;
-				case TYPE_OBJECT_P:fprintf(fp,"=%p",(void *)n->value);break;
+				case aCHAR_P:fprintf(fp,"=\"%s\"",(char *)n->value);break;
+				case aOBJECT:fprintf(fp,"=%p",(void *)n->value);break;
 			}
 			fflush(fp);
 			if(n->next) s--;
@@ -447,29 +449,35 @@ size_t aHashtable::print(FILE *fp) {
 	return sz;
 }
 
-size_t aHashtable::load(const char *fn) {
+size_t aHashtable::load(const char *fn,const char *k,const char *l) {
 //fprintf(stderr,"aHashtable::load(%s)\n",fn);
 //fflush(stderr);
-	FILE *fp;
-	if(!fn || !*fn || !(fp=fopen(fn,"rb"))) return 0;
-	size_t s = load(fp);
-	fclose(fp);
+	size_t s = 0;
+	if(fn && *fn) {
+		FILE *fp;
+		if((fp=fopen(fn,"rb"))) {
+			s = load(fp,k,l);
+			fclose(fp);
+		} else perror(fn);
+	}
 	return s;
 }
 
-size_t aHashtable::load(FILE *fp) {
+size_t aHashtable::load(FILE *fp,const char *k,const char *l) {
 	if(!fp) return 0;
 //fprintf(stderr,"aHashtable::load()\n");
 //fflush(stderr);
 	aString key(64),val(256);
 	size_t n = 0;
+	if(!k) k = "=:";
+	if(!l) l = aString::endl;
 	while(!feof(fp)) {
 //fprintf(stderr,"aHashtable::load(readPair)\n");
 //fflush(stderr);
 		key.clear();
-		key.appendUntil(fp,"=:",aString::whitespace);
+		key.appendUntil(fp,k,aString::whitespace);
 		val.clear();
-		if(!feof(fp)) val.appendUntil(fp,aString::whitespace+2,aString::whitespace);
+		if(!feof(fp)) val.appendUntil(fp,l,aString::whitespace);
 		if(key) {
 			put(key,val);
 			n++;
@@ -480,42 +488,48 @@ size_t aHashtable::load(FILE *fp) {
 	return n;
 }
 
-size_t aHashtable::save(const char *fn) {
-	FILE *fp;
-	if(!fn || !*fn || !(fp=fopen(fn,"wb"))) return 0;
-	size_t s = save(fp);
-	fclose(fp);
+size_t aHashtable::save(const char *fn,const char *k,const char *l) {
+	size_t s = 0;
+	if(fn && *fn) {
+		FILE *fp;
+		if((fp=fopen(fn,"wb"))) {
+			s = save(fp,k,l);
+			fclose(fp);
+		} else perror(fn);
+	}
 	return s;
 }
 
-size_t aHashtable::save(FILE *fp) {
+size_t aHashtable::save(FILE *fp,const char *k,const char *l) {
 	if(!fp) return 0;
 	node *n;
+	if(!k) k = "=";
+	if(!l) l = aString::endl;
 	if(table) for(size_t i=0; i<cap; ++i) if((n=table[i])) while(n) {
 		switch(n->k_type) {
-			case TYPE_VOID_P:fprintf(fp,"%p=",(void *)n->key);break;
-			case TYPE_INTPTR:fprintf(fp,"%" PRIuPTR "=",(intptr_t)n->key);break;
+			case aVOID:fprintf(fp,"%p%s",(void *)n->key,k);break;
+			case aINTPTR:fprintf(fp,"%" PRIdPTR "%s",(intptr_t)n->key,k);break;
 #if _WORDSIZE == 64
-			case TYPE_DOUBLE:fprintf(fp,"%f=",*((double *)((void *)&n->key)));break;
+			case aDOUBLE:fprintf(fp,"%f%s",*((double *)((void *)&n->key)),k);break;
 #else
-			//case TYPE_INT64:fprintf(fp,"%" PRId64 "=",*(long long *)n->key);break;
-			case TYPE_FLOAT:fprintf(fp,"%f=",*((float *)((void *)&n->key)));break;
-			//case TYPE_DOUBLE:fprintf(fp,"%f=",*((double *)((void *)&n->key)));break;
+			//case aINT64:fprintf(fp,"%" PRId64 "%s",*(long long *)n->key,k);break;
+			case aFLOAT:fprintf(fp,"%f%s",*((float *)((void *)&n->key)),k);break;
+			//case aDOUBLE:fprintf(fp,"%f%s",*((double *)((void *)&n->key)),k);break;
 #endif
-			case TYPE_CHAR_P:fprintf(fp,"%s=",(char *)n->key);break;
+			case aCHAR_P:fprintf(fp,"%s%s",(char *)n->key,k);break;
 		}
 		switch(n->v_type) {
-			case TYPE_VOID_P:fprintf(fp,"%p\n",(void *)n->value);break;
-			case TYPE_INTPTR:fprintf(fp,"%" PRIuPTR "\n",(intptr_t)n->value);break;
+			case aVOID:fprintf(fp,"%p%s",(void *)n->value,l);break;
+			case aINTPTR:fprintf(fp,"%" PRIdPTR "%s",(intptr_t)n->value,l);break;
 #if _WORDSIZE == 64
-			case TYPE_DOUBLE:fprintf(fp,"%f\n",*((double *)((void *)&n->key)));break;
+			case aDOUBLE:fprintf(fp,"%f%s",*((double *)((void *)&n->key)),l);break;
 #else
-			//case TYPE_UINT32:fprintf(fp,"%lu\n",(unsigned long)n->value);break;
-			case TYPE_FLOAT:fprintf(fp,"%f\n",*((float *)((void *)&n->key)));break;
-			//case TYPE_DOUBLE:fprintf(fp,"%f\n",*((double *)((void *)&n->key)));break;
+			//case aUINT32:fprintf(fp,"%lu%s",(unsigned long)n->value,l);break;
+			case aFLOAT:fprintf(fp,"%f%s",*((float *)((void *)&n->key)),l);break;
+			//case aDOUBLE:fprintf(fp,"%f%s",*((double *)((void *)&n->key)),l);break;
 #endif
-			case TYPE_CHAR_P:fprintf(fp,"%s\n",(char *)n->value);break;
-			case TYPE_OBJECT_P:fprintf(fp,"%p\n",(void *)n->value);break;
+			case aCHAR_P:fprintf(fp,"%s%s",(char *)n->value,l);break;
+			case aOBJECT:fprintf(fp,"%p%s",(void *)n->value,l);break;
 		}
 		n = n->next;
 	}
@@ -555,7 +569,7 @@ size_t aHashtable::merge(aVector &vec) {
 	aVector::node *n1;
 	for(long i=vec.sz-1; i>=0; --i) {
 		n1 = &vec.list[i];
-		put(i,n1->value,_TYPE_INTPTR,n1->type);
+		put(i,n1->value,_aINTPTR,n1->type);
 	}
 	return n;
 }

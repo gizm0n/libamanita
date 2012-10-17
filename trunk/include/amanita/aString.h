@@ -14,14 +14,74 @@
 #include <amanita/aObject.h>
 
 enum {
-	aSTRING_HTML_QUOTES		= 0x00000001,
-	aSTRING_HTML_AMP			= 0x00000002,
-	aSTRING_HTML_LTGT			= 0x00000004,
-	aSTRING_HTML_NAMED		= 0x000000ff,
-	aSTRING_HTML_CODES		= 0x00000100,
-	aSTRING_HTML_UNICODE		= 0x00000200,
-	aSTRING_HTML_ALL			= 0xffffffff,
+	aLANG_C,
+	aLANG_CPP,
+	aLANG_JAVA,
+	aLANG_JAVASCRIPT,
+	aLANG_PHP,
+	aLANG_PERL,
+	aLANG_BASH,
+	aLANG_SHELL,
+	aLANG_HTML,
+	aLANG_XML,
+	aLANG_CFG,
+	aLANG_INI,
+	aLANG_LANGS,
 };
+
+/** Escape flags.
+ * @see void escape(long o,long l,const char *,int) */
+enum {
+	aESCAPE_QUOTE		= 0x00000001,	//!< Escape/Unescape quotes.
+	aESCAPE_SL_EOL		= 0x00000002,	//!< Escape '\n' so that it becomes '\\' and '\n' instead of "\\n".
+	aESCAPE_HEX			= 0x00000004,	//!< Escape/Unescape hexadecimal characters, so that '~' becomes "\\x7F".
+	aESCAPE_UNICODE	= 0x00000008,	//!< Escape/Unescape unicode characters.
+	aESCAPE_ALL			= 0x00000009,	//!< Escape all characters that can be escaped. Default.
+	aUNESCAPE_ALL		= 0x0000000f,	//!< Unescape all characters that can be escaped. Default.
+};
+
+/** Find flags
+ * @see void find(const char *) */
+enum {
+	aTOKEN_LTRIM		= 0x00000001,	//!< Trim tokens on left side.
+	aTOKEN_RTRIM		= 0x00000002,	//!< Trim tokens on right side.
+	aTOKEN_TRIM			= 0x00000004,	//!< Trim tokens on either side.
+	aTOKEN_ESCAPE		= 0x00000008,	//!< Match escape sequences in tokens.
+	aTOKEN_DELIM_CH	= 0x00000000,	//!< Each char in the delimiter matches.
+	aTOKEN_DELIM_STR	= 0x00000010,	//!< The entire string is used as delimiter.
+};
+
+/** Encode HTML flags
+ * @see void encodeHTML(int) */
+enum {
+	aHTML_QUOTE			= 0x00000001,	//!<
+	aHTML_AMP			= 0x00000002,	//!<
+	aHTML_LTGT			= 0x00000004,	//!<
+	aHTML_NAMED			= 0x000000ff,	//!<
+	aHTML_CODES			= 0x00000100,	//!<
+	aHTML_UNICODE		= 0x00000200,	//!<
+	aHTML_ALL			= 0xffffffff,	//!<
+};
+
+/** Trim flags.
+ * @see void trim(long &,long &,const char *,int) */
+enum {
+	aTRIM_LEFT			= 0x0001,		//!<
+	aTRIM_RIGHT			= 0x0002,		//!<
+	aTRIM_BOTH			= 0x0003,		//!<
+	aTRIM_UNTRIM		= 0x0004,		//!<
+};
+
+/** @cond */
+#ifdef USE_UNIX
+#define aSTRING_ENDL "\n"
+#endif
+#ifdef USE_WIN32
+#define aSTRING_ENDL "\r\n"
+#endif
+#define aSTRING_WHITESPACE " \t\n\r\f\v"
+/** @endcond */
+
 
 /** A generic string class.
  * 
@@ -52,9 +112,9 @@ protected:
 	void resize(size_t l);
 	/** Move a section of the string, and resize capasity if needed.
 	 * Used by all <tt>insert()</tt>-methods.
-	 * @param n Position to start moving, a negative value counts from the end.
-	 * @param l Length in bytes to move. */
-	long move(long n,size_t l);
+	 * @param o Offset, position to start moving, a negative value counts from the end.
+	 * @param l Length in bytes to move. Positive value moves to the right, negative to the left. */
+	long move(long o,long l);
 
 	/** @name Insert integer
 	 * @{ */
@@ -67,12 +127,8 @@ protected:
 	/** @} */
 
 public:
-	struct entity {
-		const char *name;
-		size_t len;
-	};
 	static const char *blank;			//!< A blank string, e.g. "".
-	static const char *endline;		//!< A line ending, e.g. "\n" for Linux, and "\r\n" for Windows.
+	static const char *endl;			//!< A line ending, e.g. "\n" for Linux, and "\r\n" for Windows.
 	static const char *whitespace;	//!< White space characters, e.g. " \t\n\r".
 
 	/** @name Constructors & Destructors
@@ -123,10 +179,10 @@ public:
 	/** Get char at position i.
 	 * @param i Position in string. If less than zery, count from end of string.
 	 * @return Char at position i. */
-	char operator[](long i) { return charAt(i); }
-	bool operator==(const aString *s) { return equals(s); }
-	bool operator==(const aString &s) { return equals(s); }
-	bool operator==(const char *s) { return equals(s,0,0); }
+	char operator[](long i) const { return charAt(i); }
+	bool operator==(const aString *s) const { return equals(s); }
+	bool operator==(const aString &s) const { return equals(s); }
+	bool operator==(const char *s) const { return equals(s,0,0); }
 	aString &operator<<(char c) { insert(len,c);return *this; }
 	aString &operator<<(const aString *s) { insert(len,s);return *this; }
 	aString &operator<<(const aString &s) { insert(len,s);return *this; }
@@ -180,7 +236,7 @@ public:
 	size_t insert(long n,long long int i) { return inserti64(n,(int64_t)i); }
 	size_t insert(long n,unsigned long long int i) { return insertu64(n,(uint64_t)i); }
 	size_t insert(long n,double f,int d=2,char c='.');
-	size_t insertln(long n) { return insert(n,endline,0); }
+	size_t insertln(long n) { return insert(n,endl,0); }
 
 	size_t insertHex(long n,uint64_t i,bool upper=true);
 	size_t insertBase(long n,int64_t i,int base);
@@ -216,7 +272,7 @@ public:
 	size_t append(unsigned long long int i) { return insertu64(len,(uint64_t)i); }
 	size_t append(double f,int d=2,char c='.') { return insert(len,f,d,c); }
 	size_t append(FILE *fp,bool uesc=true) { return appendUntil(fp,0,0,uesc); }
-	size_t appendln() { return insert(len,endline,0); }
+	size_t appendln() { return insert(len,endl,0); }
 
 	size_t appendHex(uint64_t i,bool upper=true) { return insertHex(len,i,upper); }
 	size_t appendBase(int64_t i,int base) { return insertBase(len,i,base); }
@@ -245,37 +301,39 @@ public:
 
 	/** @name Input & Output
 	 * @{ */
-	size_t include(const char *fn);
 	size_t includef(const char *format, ...);
+	size_t include(const char *fn);
+	size_t include(FILE *fp);
 
-	size_t print(FILE *fp);
-	size_t println(FILE *fp);
+	size_t print(FILE *fp=stdout) const;
+	size_t println(FILE *fp=stdout) const;
 	/** @} */
 
-	/** @name Find & Match
+	/** @name Find, Match & Skip
 	 * @{ */
 	/** Find a char.
 	 * @param c Char to find.
 	 * @param o Offset position.
 	 * @param l Length in string to search.
 	 * @return Position in string where char is, or -1 if no found. */
-	long find(char c,long o=0,long l=0);
+	long find(char c,long o=0,long l=0) const;
 	/** @see long find(const char *,long,long,long) */
-	long find(const aString *s,long o=0,long l=0) { return s? find(s->str,o,l,s->len) : -1; }
+	long find(const aString *s,long o=0,long l=0) const { return s? find(s->str,o,l,s->len) : -1; }
 	/** @see long find(const char *,long,long,long) */
-	long find(const aString &s,long o=0,long l=0) { return find(s.str,o,l,s.len); }
+	long find(const aString &s,long o=0,long l=0) const { return find(s.str,o,l,s.len); }
 	/** Find a string.
 	 * @param s String to find.
 	 * @param o Offset position.
 	 * @param l Length in string to search.
+	 * @param sl Length of s, if zero or negative length is calculated from the entire length and backward.
 	 * @return Position in string where string is, or -1 if no found. */
-	long find(const char *s,long o=0,long l=0,long sl=0);
-	/** Find any char from s int string.
+	long find(const char *s,long o=0,long l=0,long sl=0) const;
+	/** Find any char from s in string.
 	 * @param s Any chars in string s will be matched.
 	 * @param o Offset position.
 	 * @param l Length in string to search.
 	 * @return Position in string where char is, or -1 if no found. */
-	long findChar(const char *s,long o=0,long l=0);
+	long findChar(const char *s,long o=0,long l=0) const;
 
 	/** Match nested tags.
 	 * Returns the position at the beginning of the last ending tag. For the string
@@ -291,33 +349,69 @@ public:
 	 * @param l Length to search in string, if zero or negative length is calculated from the entire string length and backward.
 	 * @param c1 String of chars to accept completing of tag1, e.g. " \n\t]" will accept "[b" to match with any of these chars, so "[b ar]" will match, but "[bar]" will not match.
 	 * @param c1 String of chars to accept completing of tag2, e.g. " \n\t]" will accept "[/b" to match with any of these chars, so "[/b ar]" will match, "but "[/bar]" will not match.
-	 * @return Zero based index of beginning of last nested tag.
+	 * @return Zero based index of beginning of last nested tag, or -1 on fail.
 	 */
-	long matchNestedTags(const char *tag1,const char *tag2,long o=0,long l=0,const char *c1=0,const char *c2=0);
+	long matchNestedTags(const char *tag1,const char *tag2,long o=0,long l=0,const char *c1=0,const char *c2=0) const;
+
+	/** Match a quoted string.
+	 * Returns the position after the ending quote sign of the string. Escaped quotes are included
+	 * in the match so that "abc\"def"@ will return 11, or the position at '@'. If the char at o
+	 * is not a quot-sign - " or ', o is returned. Ending quote-sign has to be the same as the
+	 * starting quote-sign.
+	 * @param o Offset, if negative offset is counted from ending of string.
+	 * @param l Length to search in string, if zero or negative length is calculated from the entire string length and backward.
+	 * @return Zero based index after ending quote sign, or -1 on fail.
+	 */
+	long matchQuotes(long o=0,long l=0) const;
+
+	/** Match a string value.
+	 * Similar to matchQuotes, except will accept an unquoted string and in such a case instead of returning
+	 * at end quote, returns at first white space before end of line or first white space before a comment.
+	 * Type of comment is defined by lang.
+	 * @param delim Delimiter separating tokens.
+	 * @param o Offset, if negative offset is counted from ending of string.
+	 * @param l Length to search in string, if zero or negative length is calculated from the entire string length and backward.
+	 * @return Zero based index after ending quote sign, or -1 on fail.
+	 */
+	long matchToken(const char *delim,long o=0,long l=0,int f=0) const;
+
+	/** Match a string value.
+	 * Similar to matchQuotes, except will accept an unquoted string and in such a case instead of returning
+	 * at end quote, returns at first white space before end of line or first white space before a comment.
+	 * Type of comment is defined by lang.
+	 * @param lang Language by which comments to match.
+	 * @param o Offset, if negative offset is counted from ending of string.
+	 * @param l Length to search in string, if zero or negative length is calculated from the entire string length and backward.
+	 * @return Zero based index after ending quote sign, or -1 on fail.
+	 */
+	long matchValue(int lang,long o=0,long l=0) const;
+
+	long skipComment(int lang,long o=0,long l=0) const;
+	long skipComments(int lang,long o=0,long l=0) const;
 	/** @} */
 
 	/** @name Equals
 	 * @{ */
 	/** @see bool equals(const char *,long,long) */
-	bool equals(const aString *s,long o=0,long l=0) { return s? equals(s->str,o,l!=0? l : s->len) : false; }
+	bool equals(const aString *s,long o=0,long l=0) const { return s? equals(s->str,o,l!=0? l : s->len) : false; }
 	/** @see bool equals(const char *,long,long) */
-	bool equals(const aString &s,long o=0,long l=0) { return equals(s.str,o,l!=0? l : s.len); }
+	bool equals(const aString &s,long o=0,long l=0) const { return equals(s.str,o,l!=0? l : s.len); }
 	/** Compare string (or substring) with s and return true if equal, or false. If o and l is set,
 	 * a substring is compared, otherwise the entire string.
 	 * @param s String to compare.
 	 * @param o Offset position.
 	 * @param l Length in string to compare.
 	 * @return True if equal, otherwise false. */
-	bool equals(const char *s,long o=0,long l=0);
+	bool equals(const char *s,long o=0,long l=0) const;
 	/** @} */
 
 
 	/** @name Compare
 	 * @{ */
 	/** @see int compare(const char *,long,long) */
-	int compare(const aString *s,long o=0,long l=0) { return s? compare(s->str,o,l!=0? l : s->len) : -1; }
+	int compare(const aString *s,long o=0,long l=0) const { return s? compare(s->str,o,l!=0? l : s->len) : -1; }
 	/** @see int compare(const char *,long,long) */
-	int compare(const aString &s,long o=0,long l=0) { return compare(s.str,o,l!=0? l : s.len); }
+	int compare(const aString &s,long o=0,long l=0) const { return compare(s.str,o,l!=0? l : s.len); }
 	/** Compare string (or substring) with s and return result. If o and l is set,
 	 * a substring is compared, otherwise the entire string.
 	 * @see int strncmp (const char *,const char *,size_t)
@@ -325,7 +419,7 @@ public:
 	 * @param o Offset position.
 	 * @param l Length in string to compare.
 	 * @return Zero if equal, a positive value if string is greater than s, otherwise a negative value. */
-	int compare(const char *s,long o=0,long l=0);
+	int compare(const char *s,long o=0,long l=0) const;
 	/** @} */
 
 	/** @name Count
@@ -333,11 +427,11 @@ public:
 	/** Count the number of times c appears in string.
 	 * @param c Char to look for.
 	 * @return Number of times c is found in string. */
-	size_t count(char c);
+	size_t count(char c) const;
 	/** Count the number of times s appears in string.
 	 * @param s String to look for.
 	 * @return Number of times s is found in string. */
-	size_t count(const char *s);
+	size_t count(const char *s) const;
 	/** @} */
 
 	/** @name Replace
@@ -349,50 +443,95 @@ public:
 
 	/** @name Strip
 	 * @{ */
-	size_t stripComments();
+	size_t stripComments(int lang,long o=0,long l=0);
 	size_t stripHTML();
-	size_t stripHTMLComments();
 	/** @} */
 
 	/** @name Substring
 	 * @{ */
-	size_t substr(aString *s,long o,long l) { if(s) return substr(*s,o,l);return 0; }
-	size_t substr(aString &s,long o,long l);
-	size_t substr(char *s,long o,long l);
+	size_t substr(aString *s,long o,long l) const { if(s) return substr(*s,o,l);return 0; }
+	size_t substr(aString &s,long o,long l) const;
+	size_t substr(char *s,long o,long l) const;
 	/** @} */
 
 	/** @name Encoding
 	 * @{ */
 	void newline(const char *nl);
-	void escape();
-	void unescape();
+	/** Escape strings so that '\n' and '\t' become "\\n" and "\\t", and unicode become "\\uNNNN".
+	 * Large unicode characters are translated to "\\UNNNNNNNN".
+	 * 
+	 * Offset and length include the size of unicode characters, so that "ab€" has length 5. This means
+	 * that in this string, with offset 2 and length 1, the unicode '€' which is 3 bytes long will
+	 * become split, but it is not so, because any multi-byte char that is starting within the length
+	 * of l, offset o, is translated.
+	 * @param o Offset, if negative from end of string.
+	 * @param l Length to trim from o, if negative calculated from end of string.
+	 * @param s If set, the chars in this string become escaped with a backslash, eg. '~' become "\\~". With aESCAPE_HEX-flag set chars in s are escaped with hexadecimal value, eg. '~' become "\\x7E".
+	 * @param f Escape flags. */
+	void escape(long o=0,long l=0,const char *s=0,int f=aESCAPE_ALL);
+	/** Unescape strings so that "\\n" and "\\t" become '\n' and '\t', and \\uNNNN" become unicode.
+	 * @param o Offset, if negative from end of string.
+	 * @param l Length to trim from o, if negative calculated from end of string.
+	 * @param f Escape flags.
+	 * @see void escape(long,long,const char *,int) */
+	void unescape(long o=0,long l=0,int f=aUNESCAPE_ALL);
 	void quote(const char c);
 	void unquote();
 	void encodeURL();
 	void decodeURL();
-	void encodeHTML(int f=aSTRING_HTML_ALL);
+	void encodeHTML(int f=aHTML_ALL);
 	void decodeHTML();
+	void encodeUTF8();
+	void decodeUTF8();
+	void encodeBase64();
+	void decodeBase64();
 	/** @} */
 
 	/** @name Capacity
 	 * @{ */
-	void trim() { len = trim(str); }
-	void trim(long &o,long &l);
+	void reverse(long o=0,long l=0);
+	/** @see void trim(const char *,int) */
+	void trim(const char *s=0,int f=0) { len = trim(str,s,f); }
+	/** Adjust o and l to trim from a set of chars.
+	 * @param o Offset, if negative from end of string.
+	 * @param l Length to trim from o, if negative calculated from end of string.
+	 * @param s Should contain a string of chars to trim. Default is the static variable whitespace.
+	 * @param f Use the flags named aTRIM_*. Default is aTRIM_BOTH. */
+	void trim(long &o,long &l,const char *s=0,int f=0) const;
+	/** Trim left side of string.
+	 * @see void trim(long &,long &,const char *,int) */
+	void ltrim(long &o,long l=0,const char *s=0) const { trim(o,l,s,aTRIM_LEFT); }
+	/** Trim right side of string.
+	 * @see void trim(long &,long &,const char *,int) */
+	void rtrim(long o,long &l,const char *s=0) const { trim(o,l,s,aTRIM_RIGHT); }
+	/** Un-Trim string, expand string to include space instead of trimming off.
+	 * @see void trim(long &,long &,const char *,int) */
+	void untrim(long &o,long &l,const char *s=0) const { trim(o,l,s,aTRIM_UNTRIM|aTRIM_BOTH); }
+	/** Un-Trim left side of string.
+	 * @see void trim(long &,long &,const char *,int) */
+	void luntrim(long &o,long l=0,const char *s=0) const { trim(o,l,s,aTRIM_UNTRIM|aTRIM_LEFT); }
+	/** Un-Trim right side of string.
+	 * @see void trim(long &,long &,const char *,int) */
+	void runtrim(long o,long &l,const char *s=0) const { trim(o,l,s,aTRIM_UNTRIM|aTRIM_RIGHT); }
 	void clear() { if(str) *str = '\0',len = 0; }
 	void free();
 	void setCapacity(size_t n);
 	void increaseCapacity(size_t n) { resize(n); }
 
-	size_t length() { return len; }
-	size_t capacity() { return cap; }
+	size_t length() const { return len; }
+	size_t capacity() const { return cap; }
 	/** @} */
 
 	/** @name Type conversion
 	 * @{ */
-	char charAt(long i);
-	const char *toCharArray() { return str; }
-	long toInt();
-	size_t toIntArray(long *n,char c=',');
+	char charAt(long i) const;
+	const char *toCharArray() const { return str; }
+	long toInt() const;
+	size_t toIntArray(long *n,char c=',') const;
+	/** Hash function, inherited from aObject. */
+	virtual hash_t crc32() const { return crc32(str,false); }
+	/** Hash function, inherited from aObject. */
+	virtual hash_t hash() const { return crc32(str,false); }
 	/** @} */
 
 	/** @name Tokenizing
@@ -402,6 +541,20 @@ public:
 
 	/** @name Static functions
 	 * @{ */
+	/** Cyclic Redundancy Check
+	 * Reads in a string s as a command-line argument, and prints out
+	 * its 32 bit Cyclic Redundancy Check (CRC32 or Ethernet / AAL5 or ITU-TSS).
+	 * 
+	 * Uses direct table lookup.
+	 * @param s String to calcualte hash from.
+	 * @param c Case insensitive, if true calculates hash based on lower case of the string.
+	 * @return Hashvalue. */
+	static hash_t crc32(const char *s,bool c);
+	/** Generate hash value from a char string.
+	 * @param s String to generate hash from.
+	 * @param c Case insensitive, if true calculates hash based on lower case of the string.
+	 * @return Hashvalue. */
+	static hash_t hash(const char *s,bool c) { return crc32(s,c); }
 	static char toLower(const char c) { return (c>='A' && c<='Z')? c+32 : c; }
 	static char toUpper(const char c) { return (c>='a' && c<='z')? c-32 : c; }
 	static int fromHex(char c) { return c>='0' && c<='9'? c-'0' : (c>='a' && c<='f'? c-87 : (c>='A' && c<='F'? c-55 : 0)); }
@@ -409,13 +562,24 @@ public:
 	static char *toHex(char *h,uint64_t i,bool upper=true);
 	static char *toLower(char *str);
 	static char *toUpper(char *str);
+	/** Returns the character for certain escape sequences without the slash, eg. 'n' for '\n'.
+	 * If it's not an escape sequence character, returns c. */
+	static char escape(char c) { return c=='\0'? '0' : c=='\t'? 't' : c=='\n'? 'n' : c=='\r'? 'r' : c=='\f'? 'f' : c=='\v'? 'v' : c; }
+	/** Returns the escape sequence for certain characters without the slash, eg. '\n' for 'n'.
+	 * If it's not an escape sequence character, returns c. */
+	static char unescape(char c) { return c=='0'? '\0' : c=='t'? '\t' : c=='n'? '\n' : c=='r'? '\r' : c=='f'? '\f' : c=='v'? '\v' : c; }
 	static int stricmp(const char *str1,const char *str2);
 	static int strnicmp(const char *str1,const char *str2,size_t n);
 	static char *stristr(char *str1,const char *str2);
 	static int countTokens(char *str,const char *delim,bool cins=false);
 	static char **split(char **list,char *str,const char *delim,bool cins=false);
-	static size_t reverse(char *str);
-	static size_t trim(char *str);
+	static void reverse(char *str,long o=0,long l=0);
+	/** Trim a string from white space.
+	 * @param str String to trim.
+	 * @param s If set should contain a string of chars to trim, default is the static variable whitespace.
+	 * @param f Use the flags named aTRIM_*, an exception is that aTRIM_UNTRIM is not implemented. Default is aTRIM_BOTH.
+	 * @see void trim(const char *,int) */
+	static size_t trim(char *str,const char *s=0,int f=0);
 	static void printUTF8(char *d,const char *s,size_t o,size_t l);
 	/** @} */
 
@@ -437,6 +601,8 @@ public:
 	static bool isPrint(unsigned char c) { return c>='\x20' && c<='\x7e'; }
 	static bool isGraph(unsigned char c) { return c>='\x21' && c<='\x7e'; }
 	static bool isCntrl(unsigned char c) { return c<='\x1F' || c=='\x7f'; }
+	static bool isQuote(char c) { return c=='\'' || c=='"'; }
+	static bool isUTF8(unsigned char c) { return (c&0x80)==0x80; }
 	/** @} */
 };
 

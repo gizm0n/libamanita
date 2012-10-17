@@ -228,7 +228,7 @@ static uint32_t cairo_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intpt
 	}
 	return 0;
 }
-
+/*
 static uint32_t button_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
 fprintf(stderr,"button_events(%s, %d)\n",w->getText(),(int)p1);
 	return 0;
@@ -243,7 +243,7 @@ static uint32_t list_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr
 fprintf(stderr,"list_events(%s)\n",((aList *)w)->getColumn(0));
 	return 0;
 }
-
+*/
 static uint32_t text_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
 fprintf(stderr,"text_events()\n");
 	return 0;
@@ -257,8 +257,8 @@ fflush(stderr);
 
 
 void GuiApp::create() {
-	int i,n,s;
-	char str[1025];
+	int /*i,*/n/*,s*/;
+//	char str[1025];
 	aWindow *window;
 	aBrowser *browser;
 	aCairo *cairo;

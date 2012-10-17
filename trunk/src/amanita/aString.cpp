@@ -13,7 +13,12 @@ aObject_Inheritance(aString,aObject)
 static const char upper_hex[17] = "0123456789ABCDEF";
 static const char lower_hex[17] = "0123456789abcdef";
 
-static const aString::entity HTMLentities[256] = {
+struct entity {
+	const char *name;
+	size_t len;
+};
+
+static const entity HTMLentities[256] = {
 	{ "#0",			2 },			// 0
 	{ "#1",			2 },			// 1
 	{ "#2",			2 },			// 2
@@ -23,11 +28,11 @@ static const aString::entity HTMLentities[256] = {
 	{ "#6",			2 },			// 6
 	{ "#7",			2 },			// 7
 	{ "#8",			2 },			// 8
-	{ "#9",			2 },			// 9
-	{ "#10",			3 },			// 10
-	{ "#11",			3 },			// 11
-	{ "#12",			3 },			// 12
-	{ "#13",			3 },			// 13
+	{ 0,				0 },			// 9		<TAB>
+	{ 0,				0 },			// 10		<NEW_LINE>
+	{ 0,				0 },			// 11		<VTAB>
+	{ 0,				0 },			// 12		<FORM_FEED>
+	{ 0,				0 },			// 13		<CARRIAGE_RETURN>
 	{ "#14",			3 },			// 14
 	{ "#15",			3 },			// 15
 	{ "#16",			3 },			// 16
@@ -53,7 +58,7 @@ static const aString::entity HTMLentities[256] = {
 	{ 0,				0 },			// 36		$
 	{ 0,				0 },			// 37		%
 	{ "amp",			3 },			// 38		&		&amp;
-	{ "#39",			3 },			// 39		'		&apos;
+	{ "apos",		4 },			// 39		'		&apos;
 	{ 0,				0 },			// 40		(
 	{ 0,				0 },			// 41		)
 	{ 0,				0 },			// 42		*
@@ -272,15 +277,105 @@ static const aString::entity HTMLentities[256] = {
 	{ "yuml",		4 },			// 255	ÿ 	small y, umlaut mark 	&yuml; 	&#255;
 };
 
-const char *aString::blank = "";
+static const char *escape_sequences = "'\"?\\\a\b\f\n\r\t\v";
+static const char *escape_chars = "0      abtnvfr";
 
-#ifdef USE_UNIX
-const char *aString::endline = "\n";
-#endif
-#ifdef USE_WIN32
-const char *aString::endline = "\r\n";
-#endif
-const char *aString::whitespace = " \t\n\r";
+static const char *comments[] = {
+	/* Line Comments: */
+	"//",								// 0 - C/C++, Java, JavaScript
+	"#",								// 1 - Bash, Perl
+	"//","#",						// 2 - PHP
+	";","#",							// 4 - CFG/INI
+	/* Block Comments: */
+	"/*","*/",						// 6 - C/C++, Java, JavaScript, PHP
+	"<!--","-->",					// 8 - HTML
+};
+
+static const int comments_len[] = {
+	/* Line Comments: */
+	2,									// C/C++, Java, JavaScript
+	1,									// Bash, Perl
+	2,1,								// PHP
+	1,1,								// CFG/INI
+	/* Block Comments: */
+	2,2,								// C/C++, Java, JavaScript, PHP
+	4,3,								// HTML
+};
+
+static const int comments_lang[aLANG_LANGS][4] = {
+	{ 0,1,6,2 },						// C
+	{ 0,1,6,2 },						// C++
+	{ 0,1,6,2 },						// Java
+	{ 0,1,6,2 },						// JavaScript
+	{ 2,2,6,2 },						// PHP
+	{ 1,1,0,0 },						// Perl
+	{ 1,1,0,0 },						// Bash
+	{ 1,1,0,0 },						// Shell
+	{ 0,0,8,2 },						// HTML
+	{ 0,0,8,2 },						// XML
+	{ 4,2,0,0 },						// CFG
+	{ 4,2,0,0 },						// INI
+};
+
+#define __ -1
+static const char base64_code[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static const int base64_index[256] = {
+    __,__,__,__, __,__,__,__, __,__,__,__, __,__,__,__,
+    __,__,__,__, __,__,__,__, __,__,__,__, __,__,__,__,
+    __,__,__,__, __,__,__,__, __,__,__,62, __,__,__,63, /* '+','/' */
+    52,53,54,55, 56,57,58,59, 60,61,__,__, __, 0,__,__, /* '0'-'9', '=' */
+    __, 0, 1, 2,  3, 4, 5, 6,  7, 8, 9,10, 11,12,13,14, /* 'A'-'O' */
+    15,16,17,18, 19,20,21,22, 23,24,25,__, __,__,__,__, /* 'P'-'Z' */
+    __,26,27,28, 29,30,31,32, 33,34,35,36, 37,38,39,40, /* 'a'-'o' */
+    41,42,43,44, 45,46,47,48, 49,50,51,__, __,__,__,__, /* 'p'-'z' */
+    __,__,__,__, __,__,__,__, __,__,__,__, __,__,__,__,
+    __,__,__,__, __,__,__,__, __,__,__,__, __,__,__,__,
+    __,__,__,__, __,__,__,__, __,__,__,__, __,__,__,__,
+    __,__,__,__, __,__,__,__, __,__,__,__, __,__,__,__,
+    __,__,__,__, __,__,__,__, __,__,__,__, __,__,__,__,
+    __,__,__,__, __,__,__,__, __,__,__,__, __,__,__,__,
+    __,__,__,__, __,__,__,__, __,__,__,__, __,__,__,__,
+    __,__,__,__, __,__,__,__, __,__,__,__, __,__,__,__,
+};
+
+static const uint32_t crc32_table[256] = {
+	0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
+	0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988, 0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91,
+	0x1db71064, 0x6ab020f2, 0xf3b97148, 0x84be41de, 0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7,
+	0x136c9856, 0x646ba8c0, 0xfd62f97a, 0x8a65c9ec, 0x14015c4f, 0x63066cd9, 0xfa0f3d63, 0x8d080df5,
+	0x3b6e20c8, 0x4c69105e, 0xd56041e4, 0xa2677172, 0x3c03e4d1, 0x4b04d447, 0xd20d85fd, 0xa50ab56b,
+	0x35b5a8fa, 0x42b2986c, 0xdbbbc9d6, 0xacbcf940, 0x32d86ce3, 0x45df5c75, 0xdcd60dcf, 0xabd13d59,
+	0x26d930ac, 0x51de003a, 0xc8d75180, 0xbfd06116, 0x21b4f4b5, 0x56b3c423, 0xcfba9599, 0xb8bda50f,
+	0x2802b89e, 0x5f058808, 0xc60cd9b2, 0xb10be924, 0x2f6f7c87, 0x58684c11, 0xc1611dab, 0xb6662d3d,
+	0x76dc4190, 0x01db7106, 0x98d220bc, 0xefd5102a, 0x71b18589, 0x06b6b51f, 0x9fbfe4a5, 0xe8b8d433,
+	0x7807c9a2, 0x0f00f934, 0x9609a88e, 0xe10e9818, 0x7f6a0dbb, 0x086d3d2d, 0x91646c97, 0xe6635c01,
+	0x6b6b51f4, 0x1c6c6162, 0x856530d8, 0xf262004e, 0x6c0695ed, 0x1b01a57b, 0x8208f4c1, 0xf50fc457,
+	0x65b0d9c6, 0x12b7e950, 0x8bbeb8ea, 0xfcb9887c, 0x62dd1ddf, 0x15da2d49, 0x8cd37cf3, 0xfbd44c65,
+	0x4db26158, 0x3ab551ce, 0xa3bc0074, 0xd4bb30e2, 0x4adfa541, 0x3dd895d7, 0xa4d1c46d, 0xd3d6f4fb,
+	0x4369e96a, 0x346ed9fc, 0xad678846, 0xda60b8d0, 0x44042d73, 0x33031de5, 0xaa0a4c5f, 0xdd0d7cc9,
+	0x5005713c, 0x270241aa, 0xbe0b1010, 0xc90c2086, 0x5768b525, 0x206f85b3, 0xb966d409, 0xce61e49f,
+	0x5edef90e, 0x29d9c998, 0xb0d09822, 0xc7d7a8b4, 0x59b33d17, 0x2eb40d81, 0xb7bd5c3b, 0xc0ba6cad,
+	0xedb88320, 0x9abfb3b6, 0x03b6e20c, 0x74b1d29a, 0xead54739, 0x9dd277af, 0x04db2615, 0x73dc1683,
+	0xe3630b12, 0x94643b84, 0x0d6d6a3e, 0x7a6a5aa8, 0xe40ecf0b, 0x9309ff9d, 0x0a00ae27, 0x7d079eb1,
+	0xf00f9344, 0x8708a3d2, 0x1e01f268, 0x6906c2fe, 0xf762575d, 0x806567cb, 0x196c3671, 0x6e6b06e7,
+	0xfed41b76, 0x89d32be0, 0x10da7a5a, 0x67dd4acc, 0xf9b9df6f, 0x8ebeeff9, 0x17b7be43, 0x60b08ed5,
+	0xd6d6a3e8, 0xa1d1937e, 0x38d8c2c4, 0x4fdff252, 0xd1bb67f1, 0xa6bc5767, 0x3fb506dd, 0x48b2364b,
+	0xd80d2bda, 0xaf0a1b4c, 0x36034af6, 0x41047a60, 0xdf60efc3, 0xa867df55, 0x316e8eef, 0x4669be79,
+	0xcb61b38c, 0xbc66831a, 0x256fd2a0, 0x5268e236, 0xcc0c7795, 0xbb0b4703, 0x220216b9, 0x5505262f,
+	0xc5ba3bbe, 0xb2bd0b28, 0x2bb45a92, 0x5cb36a04, 0xc2d7ffa7, 0xb5d0cf31, 0x2cd99e8b, 0x5bdeae1d,
+	0x9b64c2b0, 0xec63f226, 0x756aa39c, 0x026d930a, 0x9c0906a9, 0xeb0e363f, 0x72076785, 0x05005713,
+	0x95bf4a82, 0xe2b87a14, 0x7bb12bae, 0x0cb61b38, 0x92d28e9b, 0xe5d5be0d, 0x7cdcefb7, 0x0bdbdf21,
+	0x86d3d2d4, 0xf1d4e242, 0x68ddb3f8, 0x1fda836e, 0x81be16cd, 0xf6b9265b, 0x6fb077e1, 0x18b74777,
+	0x88085ae6, 0xff0f6a70, 0x66063bca, 0x11010b5c, 0x8f659eff, 0xf862ae69, 0x616bffd3, 0x166ccf45,
+	0xa00ae278, 0xd70dd2ee, 0x4e048354, 0x3903b3c2, 0xa7672661, 0xd06016f7, 0x4969474d, 0x3e6e77db,
+	0xaed16a4a, 0xd9d65adc, 0x40df0b66, 0x37d83bf0, 0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9,
+	0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693, 0x54de5729, 0x23d967bf,
+	0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d,
+};
+
+const char *aString::blank = "";
+const char *aString::endl = aSTRING_ENDL;
+const char *aString::whitespace = aSTRING_WHITESPACE;
 
 
 aString::aString(size_t c) : aObject(),str(0),len(0),cap(0) {
@@ -323,7 +418,7 @@ aString::~aString() {
 size_t aString::insert(long n,char c) {
 	if(c!='\0') {
 		if(len==cap) resize(0);
-		if(n==len) {
+		if(n==(long)len) {
 			str[len] = c;
 			str[++len] = '\0';
 		} else {
@@ -338,7 +433,7 @@ size_t aString::insert(long n,const char *s,size_t l) {
 	if(s) {
 		if(!l) l = strlen(s);
 		resize(l);
-		if(n==len) {
+		if(n==(long)len) {
 			memcpy(&str[len],s,l);
 			len += l;
 			str[len] = '\0';
@@ -358,7 +453,7 @@ size_t aString::insert(long n,const char *s,long o,long l) {
 			if(l<=0) l = l1-o+l;
 		}
 		resize(l);
-		if(n==len) {
+		if(n==(long)len) {
 			memcpy(&str[len],&s[o],l);
 			len += l;
 			str[len] = '\0';
@@ -748,13 +843,6 @@ size_t aString::repeat(const char *s,size_t l,size_t n) {
 	return l*n;
 }
 
-size_t aString::include(const char *fn) {
-	FILE *fp = fopen(fn,"r");
-	size_t l = append(fp,true);
-	fclose(fp);
-	return l;
-}
-
 size_t aString::includef(const char *format, ...) {
 	char buf[128];
 	va_list args;
@@ -764,25 +852,68 @@ size_t aString::includef(const char *format, ...) {
 	return include(buf);
 }
 
-size_t aString::print(FILE *fp) {
+size_t aString::include(const char *fn) {
+	size_t l = 0;
+	FILE *fp = fopen(fn,"rb");
+	if(fp) {
+		l = include(fp);
+		fclose(fp);
+	} else perror(fn);
+	return l;
+}
+
+size_t aString::include(FILE *fp) {
+	static const char s[32] = { 0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+	size_t l,n;
+	char str[1026];
+	int c,c0;
+//debug_output("aString::include()\n");
+	for(l=0,n=0,c0=0; (c=fgetc(fp)) && c!=EOF;) {
+//debug_putc(c);
+		if((c<32 && !s[c]) || c==0x7f) continue;
+		if((c=='\r' || c=='\n') && !c0) c0 = c;
+		else {
+			if(c0) {
+				if(c0==c || (c!='\n' && c!='\r')) str[n++] = '\n',++l;
+				if(c=='\r') c = '\n';
+				c0 = 0;
+			}
+			str[n++] = c,++l;
+			if(n>=1024) {
+				str[n] = '\0';
+//debug_output("aString::include(%s)\n",str);
+				append(str,n);
+				n = 0;
+			}
+		}
+	}
+	if(n>0) {
+		str[n] = '\0';
+//debug_output("aString::include(%s)\n",str);
+		append(str,n);
+	}
+	return l;
+}
+
+size_t aString::print(FILE *fp) const {
 	if(fp) return fwrite(str,len,1,fp);
 	return 0;
 }
 
-size_t aString::println(FILE *fp) {
+size_t aString::println(FILE *fp) const {
 	size_t n = 0;
 	if(fp) {
 		n += fwrite(str,len,1,fp);
-		n += fwrite(endline,strlen(endline),1,fp);
+		n += fwrite(endl,strlen(endl),1,fp);
 	}
 	return n;
 }
 
-long aString::find(char c,long o,long l) {
+long aString::find(char c,long o,long l) const {
 	if(str && *str && c!='\0') {
 		if(o<0) o = (long)len+o;
 		if(l<=0) l = (long)len-o+l;
-		if(o>=0 && l>0 && o+l<=len) {
+		if(o>=0 && l>0 && o+l<=(long)len) {
 			for(size_t i=o,n=o+l; i<n; ++i)
 				if(str[i]==c) return i;
 		}
@@ -790,69 +921,187 @@ long aString::find(char c,long o,long l) {
 	return -1;
 }
 
-long aString::find(const char *s,long o,long l,long sl) {
+long aString::find(const char *s,long o,long l,long sl) const {
 	if(str && *str && s && *s) {
 		if(o<0) o = (long)len+o;
 		if(l<=0) l = (long)len-o+l;
 		if(sl<=0) sl = (long)strlen(s)+sl;
-		if(o>=0 && l>0 && sl>0 && o+l<=len) {
+		if(o>=0 && l>0 && sl>0 && o+l<=(long)len) {
 			for(size_t i=o,n=o+l; i<n; ++i)
 				if(str[i]==*s && strncmp(&str[i],s,sl)==0) return i;
 		}
 	}
 	return -1;
 }
-
-long aString::findChar(const char *s,long o,long l) {
+/*
+static const char *escape_sequences = "'\"?\\\a\b\f\n\r\t\v";
+static const char *escape_chars = "0      abtnvfr";
+*/
+long aString::findChar(const char *s,long o,long l) const {
 	if(str && *str && s && *s) {
 		if(o<0) o = (long)len+o;
 		if(l<=0) l = (long)len-o+l;
-		if(o>=0 && l>0 && o+l<=len) {
+		if(o>=0 && l>0 && o+l<=(long)len)
 			for(size_t i=o,n=o+l; i<n; ++i)
 				if(strchr(s,str[i])) return i;
-		}
 	}
 	return -1;
 }
 
-bool aString::equals(const char *s,long o,long l) {
+bool aString::equals(const char *s,long o,long l) const {
 	if(str && *str && s && *s) {
 		if(o<0) o = (long)len+o;
 		if(l<=0) l = (long)strlen(s)+l;
-		if(o>=0 && l>0 && o+l<=len)
+		if(o>=0 && l>0 && o+l<=(long)len)
 			return strncmp(&str[o],s,l)==0;
 	}
 	return false;
 }
 
-int aString::compare(const char *s,long o,long l) {
+int aString::compare(const char *s,long o,long l) const {
 	if(str && *str && s && *s) {
 		if(o<0) o = (long)len+o;
 		if(l<=0) l = (long)strlen(s)+l;
-		if(o>=0 && l>0 && o+l<=len)
+		if(o>=0 && l>0 && o+l<=(long)len)
 			return strncmp(&str[o],s,l);
 	}
 	return str? -1 : 1;
 }
 
-long aString::matchNestedTags(const char *tag1,const char *tag2,long o,long l,const char *c1,const char *c2) {
-	size_t i,n,l1 = strlen(tag1),l2 = strlen(tag2);
-	int nest;
+long aString::matchNestedTags(const char *tag1,const char *tag2,long o,long l,const char *c1,const char *c2) const {
+	long i,n,l1 = strlen(tag1),l2 = strlen(tag2),nest;
 	if(o<0) o = (long)len+o;
 	if(l<=0) l = (long)len-o+l;
-	for(i=o,n=o+l,nest=0; i<n; ++i) {
-		if(str[i]==*tag1 && (l1==1 || !strncmp(&str[i],tag1,l1)) &&
-				(!c1 || strchr(c1,str[i+l1]))) i += l1-1,++nest;
-		else if(str[i]==*tag2 && (l2==1 || !strncmp(&str[i],tag2,l2)) &&
-				(!c2 || strchr(c2,str[i+l2]))) {
-			if(--nest==0) return i;
-			i += l2-1;
-		}
+	if(o>=0 && l>0 && o+l<=(long)len) 
+		for(i=o,n=o+l,nest=0; i<n; ++i)
+			if(str[i]==*tag1 && (l1==1 || !strncmp(&str[i],tag1,l1)) &&
+					(!c1 || strchr(c1,str[i+l1]))) i += l1-1,++nest;
+			else if(str[i]==*tag2 && (l2==1 || !strncmp(&str[i],tag2,l2)) &&
+					(!c2 || strchr(c2,str[i+l2]))) {
+				if(--nest==0) return i;
+				i += l2-1;
+			}
+	return -1;
+}
+
+long aString::matchQuotes(long o,long l) const {
+	if(o<0) o = (long)len+o;
+	if(l<=0) l = (long)len-o+l;
+	char q = str[o];
+	if(o>=0 && l>0 && o+l<=(long)len && isQuote(q))
+		for(long i=o,n=o+l; i<n; ++i)
+			if(str[i]=='\\') ++i;
+			else if(str[i]==q) return i+1;
+	return -1;
+}
+
+long aString::matchToken(const char *delim,long o,long l,int f) const {
+	if(o<0) o = (long)len+o;
+	if(l<=0) l = (long)len-o+l;
+	if(o>=0 && l>0 && o+l<=(long)len) {
+		if(f&aTOKEN_LTRIM) ltrim(o,l);
+		for(long i=o,n=o+l,dl=strlen(delim); i<n; ++i)
+			if(str[i]=='\\' && (f&aTOKEN_ESCAPE)) ++i;
+			else if((f&aTOKEN_DELIM_STR)? strncmp(delim,&str[i],dl)==0 : strchr(delim,str[i])!=NULL) {
+				if(f&aTOKEN_RTRIM) rtrim(0,i);
+				return i;
+			}
 	}
 	return -1;
 }
 
-size_t aString::count(char c) {
+long aString::matchValue(int lang,long o,long l) const {
+	if(o<0) o = (long)len+o;
+	if(l<=0) l = (long)len-o+l;
+	long i = o,n;
+	char c,q = str[o];
+	if(isQuote(q)) ++i;
+	else q = 0;
+	if(o>=0 && l>0 && o+l<=(long)len && lang>=0 && lang<aLANG_LANGS) {
+		const int *cl = comments_lang[lang];
+		const char **cc = &comments[cl[0]],**cb = cl[3]? &comments[cl[2]] : 0;
+		const int *ccl = &comments_len[cl[0]],*cbl = cl[3]? &comments_len[cl[2]] : 0;
+		int j;
+		for(n=o+l; i<n; ++i)
+			if((c=str[i])=='\\') ++i;
+			else if(q && c==q) return i+1;
+			else if(!q) {
+				if(isBreak(c)) return i;
+				else {
+					// Match line comment
+					for(j=0; j<cl[1]; ++j)
+						if(c==*cc[j] && (ccl[j]==1 || !strncmp(&str[i],cc[j],ccl[j]))) n = 0;
+					// Match block comment
+					if(cb && c==*cb[0] && (cbl[0]==1 || !strncmp(&str[i],cb[0],cbl[0]))) n = 0;
+					if(n==0) { // Find first white space before comment
+						for(; i>o && isSpace(str[i-1]); --i);
+						return i;
+					}
+				}
+			}
+	}
+	return -1;
+}
+
+long aString::skipComment(int lang,long o,long l) const {
+	long i;
+	if(o<0) o = (long)len+o;
+	if(l<=0) l = (long)len-o+l;
+	if(o>=0 && l>0 && o+l<=(long)len && lang>=0 && lang<aLANG_LANGS) {
+		const int *cl = comments_lang[lang];
+		const char **cc = &comments[cl[0]],**cb = cl[3]? &comments[cl[2]] : 0;
+		const int *ccl = &comments_len[cl[0]],*cbl = cl[3]? &comments_len[cl[2]] : 0;
+		int j;
+		// Skip line comment
+		for(j=0; j<cl[1]; ++j)
+			if(str[o]==*cc[j] && (ccl[j]==1 || !strncmp(&str[o],cc[j],ccl[j]))) {
+				for(o+=ccl[j]; !isBreak(str[o]); ++o);
+				return o;
+			}
+		// Skip block comment
+		if(cb && str[o]==*cb[0] && (cbl[0]==1 || !strncmp(&str[o],cb[0],cbl[0]))) {
+			i = find(cb[1],o,l-o,cbl[1]);
+			if(i==-1) return o+l;
+		}
+	}
+	return o;
+}
+
+long aString::skipComments(int lang,long o,long l) const {
+	long i,n;
+	if(o<0) o = (long)len+o;
+	if(l<=0) l = (long)len-o+l;
+	if(o>=0 && l>0 && o+l<=(long)len && lang>=0 && lang<aLANG_LANGS) {
+		const int *cl = comments_lang[lang];
+		const char **cc = &comments[cl[0]],**cb = cl[3]? &comments[cl[2]] : 0;
+		const int *ccl = &comments_len[cl[0]],*cbl = cl[3]? &comments_len[cl[2]] : 0;
+		int j;
+		for(i=o,n=o+l; i<n; ++i) {
+//			// Skip whitespace
+//			while(isSpace(str[i])) ++i;
+			// Skip line comment
+			for(j=0; j<cl[1]; ++j)
+				if(str[i]==*cc[j] && (ccl[j]==1 || !strncmp(&str[i],cc[j],ccl[j]))) {
+					for(i+=ccl[j]; !isBreak(str[i]); ++i);
+					// Yes, I make use of goto here, breaking all the rules! Ain't I a gangsta!
+					goto skipComments_loop_end;
+				}
+			// Skip block comment
+			if(cb && str[i]==*cb[0] && (cbl[0]==1 || !strncmp(&str[i],cb[0],cbl[0]))) {
+				i = find(cb[1],i,l-(i-o),cbl[1]);
+				if(i==-1) return o+l;
+				// Yes, I make use of goto here, breaking all the rules! Ain't I a gangsta!
+				goto skipComments_loop_end;
+			}
+			return i;
+			skipComments_loop_end:
+			;
+		}
+	}
+	return o;
+}
+
+size_t aString::count(char c) const {
 	if(c=='\0' || !str || !len) return 0;
 	char *p = str;
 	size_t n = 0;
@@ -860,7 +1109,7 @@ size_t aString::count(char c) {
 	return n;
 }
 
-size_t aString::count(const char *s) {
+size_t aString::count(const char *s) const {
 	if(!s || !*s || !str || !len) return 0;
 	char *p = str;
 	size_t n = 0,sl = strlen(s);
@@ -891,7 +1140,7 @@ size_t aString::replace(const char *s,const char *r) {
 }
 
 size_t aString::replace(const char *s, ...) {
-	size_t i,n,c = 32,l = len;
+	size_t n,c = 32,l = len;
 	va_list vl;
 	const char **arr = (const char **)malloc(c*sizeof(const char *)),*vp = s;
 	va_start(vl,s);
@@ -910,7 +1159,7 @@ size_t aString::replace(const char *s, ...) {
 }
 
 size_t aString::replace(const char **arr) {
-	size_t i,n,c = 32,l = len;
+	size_t i,n,l = len;
 	for(n=0; arr[n]; ++n);
 	if(n>1) {
 		char *p = str;
@@ -939,7 +1188,48 @@ size_t aString::replace(const char **arr) {
 	return len-l;
 }
 
-size_t aString::stripComments() {
+size_t aString::stripComments(int lang,long o,long l) {
+	size_t i,m = 0,n;
+	if(o<0) o = (long)len+o;
+	if(l<=0) l = (long)len-o+l;
+//debug_output("aString::stripComments(o=%d,l=%d)\n",(int)o,(int)l);
+	if(o>=0 && l>0 && o+l<=(long)len && lang>=0 && lang<aLANG_LANGS) {
+		const int *cl = comments_lang[lang];
+		const char **cc = &comments[cl[0]],**cb = cl[3]? &comments[cl[2]] : 0;
+		const int *ccl = &comments_len[cl[0]],*cbl = cl[3]? &comments_len[cl[2]] : 0;
+		int j;
+		long f;
+//debug_output("cl[%d,%d,%d,%d]\n",cl[0],cl[1],cl[2],cl[3]);
+//for(j=0; j<cl[1]; ++j)
+//debug_output("cc[%d]: %s\n",j,cc[j]);
+//if(cb)
+//debug_output("cb: %s %s\n",cb[0],cb[1]);
+		for(i=o,n=o+l,m=0; i+m<n; ++i) {
+			// Skip line comment
+			for(j=0; j<cl[1]; ++j)
+				if(str[i+m]==*cc[j] && (ccl[j]==1 || !strncmp(&str[i+m],cc[j],ccl[j]))) {
+//debug_output("aString::stripComments(line[i=%d,m=%d]: %s)\n",(int)i,(int)m,cc[j]);
+					for(m+=ccl[j]; !isBreak(str[i+m]); ++m);
+				}
+			// Skip block comment
+			if(cb && str[i+m]==*cb[0] && (cbl[0]==1 || !strncmp(&str[i+m],cb[0],cbl[0]))) {
+//debug_output("aString::stripComments(block[i=%d,m=%d]: %s)\n",(int)i,(int)m,cb[0]);
+				f = find(cb[1],i+m,l-(i+m-o),cbl[1]);
+				if(f==-1) break;
+				m = f-i+cbl[1];
+			}
+			if(m>0) str[i] = str[i+m];
+		}
+		if(m>0) {
+			for(; i+m<len; ++i) str[i] = str[i+m];
+			str[i] = '\0';
+		}
+	}
+//debug_output("aString::stripComments(m=%d)\n",(int)m);
+	return m;
+}
+
+/*size_t aString::stripCComments() {
 	char *p1,*p2,*p3;
 	size_t n;
 	for(p1=str,p2=p1,n=0; *p1!='\0'; ++p1) {
@@ -948,7 +1238,7 @@ size_t aString::stripComments() {
 				for(p1+=2; *p1!='\n' && *p1!='\r'; ++p1);
 				*p2++ = *p1,++n;
 			} else {
-				p3 = strstr(p1+2,"*/");
+				p3 = strstr(p1+2,"*" "/");
 				if(!p3) break;
 				else p1 = p3+1,++n;
 			}
@@ -956,7 +1246,7 @@ size_t aString::stripComments() {
 	}
 	*p2 = '\0';
 	return n;
-}
+}*/
 
 size_t aString::stripHTML() {
 	char *p1,*p2,*p3,*p4;
@@ -975,7 +1265,7 @@ size_t aString::stripHTML() {
 	return n;
 }
 
-size_t aString::stripHTMLComments() {
+/*size_t aString::stripHTMLComments() {
 	char *p1,*p2,*p3;
 	size_t n;
 	for(p1=str,p2=p1,n=0; *p1!='\0'; ++p1) {
@@ -988,13 +1278,13 @@ size_t aString::stripHTMLComments() {
 	}
 	*p2 = '\0';
 	return n;
-}
+}*/
 
-size_t aString::substr(aString &s,long o,long l) {
+size_t aString::substr(aString &s,long o,long l) const {
 	if(str && *str) {
 		if(o<0) o = len+o;
 		if(l<=0) l = len-o+l;
-		if(l+2>s.cap) s.resize(l+2);
+		if(l+2>(long)s.cap) s.resize(l+2);
 		memcpy(s.str,&str[o],l);
 		s.str[l] = '\0',s.len = l;
 		return l;
@@ -1003,7 +1293,7 @@ size_t aString::substr(aString &s,long o,long l) {
 	return 0;
 }
 
-size_t aString::substr(char *s,long o,long l) {
+size_t aString::substr(char *s,long o,long l) const {
 	if(str && *str) {
 		if(o<0) o = len+o;
 		if(l<=0) l = len-o+l;
@@ -1033,36 +1323,92 @@ void aString::newline(const char *nl) {
 	::free(p);
 }
 
-void aString::escape() {
+void aString::escape(long o,long l,const char *s,int f) {
 	if(str && len) {
-		size_t i,n = 0;
-		for(i=0; i<len; i++) if(isEscSpace(str[i])) n++;
-		if(n) {
-			if(len+n>=cap) resize(n);
-			char c;
-			for(i=len-1,c=str[i],n=0; i>=0; c=str[--i]) {
-				if(c=='\t') str[i-- +n] = '\\',c = '\\',n++,len++;
-				else if(c=='\n') str[i-- +n] = '\\',c = '\\',n++,len++;
-				str[i+n] = c;
+		if(o<0) o = (long)len+o;
+		if(l<=0) l = (long)len-o+l;
+		if(o>=0 && l>0 && o+l<=(long)len) {
+			int i,j,k,m,n;
+			uint32_t c,u,u1;
+			for(i=o,m=0,n=o+l; i<n; ++i) // Count number of characters to escape
+				if((c=(uint32_t)str[i]) && strchr(escape_sequences,c) &&
+							(!isQuote(c) || (f&aESCAPE_QUOTE))) ++m; // Escape sequence
+				else if(s && c && !(c&0x80) && strchr(s,c)) m += (f&aESCAPE_HEX)? 3 : 1; // Escape selected chars in s
+				else if((c&0xc0)==0xc0 && (f&aESCAPE_UNICODE)) { // UTF8
+					j = (c&0x20)? ((c&0x10)? ((c&0x08)? ((c&0x04)? 6 : 5) : 4) : 3) : 2;
+					if(j<6 || !(c&0x02)) {
+						for(k=1,u=((c<<(j+1))&0xff)>>(j+1); k<j; ++k)
+							u = (u<<6)|(str[++i]&0x3f);
+						if(u>0xff) m += ((u&0xffff0000)? 10 : 6)-j;
+					}
+				}
+			if(m>0) { // Only escape strings containing sequences
+				if(len+m>=cap) resize(m);
+				if(o+l<(long)len) move(o,m);
+				else len += m;
+				for(i=o+l,n=m; i>=o && n>0; --i)
+					// Escape sequence
+					if((c=(uint32_t)str[i]) && strchr(escape_sequences,c) &&
+							(!isQuote(c) || (f&aESCAPE_QUOTE))) {
+						str[i+n] = c<=0x0d && (c!='\n' || !(f&aESCAPE_SL_EOL))? escape_chars[c] : c;
+						str[i+ --n] = '\\';
+					} else if(s && c && !(c&0x80) && strchr(s,c)) { // Escape selected chars in s
+						if(f&aESCAPE_HEX) {
+							j = c&0x0f,str[i+n] = (char)(j<=9? '0'+j : 'A'+j-10);
+							j = (c>>4)&0x0f,str[i+n-1] = (char)(j<=9? '0'+j : 'A'+j-10);
+							str[i+n-2] = 'x',str[i+n-3] = '\\',n -= 3;
+						} else str[i+n] = (char)c,str[i+n-1] = '\\',--n;
+					} else if((c&0x80) && (f&aESCAPE_UNICODE)) { // Escape UTF8
+						if((c&0xc0)==0xc0) {
+							j = (c&0x20)? ((c&0x10)? ((c&0x08)? ((c&0x04)? 6 : 5) : 4) : 3) : 2;
+							if(j<6 || !(c&0x02)) {
+								for(k=1,u=((c<<(j+1))&0xff)>>(j+1); k<j; ++k)
+									u = (u<<6)|(str[i+k]&0x3f);
+								if(u>0xff) {
+									for(k=2,n+=j,j=((u&0xffff0000)? 10 : 6),u1=u; k<j; ++k)
+										c = (u1&0xf),u1 >>= 4,str[i+n-1] = (char)(c<=9? '0'+c : 'A'+c-10),--n;
+									str[i+n-1] = (u&0xffff0000)? 'U' : 'u',str[i+n-2] = '\\',n -= 2;
+								} else str[i+n] = (char)u;
+							}
+						}
+					} else str[i+n] = (char)c; // Ordinary char
 			}
-			str[len] = '\0';
 		}
 	}
 }
 
-void aString::unescape() {
+void aString::unescape(long o,long l,int f) {
 	if(str && len) {
-		size_t i,n;
-		char c;
-		for(i=0,n=0,c=str[i]; i<len; i++,c=str[i+n]) {
-			if(c=='\\') {
-				n++,c = str[i+n],len--;
-				if(c=='t') c = '\t';
-				else if(c=='n') c = '\n';
+		if(o<0) o = (long)len+o;
+		if(l<=0) l = (long)len-o+l;
+		if(o>=0 && l>0 && o+l<=(long)len) {
+//debug_output("aString::unescape(str: \"%s\", len:%d, o:%ld, l:%ld)\n",&str[o],(int)len,o,l);
+			long i;
+			for(i=o; i<=o+l; ++i) if(str[i]=='\\') break; // Skip string until first escape sequence.
+			if(i<(long)len) {
+				int j,m,n;
+				uint32_t c,u;
+				const char *p;
+				for(n=0; i<=(long)len; ++i) {
+					c = str[i+n];
+					if(i<o+l && c=='\\') {
+						c = str[i+ ++n];
+						if(c!=' ' && (p=strchr(escape_chars,c)) &&
+							(!isQuote(c) || (f&aESCAPE_QUOTE))) str[i] = (char)(p-escape_chars);
+						else if(c=='x' && (f&aESCAPE_HEX)) str[i] = (fromHex(str[i+n+1])<<4)|fromHex(str[i+n+2]),n += 2;
+						else if((c=='u' || c=='U') && (f&aESCAPE_UNICODE)) {
+							for(j=0,m=(c=='u'? 4 : 8),u=0; j<m; ++j) u = (u<<4)|fromHex(str[i+n+1]),++n;
+							if(u>0x7f) {
+								m = u>0x7ff? (u>0xffff? (u>0x1fffff? (u>0x3ffffff? 6 : 5) : 4) : 3) : 2,n -= m-1;
+								c = (0xff<<(8-m))&0xff,str[i] = (char)(c|(u>>((m-1)*6)));
+								for(j=1; j<m; ++j) str[++i] = (char)(0x80|((u>>((m-j-1)*6))&0x3f));
+							} else str[i] = (char)u;
+						} else str[i] = (char)c;
+					} else str[i] = (char)c;
+				}
+				len -= n;
 			}
-			str[i] = c;
 		}
-		str[len] = '\0';
 	}
 }
 
@@ -1070,7 +1416,7 @@ void aString::quote(const char c) {
 	if(c && str && len) {
 		if(len+2>=cap) resize(0);
 		*str = c;
-		for(size_t i=0; i<len; i++) str[i+1] = str[i];
+		for(size_t i=0; i<len; ++i) str[i+1] = str[i];
 		str[++len] = c,str[++len] = '\0';
 	}
 }
@@ -1079,7 +1425,7 @@ void aString::unquote() {
 	if(str && len>1) {
 		char c = *str;
 		if((c=='"' || c=='\'') && str[len-1]==c) {
-			for(size_t i=1; i<len; i++) str[i-1] = str[i];
+			for(size_t i=1; i<len; ++i) str[i-1] = str[i];
 			str[len-=2] = '\0';
 		}
 	}
@@ -1127,13 +1473,13 @@ void aString::decodeURL() {
 
 #define select_entity(p) \
 c = (unsigned char)p;\
-if((c=='\'' || c=='"') && !(f&aSTRING_HTML_QUOTES)) e = 0;\
-else if((c=='&') && !(f&aSTRING_HTML_AMP)) e = 0;\
-else if((c=='<' || c=='>') && !(f&aSTRING_HTML_LTGT)) e = 0;\
+if((c=='\'' || c=='"') && !(f&aHTML_QUOTE)) e = 0;\
+else if((c=='&') && !(f&aHTML_AMP)) e = 0;\
+else if((c=='<' || c=='>') && !(f&aHTML_LTGT)) e = 0;\
 else {\
 	e = &HTMLentities[c];\
 	if(e->len) {\
-		if(*e->name=='#' && !(f&aSTRING_HTML_CODES)) e = 0;\
+		if(*e->name=='#' && !(f&aHTML_CODES)) e = 0;\
 	}\
 }
 
@@ -1194,13 +1540,83 @@ void aString::decodeHTML() {
 	}
 }
 
-void aString::trim(long &o,long &l) {
+void aString::encodeUTF8() {
+/*	if(str && *str) {
+		long i,m,n;
+		for(i=0,m=0,n=len; i<n; ++i) if(str[i]&0x80) ++m;
+		if(m>0) {
+			if(len+m>=cap) resize(m);
+			char c;
+			for(i=len,c=str[i],n=m; i>=0 && n>0; c=str[--i])
+				if(c&0x80) str[i+n] = 0x80|(c&0x3f),--n,str[i+n] = 0xb0|(c>>6);
+				else str[i+n] = c;
+			len += m;
+		}
+	}*/
+}
+
+void aString::decodeUTF8() {
+}
+
+void aString::encodeBase64() {
+	size_t i,l = ((len+2)/3)*4;
+	unsigned char *d = (unsigned char *)malloc(l+1),*s = (unsigned char *)str;
+	for(i=0; i<len; i+=3,s+=3,d+=4) {
+		d[0] = (unsigned char)base64_code[(int)(s[0]>>2)];
+		d[1] = (unsigned char)base64_code[(int)(((s[0]&0x03)<<4)|((s[1]&0xf0)>>4))];
+		d[2] = (unsigned char)(len-i>1? base64_code[(int)(((s[1]&0x0f)<<2)|((s[2]&0xc0)>>6))] : '=');
+		d[3] = (unsigned char)(len-i>2? base64_code[(int)(s[2]&0x3f)] : '=');
+	}
+	::free(str);
+	str = (char *)d,len = cap = l,str[len] = '\0';
+}
+
+void aString::decodeBase64() {
+	size_t l = (len/4)*3;
+	unsigned char *d = (unsigned char *)malloc(l+1);
+	const unsigned char *s = (unsigned char *)str;
+	int w,x,y,z;
+	for(; *s!='\0'; s+=4,d+=3) {
+		w = base64_index[(int)s[0]];
+		x = base64_index[(int)s[1]];
+		y = base64_index[(int)s[2]];
+		z = base64_index[(int)s[3]];
+		if(w==__ || x==__ || y==__ || z==__) break;
+		d[0] = (unsigned char )(w<<2|x>>4);
+		d[1] = (unsigned char )(x<<4|y>>2);
+		d[2] = (unsigned char )(((y<<6)&0xc0)|z);
+	}
+	::free(str);
+	str = (char *)d,len = cap = l,str[len] = '\0';
+}
+
+void aString::reverse(long o,long l) {
 	if(str && *str) {
 		if(o<0) o = (long)len+o;
-		if(l<=0) l = (long)len-o;
-		if(o>=0 && l>0 && o+l<=len)
-		while(isSpace(str[o]) && o<len) ++o,--l;
-		while(isSpace(str[o+l]) && l>0) --l;
+		if(l<=0) l = (long)len-o+l;
+		if(o>=0 && l>0 && o+l<=(long)len) {
+			char *p1 = &str[o],*p2 = &str[o+l-1],c;
+			while(p1<p2) c = *p1,*p1++ = *p2,*p2-- = c;
+		}
+	}
+}
+
+void aString::trim(long &o,long &l,const char *s,int f) const {
+	if(str && *str) {
+		if(o<0) o = (long)len+o;
+		if(l<=0) l = (long)len-o+l;
+		if(!s) s = whitespace;
+		if(!f) f = aTRIM_BOTH;
+		if(o>=0 && l>0 && o+l<=(long)len) {
+//debug_output("aString::trim(o: %d, l=%d, s: \"%s\", f: %x, len: %d)\n",(int)o,(int)l,s,f,(int)len);
+			if(f&aTRIM_UNTRIM) {
+				if(f&aTRIM_LEFT) while(strchr(s,str[o-1]) && o>0) --o,++l;
+				if(f&aTRIM_RIGHT) while(strchr(s,str[o+l]) && o+l<(long)len) ++l;
+			} else {
+				if(f&aTRIM_LEFT) while(strchr(s,str[o]) && l>0) ++o,--l;
+				if(f&aTRIM_RIGHT) while(strchr(s,str[o+l]) && l>0) --l;
+			}
+		}
 	}
 }
 
@@ -1221,16 +1637,21 @@ void aString::resize(size_t l) {
 //debug_output("aString::resize(len=%d,l=%d,cap=%d)\n",len,l,cap);
 }
 
-long aString::move(long n,size_t l) {
-	if(n<0) n = len+n;
-	if(n>=0 && n<=len && l>0) {
-		if(len+l+2>=cap) resize(l);
-		if(n<len) {
-			memmove(&str[n+l],&str[n],len+1-n);
+long aString::move(long o,long l) {
+	if(o<0) o = (long)len+o;
+	if(o>=0 && o<(long)len && l!=0) {
+		long n;
+		if(l>0) {
+			if(len+l+2>=cap) resize(l);
+			for(n=(long)len; n>=o; --n) str[n+l] = str[n];
 			len += l;
+		} else if(-l>=(long)len) {
+			if(o+l<0) o = 0;
+			for(n=(o+l>=0? o : -l); n<=(long)len; ++n) str[n] = str[n+l];
+			len -= l;
 		}
 	}
-	return n;
+	return o;
 }
 
 void aString::setCapacity(size_t n) {
@@ -1242,19 +1663,19 @@ void aString::setCapacity(size_t n) {
 //debug_output("aString::resize(len=%d,n=%d,cap=%d)\n",len,n,cap);
 }
 
-char aString::charAt(long i) {
+char aString::charAt(long i) const {
 	if(i<0) i = (long)len+i;
 	return str && i>=0 && i<(long)len? str[i] : '\0';
 }
 
-long aString::toInt() {
+long aString::toInt() const {
 	char *p = str;
 	while(isSpace(*p)) ++p;
 	if(*p=='0' && *++p=='x') return fromHex(++p);
 	return atol(p);
 }
 
-size_t aString::toIntArray(long *n,char c) {
+size_t aString::toIntArray(long *n,char c) const {
 	if(!n || c=='\0' || !str || !len) return 0;
 	size_t i;
 	char *p1 = str,*p2;
@@ -1278,6 +1699,18 @@ size_t aString::nextWord(const char **s,const char *c) {
 	return l;
 }
 
+hash_t aString::crc32(const char *s,bool c) {
+	hash_t crc = 0xffffffff;
+	if(c) for(; *s; ++s) crc = (crc>>8)^crc32_table[(crc^toLower(*s))&0xff];
+	else for(; *s; ++s) crc = (crc>>8)^crc32_table[(crc^(*s))&0xff];
+	return crc^0xffffffff;
+}
+
+/*hash_t aString::hash(const char *s,bool c) {
+	if(c) while(*s) h = 31*h+toLower(*s),++s;
+	else while(*s) h = 31*h+(*s),++s;
+	return h;
+}*/
 
 uint64_t aString::fromHex(const char *str) {
 	if(!str) return 0;
@@ -1329,22 +1762,29 @@ char **aString::split(char **list,char *str,const char *delim,bool cins) {
 	return list;
 }
 
-size_t aString::reverse(char *str) {
-	if(!str || !*str) return 0;
-	size_t l = strlen(str);
-	char *p1 = str,*p2 = &str[l-1],c;
-	while(p1<p2) c = *p1,*p1++ = *p2,*p2-- = c;
-	return l;
+void aString::reverse(char *str,long o,long l) {
+	if(str && *str) {
+		long n = strlen(str);
+		if(o<0) o = n+o;
+		if(l<=0) l = n-o+l;
+		if(o>=0 && l>0 && o+l<=n) {
+			char *p1 = &str[o],*p2 = &str[o+l-1],c;
+			while(p1<p2) c = *p1,*p1++ = *p2,*p2-- = c;
+		}
+	}
 }
 
-size_t aString::trim(char *str) {
+size_t aString::trim(char *str,const char *s,int f) {
 	if(!str || !*str) return 0;
 	size_t l = 0;
 	char *p = str;
-	while(*p && isSpace(*p)) ++p;
-	while(*p) *str++ = *p++,++l;
+	if(!s) s = whitespace;
+	if(!f) f = aTRIM_BOTH;
+	if(f&aTRIM_LEFT) while(*p && strchr(s,*p)) ++p;
+	if(p!=str) while(*p) *str++ = *p++,++l;
+	else while(*str) ++str,++l;
 	if(l) {
-		while(isSpace(*--str)) --l;
+		if(f&aTRIM_RIGHT) while(strchr(s,*--str)) --l;
 		*++str = '\0';
 	} else *str = '\0';
 	return l;

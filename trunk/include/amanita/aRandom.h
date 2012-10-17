@@ -70,15 +70,15 @@ int i = rnd.int32();
  * Here's an example on how to store and restore an instance of aRandom:
  * @code
 aRandom r; // Sets seed to time(0).
-FILE *f = fopen("random.dat","wb");
-r.write(f);
-fclose(f);
+FILE *fp = fopen("random.dat","wb");
+r.write(fp);
+fclose(fp);
 
 ... // Do romething with r.
 
-f = fopen("random.dat","rb");
-r.read(f); // Reads r to be exactly the same as when saved.
-fclose(f);
+fp = fopen("random.dat","rb");
+r.read(fp); // Reads r to be exactly the same as when saved.
+fclose(fp);
  * @endcode
  * @ingroup amanita
  */
