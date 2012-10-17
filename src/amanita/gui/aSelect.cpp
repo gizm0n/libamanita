@@ -36,13 +36,13 @@ aSelect::~aSelect() {
 
 void aSelect::create(aWindow *wnd,uint32_t st) {
 	int i,n,t = style&0xf;
-	char *str;
 	if(t==aSELECT_COMBOBOX) type = aWIDGET_COMBOBOX;
 	else if(t==aSELECT_ENTRY) type = aWIDGET_COMBOBOX_ENTRY;
 #ifdef USE_GTK
 	if(type==aWIDGET_COMBOBOX) component = (aComponent)gtk_combo_box_text_new();
 	else component = (aComponent)gtk_combo_box_entry_new_text();
 	if(items && items->size()) {
+		char *str;
 		for(i=0,n=items->size(); i<n; ++i) {
 			str = (char *)(*items)[i];
 			if(type==aWIDGET_COMBOBOX) gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(component),(gchar *)str);
@@ -111,7 +111,6 @@ void aSelect::addItem(const char *str) {
 }
 
 void aSelect::select(int n) {
-	int sz = 0;
 	if(component) {
 #ifdef USE_GTK
 		gtk_combo_box_set_active(GTK_COMBO_BOX(component),selected);
@@ -119,7 +118,7 @@ void aSelect::select(int n) {
 #ifdef USE_WIN32
 		SendMessage((HWND)component,CB_SETCURSEL,(WPARAM)selected,0);
 #endif
-	} else selected = n>=0 && items && n<items->size()? n : -1;
+	} else selected = n>=0 && items && n<(int)items->size()? n : -1;
 }
 
 int aSelect::getSelected() {

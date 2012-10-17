@@ -131,29 +131,31 @@ fflush(djynn.log);
 	djynn_save_config();
 	djynn_close_config();
 
-	fp = fopen(prj1,"w");
-	fprintf(fp,"+%s\n"
-		"%s\n"
-		"%s\n"
-		"-src\n",
-		name,dir,prj2);
-	fclose(fp);
-	fp = fopen(prj2,"w");
-	fprintf(fp,"\n"
-			"[indentation]\n"
-			"indent_width=3\n"
-			"indent_type=1\n"
-			"indent_hard_tab_width=8\n"
-			"detect_indent=false\n"
-			"indent_mode=2\n"
-			"\n[project]\n"
-			"name=%s\n"
-			"base_path=%s\n"
-			"make_in_base_path=false\n"
-			"description=%s\n"
-			"run_cmd=%s\n",
-			name,dir,descr,name);
-	fclose(fp);
+	if((fp=fopen(prj1,"wb"))) {
+		fprintf(fp,"+%s\n"
+			"%s\n"
+			"%s\n"
+			"-src\n",
+			name,dir,prj2);
+		fclose(fp);
+	} else perror(prj1);
+	if((fp=fopen(prj2,"wb"))) {
+		fprintf(fp,"\n"
+				"[indentation]\n"
+				"indent_width=3\n"
+				"indent_type=1\n"
+				"indent_hard_tab_width=8\n"
+				"detect_indent=false\n"
+				"indent_mode=2\n"
+				"\n[project]\n"
+				"name=%s\n"
+				"base_path=%s\n"
+				"make_in_base_path=false\n"
+				"description=%s\n"
+				"run_cmd=%s\n",
+				name,dir,descr,name);
+		fclose(fp);
+	} else perror(prj2);
 
 	djynn_projectmanager_save_workspace();
 	djynn_projectmanager_load_workspace();

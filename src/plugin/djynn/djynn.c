@@ -172,28 +172,31 @@ void plugin_init(GeanyData *data) {
 	if(g_file_test(djynn.config_dir,G_FILE_TEST_EXISTS)==FALSE) g_mkdir(djynn.config_dir,0700);
 
 	p1 = g_strconcat(djynn.config_dir,"djynn.log",NULL);
-	djynn.log = fopen(p1,"w");
+	djynn.log = fopen(p1,"wb");
+	if(!djynn.log) perror(p1);
 	g_free(p1);
 
 	djynn.config_filename = g_strconcat(djynn.config_dir,"djynn.conf",NULL);
 	if(g_file_test(djynn.config_filename,G_FILE_TEST_EXISTS)==FALSE) {
-		FILE *fp = fopen(djynn.config_filename,"w");
-		sprintf(str,djynn.str.workspace_d,1);
-		fprintf(fp,
-			"\n[%s]\n\n"
-			"[%s]\n"
-			"%s=1\n"
-			"%s=1\n"
-			"%s=default\n\n"
-			"[pm_default]\n"
-			"%s=0\n",
-				djynn.str.djynn,
-				djynn.str.workspace,
-				djynn.str.workspace,
-				djynn.str.workspace_n,
-				str,
-				djynn.str.project_n);
-		fclose(fp);
+		FILE *fp = fopen(djynn.config_filename,"wb");
+		if(fp) {
+			sprintf(str,djynn.str.workspace_d,1);
+			fprintf(fp,
+				"\n[%s]\n\n"
+				"[%s]\n"
+				"%s=1\n"
+				"%s=1\n"
+				"%s=default\n\n"
+				"[pm_default]\n"
+				"%s=0\n",
+					djynn.str.djynn,
+					djynn.str.workspace,
+					djynn.str.workspace,
+					djynn.str.workspace_n,
+					str,
+					djynn.str.project_n);
+			fclose(fp);
+		} else perror(djynn.config_filename);
 	}
 
 	djynn_open_config();

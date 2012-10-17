@@ -69,7 +69,10 @@ aMenu::~aMenu() {
 
 void aMenu::create(aWindow *wnd,uint32_t st) {
 	int i,n;
-	char str[257],buf[5];
+	char str[257];
+#ifdef USE_WIN32
+	char buf[5];
+#endif
 #ifdef USE_WCHAR
 	wchar_t wstr[257];
 #endif

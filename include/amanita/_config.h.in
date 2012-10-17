@@ -118,8 +118,8 @@ extern void tfree(tchar_t *s);
 #define debug_output(...)
 #define debug_putc(c)
 #else
-#define debug_output(...) fprintf(stderr,__VA_ARGS__);
-#define debug_putc(c) fputc(c,stderr);
+#define debug_output(...) fprintf(stderr,__VA_ARGS__)
+#define debug_putc(c) fputc(c,stderr)
 #endif
 
 #endif /* _AMANITA__CONFIG_H */

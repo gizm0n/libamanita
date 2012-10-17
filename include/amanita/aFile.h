@@ -12,11 +12,14 @@
 #include <time.h>
 
 
-#ifdef WIN32
-#define FILE_DIRSEP "\\"
-#else
-#define FILE_DIRSEP "/"
+/** @cond */
+#ifdef USE_UNIX
+#define aFILE_DIRSEP "/"
 #endif
+#ifdef USE_WIN32
+#define aFILE_DIRSEP "\\"
+#endif
+/** @endcond */
 
 
 /** A filehandling class.
@@ -28,15 +31,17 @@ class aFile {
 private:
 	char *dir;
 	char *name;
-	FILE *file;
+	FILE *fp;
 
 public:
-	aFile() : dir(0),name(0),file(0) {}
+	static const char *dirsep;			//!< Separator for directories, eg. for Unix '/' and windows '\\'.
+
+	aFile() : dir(0),name(0),fp(0) {}
 	~aFile() { close(); }
 
 	const char *getDirectory() { return dir; }
 	const char *getName() { return name; }
-	const FILE *getFile() { return file; }
+	const FILE *getFile() { return fp; }
 
 	aFile &open(const char *a,const char *fn, ...);
 	aFile &close();

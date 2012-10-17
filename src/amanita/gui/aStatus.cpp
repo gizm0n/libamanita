@@ -40,7 +40,7 @@ aStatus::~aStatus() {
 
 void aStatus::create(aWindow *wnd,uint32_t st) {
 #ifdef USE_GTK
-	int i,x;
+	int i;
 	GtkWidget *message_area;
 	component = (aComponent)gtk_statusbar_new();
 	message_area = (aComponent)gtk_statusbar_get_message_area(GTK_STATUSBAR(component));

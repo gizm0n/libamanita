@@ -60,7 +60,7 @@ aList::~aList() {
 }
 
 void aList::create(aWindow *wnd,uint32_t st) {
-	int i,n;
+	int i;
 #ifdef USE_GTK
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;

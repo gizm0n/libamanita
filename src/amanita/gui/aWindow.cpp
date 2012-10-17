@@ -135,7 +135,6 @@ void aWindow::open(aWindow *p) {
 #endif
 #ifdef USE_WIN32
 	HWND hwnd;
-	MSG msg;
 	DWORD ex = WS_EX_CLIENTEDGE;
 	DWORD st = WS_OVERLAPPEDWINDOW;
 	LPCTSTR cl = aWINDOW_CLASS;
@@ -144,7 +143,7 @@ void aWindow::open(aWindow *p) {
 	if(!(class_registers&aWINDOW_CLASS_REGISTER)) {
 		HICON hicon = 0,hicon_sm = 0;
 		if(icons) {
-			aWindowIcon *icon,*icon_b,*icon_sm;
+			aWindowIcon *icon,*icon_b = 0,*icon_sm = 0;
 			for(icon=icons; icon->size>0; ++icon)
 				if(icon->size==16) icon_sm = icon;
 				else if(!icon_b || icon_b->size<icon->size) icon_b = icon;

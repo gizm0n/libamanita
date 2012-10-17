@@ -26,6 +26,7 @@
 #include <amanita/gui/aWindow.h>
 #include <amanita/gui/aMenu.h>
 #include <amanita/aFile.h>
+#include <amanita/aString.h>
 //#include <amanita/aVector.h>
 //#include <amanita/net/aHttp.h>
 
@@ -55,14 +56,16 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE hp,LPSTR cmd,int show) {
 aApplication::aApplication(uint32_t params,const char *prj,const char *nm) : app_thread() {
 	FILE *fp;
 	char str[257],home[257],data[257];
-	int n;
 
 	app_init_params = params;
 	app_out = 0;
 	app_project = 0;
 	app_name = 0;
 	app_user_agent = 0;
+	app_home_dir = 0;
+	app_data_dir = 0;
 	app_locale_dir = 0;
+	app_fonts_dir = 0;
 	app_local_id = 0;
 	app_local_time = 0;
 	app_last_access = 0;
@@ -72,7 +75,6 @@ aApplication::aApplication(uint32_t params,const char *prj,const char *nm) : app
 	setApplicationName(nm);
 
 	if((app_init_params&aINIT_DIRECTORIES)) {
-		char fonts[257];
 		aFile::getHomeDir(str,256);
 #if defined USE_GTK
 		sprintf(home,"%s/.%s/",str,app_project);
@@ -83,26 +85,26 @@ aApplication::aApplication(uint32_t params,const char *prj,const char *nm) : app
 		if(!aFile::exists(home)) aFile::mkdir(home);
 
 #if defined USE_GTK
-		n = 0;
 		snprintf(data,256,"/usr/share/%s/",app_project);
 		if(!aFile::exists(data)) {
 			snprintf(data,256,"/usr/local/share/%s/",app_project);
 			if(!aFile::exists(data)) {
 				snprintf(data,256,"%s/.local/share/%s/",home,app_project);
-				if(!aFile::exists(data)) sprintf(data,"%sdata" FILE_DIRSEP,home);
+				if(!aFile::exists(data)) sprintf(data,"%sdata" aFILE_DIRSEP,home);
 			}
 		}
 #elif defined USE_WIN32
-		sprintf(data,"%sdata" FILE_DIRSEP,home);
+		sprintf(data,"%sdata" aFILE_DIRSEP,home);
 #endif
 
 		aFile::getFontsDir(str,256);
-		sprintf(fonts,"%s" FILE_DIRSEP,str);
-		if(!aFile::exists(fonts)) aFile::mkdir(fonts);
-debug_output("app_dir_fonts=%s\n",fonts);
+		strcat(str,aFILE_DIRSEP);
+		if(!aFile::exists(str)) aFile::mkdir(str);
+debug_output("app_dir_fonts=%s\n",str);
+		app_fonts_dir = strdup(str);
 	} else {
 		aFile::getCurrentDir(str,256);
-		sprintf(home,"%s" FILE_DIRSEP,str);
+		sprintf(home,"%s" aFILE_DIRSEP,str);
 		strcpy(data,home);
 	}
 
@@ -112,13 +114,13 @@ debug_output("app_home_dir: %s\n",home);
 debug_output("app_data_dir: %s\n",data);
 	
 	if((app_init_params&aINIT_LOG)) {
-		sprintf(str,"%s%s.log",app_home_dir,app_name);
+		sprintf(str,"%s%s.log",app_home_dir,app_project);
 		app_last_access = aFile::modified(str);
 debug_output("logfile: %s\nlast_access %" PRIu64 "\n\n",str,(uint64_t)app_last_access);
-		app_out = fopen(str,"w");
-		fp = freopen(str,"a",app_out);
-		fp = freopen(str,"a",stdout);
-		fp = freopen(str,"a",stderr);
+		if(!(app_out=fopen(str,"wb")) ||
+			!(fp=freopen(str,"ab",app_out)) ||
+			!(fp=freopen(str,"ab",stdout)) ||
+			!(fp=freopen(str,"ab",stderr))) perror(str);
 debug_output("aApplication::aApplication()");
 	} else {
 		aFile::getExecutable(str,256);
@@ -141,6 +143,8 @@ debug_output("aApplication::~aApplication()\n");
 	app_data_dir = 0;
 	if(app_locale_dir) free(app_locale_dir);
 	app_locale_dir = 0;
+	if(app_fonts_dir) free(app_fonts_dir);
+	app_fonts_dir = 0;
 
 	if(app_out) fclose(app_out);
 	app_out = 0;
@@ -258,7 +262,6 @@ int aApplication::main() {
 		int i,n,nitems = window->getMenu()->nitems;
 		for(i=0,n=0,m=items; m && i<nitems; ++i,++m) if(m->acc!=-1) ++n;
 		if(n>0) {
-			int mod;
 			ACCEL accel[n],*a;
 			for(i=0,m=items,a=accel; i<nitems; ++i,++m) if(m->acc!=-1) {
 				a->fVirt = (m->acc_mod==aKEY_CONTROL? FCONTROL : (m->acc_mod==aKEY_ALT? FALT : 0))|FVIRTKEY;
@@ -312,6 +315,76 @@ void aApplication::add(aComponent c,aWidget *w) {
 }
 */
 
+enum {
+	HOME,
+	DATA,
+	LOCALE,
+	FONTS,
+	HOST,
+};
+
+static void extract_dir(char *dir,const char *str,const char **dirs) {
+	const char *p;
+	char tag[33];
+	int n;
+	for(p=0; *str; ++str) {
+		if(*str=='[' && !p) p = str+1;
+		else if(*str==']' && p) {
+			memcpy(tag,p,(size_t)(str-p));
+			tag[(size_t)(str-p)] = '\0';
+			if(!strcmp(tag,"home")) n = HOME;
+			else if(!strcmp(tag,"data")) n = DATA;
+			else if(!strcmp(tag,"locale")) n = LOCALE;
+			else if(!strcmp(tag,"fonts")) n = FONTS;
+			else if(!strcmp(tag,"host")) n = HOST;
+			else n = -1;
+			if(n>=0) {
+				strcpy(dir,dirs[n]);
+				dir += strlen(dir);
+			}
+			p = 0;
+		} else if(!p) *dir++ = *str;
+	}
+	if(*dir!=*aFile::dirsep) *dir++ = *aFile::dirsep;
+	*dir = '\0';
+}
+
+int aApplication::install(const char *host,const char *files,install_function func,void *obj) {
+	char str[257],*p,from[257],to[257],from_dir[257],to_dir[257];
+	const char *p1,*p2,*dirs[] = { app_home_dir,app_data_dir,app_locale_dir,app_fonts_dir,host };
+	int n,http,cp;
+	for(p1=files,n=0,http=0,cp=0; p1 && *p1; ) {
+		if(!(p2=strchr(p1,'\n'))) break;
+		if(*p1=='\n') cp = 0;
+		else {
+			memcpy(str,p1,(size_t)(p2-p1));
+			str[(size_t)(p2-p1)] = '\0';
+			p = strchr(str,'>');
+			if(p) *p++ = '\0';
+			else p = str;
+			aString::trim(str);
+			if(p!=str) aString::trim(p);
+			if(cp==0) {
+				extract_dir(from_dir,str,dirs);
+				if(p!=str) extract_dir(to_dir,p,dirs);
+				else strcpy(to_dir,from_dir);
+				http = !strncmp(from_dir,"http://",7);
+				cp = (!http && !aFile::exists(from_dir)) || !aFile::exists(to_dir)? 2 : 1;
+			} else if(cp==1) {
+				sprintf(to,"%s%s",to_dir,p);
+				if(http) {
+				} else {
+					sprintf(from,"%s%s",from_dir,str);
+					if(strcmp(from,to) && (!aFile::exists(to) ||
+							(aFile::modified(from)>aFile::modified(to)))) aFile::copy(from,to);
+				}
+			}
+		}
+		p1 = p2+1;
+	}
+	return n;
+}
+
 /*
 int aApplication::install(const char *host,const char *path,aVector &files,install_function func,void *obj) {
 debug_output("aApplication::install(host=\"%s\",path=\"%s\")\n",host,path);
@@ -353,6 +426,7 @@ debug_output("sz=%lu\n",(unsigned long)sz);
 	}
 	return n;
 }
+*/
 
 #if defined USE_GTK
 void aApplication::updateFontCache() {
@@ -362,7 +436,6 @@ void aApplication::updateFontCache() {
 debug_output("spawn: %s\nstdout:\n%sstderr:\n\n%s",p,so,se);
 }
 #endif
-*/
 
 void aApplication::setProjectName(const char *prj) {
 	if(!prj || !*prj) return;
@@ -397,6 +470,11 @@ void aApplication::setDataDir(const char *dir) {
 void aApplication::setLocaleDir(const char *dir) {
 	if(app_locale_dir) free(app_locale_dir);
 	app_locale_dir = strdup(dir);
+}
+
+void aApplication::setFontsDir(const char *dir) {
+	if(app_locale_dir) free(app_fonts_dir);
+	app_fonts_dir = strdup(dir);
 }
 
 

@@ -61,7 +61,7 @@ public:
 
 
 /** Is used by the aHashtable class to store a hash-values, and to get a hash-value from the aObject-class. */
-typedef intptr_t hash_t;
+typedef uint32_t hash_t;
 
 
 
@@ -280,7 +280,7 @@ public:
 
 	/** @name Hash
 	 * @{ */
-	virtual hash_t hash() const { return (unsigned long)this; }
+	virtual hash_t hash() const { return *(hash_t *)this; }
 	operator hash_t() const { return hash(); }
 	/** @} */
 };

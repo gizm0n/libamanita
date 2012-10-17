@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
 		aWiki wiki;
 		wiki << r.getRow(0)->getColumn(0);
 		wiki.format(page,aWIKI_SECTIONS);
-		fp = fopen("page.html","w");
+		fp = fopen("page.html","wb");
 		fwrite(wiki.toCharArray(),wiki.length(),1,fp);
 		fclose(fp);
 	}

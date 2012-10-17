@@ -440,36 +440,38 @@ static void read_project_files(char *data,djynn_project_file *f) {
 static void write_project(djynn_project *p) {
 	int i;
 	gboolean e;
-	FILE *fp = fopen(p->config_filename,"w");
-	djynn_project_file *f;
-	e = gtk_tree_view_row_expanded(GTK_TREE_VIEW(project_tree_view),p->path);
-	fprintf(fp,"%c%s\n%s\n%s\n",e? '+' : '-',p->name,p->directory,p->geany_project_filename);
+	FILE *fp = fopen(p->config_filename,"wb");
+	if(fp) {
+		djynn_project_file *f;
+		e = gtk_tree_view_row_expanded(GTK_TREE_VIEW(project_tree_view),p->path);
+		fprintf(fp,"%c%s\n%s\n%s\n",e? '+' : '-',p->name,p->directory,p->geany_project_filename);
 fflush(fp);
 fprintf(djynn.log,"write_project(config_filename=%s,name=%c%s,dir=%s)\n",p->config_filename,e? '+' : '-',p->name,p->directory);
 fflush(djynn.log);
-	for(f=p->files; f!=NULL; ) {
-		for(i=1; i<f->depth; i++) fputc('\t',fp);
-		if(f->type==DJYNN_PM_FOLDER) {
-			e = gtk_tree_view_row_expanded(GTK_TREE_VIEW(project_tree_view),f->path);
-			fprintf(fp,"%c%s\n",e? '+' : '-',f->name);
+		for(f=p->files; f!=NULL; ) {
+			for(i=1; i<f->depth; i++) fputc('\t',fp);
+			if(f->type==DJYNN_PM_FOLDER) {
+				e = gtk_tree_view_row_expanded(GTK_TREE_VIEW(project_tree_view),f->path);
+				fprintf(fp,"%c%s\n",e? '+' : '-',f->name);
 fflush(fp);
 fprintf(djynn.log,"write_project(%c%s)\n",e? '+' : '-',f->name);
 fflush(djynn.log);
-		} else {
-			fprintf(fp,"%s" G_DIR_SEPARATOR_S "%s\n",f->directory,f->name);
+			} else {
+				fprintf(fp,"%s" G_DIR_SEPARATOR_S "%s\n",f->directory,f->name);
 fflush(fp);
 fprintf(djynn.log,"write_project(%s" G_DIR_SEPARATOR_S "%s)\n",f->directory,f->name);
 fflush(djynn.log);
+			}
+			if(f->files!=NULL) f = f->files;
+			else if(f->next!=NULL) f = f->next;
+			else {
+				for(f=f->parent; f!=NULL && f->next==NULL; f=f->parent);
+				if(f==NULL || f->depth==0) break;
+				f = f->next;
+			}
 		}
-		if(f->files!=NULL) f = f->files;
-		else if(f->next!=NULL) f = f->next;
-		else {
-			for(f=f->parent; f!=NULL && f->next==NULL; f=f->parent);
-			if(f==NULL || f->depth==0) break;
-			f = f->next;
-		}
-	}
-	fclose(fp);
+		fclose(fp);
+	} else perror(p->config_filename);
 }
 
 static void expand_project_files() {
@@ -587,8 +589,10 @@ fflush(djynn.log);
 			value = djynn_config_get_str(djynn.workspace,key);
 fprintf(djynn.log,"%s=%s\n",key,value);
 fflush(djynn.log);
-			fp = fopen(value,"r");
-			if(!fp) continue;
+			if(!(fp=fopen(value,"rb"))) {
+				perror(value);
+				continue;
+			}
 			fseek(fp,0,SEEK_END);
 			n = ftell(fp);
 			fseek(fp,0,SEEK_SET);

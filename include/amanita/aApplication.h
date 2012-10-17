@@ -81,6 +81,7 @@ private:
 	char *app_home_dir;					//!< Home directory, on Linux ~/.prj where prj is the name of the project, .\ for windows.
 	char *app_data_dir;					//!< Data directory, on Linux /usr/share/prj where prj is the name of the project, .\data for windows.
 	char *app_locale_dir;				//!< Directory where locale files are stored.
+	char *app_fonts_dir;					//!< Directory where font files are stored.
 	aThread app_thread;					//!< The mutex is mainly used as a standard lock/unlock of the application.
 	uint32_t app_local_id;				//!< A local ID for the running instance.
 	time_t app_local_time;				//!<
@@ -112,12 +113,13 @@ public:
 	virtual void create();				//!< Create aplication, this method should be inherited and used for creating the windows and widgets etc.
 	virtual void destroy();				//!< Destroy application, inherit and use for freeing user created resources.
 
+	int install(const char *host,const char *files,install_function func=0,void *obj=0);
 /*
 	int install(const char *host,const char *path,aVector &files,install_function func=0,void *obj=0);
+*/
 #if defined USE_GTK
 	void updateFontCache();
 #endif
-*/
 
 	void lock() { app_thread.lock(); }
 	void unlock() { app_thread.unlock(); }
@@ -135,6 +137,8 @@ public:
 	const char *getDataDir() { return app_data_dir; }
 	void setLocaleDir(const char *dir);
 	const char *getLocaleDir() { return app_locale_dir; }
+	void setFontsDir(const char *dir);
+	const char *getFontsDir() { return app_fonts_dir; }
 
 	void setLocalID(uint32_t id) { app_local_id = id; }
 	uint32_t getLocalID() { return app_local_id; }

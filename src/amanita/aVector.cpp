@@ -13,32 +13,32 @@ value_t aVector::iterator::first(type_t type) {
 		for(index=0; index<(long)vec->sz; index++)
 			if(vec->list[index].type==type) return vec->list[index].value;
 	}
-	index = ITER_INDEX_EMPTY;
+	index = aITER_INDEX_EMPTY;
 	return 0;
 }
 
 value_t aVector::iterator::next(type_t type) {
-	if(!vec->sz) index = ITER_INDEX_EMPTY;
-	else if(index!=ITER_INDEX_AFTER_LAST) {
-		if(index<0) index = ITER_INDEX_BEFORE_FIRST;
+	if(!vec->sz) index = aITER_INDEX_EMPTY;
+	else if(index!=aITER_INDEX_AFTER_LAST) {
+		if(index<0) index = aITER_INDEX_BEFORE_FIRST;
 		if(!type) {
 			if(index<(long)vec->sz-1) return vec->list[++index].value;
 		} else for(index++; index<(long)vec->sz; index++)
 			if(vec->list[index].type==type) return vec->list[index].value;
-		index = ITER_INDEX_AFTER_LAST;
+		index = aITER_INDEX_AFTER_LAST;
 	}
 	return 0;
 }
 
 value_t aVector::iterator::previous(type_t type) {
-	if(!vec->sz) index = ITER_INDEX_EMPTY;
-	else if(index!=ITER_INDEX_BEFORE_FIRST) {
+	if(!vec->sz) index = aITER_INDEX_EMPTY;
+	else if(index!=aITER_INDEX_BEFORE_FIRST) {
 		if(index<0) index = vec->sz;
 		if(!type) {
 			if(index>0) return vec->list[--index].value;
 		} else for(index--; index>=0; index--)
 			if(vec->list[index].type==type) return vec->list[index].value;
-		index = ITER_INDEX_BEFORE_FIRST;
+		index = aITER_INDEX_BEFORE_FIRST;
 	}
 	return 0;
 }
@@ -49,7 +49,7 @@ value_t aVector::iterator::last(type_t type) {
 		for(index=vec->sz-1; index>=0; index--)
 			if(vec->list[index].type==type) return vec->list[index].value;
 	}
-	index = ITER_INDEX_EMPTY;
+	index = aITER_INDEX_EMPTY;
 	return 0;
 }
 
@@ -84,9 +84,9 @@ inline long align_to_size(long n,long sz) { return n<0? (sz+1+n<0? -1 : sz+1+n) 
 size_t aVector::insert(long n,value_t v,type_t t) {
 	if((n=align_to_size(n,sz))<0) return 0;
 	if(!list || sz==cap) resize(0);
-	if(t==TYPE_CHAR_P) v = (value_t)strdup((char *)v);
+	if(t==aCHAR_P) v = (value_t)strdup((char *)v);
 #if _WORDSIZE < 64
-	else if(t==TYPE_DOUBLE) {
+	else if(t==aDOUBLE) {
 		double *d = (double *)v;
 		v = (value_t)malloc(8),*(double *)v = *d;
 	}
@@ -96,17 +96,30 @@ size_t aVector::insert(long n,value_t v,type_t t) {
 	return ++sz;
 }
 
+size_t aVector::insert(long n,const char **v) {
+	size_t vsz;
+	for(vsz=0; v[vsz]; ++vsz);
+	if(vsz==0 || (n=align_to_size(n,sz))<0) return 0;
+	if(!list || sz+vsz>cap) resize(sz+vsz);
+	size_t i;
+	node *l;
+	if((size_t)n<sz) for(i=sz+vsz-1; i>=(size_t)n+vsz; --i) list[i] = list[i-vsz];
+	for(i=0,sz+=vsz; i<vsz; ++i)
+		l = &list[n+i],l->type = aCHAR_P,l->value = (value_t)strdup(v[i]);
+	return sz;
+}
+
 size_t aVector::insert(long n,const aVector &v) {
 	if((n=align_to_size(n,sz))<0) return 0;
 	if(!list || sz+v.sz>cap) resize(sz+v.sz);
 	size_t i;
 	node *l;
 	if((size_t)n<sz) for(i=sz+v.sz-1; i>=(size_t)n+v.sz; --i) list[i] = list[i-v.sz];
-	for(i=0; i<v.sz; ++i,++sz) {
+	for(i=0,sz+=v.sz; i<v.sz; ++i) {
 		l = &list[n+i],*l = v.list[i];
-		if(l->type==TYPE_CHAR_P) l->value = (value_t)strdup((char *)l->value);
+		if(l->type==aCHAR_P) l->value = (value_t)strdup((char *)l->value);
 #if _WORDSIZE < 64
-		else if(l->type==TYPE_DOUBLE) {
+		else if(l->type==aDOUBLE) {
 			double *d = (double *)l->value;
 			l->value = (value_t)malloc(8),*(double *)l->value = *d;
 		}
@@ -118,29 +131,29 @@ size_t aVector::insert(long n,const aVector &v) {
 void aVector::set(long n,value_t v,type_t t) {
 	if((n=align_to_size(n,sz))<0) return;
 	if(!list || sz==cap) resize(0);
-	if(t==TYPE_CHAR_P) v = (value_t)strdup((char *)v);
+	if(t==aCHAR_P) v = (value_t)strdup((char *)v);
 #if _WORDSIZE < 64
-	else if(t==TYPE_DOUBLE) {
+	else if(t==aDOUBLE) {
 		double *d = (double *)v;
 		v = (value_t)malloc(8),*(double *)v = *d;
 	}
 #endif
-	if(n<sz && list[n].type==TYPE_CHAR_P
+	if(n<(long)sz && (list[n].type==aCHAR_P
 #if _WORDSIZE < 64
-		|| list[n].type==TYPE_DOUBLE
+		|| list[n].type==aDOUBLE
 #endif
-		) free((void *)list[n].value);
+		)) free((void *)list[n].value);
 	list[n] = (node){ v,t };
-	if(n==sz) ++sz;
+	if(n==(long)sz) ++sz;
 }
 
 size_t aVector::remove(value_t v,type_t t) {
-	size_t n;
+	size_t i,n = 0;
 	if(v && sz) {
-		for(size_t i=0; i+n<sz; ++i) {
+		for(i=0; i+n<sz; ++i) {
 			while(list[i+n].value==v && (!t || list[i+n].type==t) && i+n<sz) {
 #if _WORDSIZE < 64
-				if(list[i+n].type==TYPE_DOUBLE) free((void *)list[i+n].value);
+				if(list[i+n].type==aDOUBLE) free((void *)list[i+n].value);
 #endif
 				n++;
 			}
@@ -153,9 +166,9 @@ size_t aVector::remove(value_t v,type_t t) {
 
 size_t aVector::remove(const char *v) {
 	size_t n = 0;
-	if(v && *v && sz) {
+	if(v && sz) {
 		for(size_t i=0; i+n<sz; ++i) {
-			while(list[i+n].type==TYPE_CHAR_P && i+n<sz && !strcmp((char *)list[i+n].value,v)) {
+			while(list[i+n].type==aCHAR_P && i+n<sz && !strcmp((char *)list[i+n].value,v)) {
 				free((void *)list[i+n].value);
 				n++;
 			}
@@ -166,12 +179,22 @@ size_t aVector::remove(const char *v) {
 	return n;
 }
 
+size_t aVector::remove(const char **v) {
+	size_t n = 0;
+	if(v && *v && sz) {
+		size_t i;
+		for(i=0; v[i]; ++i) n += remove(v[i]);
+		sz -= n;
+	}
+	return n;
+}
+
 void aVector::removeAt(long n) {
 	if(sz) {
 		if((n=align_to_size(n,sz))<0) return;
-		if(list[n].type==TYPE_CHAR_P
+		if(list[n].type==aCHAR_P
 #if _WORDSIZE < 64
-			|| list[n].type==TYPE_DOUBLE
+			|| list[n].type==aDOUBLE
 #endif
 				) free((void *)list[n].value);
 		for(size_t i=n+1; i<sz; ++i) list[i-1] = list[i];
@@ -186,7 +209,7 @@ long aVector::find(value_t v,type_t t) {
 
 long aVector::find(const char *v) {
 	for(size_t i=0; i<sz; ++i)
-      if(list[i].type==TYPE_CHAR_P && !strcmp((char *)list[i].value,v)) return (long)i;
+      if(list[i].type==aCHAR_P && !strcmp((char *)list[i].value,v)) return (long)i;
 	return -1;
 }
 
@@ -214,12 +237,12 @@ size_t aVector::split(const char *str,const char *delim,bool trim) {
 				}
 				if(trim) aString::trim(s1);
 //debug_output("s1=\"%s\"\n",s1);
-				if(*s1) insert(sz,(value_t)s1,TYPE_CHAR_P);
+				if(*s1) insert(sz,(value_t)s1,aCHAR_P);
 				s1 = s2;
 			}
 			free(buf);
 		} else {
-			insert(sz,(value_t)str,TYPE_CHAR_P);
+			insert(sz,(value_t)str,aCHAR_P);
 		}
 	}
 	return sz;
@@ -250,7 +273,7 @@ void aVector::trim() {
 
 void aVector::clear() {
 	if(list) {
-		for(size_t i=0; i<sz; ++i) if(list[i].type==TYPE_CHAR_P) free((void *)list[i].value);
+		for(size_t i=0; i<sz; ++i) if(list[i].type==aCHAR_P) free((void *)list[i].value);
 		free(list);
 	}
 	sz = 0,cap = 16,list = 0;
@@ -258,10 +281,14 @@ void aVector::clear() {
 
 
 size_t aVector::print(const char *fn) {
-	FILE *fp;
-	if(!fn || !*fn || !(fp=fopen(fn,"w"))) return 0;
-	size_t s = print(fp);
-	fclose(fp);
+	size_t s = 0;
+	if(fn && *fn) {
+		FILE *fp;
+		if((fp=fopen(fn,"wb"))) {
+			s = print(fp);
+			fclose(fp);
+		} else perror(fn);
+	}
 	return s;
 }
 
@@ -272,18 +299,17 @@ size_t aVector::print(FILE *fp) {
 		fflush(fp);
 		if(list[i].value) {
 			switch(list[i].type) {
-				case TYPE_VOID_P:fprintf(fp,"=%p",(void *)list[i].value);break;
-				case TYPE_INTPTR:fprintf(fp,"=%" PRIuPTR,(intptr_t)list[i].value);break;
+				case aVOID:fprintf(fp,"=%p\n",(void *)list[i].value);break;
+				case aINTPTR:fprintf(fp,"=%" PRIuPTR "\n",(intptr_t)list[i].value);break;
 #if _WORDSIZE == 64
-				case TYPE_DOUBLE:fprintf(fp,"=%f",*((double *)((void *)&list[i].value)));break;
+				case aDOUBLE:fprintf(fp,"=%f\n",*((double *)((void *)&list[i].value)));break;
 #else
-				case TYPE_FLOAT:fprintf(fp,"=%f",*((float *)((void *)&list[i].value)));break;
+				case aFLOAT:fprintf(fp,"=%f\n",*((float *)((void *)&list[i].value)));break;
 #endif
-				case TYPE_CHAR_P:fprintf(fp,"=\"%s\"",(char *)list[i].value);break;
-				case TYPE_OBJECT_P:fprintf(fp,"=%p",(void *)list[i].value);break;
+				case aCHAR_P:fprintf(fp,"=\"%s\"\n",(char *)list[i].value);break;
+				case aOBJECT:fprintf(fp,"=%p\n",(void *)list[i].value);break;
 			}
 		}
-		fprintf(fp,"\n");
 		fflush(fp);
 	}
 	fprintf(fp,"Size=%lu,Capacity=%lu\n",(unsigned long)sz,(unsigned long)cap);
@@ -291,21 +317,26 @@ size_t aVector::print(FILE *fp) {
 	return sz;
 }
 
-size_t aVector::load(const char *fn) {
-	FILE *fp;
-	if(!fn || !*fn || !(fp=fopen(fn,"rb"))) return 0;
-	size_t s = load(fp);
-	fclose(fp);
+size_t aVector::load(const char *fn,const char *l) {
+	size_t s = 0;
+	if(fn && *fn) {
+		FILE *fp;
+		if((fp=fopen(fn,"rb"))) {
+			s = load(fp,l);
+			fclose(fp);
+		} else perror(fn);
+	}
 	return s;
 }
 
-size_t aVector::load(FILE *fp) {
+size_t aVector::load(FILE *fp,const char *l) {
 	if(!fp) return 0;
 	aString line("",256);
+	if(!l) l = aString::endl;
 	for(size_t i=0; !feof(fp); ++i) {
 //debug_output("aHashtable::load(readPair)\n");
 		line.clear();
-		line.appendUntil(fp,"\r\n");
+		line.appendUntil(fp,l);
 		if(line) {
 			insert(sz,line);
 //debug_output("aHashtable::load(key='%s',val='%s')\n",key.array(),val.array());
@@ -314,27 +345,32 @@ size_t aVector::load(FILE *fp) {
 	return sz;
 }
 
-size_t aVector::save(const char *fn) {
-	FILE *fp;
-	if(!fn || !*fn || !(fp=fopen(fn,"wb"))) return 0;
-	size_t s = save(fp);
-	fclose(fp);
+size_t aVector::save(const char *fn,const char *l) {
+	size_t s = 0;
+	if(fn && *fn) {
+		FILE *fp;
+		if((fp=fopen(fn,"wb"))) {
+			s = save(fp,l);
+			fclose(fp);
+		} else perror(fn);
+	}
 	return s;
 }
 
-size_t aVector::save(FILE *fp) {
+size_t aVector::save(FILE *fp,const char *l) {
 	if(!fp) return 0;
+	if(!l) l = aString::endl;
 	for(size_t i=0; i<sz; ++i) if(list[i].value) {
 		switch(list[i].type) {
-			case TYPE_VOID_P:fprintf(fp,"%p\n",(void *)list[i].value);break;
-			case TYPE_INTPTR:fprintf(fp,"%" PRIuPTR "\n",(intptr_t)list[i].value);break;
+			case aVOID:fprintf(fp,"%p%s",(void *)list[i].value,l);break;
+			case aINTPTR:fprintf(fp,"%" PRIuPTR "%s",(intptr_t)list[i].value,l);break;
 #if _WORDSIZE == 64
-			case TYPE_DOUBLE:fprintf(fp,"%f\n",*((double *)((void *)&list[i].value)));break;
+			case aDOUBLE:fprintf(fp,"%f%s",*((double *)((void *)&list[i].value)),l);break;
 #else
-			case TYPE_FLOAT:fprintf(fp,"%f\n",*((float *)((void *)&list[i].value)));break;
+			case aFLOAT:fprintf(fp,"%f%s",*((float *)((void *)&list[i].value)),l);break;
 #endif
-			case TYPE_CHAR_P:fprintf(fp,"%s\n",(char *)list[i].value);break;
-			case TYPE_OBJECT_P:fprintf(fp,"%p\n",(void *)list[i].value);break;
+			case aCHAR_P:fprintf(fp,"%s%s",(char *)list[i].value,l);break;
+			case aOBJECT:fprintf(fp,"%p%s",(void *)list[i].value,l);break;
 		}
 	}
 	return sz;

@@ -11,8 +11,12 @@ int main(int argc, char *argv[]) {
 
 	http.get("www.google.com","");
 
-	FILE *fp = fopen("http.txt","w");
-	fwrite(http.getFile(),http.getFileSize(),1,fp);
-	fclose(fp);
+	const char *fn = "http.txt";
+	FILE *fp = fopen(fn,"wb");
+	if(fp) {
+		fwrite(http.getFile(),http.getFileSize(),1,fp);
+		fclose(fp);
+	} else perror(fn);
+	return 0;
 }
 

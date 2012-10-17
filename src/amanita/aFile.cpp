@@ -16,6 +16,7 @@
 #include <amanita/aFile.h>
 
 
+const char *aFile::dirsep = aFILE_DIRSEP;
 
 
 aFile &aFile::open(const char *a,const char *fn, ...) {
@@ -25,49 +26,47 @@ aFile &aFile::open(const char *a,const char *fn, ...) {
 	vsnprintf(buf,256,fn,args);
    va_end(args);
 	if(name) free(name);
-	if(file) fclose(file);
-	file = fopen(buf,a);
-	if(file) {
+	if(fp) fclose(fp);
+	if((fp=fopen(buf,a))) {
 		dir = strdup(buf);
 		char *p1 = strrchr(dir,'/');
 		char *p2 = strrchr(dir,'\\');
 		name = p1>p2? p1 : p2;
-		if(name) *name = '\0',name++;
-	}
+		if(name) *name++ = '\0';
+	} else perror(buf);
 	return *this;
 }
 
 aFile &aFile::close() {
 	if(dir) { free(dir);dir = 0,name = 0; }
-	if(file) { fclose(file);file = 0; }
+	if(fp) { fclose(fp);fp = 0; }
 	return *this;
 }
 
 aFile &aFile::read(char **data,size_t &len) {
 	*data = 0;
 	len = 0;
-	if(file) {
+	if(fp) {
 		len = size();
 		if(len>0) {
 			*data = (char *)malloc(len);
-			size_t n;
-			n = fread(*data,len,1,file);
+			fread(*data,len,1,fp);
 		}
 	}
 	return *this;
 }
 
 aFile &aFile::write(const char *data,size_t len) {
-	if(file) fwrite(data,len,1,file);
+	if(fp) fwrite(data,len,1,fp);
 	return *this;
 }
 
 size_t aFile::size() {
-	if(!file) return 0;
-	long n1 = ftell(file);
-	fseek(file,0,SEEK_END);
-	long n2 = ftell(file);
-	fseek(file,n1,SEEK_SET);
+	if(!fp) return 0;
+	long n1 = ftell(fp);
+	fseek(fp,0,SEEK_END);
+	long n2 = ftell(fp);
+	fseek(fp,n1,SEEK_SET);
 	return n2>0? (size_t)n2 : 0;
 }
 
@@ -107,25 +106,27 @@ time_t aFile::modified(const char *fn) {
 }
 
 long aFile::copy(const char *s,const char *d) {
+	long n = -1;
 	FILE *fps = fopen(s,"rb");
-	if(!fps) return -1;
-	FILE *fpd = fopen(d,"wb");
-	if(!fpd) return -1;
-	long n = copy(fps,fpd);
-	fclose(fps);
-	fclose(fpd);
+	if(fps) {
+		FILE *fpd = fopen(d,"wb");
+		if(fpd) {
+			n = copy(fps,fpd);
+			fclose(fps);
+		} else perror(d);
+		fclose(fpd);
+	} else perror(s);
 	return n;
 }
 
 long aFile::copy(FILE *s,FILE *d) {
 	if(!s || !d) return -1;
-	size_t i;
 	fseek(s,0,SEEK_END);
 	long n = ftell(s);
 	fseek(s,0,SEEK_SET);
 	char buf[n+1];
-	i = fread(buf,n,1,s);
-	i = fwrite(buf,n,1,d);
+	fread(buf,n,1,s);
+	fwrite(buf,n,1,d);
 	return n;
 }
 
@@ -272,8 +273,7 @@ void aFile::getSystemDir(char *dir,int l) {
 
 void aFile::getCurrentDir(char *dir,int l) {
 #ifdef USE_GLIB
-	char *p;
-	p = getcwd(dir,l);
+	getcwd(dir,l);
 #endif
 #ifdef USE_WIN32
 #ifdef USE_WCHAR

@@ -149,7 +149,7 @@ void aHttp::setRequestHeader(const char *key,const char *value) {
 	else if(headers.contains(key)) headers.remove(key);
 }
 
-void aHttp::setRequestHeader(HTTP_HEADER key,const char *value) {
+void aHttp::setRequestHeader(aHTTP_HEADER key,const char *value) {
 	setRequestHeader(http_headers[key],value);
 }
 
@@ -173,17 +173,15 @@ void aHttp::setFormFile(const char *key,const char *file,const char *content,boo
 		packet *p = (packet *)malloc(sizeof(packet));
 		bool loaded = false;
 		if(!data) {
-			FILE *fp = fopen(file,binary? "rb" : "r");
+			FILE *fp = fopen(file,"rb");
 			if(fp) {
 				fseek(fp,0,SEEK_END);
 				len = ftell(fp);
 				if(len>0) {
 					fseek(fp,0,SEEK_SET);
 					data = malloc(len);
-					if(binary) {
-						size_t n;
-						n = fread(data,len,1,fp);
-					} else {
+					if(binary) fread(data,len,1,fp);
+					else {
 						int c;
 						char *p1 = (char *)data;
 						for(len=0; (c=fgetc(fp))!=EOF && c; *p1++ = c,len++);
@@ -192,7 +190,7 @@ void aHttp::setFormFile(const char *key,const char *file,const char *content,boo
 					loaded = true;
 				}
 				fclose(fp);
-			}
+			} else perror(file);
 		}
 		if(!data || len<=0) free(p);
 		else {
@@ -206,7 +204,7 @@ void aHttp::setFormFile(const char *key,const char *file,const char *content,boo
 void aHttp::removeFormValue(const char *key) {
 	type_t type;
 	void *p = (void *)form.remove(key,type);
-	if(p && type==TYPE_VOID_P) {
+	if(p && type==aVOID) {
 		packet &pack = *(packet *)p;
 		free(pack.file);
 		free(pack.content);
@@ -221,7 +219,7 @@ void aHttp::clearForm() {
 	aHashtable::iterator iter = form.iterate();
 	void *p;
 	while((p=(void *)iter.next()))
-		if(iter.valueType()==TYPE_VOID_P) {
+		if(iter.valueType()==aVOID) {
 			packet &pack = *(packet *)p;
 			free(pack.file);
 			free(pack.content);
@@ -234,7 +232,7 @@ void aHttp::clearForm() {
 
 
 const char *aHttp::get(const char *host,const char *url) {
-	return request(host,url,HTTP_METHOD_GET);
+	return request(host,url,aHTTP_METHOD_GET);
 }
 
 const char *aHttp::getf(const char *host,const char *url, ...) {
@@ -262,23 +260,23 @@ const char *aHttp::post(const char *host,const char *url) {
 		};
 debug_output("Boundary 1: %s\n",boundary.toCharArray());
 		while((p=(void *)iter.next())) {
-			if(iter.valueType()==TYPE_VOID_P) p1 = (char *)((packet *)p)->data;
+			if(iter.valueType()==aVOID) p1 = (char *)((packet *)p)->data;
 			else p1 = (char *)p;
 			while((p1=strstr(p1,boundary.toCharArray()))) boundary.append(rnd.alphanum());
 		}
 		iter = form.iterate();
-		while((p=(void *)iter.next())) if(iter.valueType()==TYPE_CHAR_P)
+		while((p=(void *)iter.next())) if(iter.valueType()==aCHAR_P)
 			file << s[0] << boundary << s[1] // "--".boundary."\r\n"
-				<< http_headers[HTTP_CONTENT_DISPOSITION] << s[3] << s[7]
+				<< http_headers[aHTTP_CONTENT_DISPOSITION] << s[3] << s[7]
 					<< ';' << s[5] << (const char *)iter.key() << '"' << s[2]
 						<< (const char *)p << s[1];
 		iter = form.iterate();
-		while((p=(void *)iter.next())) if(iter.valueType()==TYPE_VOID_P) {
+		while((p=(void *)iter.next())) if(iter.valueType()==aVOID) {
 			file << s[0] << boundary << s[1] // "--".boundary."\r\n"
-				<< http_headers[HTTP_CONTENT_DISPOSITION] << s[3] << s[7]
+				<< http_headers[aHTTP_CONTENT_DISPOSITION] << s[3] << s[7]
 					<< ';' << s[5] << (const char *)iter.key() << '"'
 						<< ';' << s[6] << ((packet *)p)->file << '"' << s[1]
-							<< http_headers[HTTP_CONTENT_TYPE] << s[3] << ((packet *)p)->content << s[1];
+							<< http_headers[aHTTP_CONTENT_TYPE] << s[3] << ((packet *)p)->content << s[1];
 			if(((packet *)p)->binary) file << s[8] << s[1];
 			file << s[1];
 			file.append((const char *)((packet *)p)->data,((packet *)p)->len);
@@ -286,8 +284,8 @@ debug_output("Boundary 1: %s\n",boundary.toCharArray());
 		}
 		file << s[0] << boundary << s[0] << s[1];
 		char mime[32+boundary.length()];
-		sprintf(mime,"%s;%s%s",http_mimes[HTTP_MULTIPART_FORM_DATA],s[4],boundary.toCharArray());
-		headers.put(http_headers[HTTP_CONTENT_TYPE],mime);
+		sprintf(mime,"%s;%s%s",http_mimes[aHTTP_MULTIPART_FORM_DATA],s[4],boundary.toCharArray());
+		headers.put(http_headers[aHTTP_CONTENT_TYPE],mime);
 	} else {
 		aString key,value;
 		if(form) while(iter.next()) {
@@ -298,9 +296,9 @@ debug_output("Boundary 1: %s\n",boundary.toCharArray());
 			value.encodeURL();
 			file << key << '=' << value;
 		}
-		headers.put(http_headers[HTTP_CONTENT_TYPE],http_mimes[HTTP_FORM_URLENCODED]);
+		headers.put(http_headers[aHTTP_CONTENT_TYPE],http_mimes[aHTTP_FORM_URLENCODED]);
 	}
-	return request(host,url,HTTP_METHOD_POST,file.toCharArray(),file.length());
+	return request(host,url,aHTTP_METHOD_POST,file.toCharArray(),file.length());
 }
 
 const char *aHttp::postf(const char *host,const char *url, ...) {
@@ -315,7 +313,7 @@ debug_output("aHttp::postf(2: host=%s,url=%s)\n",host,str.toCharArray());
 }
 
 
-const char *aHttp::request(const char *host,const char *url,HTTP_METHOD method,const char *data,size_t len) {
+const char *aHttp::request(const char *host,const char *url,aHTTP_METHOD method,const char *data,size_t len) {
 	response.removeAll();
 	body.clear();
 
@@ -371,11 +369,11 @@ debug_output("aHttp::request(host=%s,url=%s)\n",host,url);
 			char buf[2049];
 			t2 = http_clock();
 			{
-				if(!headers.contains(http_headers[HTTP_HOST])) headers.put(http_headers[HTTP_HOST],host);
-				if(!headers.contains(http_headers[HTTP_CONNECTION])) headers.put(http_headers[HTTP_CONNECTION],"close");
+				if(!headers.contains(http_headers[aHTTP_HOST])) headers.put(http_headers[aHTTP_HOST],host);
+				if(!headers.contains(http_headers[aHTTP_CONNECTION])) headers.put(http_headers[aHTTP_CONNECTION],"close");
 				if(data && len==0) len = strlen(data);
 				sprintf(buf,"%lu",(unsigned long)len);
-				headers.put(http_headers[HTTP_CONTENT_LENGTH],buf);
+				headers.put(http_headers[aHTTP_CONTENT_LENGTH],buf);
 				aString header(2048);
 				header << http_methods[method] << " /" << url << " HTTP/1.1\r\n";
 				aHashtable::iterator iter = headers.iterate();
@@ -438,10 +436,10 @@ debug_output("aHttp::request(header: %s = %s)\n",p1,p2);
 							if(!strncmp(buf,"HTTP/",5)) sscanf(buf,"HTTP/%f %d",&ver,&status);
 						}
 
-						p1 = (char *)response.getString(http_headers[HTTP_TRANSFER_ENCODING]);
+						p1 = (char *)response.getString(http_headers[aHTTP_TRANSFER_ENCODING]);
 debug_output("aHttp::request(encoding: %s)\n",p1);
 						//chunked = p1? strcmp(p1,"identity")!=0 : true;
-						p2 = (char *)response.getString(http_headers[HTTP_CONTENT_LENGTH]);
+						p2 = (char *)response.getString(http_headers[aHTTP_CONTENT_LENGTH]);
 debug_output("aHttp::request(content length: %s)\n",p2);
 						n = p2? atol(p2) : 0;
 						chunked = p2? false : true;
@@ -558,7 +556,7 @@ debug_output("aHttp::request(r=%d)\n",r);
 		fflush(stderr);
 		body.free();
 	}
-	headers.remove(http_headers[HTTP_HOST]);
+	headers.remove(http_headers[aHTTP_HOST]);
 	clearForm();
 
 fprintf(stdout,"Time alltogether: %d\nTime to init: %d\nTime to send: %d\nTime until response: %d\nTime to download: %d\n"
@@ -572,8 +570,8 @@ const char *aHttp::getResponseHeader(const char *key) {
 	return response.getString(key);
 }
 
-const char *aHttp::getResponseHeader(HTTP_HEADER key) {
-	if(key>=HTTP_ACCEPT && key<=HTTP_USER_AGENT) return response.getString(http_headers[key]);
+const char *aHttp::getResponseHeader(aHTTP_HEADER key) {
+	if(key>=aHTTP_ACCEPT && key<=aHTTP_USER_AGENT) return response.getString(http_headers[key]);
 	return 0;
 }
 

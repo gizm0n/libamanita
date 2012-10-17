@@ -26,6 +26,9 @@
 #ifndef WINVER
 #define WINVER 0x0501
 #endif
+#ifdef _WIN32_IE
+#undef _WIN32_IE
+#endif
 #define _WIN32_IE	0x0501
 #include <windows.h>
 

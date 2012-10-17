@@ -57,7 +57,10 @@ void aPanel::deleteButtons() {
 }
 
 void aPanel::create(aWindow *wnd,uint32_t st) {
-	int i,n;
+	int n;
+#ifdef USE_WIN32
+	int i;
+#endif
 	aPanelButton *b1;
 #ifdef USE_GTK
 	GtkToolItem *item;

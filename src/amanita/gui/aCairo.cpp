@@ -109,7 +109,6 @@ void aCairo::beginPaint(GtkWidget *widget,GdkEventExpose *event) {
 
 #ifdef USE_WIN32
 bool aCairo::drawItem(LPDRAWITEMSTRUCT dis) {
-	RECT r;
 	if(width>0 && height>0) {
 		if(event_handler) {
 			if((style&aCAIRO_BUFFERED)) {
