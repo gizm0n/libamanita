@@ -280,41 +280,58 @@ static const entity HTMLentities[256] = {
 static const char *escape_sequences = "'\"?\\\a\b\f\n\r\t\v";
 static const char *escape_chars = "0      abtnvfr";
 
+/* Comment types */
 static const char *comments[] = {
 	/* Line Comments: */
-	"//",								// 0 - C/C++, Java, JavaScript
-	"#",								// 1 - Bash, Perl
-	"//","#",						// 2 - PHP
-	";","#",							// 4 - CFG/INI
+	"//",								// 0 - C/C++, Java, JavaScript, PHP
+	";","#","!",					// 1 - Bash, Perl, CFG, INI, Properties
+	"--",								// 4 - SQL
 	/* Block Comments: */
-	"/*","*/",						// 6 - C/C++, Java, JavaScript, PHP
-	"<!--","-->",					// 8 - HTML
+	"/*","*/",						// 5 - C/C++, Java, JavaScript, PHP
+	"{-","-}",						// 7 - Haskell
+	"<!--","-->",					// 9 - HTML
 };
 
+/* String-length for comment types */
 static const int comments_len[] = {
 	/* Line Comments: */
-	2,									// C/C++, Java, JavaScript
-	1,									// Bash, Perl
-	2,1,								// PHP
-	1,1,								// CFG/INI
+	2,									// 0 - C/C++, Java, JavaScript
+	1,1,1,							// 1 - Bash, Perl, CFG, INI, Properties
+	2,									// 4 - SQL
 	/* Block Comments: */
-	2,2,								// C/C++, Java, JavaScript, PHP
-	4,3,								// HTML
+	2,2,								// 5 - C/C++, Java, JavaScript, PHP
+	2,2,								// 7 - Haskell
+	4,3,								// 9 - HTML
 };
 
+#define C_LN		0
+#define CFG_LN		1
+#define PL_LN		2
+#define SQL_LN		4
+#define C_BL		5
+#define H_BL		7
+#define HTML_BL	9
+
+/* [0] Index i comments-array for line-comments
+ * [1] Range in comments-array (number of line-comment types), or zero if no line-comment type exist in language
+ * [2] Index in comments-array for block-comments
+ * [3] Range in comments-array (number of block-comment types), or zero if no block-comment type exist in language */
 static const int comments_lang[aLANG_LANGS][4] = {
-	{ 0,1,6,2 },						// C
-	{ 0,1,6,2 },						// C++
-	{ 0,1,6,2 },						// Java
-	{ 0,1,6,2 },						// JavaScript
-	{ 2,2,6,2 },						// PHP
-	{ 1,1,0,0 },						// Perl
-	{ 1,1,0,0 },						// Bash
-	{ 1,1,0,0 },						// Shell
-	{ 0,0,8,2 },						// HTML
-	{ 0,0,8,2 },						// XML
-	{ 4,2,0,0 },						// CFG
-	{ 4,2,0,0 },						// INI
+	/* Bash */					{ PL_LN,		1,		0,0 			}, // # line comment
+	/* C */						{ C_LN,		1,		C_BL,		2	}, // C comments
+	/* C++ */					{ C_LN,		1,		C_BL,		2	}, // C comments
+	/* CFG */					{ CFG_LN,	2,		0,0			}, // ; and # line comments
+	/* Haskell */				{ SQL_LN,	1,		H_BL,		2 	}, // -- line comments, {- -} block comments
+	/* HTML */					{ 0,0,				HTML_BL,	2 	}, // HTML block comments
+	/* INI */					{ CFG_LN,	2,		0,0			}, // ; line comments
+	/* Java */					{ C_LN,		1,		C_BL,		2	}, // C comments
+	/* JavaScript */			{ C_LN,		1,		C_BL,		2	}, // C comments
+	/* Perl */					{ PL_LN,		1,		0,0			}, // # line comment, POD-documentation excluded
+	/* PHP */					{ C_LN,		2,		C_BL,		2	}, // C-comments
+	/* Properties (Java) */	{ PL_LN,		2,		0,0			}, // # and ! line comments
+	/* Shell */					{ PL_LN,		1,		0,0			}, // # line comments
+	/* SQL */					{ SQL_LN,	1,		0,0			}, // -- line comments
+	/* XML */					{ 0,0,				HTML_BL,	2	}, // HTML block comments
 };
 
 #define __ -1
@@ -996,21 +1013,23 @@ long aString::matchQuotes(long o,long l) const {
 }
 
 long aString::matchToken(const char *delim,long o,long l,int f) const {
+	long i,j = -1,n,dl = strlen(delim);
 	if(o<0) o = (long)len+o;
 	if(l<=0) l = (long)len-o+l;
 	if(o>=0 && l>0 && o+l<=(long)len) {
 		if(f&aTOKEN_LTRIM) ltrim(o,l);
-		for(long i=o,n=o+l,dl=strlen(delim); i<n; ++i)
+		for(i=o,n=o+l; i<n; ++i)
 			if(str[i]=='\\' && (f&aTOKEN_ESCAPE)) ++i;
 			else if((f&aTOKEN_DELIM_STR)? strncmp(delim,&str[i],dl)==0 : strchr(delim,str[i])!=NULL) {
-				if(f&aTOKEN_RTRIM) rtrim(0,i);
-				return i;
-			}
+				j = i;
+				if((f&aTOKEN_DELIM_STR) || !isSpace(str[i])) break;
+			} else if(j>=0) break;
+		if(f&aTOKEN_RTRIM) rtrim(0,j);
 	}
-	return -1;
+	return j;
 }
 
-long aString::matchValue(int lang,long o,long l) const {
+long aString::matchValue(int lang,long o,long l,int f) const {
 	if(o<0) o = (long)len+o;
 	if(l<=0) l = (long)len-o+l;
 	long i = o,n;
@@ -1027,7 +1046,7 @@ long aString::matchValue(int lang,long o,long l) const {
 			else if(q && c==q) return i+1;
 			else if(!q) {
 				if(isBreak(c)) return i;
-				else {
+				else if(!(f&aMATCH_COMMENTS)) {
 					// Match line comment
 					for(j=0; j<cl[1]; ++j)
 						if(c==*cc[j] && (ccl[j]==1 || !strncmp(&str[i],cc[j],ccl[j]))) n = 0;
@@ -1077,8 +1096,6 @@ long aString::skipComments(int lang,long o,long l) const {
 		const int *ccl = &comments_len[cl[0]],*cbl = cl[3]? &comments_len[cl[2]] : 0;
 		int j;
 		for(i=o,n=o+l; i<n; ++i) {
-//			// Skip whitespace
-//			while(isSpace(str[i])) ++i;
 			// Skip line comment
 			for(j=0; j<cl[1]; ++j)
 				if(str[i]==*cc[j] && (ccl[j]==1 || !strncmp(&str[i],cc[j],ccl[j]))) {
@@ -1189,7 +1206,7 @@ size_t aString::replace(const char **arr) {
 }
 
 size_t aString::stripComments(int lang,long o,long l) {
-	size_t i,m = 0,n;
+	long i,m = 0,n;
 	if(o<0) o = (long)len+o;
 	if(l<=0) l = (long)len-o+l;
 //debug_output("aString::stripComments(o=%d,l=%d)\n",(int)o,(int)l);
@@ -1197,21 +1214,26 @@ size_t aString::stripComments(int lang,long o,long l) {
 		const int *cl = comments_lang[lang];
 		const char **cc = &comments[cl[0]],**cb = cl[3]? &comments[cl[2]] : 0;
 		const int *ccl = &comments_len[cl[0]],*cbl = cl[3]? &comments_len[cl[2]] : 0;
-		int j;
-		long f;
+		long j,f;
 //debug_output("cl[%d,%d,%d,%d]\n",cl[0],cl[1],cl[2],cl[3]);
 //for(j=0; j<cl[1]; ++j)
 //debug_output("cc[%d]: %s\n",j,cc[j]);
 //if(cb)
 //debug_output("cb: %s %s\n",cb[0],cb[1]);
 		for(i=o,n=o+l,m=0; i+m<n; ++i) {
-			// Skip line comment
+			if(isQuote(str[i+m])) {
+				f = matchQuotes(i+m,n-(i+m));
+				if(f==-1) f = n+1;
+				if(m>0) for(; i+m<f; ++i) str[i] = str[i+m];
+				else i = f;
+			}
+			// Strip line comment
 			for(j=0; j<cl[1]; ++j)
 				if(str[i+m]==*cc[j] && (ccl[j]==1 || !strncmp(&str[i+m],cc[j],ccl[j]))) {
 //debug_output("aString::stripComments(line[i=%d,m=%d]: %s)\n",(int)i,(int)m,cc[j]);
 					for(m+=ccl[j]; !isBreak(str[i+m]); ++m);
 				}
-			// Skip block comment
+			// Strip block comment
 			if(cb && str[i+m]==*cb[0] && (cbl[0]==1 || !strncmp(&str[i+m],cb[0],cbl[0]))) {
 //debug_output("aString::stripComments(block[i=%d,m=%d]: %s)\n",(int)i,(int)m,cb[0]);
 				f = find(cb[1],i+m,l-(i+m-o),cbl[1]);
@@ -1221,12 +1243,12 @@ size_t aString::stripComments(int lang,long o,long l) {
 			if(m>0) str[i] = str[i+m];
 		}
 		if(m>0) {
-			for(; i+m<len; ++i) str[i] = str[i+m];
+			for(; i+m<(long)len; ++i) str[i] = str[i+m];
 			str[i] = '\0';
 		}
 	}
 //debug_output("aString::stripComments(m=%d)\n",(int)m);
-	return m;
+	return (size_t)m;
 }
 
 /*size_t aString::stripCComments() {
@@ -1382,17 +1404,15 @@ void aString::unescape(long o,long l,int f) {
 		if(o<0) o = (long)len+o;
 		if(l<=0) l = (long)len-o+l;
 		if(o>=0 && l>0 && o+l<=(long)len) {
-//debug_output("aString::unescape(str: \"%s\", len:%d, o:%ld, l:%ld)\n",&str[o],(int)len,o,l);
 			long i;
 			for(i=o; i<=o+l; ++i) if(str[i]=='\\') break; // Skip string until first escape sequence.
 			if(i<(long)len) {
 				int j,m,n;
 				uint32_t c,u;
 				const char *p;
-				for(n=0; i<=(long)len; ++i) {
-					c = str[i+n];
-					if(i<o+l && c=='\\') {
-						c = str[i+ ++n];
+				for(n=0; i+n<=(long)len; ++i)
+					if(i<o+l && (c=str[i+n])=='\\') {
+						++n,c = str[i+n];
 						if(c!=' ' && (p=strchr(escape_chars,c)) &&
 							(!isQuote(c) || (f&aESCAPE_QUOTE))) str[i] = (char)(p-escape_chars);
 						else if(c=='x' && (f&aESCAPE_HEX)) str[i] = (fromHex(str[i+n+1])<<4)|fromHex(str[i+n+2]),n += 2;
@@ -1405,7 +1425,6 @@ void aString::unescape(long o,long l,int f) {
 							} else str[i] = (char)u;
 						} else str[i] = (char)c;
 					} else str[i] = (char)c;
-				}
 				len -= n;
 			}
 		}

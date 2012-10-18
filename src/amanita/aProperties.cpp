@@ -6,12 +6,22 @@
 #include <amanita/aString.h>
 
 
-static const char *key_escape_chars = ";#=:";
+static const char *comment_chars[] = { ";#","#!" };
+static const char *key_escape_chars[] = { ";#=:","#!=: " };
+static const char *key_delim_chars[] = { "=:\n","=: \t\n" };
 
 
 aObject_Inheritance(aProperties,aCollection)
 
-aProperties::aProperties(style_t st) : aCollection(),first(0),last(0),table(0),full(0),style(st) { cap = 11; }
+aProperties::aProperties(int l,style_t st) : aCollection(),first(0),last(0),table(0),full(0),lang(l),style(st) {
+	cap = 11;
+	if(lang!=aLANG_CFG && lang!=aLANG_INI && lang!=aLANG_PROPERTIES) lang = aLANG_CFG;
+	if(lang==aLANG_PROPERTIES)
+		style &= ~(aPROP_STYLE_SECTIONS|aPROP_STYLE_VALUE_COMMENTS|aPROP_STYLE_KEY_INDENT);
+	cc = comment_chars[lang==aLANG_PROPERTIES? 1 : 0];
+	kec = key_escape_chars[lang==aLANG_PROPERTIES? 1 : 0];
+	kdc = key_delim_chars[lang==aLANG_PROPERTIES? 1 : 0];
+}
 
 aProperties::~aProperties() {
 	node *n1 = first,*n2;
@@ -23,39 +33,65 @@ aProperties::~aProperties() {
 	first = last = 0,table = 0,cap = sz = 0;
 }
 
-aProperties::node::node(const char *k,value_t v,type_t vt,const char *i,const char *d,char q,const char *c) : v_type(vt),list(0),table(0) {
-	key = k? strdup(k) : 0;
+aProperties::node::node(const char *k,const char *v,const char *i,const char *d,char q,const char *c) : list(0),table(0) {
+	key = k && *k? strdup(k) : 0;
 	hash = 0;
-	if(v_type==aCHAR_P) value = (value_t)strdup((char *)v);
-	else if(v_type==aDOUBLE) {
-		value = (value_t)malloc(sizeof(double));
-		*((double *)value) = *((double *)v);
-	} else value = v;
-	ind = i? strdup(i) : 0;
-	delim = d? strdup(d) : 0;
+	setValue(v);
+	ind = i && *i? strdup(i) : 0;
+	delim = d && *d? strdup(d) : 0;
 	quot = q;
-	comment = c? strdup(c) : 0;
+	comment = c && *c? strdup(c) : 0;
 }
 
 aProperties::node::~node() {
 	if(key) free(key);
 	if(value) {
 		if(v_type==aCHAR_P) free((char *)value);
+#if __WORDSIZE < 64
 		else if(v_type==aDOUBLE) free((double *)value);
+#endif
 	}
 	if(ind) free(ind);
 	if(delim) free(delim);
 	if(comment) free(comment);
 }
 
+void aProperties::node::setValue(const char *v) {
+	if(!v) value = 0,v_type = aEMPTY;
+	else {
+		const char *p;
+		int n;
+		for(p=v,n=0; *p; ++p)
+			if((*p<'0' || *p>'9') && *p!='.') break;
+			else if(*p=='.') ++n;
+		if(*p) value = (value_t)strdup(v),v_type = aCHAR_P;
+#if __WORDSIZE < 64
+		else if(n>0) {
+			value = (value_t)malloc(sizeof(double));
+			*((double *)value) = atof(v),v_type = aDOUBLE;
+		}
+#else
+		else if(n>0) {
+			double d = atof(v);
+			value = *(value_t *)((void *)&d),v_type = aDOUBLE;
+//debug_output("double value: %lf[%lf]\n",*(double *)&value,atof(v));
+		}
+#endif
+		else value = (value_t)atol(v),v_type = aINTPTR;
+	}
+}
+
 void aProperties::getKey(aString &s,const char *section,const char *key) {
 	long l = 0;
 	if(section && *section) {
 		s = section;
-		s.escape(0,0,key_escape_chars,aESCAPE_HEX);
+		s.escape(0,0,kec,aESCAPE_HEX);
+		if(!key || !*key) return;
 		s << '#',l = s.length(),s << key;
-	} else s = key;
-	s.escape(l,0,key_escape_chars,aESCAPE_HEX);
+	} else if(!key || !*key) return;
+	else s = key;
+	s.escape(l,0,kec,aESCAPE_HEX);
+//debug_output("key: %s\n",(const char *)s);
 }
 
 void aProperties::rehash(style_t st) {
@@ -74,7 +110,7 @@ void aProperties::rehash(style_t st) {
 		node *n1,*n2;
 		if(st!=style) {
 			for(i=0; i<cap; ++i) if((n1=t1[i])) while(n1) {
-				n1->hash = aString::crc32((char *)n1->key,style&aHASH_STYLE_CASE_INSENSITIVE);
+				n1->hash = aString::crc32((char *)n1->key,style&aPROP_STYLE_CASE_INSENSITIVE);
 				n2 = n1->table,h = n1->hash%c,n1->table = table[h],table[h] = n1,n1 = n2;
 			}
 		} else  for(i=0; i<cap; ++i) if((n1=t1[i])) while(n1)
@@ -86,7 +122,7 @@ void aProperties::rehash(style_t st) {
 	style = st;
 	full = (size_t)(cap*3/4);
 //printTable(stderr);
-debug_output("rehash: st=%d, sz=%d, full=%d, cap=%d\n",(int)st,(int)sz,(int)full,(int)cap);
+//debug_output("rehash: st=%d, sz=%d, full=%d, cap=%d\n",(int)st,(int)sz,(int)full,(int)cap);
 }
 
 void aProperties::addNode(node *n) {
@@ -98,14 +134,11 @@ void aProperties::addNode(node *n) {
 
 void aProperties::putNode(node *n) {
 /*	if(sz && !(style&aHASH_STYLE_KEY_MULTIPLES)) {
-		node *n1 = table[aString::crc32(key,style&aHASH_STYLE_CASE_INSENSITIVE)%cap];
-		if(style&aHASH_STYLE_CASE_INSENSITIVE) while(n1) {
-			if(!aString::stricmp(n1->key,n->key)) break;
-			n1 = n1->table;
-		} else while(n1) {
-			if(!strcmp(n1->key,n->key)) break;
-			n1 = n1->table;
-		}
+		node *n1 = table[aString::crc32(key,style&aPROP_STYLE_CASE_INSENSITIVE)%cap];
+		if(style&aHASH_STYLE_CASE_INSENSITIVE) for(; n1; n1=n1->table)
+			if(n->hash==n1->hash && !aString::stricmp(n1->key,n->key)) break;
+		else for(; n1; n1=n1->table)
+			if(n->hash==n1->hash && !strcmp(n1->key,n->key)) break;
 		if(n1) {
 			node n2;
 			n2 = *n1,*n1 = *n,*n = n2;
@@ -115,26 +148,106 @@ void aProperties::putNode(node *n) {
 	}*/
 //debug_output("putNode: %s\n",n->key);
 	if(sz==full) rehash(style);
-	n->hash = aString::crc32(n->key,style&aHASH_STYLE_CASE_INSENSITIVE);
-	hash_t h = n->hash%cap;
-	n->table = table[h],table[h] = n;
+	n->hash = aString::crc32(n->key,style&aPROP_STYLE_CASE_INSENSITIVE);
+	hash_t c = n->hash%cap;
+	n->table = table[c],table[c] = n;
 	++sz;
-debug_output("put: \"%s\"[%d,%08x] => table[\"%s\"]\n",n->key,(int)h,n->hash,table[h] && table[h]->table? table[h]->table->key : "empty");
-printTable(stderr);
+//debug_output("put: \"%s\"[%d,%08x] => table[\"%s\"]\n",n->key,(int)c,n->hash,table[h] && table[h]->table? table[h]->table->key : "empty");
+//printTable(stderr);
+}
+
+aProperties::node *aProperties::removeNode(const char *key) {
+	if(!sz) return 0;
+	hash_t h = aString::crc32(key,style&aPROP_STYLE_CASE_INSENSITIVE);
+	int c = h%cap;
+	node *n = table[c],*n0 = 0;
+	if(style&aPROP_STYLE_CASE_INSENSITIVE) for(; n; n0=n,n=n->table) {
+		if(n->hash==h && !aString::stricmp(n->key,key)) break;
+	} else for(; n; n0=n,n=n->table)
+		if(n->hash==h && !strcmp((char *)n->key,key)) break;
+	if(n) {
+		if(n0) n0->table = n->table;
+		else table[c] = n->table;
+	}
+	return n;
+}
+
+aProperties::node *aProperties::getNode(const char *key) {
+	if(!sz) return 0;
+	hash_t h = aString::crc32(key,style&aPROP_STYLE_CASE_INSENSITIVE);
+	node *n = table[h%cap];
+	if(style&aPROP_STYLE_CASE_INSENSITIVE) for(; n; n=n->table) {
+		if(n->hash==h && !aString::stricmp(n->key,key)) break;
+	} else for(; n; n=n->table)
+		if(n->hash==h && !strcmp((char *)n->key,key)) break;
+	return n;
+}
+
+void aProperties::set(const char *section,const char *key,const char *value) {
+	if(key) {
+		aString s;
+		node *n,*n1 = 0,*n0 = 0;
+		if(!(style&aPROP_STYLE_SECTIONS)) section = 0;
+		getKey(s,section,key);
+		n = getNode((const char *)s);
+		if(n) {
+			if(n->v_type==aCHAR_P) free((char *)n->value);
+#if __WORDSIZE < 64
+			else if(n->v_type==aDOUBLE) free((double *)n->value);
+#endif
+			if(value) n->value = (value_t)strdup(value),n->v_type = aCHAR_P;
+			else n->value = 0,n->v_type = aEMPTY;
+			return;
+		}
+		n = new node((const char *)s,value,0,0,0,0);
+		if(section) {
+			getKey(s,section,0);
+			n1 = getNode((const char *)s);
+			if(!n1) n1 = last;
+			else for(; n1->list; n0=n1,n1=n1->list)
+				if(n1->list->key && n1->list->v_type==aEMPTY) break; // Find last key-value-pair in section.
+		} else if(first && ((first->key && first->v_type!=aEMPTY) ||
+					(!first->key && first->comment)))
+			for(n1=first; n1->list; n0=n1,n1=n1->list)
+				if(n1->list->key && n1->list->v_type==aEMPTY) break; // Find last key-value-pair before first section.
+		if(n1) {
+			if(!n1->key && !n1->value && n1->comment && n0) n1 = n0;
+			if(n1==last) {
+				if(section) addNode(new node((const char *)s,0,0,0,0,0));
+				n1 = last,last = n;
+			}
+			n->list = n1->list,n1->list = n;
+		} else n->list = first,first = n;
+		putNode(n);
+//debug_output("set: \"%s\"[%08x] => list[\"%s\"]\n",n->key,n->hash,n->list? n->list->key : "empty");
+//printTable(stderr);
+	}
+}
+
+void aProperties::remove(const char *section,const char *key) {
+	if(key) {
+		aString s;
+		node *n,*n1 = 0;
+		if(!(style&aPROP_STYLE_SECTIONS)) section = 0;
+		getKey(s,section,key);
+		n = removeNode((const char *)s);
+		if(!n) return;
+		if(section) {
+			getKey(s,section,0);
+			n1 = getNode((const char *)s);
+			if(n1) for(; n1->list && n1->list!=n; n1=n1->list);
+		} else if(first==n) n1 = first;
+		else for(n1=first; n1->list && n1->list!=n; n1=n1->list);
+		if(n1==first) first = n->list;
+		else n1->list = n->list;
+		delete n;
+	}
 }
 
 value_t aProperties::get(const char *key,type_t &type) {
+//debug_output("get: %s\n",key);
+	node *n = getNode(key);
 	type = aEMPTY;
-	if(!sz) return 0;
-	hash_t h = aString::crc32(key,style&aHASH_STYLE_CASE_INSENSITIVE);
-	node *n = table[h%cap];
-	if(style&aHASH_STYLE_CASE_INSENSITIVE) while(n) {
-		if(n->hash==h && !aString::stricmp(n->key,key)) break;
-		n = n->table;
-	} else while(n) {
-		if(n->hash==h && !strcmp((char *)n->key,key)) break;
-		n = n->table;
-	}
 	if(!n) return 0;
 	type = n->v_type;
 	return n->value;
@@ -142,8 +255,8 @@ value_t aProperties::get(const char *key,type_t &type) {
 
 value_t aProperties::get(const char *section,const char *key,type_t &type) {
 	aString s;
+	if(!(style&aPROP_STYLE_SECTIONS)) section = 0;
 	getKey(s,section,key);
-//debug_output("get: %s\n",(const char *)s);
 	return get((const char *)s,type);
 }
 
@@ -184,7 +297,7 @@ size_t aProperties::print(FILE *fp) {
 //				fputs((p=strchr(n->key,'~'))? p+1 : n->key,fp);
 //fputs("{key:",fp);
 //fprintf(fp,"[%s]",n->key);
-				if((p=strchr(n->key,'#'))) s = p+1;
+				if((style&aPROP_STYLE_SECTIONS) && (p=strchr(n->key,'#'))) s = p+1;
 				else s = n->key;
 				s.unescape();
 				s.print();
@@ -200,17 +313,17 @@ size_t aProperties::print(FILE *fp) {
 				switch(n->v_type) {
 					case aVOID:fprintf(fp,"%p",(void *)n->value);break;
 					case aINTPTR:fprintf(fp,"%" PRIdPTR,(intptr_t)n->value);break;
-#if _WORDSIZE == 64
-					case aDOUBLE:fprintf(fp,"%f",*((double *)((void *)&n->value)));break;
+#if __WORDSIZE == 64
+					case aDOUBLE:fprintf(fp,"%lf",*((double *)((void *)&n->value)));break;
 #else
 					//case aINT64:fprintf(fp,"%lu",(unsigned long)n->value);break;
-					case aFLOAT:fprintf(fp,"%f",*((float *)((void *)&n->value)));break;
-					//case aDOUBLE:fprintf(fp,"%f",*((double *)((void *)&n->value)));break;
+//					case aFLOAT:fprintf(fp,"%f",*((float *)((void *)&n->value)));break;
+					case aDOUBLE:fprintf(fp,"%lf",*((double *)((void *)n->value)));break;
 #endif
 					case aCHAR_P:
 						//fprintf(fp,"%s",(char *)n->value);
 						s = (char *)n->value;
-						s.escape(0,0,";#=:",(n->quot? aESCAPE_QUOTE : 0)|aESCAPE_SL_EOL);
+						s.escape(0,0,0,(n->quot? aESCAPE_QUOTE : 0)|aESCAPE_SL_EOL);
 						s.print();
 						break;
 				}
@@ -256,42 +369,44 @@ size_t aProperties::load(aString &data) {
 	aString sec,ind,key,delim,value,comment;
 	size_t n = 0;
 	aString s;
+//debug_output("aProperties::load(lang[%d],style[%x],kec[%s],kdc[%s])\n%s\n",lang,style,kec,kdc,(const char *)data);
 	for(i=0,l=data.length(); i<l; ++i) {
-		for(j=i; j<l && strchr(aSTRING_WHITESPACE ";#",c=data[j]); ) {
-			if(c!=';' && c!='#') data.ltrim(j);
-			if((c=data[j])!=';' && c!='#') break;
+		for(j=i; j<l; ) {
+			if(aString::isSpace(data[j])) data.ltrim(j);
+			if(!strchr(cc,data[j])) break;
 //data.substr(s,j,20);
 //debug_output("Comment1: {%s}\n",(const char *)s);
-			j = data.skipComments(aLANG_CFG,j,l-j);
+			j = data.skipComments(lang,j,l-j);
 		}
 		if(j>i) {
 			data.luntrim(j,0," \t");
-			if(j>i) {
+			if(j>i && (style&aPROP_STYLE_STORE_COMMENTS)) {
 //data.substr(s,i,j-i);
 //debug_output("Comment2[%d,%d,%d]: {%s}\n",(int)i,(int)j,(int)(j-i),(const char *)s);
 				comment.append(data,i,j-i);
 //debug_output("\ncomment: [%s]\n\n",(const char *)comment);
-				addNode(new node(0,0,aEMPTY,0,0,0,comment));
+				addNode(new node(0,0,0,0,0,comment));
 				comment.clear();
-				i = j;
 			}
+			i = j;
 		}
 		if(i<l) {
 			j = i;
 			data.ltrim(j);
 			if(j!=i) {
-				ind.append(data,i,j-i);
+				if(style&aPROP_STYLE_KEY_INDENT) ind.append(data,i,j-i);
 //debug_output("ind: [%s]\n",(const char *)ind);
 				i = j;
 			}
 			c = data[i];
-			if(c=='[') {
-				++i,j = data.findChar("]\n",i);
+			if(c=='[' && (style&aPROP_STYLE_SECTIONS)) {
+				++i,j = data.matchToken("]\n",i,0,aTOKEN_ESCAPE);//findChar("]\n",i);
 				if(j==-1 || data[j]=='\n') break;
 				key.append(data,i,j-i);
-				key.escape(0,0,key_escape_chars,aESCAPE_HEX);
+				key.escape(0,0,kec,aESCAPE_HEX);
 				sec = key;
 				sec << '#';
+//debug_output("section: [%s]\n\n",(const char *)key);
 				i = j+1,c = data[i];
 				if(c!='\n') {
 					if(c==';' || c=='#' || aString::isSpace(c)) {
@@ -309,28 +424,29 @@ size_t aProperties::load(aString &data) {
 						i = j;
 					} else break;
 				}
-				addNode(new node(key,0,aEMPTY,
+				addNode(new node(key,0,
 						(ind? (const char *)ind : 0),0,0,
 						(comment? (const char *)comment : 0)));
 				++n;
 			} else {
-				j = data.findChar("=:\n",i);
+//				j = data.findChar("=:\n",i);
+				j = data.matchToken(kdc,i,0,aTOKEN_TRIM|aTOKEN_ESCAPE);
 				if(j==-1 || data[j]=='\n') break;
 				k = 1;
 				data.untrim(j,k," \t");
 				if(j==i) break;
-				if(!data.equals("=",j,k)) {
+				if((style&aPROP_STYLE_STORE_DELIM) && !data.equals("=",j,k)) {
 					delim.append(data,j,k);
 //debug_output("delim: [%s]\n",(const char *)delim);
 				}
 				key = sec;
 				key.append(data,i,j-i);
-				key.escape((long)sec.length(),0,key_escape_chars,aESCAPE_HEX);
+				key.escape((long)sec.length(),0,kec,aESCAPE_HEX);
 				//if(sec) key.insert(0,sec);
 //debug_output("key: [%s] i: %ld, j: %ld, k: %ld\n",(const char *)key,i,j,k);
 				i = j+k;
 				if(i>=l) break;
-				j = data.matchValue(aLANG_CFG,i);
+				j = data.matchValue(lang,i,0,(style&aPROP_STYLE_VALUE_COMMENTS)? 0 : aMATCH_COMMENTS);
 				if(j==i) break;
 				k = j;
 				if(aString::isQuote(data[i]) && data[i]==data[j-1]) q = data[i],++i,--k;
@@ -343,12 +459,12 @@ size_t aProperties::load(aString &data) {
 				if(data[i]!='\n') {
 					j = data.find('\n',i);
 					if(j==-1) j = l;
-					comment.append(data,i,j-i);
+					if(style&aPROP_STYLE_STORE_COMMENTS) comment.append(data,i,j-i);
 //debug_output("comment: [%s]\n",(const char *)comment);
 					i = j;
 				}
-//debug_output("add[%s%s%s%s%s]\n",(const char *)ind,(const char *)key,(delim? (const char *)delim : 0),(const char *)value,(const char *)comment);
-				addNode(new node(key,(value_t)(const char *)value,aCHAR_P,
+//debug_output("add[%s|%s|%s|%s|%s]\n",(const char *)ind,(const char *)key,(const char *)delim,(const char *)value,(const char *)comment);
+				addNode(new node(key,(const char *)value,
 						(ind? (const char *)ind : 0),
 						(delim? (const char *)delim : 0),q,
 						(comment? (const char *)comment : 0)));

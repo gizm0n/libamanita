@@ -4,7 +4,7 @@
 /**
  * @file amanita/aString.h  
  * @author Per Löwgren
- * @date Modified: 2012-03-16
+ * @date Modified: 2012-10-18
  * @date Created: 2003-11-30
  */ 
 
@@ -14,18 +14,21 @@
 #include <amanita/aObject.h>
 
 enum {
+	aLANG_BASH,
 	aLANG_C,
 	aLANG_CPP,
+	aLANG_CFG,
+	aLANG_HASKELL,
+	aLANG_HTML,
+	aLANG_INI,
 	aLANG_JAVA,
 	aLANG_JAVASCRIPT,
-	aLANG_PHP,
 	aLANG_PERL,
-	aLANG_BASH,
+	aLANG_PHP,
+	aLANG_PROPERTIES,
 	aLANG_SHELL,
-	aLANG_HTML,
+	aLANG_SQL,
 	aLANG_XML,
-	aLANG_CFG,
-	aLANG_INI,
 	aLANG_LANGS,
 };
 
@@ -40,15 +43,21 @@ enum {
 	aUNESCAPE_ALL		= 0x0000000f,	//!< Unescape all characters that can be escaped. Default.
 };
 
-/** Find flags
- * @see void find(const char *) */
+/** Tokenizing flags
+ * @see long matchToken(const char *,long,long,int) */
 enum {
 	aTOKEN_LTRIM		= 0x00000001,	//!< Trim tokens on left side.
 	aTOKEN_RTRIM		= 0x00000002,	//!< Trim tokens on right side.
 	aTOKEN_TRIM			= 0x00000004,	//!< Trim tokens on either side.
-	aTOKEN_ESCAPE		= 0x00000008,	//!< Match escape sequences in tokens.
+	aTOKEN_ESCAPE		= 0x00000008,	//!< Include escape sequences in tokens.
 	aTOKEN_DELIM_CH	= 0x00000000,	//!< Each char in the delimiter matches.
 	aTOKEN_DELIM_STR	= 0x00000010,	//!< The entire string is used as delimiter.
+};
+
+/** Match flags
+ * @see long matchValue(int,long,long,int) */
+enum {
+	aMATCH_COMMENTS	= 0x00000001,	//!< Include comments in match.
 };
 
 /** Encode HTML flags
@@ -371,6 +380,7 @@ public:
 	 * @param delim Delimiter separating tokens.
 	 * @param o Offset, if negative offset is counted from ending of string.
 	 * @param l Length to search in string, if zero or negative length is calculated from the entire string length and backward.
+	 * @param f Flags defined by the aTOKEN_* enums.
 	 * @return Zero based index after ending quote sign, or -1 on fail.
 	 */
 	long matchToken(const char *delim,long o=0,long l=0,int f=0) const;
@@ -384,7 +394,7 @@ public:
 	 * @param l Length to search in string, if zero or negative length is calculated from the entire string length and backward.
 	 * @return Zero based index after ending quote sign, or -1 on fail.
 	 */
-	long matchValue(int lang,long o=0,long l=0) const;
+	long matchValue(int lang,long o=0,long l=0,int f=0) const;
 
 	long skipComment(int lang,long o=0,long l=0) const;
 	long skipComments(int lang,long o=0,long l=0) const;

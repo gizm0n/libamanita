@@ -11,11 +11,6 @@
 #include <stdint.h>
 #include <amanita/aObject.h>
 
-enum {
-	aHASH_STYLE_CASE_SENSITIVE		= 0,	//!< 
-	aHASH_STYLE_CASE_INSENSITIVE	= 1,	//!< 
-	aHASH_STYLE_KEY_MULTIPLES		= 2,	//!< 
-};
 
 /** Enumeration used by the iteration class and subclasses for extended iteration positions. */
 enum {

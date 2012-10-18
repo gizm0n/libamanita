@@ -4,7 +4,7 @@
 /**
  * @file amanita/aHashtable.h  
  * @author Per Löwgren
- * @date Modified: 2012-03-11
+ * @date Modified: 2012-10-18
  * @date Created: 2004-09-30
  */ 
 
@@ -12,6 +12,14 @@
 #include <stdlib.h>
 #include <amanita/aCollection.h>
 #include <amanita/aString.h>
+
+
+enum {
+	aHASH_STYLE_CASE_SENSITIVE		= 0x00,	//!< 
+	aHASH_STYLE_CASE_INSENSITIVE	= 0x01,	//!< 
+	aHASH_STYLE_KEY_MULTIPLES		= 0x02,	//!< 
+	aHASH_STYLE_DEFAULT				= 0		//!< Default style for aHashtable objects.
+};
 
 
 /** @cond */
@@ -241,7 +249,7 @@ public:
 
 	/** @name Constructos and Destructors
 	 * @{ */
-	aHashtable(size_t c=11,float l=0.5f,style_t st=0);
+	aHashtable(size_t c=11,float l=0.5f,style_t st=aHASH_STYLE_DEFAULT);
 	virtual ~aHashtable() { removeAll(); }
 	/** @} */
 
