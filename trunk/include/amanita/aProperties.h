@@ -4,24 +4,31 @@
 /**
  * @file amanita/aProperties.h  
  * @author Per Löwgren
- * @date Modified: 2012-03-11
- * @date Created: 2004-09-30
+ * @date Modified: 2012-10-18
+ * @date Created: 2012-10-12
  */ 
 
 #include <string.h>
 #include <stdlib.h>
 #include <amanita/aCollection.h>
+#include <amanita/aString.h>
+
+enum {
+	aPROP_STYLE_CASE_INSENSITIVE	= 0x01,	//!< 
+	aPROP_STYLE_STORE_COMMENTS		= 0x02,	//!< 
+	aPROP_STYLE_VALUE_COMMENTS		= 0x04,	//!< 
+	aPROP_STYLE_KEY_INDENT			= 0x08,	//!< 
+	aPROP_STYLE_STORE_DELIM			= 0x10,	//!< 
+	aPROP_STYLE_SECTIONS				= 0x20,	//!< 
+	aPROP_STYLE_DEFAULT				= 0xfe	//!< Default style for aProperties objects.
+};
 
 
-/** @cond */
-class aString;
-/** @endcond */
-
-
-/** A properties files parser.
+/** A properties-file parser.
  * 
- * This parser reads typical .ini files and stores in a linked list to maintain index order and a
- * hashtable for fast access to key/value-pairs.
+ * This parser reads typical .ini, .cfg and .properties files and stores in a
+ * linked list to maintain index order and a hashtable for fast access to
+ * key/value-pairs.
  * @ingroup amanita */
 class aProperties : protected aCollection {
 
@@ -41,14 +48,19 @@ protected:
 		char *delim;
 		char quot;
 		char *comment;
-		node(const char *k,value_t v,type_t vt,const char *i,const char *d,char q,const char *c);
+		node(const char *k,const char *v,const char *i,const char *d,char q,const char *c);
 		~node();
+		void setValue(const char *v);
 	};
 	node *first;
 	node *last;
 	node **table;
 	size_t full;
+	int lang;
 	style_t style;
+	const char *cc;
+	const char *kec;
+	const char *kdc;
 
 	void getKey(aString &s,const char *section,const char *key);
 
@@ -60,19 +72,22 @@ protected:
 	 * @param st Rehashing style. */
 	void rehash(style_t st);
 
-	void putNode(node *n);
-	node *getNode(const char *key);
 	void addNode(node *n);
+	void putNode(node *n);
+	node *removeNode(const char *key);
+	node *getNode(const char *key);
 
 public:
 
 	/** @name Constructos and Destructors
 	 * @{ */
-	aProperties(style_t st=0);
+	aProperties(int l=aLANG_CFG,style_t st=aPROP_STYLE_DEFAULT);
 	virtual ~aProperties();
 	/** @} */
 
+	void set(const char *key,const char *value) { set(0,key,value); }
 	void set(const char *section,const char *key,const char *value);
+	void remove(const char *key) { remove(0,key); }
 	void remove(const char *section,const char *key);
 	value_t get(const char *key) { type_t type;return get(0,key,type); }
 	value_t get(const char *key,type_t &type);

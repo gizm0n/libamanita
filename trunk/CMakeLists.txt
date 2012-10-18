@@ -467,7 +467,9 @@ if(EXAMPLES)
 	target_link_libraries(properties amanita)
 	ADD_CUSTOM_COMMAND(TARGET properties
 		POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/examples/properties.cfg ${PROJECT_BINARY_DIR}/properties.cfg
+		COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/examples/properties.cfg ${PROJECT_BINARY_DIR}/examples/properties.cfg
+		COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/examples/properties.ini ${PROJECT_BINARY_DIR}/examples/properties.ini
+		COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/examples/properties.properties ${PROJECT_BINARY_DIR}/examples/properties.properties
 	)
 
 	add_executable(regex examples/regex.cpp)

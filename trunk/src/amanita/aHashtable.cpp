@@ -97,7 +97,9 @@ value_t aHashtable::iterator::remove() {
 aObject_Inheritance(aHashtable,aCollection)
 
 
-aHashtable::aHashtable(size_t c,float l,style_t st) : aCollection(),table(0),full(0),style(st),ld(l) { cap = c; }
+aHashtable::aHashtable(size_t c,float l,style_t st) : aCollection(),table(0),full(0),style(st),ld(l) {
+	cap = c;
+}
 
 aHashtable::iterator aHashtable::iterate() { return iterator(this); }
 
@@ -148,9 +150,9 @@ void aHashtable::put(const char *key,value_t value,type_t vt) {
 	if(sz && !(style&aHASH_STYLE_KEY_MULTIPLES)) {
 		h = aString::crc32(key,style&aHASH_STYLE_CASE_INSENSITIVE);
 		node *n = table[h%cap];
-		if(style&aHASH_STYLE_CASE_INSENSITIVE) for(; n; n=n->next)
+		if(style&aHASH_STYLE_CASE_INSENSITIVE) for(; n; n=n->next) {
 			if(n->k_type==aCHAR_P && n->hash==h && !aString::stricmp((char *)n->key,key)) break;
-		else for(; n; n=n->next)
+		} else for(; n; n=n->next)
 			if(n->k_type==aCHAR_P && n->hash==h && !strcmp((char *)n->key,key)) break;
 		if(n) {
 			if(n->v_type==aCHAR_P) free((char *)n->value);
@@ -183,13 +185,10 @@ value_t aHashtable::get(const char *key) {
 	if(!sz) return 0;
 	hash_t h = aString::crc32(key,style&aHASH_STYLE_CASE_INSENSITIVE);
 	node *n = table[h%cap];
-	if(style&aHASH_STYLE_CASE_INSENSITIVE) while(n) {
+	if(style&aHASH_STYLE_CASE_INSENSITIVE) for(; n; n=n->next) {
 		if(n->k_type==aCHAR_P && n->hash==h && !aString::stricmp((char *)n->key,key)) return n->value;
-		n = n->next;
-	} else while(n) {
+	} else for(; n; n=n->next)
 		if(n->k_type==aCHAR_P && n->hash==h && !strcmp((char *)n->key,key)) return n->value;
-		n = n->next;
-	}
 	return 0;
 }
 
@@ -211,13 +210,10 @@ value_t aHashtable::get(const char *key,type_t &type) {
 	if(!sz) return 0;
 	hash_t h = aString::crc32(key,style&aHASH_STYLE_CASE_INSENSITIVE);
 	node *n = table[h%cap];
-	if(style&aHASH_STYLE_CASE_INSENSITIVE) while(n) {
+	if(style&aHASH_STYLE_CASE_INSENSITIVE) for(; n; n=n->next) {
 		if(n->k_type==aCHAR_P && n->hash==h && !aString::stricmp((char *)n->key,key)) break;
-		n = n->next;
-	} else while(n) {
+	} else for(; n; n=n->next)
 		if(n->k_type==aCHAR_P && n->hash==h && !strcmp((char *)n->key,key)) break;
-		n = n->next;
-	}
 	if(!n) return 0;
 	type = n->v_type;
 	return n->value;
@@ -227,10 +223,8 @@ size_t aHashtable::get(value_t key,type_t kt,aVector &v) {
 	if(!sz) return 0;
 	int i = 0;
 	node *n = table[key%cap];
-	while(n) {
+	for(; n; n=n->next)
 		if(n->k_type==kt && n->key==key) v.insert(n->value,v.sz,n->v_type),++i;
-		n = n->next;
-	}
 	return i;
 }
 
@@ -239,13 +233,10 @@ size_t aHashtable::get(const char *key,aVector &v) {
 	size_t i = 0;
 	hash_t h = aString::crc32(key,style&aHASH_STYLE_CASE_INSENSITIVE);
 	node *n = table[h%cap];
-	if(style&aHASH_STYLE_CASE_INSENSITIVE) while(n) {
+	if(style&aHASH_STYLE_CASE_INSENSITIVE) for(; n; n=n->next) {
 		if(n->k_type==aCHAR_P && n->hash==h && !aString::stricmp((char *)n->key,key)) v.insert(n->value,v.sz,n->v_type),++i;
-		n = n->next;
-	} else while(n) {
+	} else for(; n; n=n->next)
 		if(n->k_type==aCHAR_P && n->hash==h && !strcmp((char *)n->key,key)) v.insert(n->value,v.sz,n->v_type),++i;
-		n = n->next;
-	}
 	return i;
 }
 
