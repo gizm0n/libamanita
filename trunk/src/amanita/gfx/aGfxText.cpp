@@ -116,7 +116,7 @@ void aGfxText::arrange(int from) {
 	if(!font || !width || !textLen) return;
 	short w = 0,len,i;
 	int l = 0,w1,w2,p = 0;
-	const aFontmetrics &metrics = font->getFontMetrics();
+	const Fontmetrics &metrics = font->getFontMetrics();
 	if(textLinesCap) p = textLines[l=(from==(int)caret? caretLine : findLine(from))].pos;
 	unsigned char ch;
 	while(true) {
@@ -150,7 +150,7 @@ void aGfxText::drawText(int x,int y,int a,bool showCaret) {
 	if(!font) return;
 	drawing = true;
 	int i = 0;
-	const aFontmetrics &metrics = font->getFontMetrics();
+	const Fontmetrics &metrics = font->getFontMetrics();
 	SDL_Rect r;
 	r.x = x,r.y = y;
 	SDL_Surface *canvas = g.getCanvas();

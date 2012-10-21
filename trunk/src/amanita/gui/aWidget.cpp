@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <amanita/aApplication.h>
-#include <amanita/aString.h>
+#include <amanita/Application.h>
+#include <amanita/String.h>
 #include <amanita/gui/aBrowser.h>
 #include <amanita/gui/aWidget.h>
 #include <amanita/gui/aWindow.h>
@@ -12,7 +12,7 @@
 
 static uint16_t id_index[27] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 
-static aHashtable widgets;
+static Hashtable widgets;
 
 #ifdef USE_WIN32
 #ifndef WINVER
@@ -132,7 +132,7 @@ static const widget_control controls[] = {
 #endif
 
 
-aObject_Inheritance(aWidget,aObject)
+Object_Inheritance(aWidget,Object)
 
 aWidget::aWidget(widget_event_handler weh,widget_type t) : event_handler(weh),type(t) {
 	id = 0;

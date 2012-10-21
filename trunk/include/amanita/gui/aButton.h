@@ -37,7 +37,7 @@ friend class aContainer;
 friend class aWindow;
 
 /** @cond */
-aObject_Instance(aButton)
+Object_Instance(aButton)
 /** @endcond */
 
 private:

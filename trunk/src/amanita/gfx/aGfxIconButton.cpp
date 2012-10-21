@@ -6,7 +6,7 @@
 #include <amanita/gfx/aGfxIconButton.h>
 
 
-aObject_Inheritance(aGfxIconButton,aGfxComponent)
+Object_Inheritance(aGfxIconButton,aGfxComponent)
 
 
 extern char indent[32];

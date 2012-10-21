@@ -39,7 +39,7 @@ static gboolean mouse_release_event_callback(GtkWidget *widget,GdkEventButton *e
 
 #endif
 
-aObject_Inheritance(aCanvas,aWidget)
+Object_Inheritance(aCanvas,aWidget)
 
 aCanvas::aCanvas(widget_event_handler weh) : aWidget(weh,aWIDGET_CANVAS) {
 #ifdef USE_GTK

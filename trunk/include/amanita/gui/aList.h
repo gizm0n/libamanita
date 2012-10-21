@@ -9,7 +9,6 @@
  */ 
 
 
-#include <amanita/aVector.h>
 #include <amanita/gui/aWidget.h>
 
 
@@ -24,7 +23,7 @@ friend class aContainer;
 friend class aWindow;
 
 /** @cond */
-aObject_Instance(aList)
+Object_Instance(aList)
 /** @endcond */
 
 private:

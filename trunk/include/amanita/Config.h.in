@@ -1,0 +1,46 @@
+#ifndef _AMANITA_CONFIG_H
+#define _AMANITA_CONFIG_H
+
+/**
+ * @file amanita/Config.h
+ * @author Per Löwgren
+ * @date Modified: 2012-03-16
+ * @date Created: 2012-03-01
+ */ 
+
+#define AMANITA_VERSION "@PACKAGE_VERSION@"
+
+#cmakedefine USE_PTHREADS
+#cmakedefine USE_WIN32_THREADS
+
+#cmakedefine USE_UNIX
+
+#cmakedefine GUI_GTK
+#cmakedefine USE_GTK
+#cmakedefine USE_GLIB
+
+#cmakedefine GUI_COCOA
+#cmakedefine USE_COCOA
+#cmakedefine USE_APPLE
+
+#cmakedefine GUI_WIN32
+#cmakedefine USE_WIN32
+
+#cmakedefine HAVE_SOURCEVIEW
+#cmakedefine HAVE_SCINTILLA
+
+#ifdef HAVE_SCINTILLA
+#define USE_SCINTILLA
+#else
+#ifdef HAVE_SOURCEVIEW
+#define USE_SOURCEVIEW
+#endif
+#endif
+
+
+#include <amanita/Resource.h>
+
+
+#endif /* _AMANITA_CONFIG_H */
+
+

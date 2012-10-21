@@ -7,7 +7,7 @@
 
 
 
-aObject_Inheritance(aGfxTextfield,aGfxComponent)
+Object_Inheritance(aGfxTextfield,aGfxComponent)
 
 
 aGfxTextfield::_settings aGfxTextfield::_s = { 0 };

@@ -10,7 +10,7 @@
 #include <amanita/gfx/aGfxTooltip.h>
 
 
-aObject_Inheritance(aGfxWindow,aGfxComponent)
+Object_Inheritance(aGfxWindow,aGfxComponent)
 
 
 extern char indent[32];
@@ -58,7 +58,7 @@ void aGfxWindow::setStyle(int st) {
 			cb->setActionListener(this);
 			cb->setToolTip(new aGfxTooltip("Close"));
 			add(cb);
-fprintf(stderr,"aGfxWindow::setDialogStyle(%p,instance=%" PRIx32 ",actionListener=%p)\n",cb,((aClass &)*cb).getID(),cb->getActionListener());
+fprintf(stderr,"aGfxWindow::setDialogStyle(%p,instance=%" PRIx32 ",actionListener=%p)\n",cb,((Class &)*cb).getID(),cb->getActionListener());
 fflush(stderr);
 		}
 	} else if(cb) {

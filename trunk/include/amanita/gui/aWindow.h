@@ -8,7 +8,8 @@
  * @date Created: 2012-01-28
  */ 
 
-#include <amanita/aResource.h>
+#include <amanita/Application.h>
+#include <amanita/Resource.h>
 #include <amanita/gui/aContainer.h>
 
 enum {
@@ -27,7 +28,6 @@ struct aWindowIcon {
 	const char *png;
 };
 
-class aApplication;
 class aMenu;
 class aStatus;
 
@@ -39,11 +39,11 @@ friend class aWidget;
 friend LRESULT CALLBACK AmanitaMainWndProc(HWND,UINT,WPARAM,LPARAM);
 #endif
 
-aObject_Instance(aWindow)
+Object_Instance(aWindow)
 /** @endcond */
 
 private:
-	aApplication *app;
+	Application *app;
 	aMenu *menu;
 	aStatus *status;
 
@@ -68,13 +68,13 @@ private:
 	void clearIcons();
 
 public:
-	aWindow(aApplication *a,widget_event_handler weh);
+	aWindow(Application *a,widget_event_handler weh);
 	virtual ~aWindow();
 
 	void open(aWindow *p);
 	bool close();
 
-	aApplication *getApplication() { return app; }
+	Application *getApplication() { return app; }
 	void setMenu(aMenu *m);
 	aMenu *getMenu() { return menu; }
 	void setStatus(aStatus *sb);

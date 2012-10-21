@@ -6,10 +6,10 @@
 #include <amanita/gfx/aGfxFont.h>
 
 
-aObject_Inheritance(aGfxFont,aObject)
+Object_Inheritance(aGfxFont,Object)
 
 
-aGfxFont::aGfxFont(const char *file,int size,int style,long color,int render) : aObject() {
+aGfxFont::aGfxFont(const char *file,int size,int style,long color,int render) : Object() {
 	SDL_Color fg = { (char)(color>>16),(char)(color>>8),(char)(color),255 };
 	SDL_Color bg = { 255,255,255,255 };
 
@@ -93,7 +93,7 @@ int aGfxFont::stringWidth(const char *str,int i,int l) {
 
 void aGfxFont::putchar(int x,int y,unsigned char c) {
 	if(glyphs[c]) {
-		aGlyphmetrics &gl = metrics.glyphs[c];
+		Glyphmetrics &gl = metrics.glyphs[c];
 		SDL_Rect r = { metrics.adjx+x+gl.minx,metrics.adjy+y-gl.maxy };
 		SDL_BlitSurface(glyphs[c],0,g.getCanvas(),&r);
 	}
@@ -104,7 +104,7 @@ void aGfxFont::print(int x,int y,const char *str) {
 	unsigned char c;
 	x += metrics.adjx,y += metrics.adjy;
 	while((c=*str++)!='\0' && c!='\n') {
-		aGlyphmetrics &gl = metrics.glyphs[c];
+		Glyphmetrics &gl = metrics.glyphs[c];
 		r.x = x+gl.minx,r.y = y-gl.maxy;
 		if(glyphs[c]) SDL_BlitSurface(glyphs[c],0,g.getCanvas(),&r);
 		x += gl.advance+metrics.spacing;

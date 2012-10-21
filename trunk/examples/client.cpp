@@ -1,13 +1,13 @@
 
 #include <stdio.h>
-#include <amanita/aApplication.h>
-#include <amanita/net/aClient.h>
+#include <amanita/Application.h>
+#include <amanita/net/Client.h>
 
 
-aClient *client;
+Client *client;
 
 
-uint32_t client_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t p3) {
+uint32_t client_listener(Socket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t p3) {
 	switch(st) {
 		case SM_ERR_RESOLVE_HOST:
 		case SM_ERR_OPEN_SOCKET:
@@ -17,7 +17,7 @@ uint32_t client_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 		case SM_ERR_CHECK_SOCKETS:
 		case SM_ERR_GET_MESSAGE:
 		case SM_ERR_PUT_MESSAGE:
-			fprintf(stderr,"Client error: %u[%s] %s\n",st,aSocket::message_names[st],(const char *)p2);
+			fprintf(stderr,"Client error: %u[%s] %s\n",st,Socket::message_names[st],(const char *)p2);
 			break;
 		case SM_STARTING_CLIENT:
 		{
@@ -47,9 +47,9 @@ int main(int argc, char *argv[]) {
 	else {
 		char text[1024-SOCKET_HEADER-1];
 		uint8_t data[1024],*p;
-		aApplication app(aINIT_SOCKETS);
+		Application app(INIT_SOCKETS);
 		app.open(argc,argv);
-		client = new aClient(client_listener);
+		client = new Client(client_listener);
 		client->start(argv[1]);
 		while(1) {
 			gets(text);

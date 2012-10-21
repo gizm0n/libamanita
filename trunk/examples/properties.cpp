@@ -1,12 +1,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <amanita/aProperties.h>
+#include <amanita/Properties.h>
 
 int main(int argc, char *argv[]) {
 	const char *fn = argc>=2? argv[1] : "properties.cfg";
-	int lang = strstr(fn,".ini")? aLANG_INI : strstr(fn,".properties")? aLANG_PROPERTIES : aLANG_CFG;
-	aProperties cfg(lang);
+	int lang = strstr(fn,".ini")? LANG_INI : strstr(fn,".properties")? LANG_PROPERTIES : LANG_CFG;
+	Properties cfg(lang);
 	const char *str;
 	printf("Load configuration file \"%s\"...\n",fn);
 	if(cfg.load(fn)) {

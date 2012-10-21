@@ -7,7 +7,7 @@
 
 
 
-aObject_Inheritance(aGfxTextbox,aGfxWindow)
+Object_Inheritance(aGfxTextbox,aGfxWindow)
 
 
 char aGfxTextbox::yes[16];

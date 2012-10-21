@@ -17,7 +17,7 @@ class aGfxFont;
  * @ingroup sdl
  */
 class aGfxTextfield : public aGfxComponent,public aGfxText,public aGfxKeyListener {
-aObject_Instance(aGfxTextfield)
+Object_Instance(aGfxTextfield)
 
 private:
 	struct _settings {

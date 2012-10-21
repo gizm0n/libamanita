@@ -1,16 +1,16 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <amanita/aHashtable.h>
-#include <amanita/aVector.h>
-#include <amanita/aWord.h>
+#include <amanita/Hashtable.h>
+#include <amanita/Vector.h>
+#include <amanita/Word.h>
 
 int main(int argc, char *argv[]) {
 	int i;
 	const char *key,*value;
-	aHashtable table;
-	aVector vector;
-	aWord word;
+	Hashtable table;
+	Vector vector;
+	Word word;
 
 	printf("Generate hashtable with values...\n");
 	for(i=0; i<512; ++i) {

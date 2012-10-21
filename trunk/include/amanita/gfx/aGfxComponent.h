@@ -9,8 +9,8 @@
  */ 
 
 #include <stdint.h>
-#include <amanita/aObject.h>
-#include <amanita/aVector.h>
+#include <amanita/Object.h>
+#include <amanita/Vector.h>
 #include <amanita/gui/aEvent.h>
 
 
@@ -21,8 +21,8 @@ struct SDL_Rect;
 /** Baseclass for all components.
  * @ingroup sdl
  */
-class aGfxComponent : public aObject {
-aObject_Instance(aGfxComponent)
+class aGfxComponent : public Object {
+Object_Instance(aGfxComponent)
 
 private:
 	enum {
@@ -42,9 +42,9 @@ private:
 		short y;								//!< Y-coordinate.
 		short w;								//!< Width.
 		short h;								//!< Height.
-		aGfxComponent *p;						//!< Parent.
-		aVector *ch;						//!< Children.
-		aGfxTooltip *tt;						//!< Tooltip message.
+		aGfxComponent *p;					//!< Parent.
+		Vector *ch;							//!< Children.
+		aGfxTooltip *tt;					//!< Tooltip message.
 	};
 	component com;
 

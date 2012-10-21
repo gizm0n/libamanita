@@ -1,10 +1,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <amanita/aRegex.h>
+#include <amanita/Regex.h>
 
 int main(int argc, char *argv[]) {
-	aRegex r;
+	Regex r;
 
 	r.match("abc \"def\" \"ghi\" jkl","\".*\"","gi");
 	r.print();

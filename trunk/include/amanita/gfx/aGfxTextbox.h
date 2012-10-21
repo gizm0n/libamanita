@@ -24,7 +24,7 @@ enum {
  * @ingroup sdl
  */
 class aGfxTextbox : public aGfxWindow {
-aObject_Instance(aGfxTextbox)
+Object_Instance(aGfxTextbox)
 
 private:
 	unsigned int style;

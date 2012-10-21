@@ -1,8 +1,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <amanita/aVector.h>
-#include <amanita/aWiki.h>
+#include <amanita/Vector.h>
+#include <amanita/Wiki.h>
+
 
 static const char *page = "\
 ==Header 1==\n\
@@ -135,7 +136,7 @@ static const int smiley_ids[] = {
 	1,1,2,2,3,3,4,4,5,6,7,8,8,9,9,10,11,11,12,13,13,14,14,15,16,16,17,18,
 };
 
-void smiley_callback(aWiki &w,int index) {
+void smiley_callback(Wiki &w,int index) {
 	w << "<img src=\"http://www.mantichora.net/images/symbols/smiley" << smiley_ids[index] << ".gif\" class=\"smiley\" />";
 }
 
@@ -164,7 +165,7 @@ static const char *astro_unicode[] = {
 	"&#x2609;","&#x263D;","&#x263F;","&#x2640;","&#x2642;","&#x2643;","&#x2644;","&#x2645;","&#x2646;","&#x2647;", 
 0};
 
-void transliterate_hebrew(aWiki &w,char *p) {
+void transliterate_hebrew(Wiki &w,char *p) {
 	char *p1;
 	const char *p2;
 	int n,n2;
@@ -177,7 +178,7 @@ void transliterate_hebrew(aWiki &w,char *p) {
 		else if(*p1=='T' && p1[1]=='h') n = 21,++p1;
 		else if((p2=strchr(hebrew_chars,*p1))) n = p2-hebrew_chars;
 		if(n!=-1) {
-			if((n==-1 || n==17) && (p1[1]=='\0' || aString::isSpace(p1[1]))) {
+			if((n==-1 || n==17) && (p1[1]=='\0' || a::isspace(p1[1]))) {
 				if(n==17) n2 = 4;
 				else if((p2=strchr(hebrew_final_chars,*p1))) n2 = p2-hebrew_final_chars;
 			}
@@ -187,47 +188,47 @@ void transliterate_hebrew(aWiki &w,char *p) {
 	w << "</span>";
 }
 
-void astro_symbols(aWiki &w,char *p) {
+void astro_symbols(Wiki &w,char *p) {
 	char *p1,*p2;
 	int n;
 	w << "<span style=\"font:18px Symbola;\">";
 	for(p1=p; (p2=strchr(p1,'|')); p1=p2) {
 		*p2++ = '\0';
-		aString::trim(p1);
-		n = aVector::find(astro,p1);
+		a::trim(p1);
+		n = Vector::find(astro,p1);
 		if(n!=-1) w << astro_unicode[n];
 	}
 	w << "</span>";
 }
 
-void template_callback(aWikiParams &p) {
+void template_callback(WikiParams &p) {
 	char str[p.param_length+1];
 	int n;
 	if(p.param_length) p.text->substr(str,p.param,p.param_length);
 	else *str = '\0';
 fprintf(stderr,"template_callback(tag: %s, param: \"%s\")\n",p.tag,str);
-	n = aVector::find(templates,p.tag);
+	n = Vector::find(templates,p.tag);
 	switch(n) {
 		case 0:transliterate_hebrew(*p.wiki,str);break;
 		case 1:astro_symbols(*p.wiki,str);break;
 	}
 }
 
-void tag_nowiki_callback(aWikiParams &p) {
+void tag_nowiki_callback(WikiParams &p) {
 	if(p.length>0) {
-		aString ref;
+		String ref;
 		ref.append(p.text,p.offset,p.length);
-		ref.encodeHTML(aHTML_LTGT);
+		ref.encodeHTML(HTML_LTGT);
 		p.wiki->addRef(ref);
 //fprintf(stderr,"tag_nowiki_callback(ref: \"%s\")\n",ref.toCharArray());
 	}
 };
 
-void tag_pre_callback(aWikiParams &p) {
+void tag_pre_callback(WikiParams &p) {
 	if(p.length>0) {
-		aString ref;
+		String ref;
 		ref.append(p.text,p.offset,p.length);
-		ref.encodeHTML(aHTML_LTGT);
+		ref.encodeHTML(HTML_LTGT);
 		ref.insert(0,"\n<pre>");
 		ref.append("</pre>\n");
 		p.wiki->addRef(ref);
@@ -235,38 +236,38 @@ void tag_pre_callback(aWikiParams &p) {
 	}
 };
 
-void link_callback(aWiki &w,aWikiLink &link) {
+void link_callback(Wiki &w,WikiLink &link) {
 fprintf(stderr,"link_category_callback(title: \"%s\")\n",link.title);
 	link.write(w,urls[0]);
 };
 
-void link_file_callback(aWiki &w,aWikiLink &link) {
-	aWikiFile file(link,dirs);
+void link_file_callback(Wiki &w,WikiLink &link) {
+	WikiFile file(link,dirs);
 	file.write(w,urls);
 };
 
-void link_category_callback(aWiki &w,aWikiLink &link) {
+void link_category_callback(Wiki &w,WikiLink &link) {
 	w << "<a href=\"" << link.link << "\" class=\"category\">" << link.title << "</a>";
 };
 
 
 int main(int argc, char *argv[]) {
-	aWikiTagHandler th[] = {
+	WikiTagHandler th[] = {
 		{ "nowiki",0,tag_nowiki_callback },
 		{ "pre",0,tag_pre_callback },
 	{0}};
-	aWikiLinkHandler lh[] = {
+	WikiLinkHandler lh[] = {
 		{ "",link_callback },
 		{ "File",link_file_callback },
 		{ "Category",link_category_callback },
 	{0}};
-	aWiki wiki;
+	Wiki wiki;
 	wiki.setBaseURL(urls[0]);
 	wiki.setTemplateHandler(template_callback);
 	wiki.setTagHandlers(th);
 	wiki.setLinkHandlers(lh);
 	wiki.setSmileys(smileys,smiley_callback);
-	wiki.format(page,aWIKI_SECTIONS|aWIKI_SMILEYS|aWIKI_TAGS|aWIKI_LINKS|aWIKI_BBCODE);
+	wiki.format(page,WIKI_SECTIONS|WIKI_SMILEYS|WIKI_TAGS|WIKI_LINKS|WIKI_BBCODE);
 
 	fprintf(stdout,"\n\nWiki:\n%s\nEOF\n",wiki.toCharArray());
 	fflush(stdout);

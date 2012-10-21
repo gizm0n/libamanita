@@ -17,7 +17,7 @@ debug_output("aMenu::menuitem_callback(%p, id: %d)\n",mi,mi->id);
 #endif
 
 
-aObject_Inheritance(aMenu,aWidget)
+Object_Inheritance(aMenu,aWidget)
 
 aMenu::aMenu(widget_event_handler weh,const aMenuItem *mi) : aWidget(weh,aWIDGET_MENU) {
 	int i,n;

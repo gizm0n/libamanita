@@ -4,7 +4,7 @@
 #include <string.h>
 #include <cairo.h>
 #include "../src/amanita/_config.h"
-#include <amanita/aApplication.h>
+#include <amanita/Application.h>
 #include <amanita/gui/aMenu.h>
 #include <amanita/gui/aNotebook.h>
 #include <amanita/gui/aStatus.h>
@@ -165,18 +165,18 @@ enum {
 };
 
 
-class GuiApp : public aApplication {
+class GuiApp : public Application {
 private:
 	aNotebook *notebook;
 public:
-	GuiApp(uint32_t params,const char *prj,const char *nm) : aApplication(params,prj,nm) {}
+	GuiApp(uint32_t params,const char *prj,const char *nm) : Application(params,prj,nm) {}
 	virtual ~GuiApp() {}
 	void create();
 	void selectPage(int n) { notebook->selectPage(n); }
 };
 
 
-GuiApp app(aINIT_GUI,"GUI","aWidget Example");
+GuiApp app(INIT_GUI,"GUI","aWidget Example");
 
 
 static uint32_t window_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
@@ -529,7 +529,7 @@ fprintf(stderr,"window->add(notebook);\n");
 
 int main(int argc,char *argv[]) {
 	int ret;
-	aObject::printClasses(stdout);
+	Object::printClasses(stdout);
 	app.open(argc,argv);
 	ret = app.main();
 	app.close();

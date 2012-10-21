@@ -24,7 +24,7 @@ class aCanvas : public aWidget {
 friend class aWindow;
 
 /** @cond */
-aObject_Instance(aCanvas)
+Object_Instance(aCanvas)
 /** @endcond */
 
 private:

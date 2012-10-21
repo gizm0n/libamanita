@@ -9,7 +9,7 @@
 #include <amanita/gfx/aGfxDisplay.h>
 
 
-aObject_Inheritance(aGfxComponent,aObject)
+Object_Inheritance(aGfxComponent,Object)
 
 
 aGfxComponent *aGfxComponent::componentFocus = 0;
@@ -46,12 +46,12 @@ bool aGfxComponent::setKeyFocus(aGfxComponent *c) {
 	return true;
 }
 
-aGfxComponent::aGfxComponent(int x,int y,int w,int h) : aObject() {
+aGfxComponent::aGfxComponent(int x,int y,int w,int h) : Object() {
 	com = (component){ 0ul,0,ENABLED|VISIBLE|LOCKED|OPAQUE,x,y,w,h,0,0,0 };
 	if(!keyFocus) keyFocus = this;
 	focusListener = 0,keyListener = 0,mouseListener = 0,mouseMotionListener = 0,actionListener = 0;
 }
-aGfxComponent::aGfxComponent(aGfxComponent &c) : aObject(),com(c.com) {
+aGfxComponent::aGfxComponent(aGfxComponent &c) : Object(),com(c.com) {
 	com.cnt = 0ul,com.p = 0,com.ch = 0,com.tt = 0;
 	if(!keyFocus) keyFocus = this;
 	focusListener = c.focusListener,keyListener = c.keyListener,mouseListener = c.mouseListener;
@@ -63,7 +63,7 @@ int indentn = 0;
 
 aGfxComponent::~aGfxComponent() {
 printf("%saComponent::~aGfxComponent(parent=%p,%" PRIx32 ",instance=%p,%" PRIx32 ",x=%d,y=%d,w=%d,h=%d,size=%lu)\n",
-indent,com.p,com.p? ((aClass &)*com.p).getID() : 0,this,((aClass &)*this).getID(),com.x,com.y,com.w,com.h,(unsigned long)(com.ch? com.ch->size() : 0));
+indent,com.p,com.p? ((Class &)*com.p).getID() : 0,this,((Class &)*this).getID(),com.x,com.y,com.w,com.h,(unsigned long)(com.ch? com.ch->size() : 0));
 indent[indentn++] = '\t';
 	if(com.ch) {
 		aGfxComponent *c;
@@ -82,7 +82,7 @@ printf("%saComponent::~aGfxComponent()\n",indent);
 void aGfxComponent::add(aGfxComponent *c) {
 	if(!c) return;
 	if(c->com.p) c->com.p->remove(c);
-	if(!com.ch) com.ch = new aVector();
+	if(!com.ch) com.ch = new Vector();
 	*com.ch += c;
 	c->com.cnt++;
 	c->com.p = this;

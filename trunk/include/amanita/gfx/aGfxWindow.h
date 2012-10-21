@@ -26,7 +26,7 @@ enum {
  * @ingroup sdl
  */
 class aGfxWindow : public aGfxComponent,public aGfxFocusListener,public aGfxMouseListener,public aGfxActionListener {
-aObject_Instance(aGfxWindow)
+Object_Instance(aGfxWindow)
 
 protected:
 	struct _settings {

@@ -10,7 +10,7 @@
 
 
 
-aObject_Inheritance(aLabel,aWidget)
+Object_Inheritance(aLabel,aWidget)
 
 aLabel::aLabel(widget_event_handler weh) : aWidget(weh,aWIDGET_LABEL) {
 }

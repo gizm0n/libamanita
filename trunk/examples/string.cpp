@@ -1,10 +1,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <amanita/aString.h>
+#include <amanita/String.h>
 
 int main(int argc, char *argv[]) {
-	aString str;
+	String str;
 	str << "\
 <html>\n\
 <head>\n\
@@ -22,9 +22,9 @@ alert('Hello world!'); // Hello world alert javascript\n\
 </body>";
 
 	fprintf(stdout,"File:\n%s\nEOF\n",str.toCharArray());
-	str.stripComments(aLANG_C);
+	str.stripComments(LANG_C);
 	fprintf(stdout,"\nStrip C Comments:\n%s\nEOF\n",str.toCharArray());
-	str.stripComments(aLANG_HTML);
+	str.stripComments(LANG_HTML);
 	fprintf(stdout,"\nStrip HTML Comments:\n%s\nEOF\n",str.toCharArray());
 	str.stripHTML();
 	fprintf(stdout,"\nStrip HTML:\n%s\nEOF\n",str.toCharArray());

@@ -19,10 +19,10 @@
 
 
 
-aObject_Inheritance(aNotebookPage,aObject)
+Object_Inheritance(aNotebookPage,Object)
 
 
-aNotebookPage::aNotebookPage(aNotebook *nb) : aObject() {
+aNotebookPage::aNotebookPage(aNotebook *nb) : Object() {
 	tab.notebook = nb;
 #ifdef USE_GTK
 	tab.button = 0;
@@ -79,7 +79,7 @@ static void close_tab_callback(GtkWidget *widget,gpointer data) {
 #endif
 
 
-aObject_Inheritance(aNotebook,aWidget)
+Object_Inheritance(aNotebook,aWidget)
 
 aNotebook::aNotebook(widget_event_handler weh) : aWidget(weh,aWIDGET_NOTEBOOK),pages() {
 	selected = -1;

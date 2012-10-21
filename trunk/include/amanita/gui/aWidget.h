@@ -9,7 +9,7 @@
  */ 
 
 #include <stdint.h>
-#include <amanita/aHashtable.h>
+#include <amanita/Hashtable.h>
 
 
 #define aWIDGET_MAKE_ID(type,index) (((type)<<9)|(index))
@@ -133,19 +133,19 @@ enum widget_type {
 
 /** The Amanita Library GUI-interface base class from which all other widgets inherit.
  * 
- * Inherits the aObject class, and so is part of the aObject-rtti-interface, and all
+ * Inherits the Object class, and so is part of the Object-rtti-interface, and all
  * classes that inherit aWidget is too.
  * 
  * Look at examples/gui.cpp to see how to use the GUI-classes.
  * @ingroup gui
  */
-class aWidget : public aObject {
+class aWidget : public Object {
 friend class aContainer;
 friend class aWindow;
 friend class aNotebook;
 
 /** @cond */
-aObject_Instance(aWidget)
+Object_Instance(aWidget)
 /** @endcond */
 
 private:

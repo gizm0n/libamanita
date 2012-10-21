@@ -38,7 +38,7 @@ friend class _EventSink;
 friend class _Container;
 #endif
 
-aObject_Instance(aBrowser)
+Object_Instance(aBrowser)
 
 private:
 #ifdef USE_GTK

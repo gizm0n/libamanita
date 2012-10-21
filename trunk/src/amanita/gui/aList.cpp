@@ -27,7 +27,7 @@ static void list_changed_callback(GtkWidget *widget,gpointer data) {
 #endif
 
 
-aObject_Inheritance(aList,aWidget)
+Object_Inheritance(aList,aWidget)
 
 aList::aList(widget_event_handler weh) : aWidget(weh,aWIDGET_LISTVIEW) {
 	columns = 0;

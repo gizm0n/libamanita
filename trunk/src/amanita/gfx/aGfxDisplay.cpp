@@ -5,13 +5,13 @@
 #include <amanita/gfx/aGfxDisplay.h>
 
 
-aObject_Inheritance(aGfxDisplay,aGfxComponent)
+Object_Inheritance(aGfxDisplay,aGfxComponent)
 
 
 aGfxDisplay *aGfxDisplay::activeDisplay = 0;
 
 aGfxDisplay::aGfxDisplay() : aGfxComponent(0,0,g.getScreenWidth(),g.getScreenHeight()) {
-	// setInstance(Screen::aClass);
+	// setInstance(Screen::Class);
 	setScreen(0,0,getWidth(),getHeight());
 	setKeyListener(this);
 	setMouseListener(this);

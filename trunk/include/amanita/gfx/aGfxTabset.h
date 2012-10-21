@@ -23,7 +23,7 @@ class aGfxFont;
  * @ingroup sdl
  */
 class aGfxTabset : public aGfxComponent,public aGfxMouseListener {
-aObject_Instance(aGfxTabset)
+Object_Instance(aGfxTabset)
 
 private:
 	struct _settings {

@@ -27,7 +27,7 @@ class aGfxIconButton;
  * @ingroup sdl
  */
 class aGfxScroll : public aGfxComponent,public aGfxMouseMotionListener,public aGfxActionListener {
-aObject_Instance(aGfxScroll)
+Object_Instance(aGfxScroll)
 
 private:
 	struct _settings {

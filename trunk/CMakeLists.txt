@@ -209,13 +209,13 @@ configure_file(
 )
 
 configure_file(
-	"${PROJECT_SOURCE_DIR}/include/amanita/aConfig.h.in"
-	"${PROJECT_BINARY_DIR}/include/amanita/aConfig.h"
+	"${PROJECT_SOURCE_DIR}/include/amanita/Config.h.in"
+	"${PROJECT_BINARY_DIR}/include/amanita/Config.h"
 )
 
 configure_file(
-	"${PROJECT_SOURCE_DIR}/include/amanita/aResource.h.in"
-	"${PROJECT_BINARY_DIR}/include/amanita/aResource.h"
+	"${PROJECT_SOURCE_DIR}/include/amanita/Resource.h.in"
+	"${PROJECT_BINARY_DIR}/include/amanita/Resource.h"
 )
 
 
@@ -223,28 +223,28 @@ configure_file(
 message("GUI system is ${GUI}")
 
 set(amanita_src
-	src/amanita/aApplication.cpp
-	src/amanita/aCollection.cpp
-	src/amanita/aConfig.cpp
-	src/amanita/aDictionary.cpp
-	src/amanita/aFile.cpp
-	src/amanita/aFlood.cpp
-	src/amanita/aHashtable.cpp
-	src/amanita/aInteger.cpp
-	src/amanita/aMath.cpp
-	src/amanita/aObject.cpp
-	src/amanita/aPath.cpp
-	src/amanita/aProperties.cpp
-	src/amanita/aRandom.cpp
-	src/amanita/aRegex.cpp
-	src/amanita/aString.cpp
-	src/amanita/aThread.cpp
-	src/amanita/aVector.cpp
-	src/amanita/aWiki.cpp
-	src/amanita/aWord.cpp
-	src/amanita/db/aDatabase.cpp
-	src/amanita/db/aRecord.cpp
-	src/amanita/db/aResult.cpp
+	src/amanita/Application.cpp
+	src/amanita/Collection.cpp
+	src/amanita/Config.cpp
+	src/amanita/Dictionary.cpp
+	src/amanita/File.cpp
+	src/amanita/Flood.cpp
+	src/amanita/Hashtable.cpp
+	src/amanita/Integer.cpp
+	src/amanita/Math.cpp
+	src/amanita/Object.cpp
+	src/amanita/Path.cpp
+	src/amanita/Properties.cpp
+	src/amanita/Random.cpp
+	src/amanita/Regex.cpp
+	src/amanita/String.cpp
+	src/amanita/Thread.cpp
+	src/amanita/Vector.cpp
+	src/amanita/Wiki.cpp
+	src/amanita/Word.cpp
+	src/amanita/db/Database.cpp
+	src/amanita/db/Record.cpp
+	src/amanita/db/Result.cpp
 	src/amanita/gui/aBrowser.cpp
 	src/amanita/gui/aButton.cpp
 	src/amanita/gui/aCairo.cpp
@@ -260,10 +260,10 @@ set(amanita_src
 	src/amanita/gui/aText.cpp
 	src/amanita/gui/aWidget.cpp
 	src/amanita/gui/aWindow.cpp
-	src/amanita/net/aClient.cpp
-	src/amanita/net/aHttp.cpp
-	src/amanita/net/aServer.cpp
-	src/amanita/net/aSocket.cpp
+	src/amanita/net/Client.cpp
+	src/amanita/net/Http.cpp
+	src/amanita/net/Server.cpp
+	src/amanita/net/Socket.cpp
 )
 
 add_library(amanita STATIC ${amanita_src})
@@ -305,35 +305,35 @@ add_library(mandragora STATIC ${mandragora_src})
 
 
 install(FILES
-	include/amanita/aApplication.h
-	include/amanita/aBytes.h
-	include/amanita/aCollection.h
-	${PROJECT_BINARY_DIR}/include/amanita/aConfig.h
-	include/amanita/aDictionary.h
-	include/amanita/aFile.h
-	include/amanita/aFlood.h
-	include/amanita/aFontmetrics.h
-	include/amanita/aHashtable.h
-	include/amanita/aInteger.h
-	include/amanita/aMath.h
-	include/amanita/aObject.h
-	include/amanita/aPath.h
-	include/amanita/aProperties.h
-	include/amanita/aRandom.h
-	include/amanita/aRegex.h
-	${PROJECT_BINARY_DIR}/include/amanita/aResource.h
-	include/amanita/aString.h
-	include/amanita/aThread.h
-	include/amanita/aVector.h
-	include/amanita/aWiki.h
-	include/amanita/aWord.h
+	include/amanita/Application.h
+	include/amanita/Bytes.h
+	include/amanita/Collection.h
+	${PROJECT_BINARY_DIR}/include/amanita/Config.h
+	include/amanita/Dictionary.h
+	include/amanita/File.h
+	include/amanita/Flood.h
+	include/amanita/Fontmetrics.h
+	include/amanita/Hashtable.h
+	include/amanita/Integer.h
+	include/amanita/Math.h
+	include/amanita/Object.h
+	include/amanita/Path.h
+	include/amanita/Properties.h
+	include/amanita/Random.h
+	include/amanita/Regex.h
+	${PROJECT_BINARY_DIR}/include/amanita/Resource.h
+	include/amanita/String.h
+	include/amanita/Thread.h
+	include/amanita/Vector.h
+	include/amanita/Wiki.h
+	include/amanita/Word.h
 	DESTINATION include/amanita
 )
 
 install(FILES
-	include/amanita/db/aDatabase.h
-	include/amanita/db/aRecord.h
-	include/amanita/db/aResult.h
+	include/amanita/db/Database.h
+	include/amanita/db/Record.h
+	include/amanita/db/Result.h
 	DESTINATION include/amanita/db
 )
 
@@ -357,10 +357,10 @@ install(FILES
 )
 
 install(FILES
-	include/amanita/net/aClient.h
-	include/amanita/net/aHttp.h
-	include/amanita/net/aServer.h
-	include/amanita/net/aSocket.h
+	include/amanita/net/Client.h
+	include/amanita/net/Http.h
+	include/amanita/net/Server.h
+	include/amanita/net/Socket.h
 	DESTINATION include/amanita/net
 )
 
@@ -430,6 +430,9 @@ if(EXAMPLES)
 			set(RC_FILE examples/_resource.rc)
 		endif()
 	endif()
+
+	add_executable(babble examples/babble.cpp)
+	target_link_libraries(babble amanita)
 
 	if(WIN32)
 		add_executable(browser WIN32 examples/browser.cpp ${RC_FILE})
