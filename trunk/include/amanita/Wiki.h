@@ -4,7 +4,7 @@
 /**
  * @file amanita/Wiki.h
  * @author Per Löwgren
- * @date Modified: 2012-03-13
+ * @date Modified: 2012-10-21
  * @date Created: 2012-03-01
  */ 
 
@@ -47,11 +47,13 @@ enum {
 };
 
 
+/** @cond */
 class Wiki;
 class WikiParams;
 class WikiLink;
 struct WikiTagHandler;
 struct WikiLinkHandler;
+/** @endcond */
 
 
 typedef void (*wiki_callback)(WikiParams &p);
@@ -192,8 +194,13 @@ int main(int argc, char *argv[]) {
  * 
  * For a more in deapth example of how to use the Wiki class, see:
  * examples/wiki.cpp
+ * 
  * @ingroup amanita */
 class Wiki : public String {
+/** @cond */
+Object_Instance(Wiki)
+/** @endcond */
+
 protected:
 	uint32_t flags;		//!< Flags for how to format the text.
 	Wiki *owner;			//!< Owner of this Wiki-object.
@@ -260,8 +267,6 @@ public:
 
 }; /* namespace a */
 
-
-using namespace a;
 
 
 

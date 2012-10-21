@@ -11,6 +11,18 @@
 namespace a {
 
 
+long search(const char *arr[],const char *s,long o,long l) {
+	long i,n;
+	for(n=0; arr[n]; ++n);
+	if(o<0) o = n+o;
+	if(l<=0) l = n-o+l;
+	if(o>=0 && o+l<=n)
+		for(i=o,n=o+l; i<n; ++i)
+   	   if(*arr[i]==*s && !strcmp(arr[i],s)) return i;
+	return -1;
+}
+
+
 value_t Vector::iterator::first(type_t type) {
 	if(vec->sz) {
 		if(!type) return vec->list[index=0].value;
@@ -214,17 +226,6 @@ long Vector::find(value_t v,type_t t) {
 long Vector::find(const char *v) {
 	for(size_t i=0; i<sz; ++i)
       if(list[i].type==CHAR_P && !strcmp((char *)list[i].value,v)) return (long)i;
-	return -1;
-}
-
-long Vector::find(const char *arr[],const char *s,long o,long l) {
-	long i,n;
-	for(n=0; arr[n]; ++n);
-	if(o<0) o = n+o;
-	if(l<=0) l = n-o+l;
-	if(o>=0 && o+l<=n)
-		for(i=o,n=o+l; i<n; ++i)
-   	   if(*arr[i]==*s && !strcmp(arr[i],s)) return i;
 	return -1;
 }
 

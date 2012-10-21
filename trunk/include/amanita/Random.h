@@ -4,7 +4,7 @@
 /**
  * @file amanita/Random.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -83,8 +83,8 @@ fp = fopen("random.dat","rb");
 r.read(fp); // Reads r to be exactly the same as when saved.
 fclose(fp);
  * @endcode
- * @ingroup amanita
- */
+ * 
+ * @ingroup amanita */
 class Random {
 private:
 	random_t seed;					//!< The initial seed from which the random sequence is generated.
@@ -310,8 +310,6 @@ extern Random rnd;
 
 }; /* namespace a */
 
-
-using namespace a;
 
 
 #endif /* _AMANITA_RANDOM_H */

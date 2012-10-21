@@ -4,7 +4,7 @@
 /**
  * @file amanita/Word.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -25,8 +25,8 @@ class Random;
  * of letters are produced, to allow for variations between different languages. For
  * example; one language may contain lots of nouns and unusual combinations like "kk",
  * while other languages may use many vocals and vocal combinations like "ae".
- * @ingroup amanita
- */
+ * 
+ * @ingroup amanita */
 class Word {
 protected:
 	const char *v;
@@ -57,7 +57,5 @@ public:
 
 }; /* namespace a */
 
-
-using namespace a;
 
 #endif /* _AMANITA_WORD_H */

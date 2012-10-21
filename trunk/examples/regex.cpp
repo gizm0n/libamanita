@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <amanita/Regex.h>
 
+using namespace a;
+
 int main(int argc, char *argv[]) {
 	Regex r;
 

@@ -4,7 +4,7 @@
 /**
  * @file amanita/net/Server.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -22,7 +22,8 @@ namespace a {
  *
  * This class is used by Server to handle channels.
  * @see Server
- */
+ * 
+ * @ingroup net */
 class ServerChannel : public Vector {
 private:
 	char *name;		//!< Name of channel.
@@ -41,7 +42,8 @@ public:
 
 /** The Channel typedef is prefered as a type for channels.
  * @see ServerChannel
- */
+ * 
+ * @ingroup net */
 typedef ServerChannel *Channel;
 
 
@@ -60,6 +62,7 @@ enum {
  * This class is used by Server to handle connections to clients. It contains
  * all client data and which channels the client is in.
  * @see Server
+ * 
  * @ingroup net */
 class ServerConnection {
 friend class Server;
@@ -139,7 +142,8 @@ public:
 
 /** The Connection typedef is prefered as a type for connections.
  * @see ServerConnection
- */
+ * 
+ * @ingroup net */
 typedef ServerConnection *Connection;
 
 
@@ -161,6 +165,7 @@ enum {
  * This server can handle a large number of clients and use it's own built in protocol.
  * @see Socket
  * @see Client
+ * 
  * @ingroup net */
 class Server : public Socket {
 private:
@@ -252,8 +257,6 @@ public:
 
 }; /* namespace a */
 
-
-using namespace a;
 
 
 #endif /* _AMANITA_NET_SERVER_H */

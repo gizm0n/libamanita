@@ -4,7 +4,7 @@
 /**
  * @file amanita/Thread.h
  * @author Per Löwgren
- * @date Modified: 2012-02-16
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -28,13 +28,11 @@
 /** Amanita Namespace */
 namespace a {
 
-
 typedef void (*thread_function)(void *);
 
-
 /** A generic thread class.
- * @ingroup amanita
- */
+ * 
+ * @ingroup amanita */
 class Thread {
 private:
 /*#ifdef USE_SDL
@@ -93,7 +91,5 @@ public:
 
 }; /* namespace a */
 
-
-using namespace a;
 
 #endif /* _AMANITA_THREAD_H */

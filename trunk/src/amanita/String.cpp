@@ -323,7 +323,7 @@ static const int comments_len[] = {
  * [1] Range in comments-array (number of line-comment types), or zero if no line-comment type exist in language
  * [2] Index in comments-array for block-comments
  * [3] Range in comments-array (number of block-comment types), or zero if no block-comment type exist in language */
-static const int comments_lang[LANG_LANGS][4] = {
+static const int comments_lang[a::LANG_LANGS][4] = {
 	/* Bash */					{ PL_LN,		1,		0,0 			}, // # line comment
 	/* C */						{ C_LN,		1,		C_BL,		2	}, // C comments
 	/* C++ */					{ C_LN,		1,		C_BL,		2	}, // C comments

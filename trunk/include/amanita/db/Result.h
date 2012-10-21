@@ -4,7 +4,7 @@
 /**
  * @file amanita/db/Result.h
  * @author Per Löwgren
- * @date Modified: 2012-03-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -21,11 +21,10 @@ class Record;
 /** @endcond */
 
 /** Resultset.
- * @ingroup sqlite
- */
+ * 
+ * @ingroup db */
 class Result : protected Vector {
 friend class Database;
-
 /** @cond */
 Object_Instance(Result)
 /** @endcond */
@@ -49,9 +48,6 @@ public:
 };
 
 }; /* namespace a */
-
-
-using namespace a;
 
 
 #endif /* _AMANITA_DB_RESULT_H */

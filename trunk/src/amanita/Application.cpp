@@ -23,12 +23,12 @@
 #endif
 
 #include <amanita/Application.h>
-#include <amanita/gui/aWindow.h>
-#include <amanita/gui/aMenu.h>
+#include <amanita/tk/Menu.h>
 #include <amanita/File.h>
 #include <amanita/String.h>
 //#include <amanita/Vector.h>
 //#include <amanita/net/Http.h>
+#include <amanita/tk/Window.h>
 
 
 #ifdef USE_WIN32
@@ -48,6 +48,8 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE hp,LPSTR cmd,int show) {
 	while(--argc>=0) free(argv[argc]);
 	return i;
 }
+
+using namespace a::tk;
 #endif
 
 
@@ -261,15 +263,15 @@ int Application::main() {
 	create();
 
 	if(window && window->getMenu()) {
-		aMenuItem *items = window->getMenu()->items,*m;
+		MenuItem *items = window->getMenu()->items,*m;
 		int i,n,nitems = window->getMenu()->nitems;
 		for(i=0,n=0,m=items; m && i<nitems; ++i,++m) if(m->acc!=-1) ++n;
 		if(n>0) {
 			ACCEL accel[n],*a;
 			for(i=0,m=items,a=accel; i<nitems; ++i,++m) if(m->acc!=-1) {
-				a->fVirt = (m->acc_mod==aKEY_CONTROL? FCONTROL : (m->acc_mod==aKEY_ALT? FALT : 0))|FVIRTKEY;
+				a->fVirt = (m->acc_mod==KEY_CONTROL? FCONTROL : (m->acc_mod==KEY_ALT? FALT : 0))|FVIRTKEY;
 				a->key = m->acc;
-				a->cmd = aWIDGET_MAKE_ID(aWIDGET_MENU,m->index);
+				a->cmd = WIDGET_MAKE_ID(WIDGET_MENU,m->index);
 				++a;
 			}
 			hacc = CreateAcceleratorTable(accel,n);
@@ -306,8 +308,8 @@ void Application::destroy() {
 	quit();
 }
 /*
-void Application::add(aComponent c,aWidget *w) {
-	aComponent handle;
+void Application::add(Component c,Widget *w) {
+	Component handle;
 	handle = w->create(window,0);
 #if defined(USE_GTK)
 	gtk_container_add(GTK_CONTAINER(window),(GtkWidget *)handle);

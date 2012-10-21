@@ -4,7 +4,7 @@
 /**
  * @file amanita/File.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2010-01-09
  */ 
 
@@ -21,8 +21,10 @@
 #endif
 /** @endcond */
 
+
 /** Amanita Namespace */
 namespace a {
+
 
 /** Check if file exists.
  * @param fn File name.
@@ -81,11 +83,11 @@ extern void systemdir(char *dir,int l);
  * @param l Length in bytes of dir. */
 extern void currentdir(char *dir,int l);
 
+
 /** A filehandling class.
- * 
  * Contains methods for handling the filesystem.
- * @ingroup amanita
- */
+ * 
+ * @ingroup amanita */
 class File {
 private:
 	char *dir;
@@ -107,14 +109,9 @@ public:
 	File &read(char **data,size_t &len);
 	File &write(const char *data,size_t len);
 	size_t size();
-
-
 };
 
 }; /* namespace a */
-
-
-using namespace a;
 
 
 #endif /* _AMANITA_FILE_H */

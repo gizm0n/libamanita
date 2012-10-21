@@ -4,7 +4,7 @@
 /**
  * @file amanita/net/Socket.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -309,8 +309,7 @@ class Socket;
  *
  * This function is one of the most important in this interface, because it makes it possible
  * for the program to intercept all communication over the network. It also sends error messages
- * and warnings.
- */
+ * and warnings. */
 typedef uint32_t (*socket_event_handler)(Socket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t p3);
 
 
@@ -321,8 +320,8 @@ typedef uint32_t (*socket_event_handler)(Socket *s,uint32_t st,intptr_t p1,intpt
  * considered abstract. Instead, use it's subclasses; Client and Server.
  * @see Client
  * @see Server
- * @ingroup net
- */
+ * 
+ * @ingroup net */
 class Socket {
 private:
 	socket_event_handler event_handler;
@@ -401,9 +400,6 @@ public:
 };
 
 }; /* namespace a */
-
-
-using namespace a;
 
 
 #endif /* _AMANITA_NET_SOCKET_H */

@@ -5,6 +5,8 @@
 #include <amanita/Vector.h>
 #include <amanita/Word.h>
 
+using namespace a;
+
 int main(int argc, char *argv[]) {
 	int i;
 	const char *key,*value;

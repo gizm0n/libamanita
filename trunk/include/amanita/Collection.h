@@ -4,7 +4,7 @@
 /**
  * @file amanita/Collection.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -16,7 +16,8 @@
 namespace a {
 
 
-/** Enumeration used by the iteration class and subclasses for extended iteration positions. */
+/** Enumeration used by the iteration class and subclasses
+ * for extended iteration positions. */
 enum {
 	ITER_EMPTY				= -4,		//!< Iteration points to an empty value.
 	ITER_START				= -3,		//!< Iteration points at the start of the Collection.
@@ -24,9 +25,10 @@ enum {
 	ITER_BEFORE_FIRST		= -1,		//!< Iteration points at one step before first value in the Collection.
 };
 
-/** Enumeration used by all subclasses of the Collection class to tell what type a value contains. */
+/** Enumeration used by all subclasses of the Collection
+ * class to tell what type a value contains. */
 enum {
-	EMPTY				= 0x00,		//!< Value is empty, meaning this position in the Collection is not filled with a value..
+	EMPTY				= 0x00,		//!< Value is empty, meaning this position in the Collection is not filled with a value.
 	VOID_P,							//!< (void *)
 	INT8,								//!< (int8_t)
 	UINT8,							//!< (uint8_t)
@@ -59,7 +61,8 @@ enum {
 };
 /** @} */
 
-/** Should contain a value from the type-enumeration to tell what type a Collection-value contains. */
+/** Should contain a value from the type-enumeration to tell
+ * what type a Collection-value contains. */
 typedef unsigned char type_t;
 
 /** @cond */
@@ -86,7 +89,8 @@ typedef unsigned char type_t;
 /** @endcond */
 
 /** Is a variant, it may contain any value from the type-enumeration.
- * Types larger than 32 bits are allocated with malloc and the adress is stored in the value_t instead. */
+ * Types larger than 32 bits are allocated with malloc and the
+ * adress is stored in the value_t instead. */
 typedef intptr_t value_t;
 
 /** Contains information about how the Collection should be handled. */
@@ -100,12 +104,13 @@ typedef uint32_t style_t;
  * of making the most efficient or "best" choice, but simply making as much as possible handmade. Also, I
  * dislike templates because I find them ugly and I wanted my set of Collection-classes to contain any types
  * and still be relatively type-safe. These classes do work fine and have been thoroughly tested, of course
- * they could be optimized, but that is an ongoing project.
+ * they could be better optimized, but that is an ongoing project.
  *
  * The Collection-class is more or less an abstract class, even though it has no pure virtual methods at the time.
  * It extends the Object-class so it can be implemented in the class-hierarchy of that class. All subclasses of
  * Collection obviously has to implement the Object-class style to maintain rtti-structure, though not doing so
  * only means pointing to the super-class Class instead.
+ * 
  * @ingroup amanita */
 class Collection : public Object {
 /** @cond */
@@ -140,8 +145,6 @@ public:
 
 }; /* namespace a */
 
-
-using namespace a;
 
 #endif /* _AMANITA_COLLECTION_H */
 

@@ -4,7 +4,7 @@
 /**
  * @file amanita/net/Client.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -19,8 +19,8 @@ namespace a {
  *
  * This class connects to a server over the network and handles communication. It uses
  * a simple built in protocol for communication.
- * @ingroup net
- */
+ * 
+ * @ingroup net */
 class Client : public Socket {
 private:
 	uint32_t id;
@@ -53,9 +53,6 @@ public:
 };
 
 }; /* namespace a */
-
-
-using namespace a;
 
 
 #endif /* _AMANITA_NET_CLIENT_H */

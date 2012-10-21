@@ -5,6 +5,8 @@
 #include <amanita/Wiki.h>
 
 
+using namespace a;
+
 static const char *page = "\
 ==Header 1==\n\
 ===Header 2===\n\
@@ -195,7 +197,7 @@ void astro_symbols(Wiki &w,char *p) {
 	for(p1=p; (p2=strchr(p1,'|')); p1=p2) {
 		*p2++ = '\0';
 		a::trim(p1);
-		n = Vector::find(astro,p1);
+		n = search(astro,p1);
 		if(n!=-1) w << astro_unicode[n];
 	}
 	w << "</span>";
@@ -207,7 +209,7 @@ void template_callback(WikiParams &p) {
 	if(p.param_length) p.text->substr(str,p.param,p.param_length);
 	else *str = '\0';
 fprintf(stderr,"template_callback(tag: %s, param: \"%s\")\n",p.tag,str);
-	n = Vector::find(templates,p.tag);
+	n = search(templates,p.tag);
 	switch(n) {
 		case 0:transliterate_hebrew(*p.wiki,str);break;
 		case 1:astro_symbols(*p.wiki,str);break;

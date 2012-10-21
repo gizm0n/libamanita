@@ -22,14 +22,14 @@ static const char *extract_letters(const char *def,const char *nm,const char *re
 		char c,*s;
 		if(p1) {
 			for(n=0,p1+=strlen(nm),p2=p1; *p2 && *p2!='\n'; ++p2)
-				if(isalpha(*p2)) {
-					for(i=0; isdigit(p2[1]); ++p2) i = i*10+(p2[1]-'0');
+				if(a::isalpha(*p2)) {
+					for(i=0; a::isdigit(p2[1]); ++p2) i = i*10+(p2[1]-'0');
 					n += i? i : 1;
 				}
 			if(n>0) {
 				for(p2=p1,l=n,s=(char *)malloc(n+1),s[n]='\0',n=0; *p2 && *p2!='\n'; ++p2)
-					if(isalpha(*p2)) {
-						for(c=*p2,i=0; isdigit(p2[1]); ++p2) i = i*10+(p2[1]-'0');
+					if(a::isalpha(*p2)) {
+						for(c=*p2,i=0; a::isdigit(p2[1]); ++p2) i = i*10+(p2[1]-'0');
 						for(i=i? i : 1; i>0; --i,++n) s[n] = c;
 					}
 //debug_output("extract_letters: [%d] %s\n",l,s);
@@ -47,7 +47,7 @@ static const char *extract_string(const char *def,const char *nm,const char *ret
 		char *s;
 		if(p1) {
 			p1 += strlen(nm);
-			while(!isalpha(*p1)) ++p1;
+			while(!a::isalpha(*p1)) ++p1;
 			for(p2=p1; *p2 && *p2!='\n'; ++p2);
 			l = (int)(p2-p1),s = (char *)malloc(l+1),s[l] = '\0';
 			strncpy(s,p1,l);
@@ -70,7 +70,7 @@ Word::Word(const char *def) {
 	s = extract_string(def,"singles",singles,sl);
 	d = extract_string(def,"doubles",doubles,dl);
 	u = extract_string(def,"unaccepted",unaccepted,ul);
-	rnd = &::rnd,str = 0,len = 0;
+	rnd = &a::rnd,str = 0,len = 0;
 }
 
 Word::~Word() {
@@ -81,13 +81,13 @@ Word::~Word() {
 	if(s!=singles) free((char *)s);
 	if(d!=doubles) free((char *)d);
 	if(u!=unaccepted) free((char *)u);
-	if(rnd && rnd!=&::rnd) delete rnd;
+	if(rnd && rnd!=&a::rnd) delete rnd;
 	free(str);
 	v = 0,v2 = 0,c = 0,c2 = 0,s = 0,d = 0,u = 0,rnd = 0,str = 0,len = 0;
 }
 
 void Word::setSeed(unsigned int n) {
-	if(rnd==&::rnd) rnd = new Random(n);
+	if(rnd==&a::rnd) rnd = new Random(n);
 	else rnd->setSeed(n);
 }
 

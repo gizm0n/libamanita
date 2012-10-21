@@ -4,7 +4,7 @@
 /**
  * @file amanita/Hashtable.h  
  * @author Per Löwgren
- * @date Modified: 2012-10-18
+ * @date Modified: 2012-10-21
  * @date Created: 2004-09-30
  */ 
 
@@ -48,6 +48,7 @@ class Vector;
  * All these overloaded methods are actually inline methods, most of them, so no need for panic,
  * the compiled file is not very large, and there is very little overhead to handle all these
  * different types in reality.
+ * 
  * @ingroup amanita */
 class Hashtable : public Collection {
 friend class iterator;
@@ -978,9 +979,6 @@ public:
 };
 
 }; /* namespace a */
-
-
-using namespace a;
 
 
 #endif /* _AMANITA_HASHTABLE_H */

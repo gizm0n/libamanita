@@ -4,7 +4,7 @@
 /**
  * @file amanita/Properties.h  
  * @author Per Löwgren
- * @date Modified: 2012-10-18
+ * @date Modified: 2012-10-21
  * @date Created: 2012-10-12
  */ 
 
@@ -14,14 +14,17 @@
 #include <amanita/String.h>
 
 
+/** Amanita Namespace */
+namespace a {
+
 enum {
-	aPROP_STYLE_CASE_INSENSITIVE	= 0x01,	//!< 
-	aPROP_STYLE_STORE_COMMENTS		= 0x02,	//!< 
-	aPROP_STYLE_VALUE_COMMENTS		= 0x04,	//!< 
-	aPROP_STYLE_KEY_INDENT			= 0x08,	//!< 
-	aPROP_STYLE_STORE_DELIM			= 0x10,	//!< 
-	aPROP_STYLE_SECTIONS				= 0x20,	//!< 
-	aPROP_STYLE_DEFAULT				= 0xfe	//!< Default style for Properties objects.
+	PROP_STYLE_CASE_INSENSITIVE	= 0x01,	//!< 
+	PROP_STYLE_STORE_COMMENTS		= 0x02,	//!< 
+	PROP_STYLE_VALUE_COMMENTS		= 0x04,	//!< 
+	PROP_STYLE_KEY_INDENT			= 0x08,	//!< 
+	PROP_STYLE_STORE_DELIM			= 0x10,	//!< 
+	PROP_STYLE_SECTIONS				= 0x20,	//!< 
+	PROP_STYLE_DEFAULT				= 0xfe	//!< Default style for Properties objects.
 };
 
 
@@ -30,9 +33,9 @@ enum {
  * This parser reads typical .ini, .cfg and .properties files and stores in a
  * linked list to maintain index order and a hashtable for fast access to
  * key/value-pairs.
+ * 
  * @ingroup amanita */
 class Properties : protected Collection {
-
 /** @cond */
 Object_Instance(Properties)
 /** @endcond */
@@ -82,7 +85,7 @@ public:
 
 	/** @name Constructos and Destructors
 	 * @{ */
-	Properties(int l=LANG_CFG,style_t st=aPROP_STYLE_DEFAULT);
+	Properties(int l=LANG_CFG,style_t st=PROP_STYLE_DEFAULT);
 	virtual ~Properties();
 	/** @} */
 
@@ -109,6 +112,8 @@ public:
 	size_t save(FILE *fp);
 	/** @} */
 };
+
+}; /* namespace a */
 
 
 #endif /* _AMANITA_PROPERTIES_H */

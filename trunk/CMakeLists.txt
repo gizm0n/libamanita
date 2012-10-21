@@ -245,25 +245,39 @@ set(amanita_src
 	src/amanita/db/Database.cpp
 	src/amanita/db/Record.cpp
 	src/amanita/db/Result.cpp
-	src/amanita/gui/aBrowser.cpp
-	src/amanita/gui/aButton.cpp
-	src/amanita/gui/aCairo.cpp
-	src/amanita/gui/aCanvas.cpp
-	src/amanita/gui/aContainer.cpp
-	src/amanita/gui/aLabel.cpp
-	src/amanita/gui/aList.cpp
-	src/amanita/gui/aMenu.cpp
-	src/amanita/gui/aNotebook.cpp
-	src/amanita/gui/aPanel.cpp
-	src/amanita/gui/aSelect.cpp
-	src/amanita/gui/aStatus.cpp
-	src/amanita/gui/aText.cpp
-	src/amanita/gui/aWidget.cpp
-	src/amanita/gui/aWindow.cpp
+	src/amanita/gui/Button.cpp
+	src/amanita/gui/Display.cpp
+	src/amanita/gui/Font.cpp
+	src/amanita/gui/Graphics.cpp
+	src/amanita/gui/Icon.cpp
+	src/amanita/gui/Image.cpp
+	src/amanita/gui/Notebook.cpp
+	src/amanita/gui/Scroll.cpp
+	src/amanita/gui/Text.cpp
+	src/amanita/gui/Textbox.cpp
+	src/amanita/gui/Textfield.cpp
+	src/amanita/gui/Tooltip.cpp
+	src/amanita/gui/Widget.cpp
+	src/amanita/gui/Window.cpp
 	src/amanita/net/Client.cpp
 	src/amanita/net/Http.cpp
 	src/amanita/net/Server.cpp
 	src/amanita/net/Socket.cpp
+	src/amanita/tk/Browser.cpp
+	src/amanita/tk/Button.cpp
+	src/amanita/tk/Cairo.cpp
+	src/amanita/tk/Canvas.cpp
+	src/amanita/tk/Container.cpp
+	src/amanita/tk/Label.cpp
+	src/amanita/tk/List.cpp
+	src/amanita/tk/Menu.cpp
+	src/amanita/tk/Notebook.cpp
+	src/amanita/tk/Panel.cpp
+	src/amanita/tk/Select.cpp
+	src/amanita/tk/Status.cpp
+	src/amanita/tk/Text.cpp
+	src/amanita/tk/Widget.cpp
+	src/amanita/tk/Window.cpp
 )
 
 add_library(amanita STATIC ${amanita_src})
@@ -338,21 +352,21 @@ install(FILES
 )
 
 install(FILES
-	include/amanita/gui/aBrowser.h
-	include/amanita/gui/aButton.h
-	include/amanita/gui/aCairo.h
-	include/amanita/gui/aCanvas.h
-	include/amanita/gui/aContainer.h
-	include/amanita/gui/aLabel.h
-	include/amanita/gui/aList.h
-	include/amanita/gui/aMenu.h
-	include/amanita/gui/aNotebook.h
-	include/amanita/gui/aPanel.h
-	include/amanita/gui/aSelect.h
-	include/amanita/gui/aStatus.h
-	include/amanita/gui/aText.h
-	include/amanita/gui/aWidget.h
-	include/amanita/gui/aWindow.h
+	include/amanita/gui/Button.h
+	include/amanita/gui/Display.h
+	include/amanita/gui/Event.h
+	include/amanita/gui/Font.h
+	include/amanita/gui/Graphics.h
+	include/amanita/gui/Icon.h
+	include/amanita/gui/Image.h
+	include/amanita/gui/Notebook.h
+	include/amanita/gui/Scroll.h
+	include/amanita/gui/Text.h
+	include/amanita/gui/Textbox.h
+	include/amanita/gui/Textfield.h
+	include/amanita/gui/Tooltip.h
+	include/amanita/gui/Widget.h
+	include/amanita/gui/Window.h
 	DESTINATION include/amanita/gui
 )
 
@@ -365,22 +379,22 @@ install(FILES
 )
 
 install(FILES
-	include/amanita/gfx/aGfxButton.h
-	include/amanita/gfx/aGfxComponent.h
-	include/amanita/gfx/aGfxDisplay.h
-	include/amanita/gfx/aGfxEvent.h
-	include/amanita/gfx/aGfxFont.h
-	include/amanita/gfx/aGfxGraphics.h
-	include/amanita/gfx/aGfxIconButton.h
-	include/amanita/gfx/aGfxImage.h
-	include/amanita/gfx/aGfxScroll.h
-	include/amanita/gfx/aGfxTabset.h
-	include/amanita/gfx/aGfxText.h
-	include/amanita/gfx/aGfxTextbox.h
-	include/amanita/gfx/aGfxTextfield.h
-	include/amanita/gfx/aGfxTooltip.h
-	include/amanita/gfx/aGfxWindow.h
-	DESTINATION include/amanita/gfx
+	include/amanita/tk/Browser.h
+	include/amanita/tk/Button.h
+	include/amanita/tk/Cairo.h
+	include/amanita/tk/Canvas.h
+	include/amanita/tk/Container.h
+	include/amanita/tk/Label.h
+	include/amanita/tk/List.h
+	include/amanita/tk/Menu.h
+	include/amanita/tk/Notebook.h
+	include/amanita/tk/Panel.h
+	include/amanita/tk/Select.h
+	include/amanita/tk/Status.h
+	include/amanita/tk/Text.h
+	include/amanita/tk/Widget.h
+	include/amanita/tk/Window.h
+	DESTINATION include/amanita/tk
 )
 
 install(FILES
