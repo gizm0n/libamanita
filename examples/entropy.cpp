@@ -1,13 +1,13 @@
 
 /**
- * Test for the randomness/entropy and speed of the aRandom class.
+ * Test for the randomness/entropy and speed of the Random class.
  **/
 #include <time.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <math.h>
 #include <sys/time.h>
-#include <amanita/aRandom.h>
+#include <amanita/Random.h>
 
 
 int main(int argc,char *argv[]) {

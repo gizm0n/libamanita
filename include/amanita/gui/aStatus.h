@@ -16,7 +16,7 @@ class aStatus : public aWidget {
 friend class aWindow;
 
 /** @cond */
-aObject_Instance(aStatus)
+Object_Instance(aStatus)
 /** @endcond */
 
 private:

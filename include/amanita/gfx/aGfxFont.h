@@ -10,8 +10,8 @@
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
-#include <amanita/aObject.h>
-#include <amanita/aFontmetrics.h>
+#include <amanita/Object.h>
+#include <amanita/Fontmetrics.h>
 
 
 enum {
@@ -27,12 +27,12 @@ enum {
 /** A class for handling fonts.
  * @ingroup sdl
  */
-class aGfxFont : public aObject {
-aObject_Instance(aGfxFont)
+class aGfxFont : public Object {
+Object_Instance(aGfxFont)
 
 private:
 	char *name;
-	aFontmetrics metrics;
+	Fontmetrics metrics;
 	SDL_Surface *glyphs[256];
 
 public:
@@ -42,7 +42,7 @@ public:
 
 	const char *getName() { return name; }
 	SDL_Surface *getGlyphSurface(int c) { return glyphs[c]; }
-	const aFontmetrics &getFontMetrics() { return metrics; }
+	const Fontmetrics &getFontMetrics() { return metrics; }
 	int getHeight() { return metrics.height; }
 	int getAscent() { return metrics.ascent; }
 	int getDescent() { return metrics.descent; }

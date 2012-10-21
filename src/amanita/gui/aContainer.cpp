@@ -7,7 +7,7 @@
 
 
 
-aObject_Inheritance(aContainer,aWidget)
+Object_Inheritance(aContainer,aWidget)
 
 aContainer::aContainer() : aWidget(0,aWIDGET_CONTAINER) {
 	child = 0;

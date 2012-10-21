@@ -1,6 +1,6 @@
 
 #include <stdio.h>
-#include <amanita/aApplication.h>
+#include <amanita/Application.h>
 #include <amanita/gui/aBrowser.h>
 #include <amanita/gui/aWindow.h>
 
@@ -17,16 +17,16 @@ const char *html_document = "\
 </html>\n";
 
 
-class BrowserApp : public aApplication {
+class BrowserApp : public Application {
 private:
 	aBrowser *browser;
 public:
-	BrowserApp(uint32_t params,const char *prj,const char *nm) : aApplication(params,prj,nm),browser(0) {}
+	BrowserApp(uint32_t params,const char *prj,const char *nm) : Application(params,prj,nm),browser(0) {}
 	void create();
 };
 
 
-BrowserApp app(aINIT_GUI,"Browser","aBrowser Example");
+BrowserApp app(INIT_GUI,"Browser","aBrowser Example");
 
 
 static uint32_t window_events(aWidget *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t p3) {

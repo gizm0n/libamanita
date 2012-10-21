@@ -6,13 +6,13 @@
 
 
 
-aObject_Inheritance(aGfxScroll,aGfxComponent)
+Object_Inheritance(aGfxScroll,aGfxComponent)
 
 
 aGfxScroll::_settings aGfxScroll::_s = { 0 };
 
 aGfxScroll::aGfxScroll(int id,int x,int y,int w,int h,int st) : aGfxComponent(x,y,w,h) {
-	// aObject::setInstance(aGfxScroll::aClass);
+	// Object::setInstance(aGfxScroll::Class);
 	setID(id);
 	val = min = 0,max = 100,inc = 10;
 	bmin = new aGfxIconButton(0);

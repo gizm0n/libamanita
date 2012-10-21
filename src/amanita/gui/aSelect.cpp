@@ -19,7 +19,7 @@ static void choice_changed_callback(GtkWidget *widget,gpointer data) {
 #endif
 
 
-aObject_Inheritance(aSelect,aWidget)
+Object_Inheritance(aSelect,aWidget)
 
 aSelect::aSelect(widget_event_handler weh) : aWidget(weh,aWIDGET_COMBOBOX) {
 	items = 0;
@@ -104,7 +104,7 @@ void aSelect::addItem(const char *str) {
 			tfree(t);
 #endif
 		} else {
-			if(!items) items = new aVector();
+			if(!items) items = new Vector();
 			*items << str;
 		}
 	}

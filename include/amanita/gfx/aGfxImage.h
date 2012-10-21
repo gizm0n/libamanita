@@ -11,17 +11,17 @@
 #include <string.h>
 #include <stdio.h>
 #include <SDL/SDL.h>
-#include <amanita/aObject.h>
+#include <amanita/Object.h>
 
 
 
 /** A generic image class, for loading and handling images.
  * @ingroup sdl
  */
-class aGfxImage : public aObject {
+class aGfxImage : public Object {
 friend class aGfxGraphics;
 
-aObject_Instance(aGfxImage)
+Object_Instance(aGfxImage)
 
 protected:
 	char *name,*file;

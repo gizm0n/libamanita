@@ -1,6 +1,5 @@
 
 #include "../_config.h"
-#include <amanita/aMath.h>
 #include <amanita/gfx/aGfxGraphics.h>
 #include <amanita/gfx/aGfxFont.h>
 

@@ -5,7 +5,7 @@
 #include <amanita/gfx/aGfxTabset.h>
 
 
-aObject_Inheritance(aGfxTabset,aGfxComponent)
+Object_Inheritance(aGfxTabset,aGfxComponent)
 
 
 aGfxTabset::_settings aGfxTabset::_s = { 0 };

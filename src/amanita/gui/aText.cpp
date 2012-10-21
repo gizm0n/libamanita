@@ -30,7 +30,7 @@ scintilla_function sci_func;
 #endif
 
 
-aObject_Inheritance(aText,aWidget)
+Object_Inheritance(aText,aWidget)
 
 aText::aText(widget_event_handler weh) : aWidget(weh,aWIDGET_ENTRY) {
 }

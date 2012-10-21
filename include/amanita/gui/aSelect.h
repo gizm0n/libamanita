@@ -9,7 +9,7 @@
  */ 
 
 
-#include <amanita/aVector.h>
+#include <amanita/Vector.h>
 #include <amanita/gui/aWidget.h>
 
 
@@ -28,11 +28,11 @@ friend class aContainer;
 friend class aWindow;
 
 /** @cond */
-aObject_Instance(aSelect)
+Object_Instance(aSelect)
 /** @endcond */
 
 private:
-	aVector *items;
+	Vector *items;
 	char *item;
 	int selected;
 

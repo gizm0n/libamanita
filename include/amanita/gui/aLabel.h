@@ -28,7 +28,7 @@ friend class aContainer;
 friend class aWindow;
 
 /** @cond */
-aObject_Instance(aLabel)
+Object_Instance(aLabel)
 /** @endcond */
 
 public:	

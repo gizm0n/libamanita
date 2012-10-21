@@ -1,5 +1,5 @@
 
-#include <amanita/aResource.h>
+#include <amanita/Resource.h>
 
 /* This is only because amanita.ico has not been installed. Do not copy this into
  * your own applications. */

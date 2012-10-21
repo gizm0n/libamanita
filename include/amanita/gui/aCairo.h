@@ -23,7 +23,7 @@ class aCairo : public aWidget {
 friend class aWindow;
 
 /** @cond */
-aObject_Instance(aCairo)
+Object_Instance(aCairo)
 /** @endcond */
 
 private:

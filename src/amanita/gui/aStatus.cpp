@@ -10,7 +10,7 @@
 
 
 
-aObject_Inheritance(aStatus,aWidget)
+Object_Inheritance(aStatus,aWidget)
 
 aStatus::aStatus(const int c[]) : aWidget(0,aWIDGET_STATUSBAR),cells(0),ncells(0) {
 	if(c) {

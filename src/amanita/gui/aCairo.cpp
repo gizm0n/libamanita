@@ -41,7 +41,7 @@ static gboolean mouse_release_event_callback(GtkWidget *widget,GdkEventButton *e
 
 #endif
 
-aObject_Inheritance(aCairo,aWidget)
+Object_Inheritance(aCairo,aWidget)
 
 aCairo::aCairo(widget_event_handler weh) : aWidget(weh,aWIDGET_CANVAS) {
 #ifdef USE_WIN32

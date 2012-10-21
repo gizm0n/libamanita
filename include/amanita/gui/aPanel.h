@@ -52,7 +52,7 @@ friend class aContainer;
 friend class aWindow;
 
 /** @cond */
-aObject_Instance(aPanel)
+Object_Instance(aPanel)
 /** @endcond */
 
 private:

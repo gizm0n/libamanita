@@ -8,7 +8,7 @@
 #include <amanita/gfx/aGfxGraphics.h>
 
 
-aObject_Inheritance(aGfxImage,aObject)
+Object_Inheritance(aGfxImage,Object)
 
 
 int aGfxImage::created = 0;
@@ -17,11 +17,11 @@ int aGfxImage::deleted = 0;
 
 inline bool _space(char c) { return c==' ' || c=='\n' || c=='\t' || c=='\r' || c=='\f' || c=='\v' || c=='\0'; }
 
-aGfxImage::aGfxImage() : aObject(),name(0),file(0),surface(0),map(0),mapSize(0),mapRow(0) {
+aGfxImage::aGfxImage() : Object(),name(0),file(0),surface(0),map(0),mapSize(0),mapRow(0) {
 	created++;
 }
 
-aGfxImage::aGfxImage(int w,int h) : aObject(),name(0),file(0),surface(0),map(0) {
+aGfxImage::aGfxImage(int w,int h) : Object(),name(0),file(0),surface(0),map(0) {
 	created++;
 	SDL_PixelFormat *f = g.getScreenFormat();
 	SDL_Surface *s = SDL_CreateRGBSurface(/*SDL_HWSURFACE*/SDL_SWSURFACE,w,h,
@@ -30,7 +30,7 @@ aGfxImage::aGfxImage(int w,int h) : aObject(),name(0),file(0),surface(0),map(0) 
 	createMap(1);
 }
 
-aGfxImage::aGfxImage(const char *fn) : aObject(),name(0),file(0),surface(0),map(0) {
+aGfxImage::aGfxImage(const char *fn) : Object(),name(0),file(0),surface(0),map(0) {
 	created++;
 	name = strdup(fn);
 	file = strdup(fn);

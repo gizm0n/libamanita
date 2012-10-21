@@ -1,11 +1,11 @@
 
 #include <stdio.h>
-#include <amanita/aApplication.h>
-#include <amanita/net/aServer.h>
+#include <amanita/Application.h>
+#include <amanita/net/Server.h>
 
-aServer *server;
+Server *server;
 
-void send_server_message(aConnection c,const char *format, ...) {
+void send_server_message(Connection c,const char *format, ...) {
 	uint8_t data[SOCKET_HEADER+257],*p = data;
 	pack_header(&p,0);
 	va_list args;
@@ -15,7 +15,7 @@ void send_server_message(aConnection c,const char *format, ...) {
 	if(*p) server->send(c,data,SOCKET_HEADER+strlen((const char *)p)+1);
 }
 
-uint32_t server_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t p3) {
+uint32_t server_listener(Socket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t p3) {
 	switch(st) {
 		case SM_ERR_RESOLVE_HOST:
 		case SM_ERR_OPEN_SOCKET:
@@ -27,7 +27,7 @@ uint32_t server_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 		case SM_ERR_CHECK_SOCKETS:
 		case SM_ERR_GET_MESSAGE:
 		case SM_ERR_PUT_MESSAGE:
-			fprintf(stderr,"Server error: %u[%s] %s\n",st,aSocket::message_names[st],(const char *)p2);
+			fprintf(stderr,"Server error: %u[%s] %s\n",st,Socket::message_names[st],(const char *)p2);
 			break;
 		case SM_CHECK_NICK:
 			printf("Check nick: %s\n",*(char **)p1);
@@ -48,7 +48,7 @@ uint32_t server_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 		case SM_ADD_CLIENT:
 		{
 			printf("Add Client.\n");
-			aConnection c = (aConnection)p1;
+			Connection c = (Connection)p1;
 			/* Add handling of new client here; store client data, send list of clients etc. */
 			c->setActive(true);
 			send_server_message(0,"%s joined.",c->getNick());
@@ -56,7 +56,7 @@ uint32_t server_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 		}
 		case SM_KILL_CLIENT:
 		{
-			aConnection c = (aConnection)p1;
+			Connection c = (Connection)p1;
 			c->setActive(false);
 			printf("Kill Client.\n");
 			fflush(stdout);
@@ -77,9 +77,9 @@ uint32_t server_listener(aSocket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t
 
 int main(int argc, char *argv[]) {
 	char text[1024];
-	aApplication app(aINIT_SOCKETS);
+	Application app(INIT_SOCKETS);
 	app.open(argc,argv);
-	server = new aServer(server_listener);
+	server = new Server(server_listener);
 	server->start(2012);
 	gets(text);
 	server->stop();

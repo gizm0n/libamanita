@@ -9,7 +9,7 @@
  */ 
 
 
-#include <amanita/aConfig.h>
+#include <amanita/Config.h>
 #include <amanita/gui/aWidget.h>
 
 #ifdef USE_SCINTILLA
@@ -35,7 +35,7 @@ friend class aContainer;
 friend class aWindow;
 
 /** @cond */
-aObject_Instance(aText)
+Object_Instance(aText)
 /** @endcond */
 
 private:

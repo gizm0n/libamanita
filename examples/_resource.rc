@@ -1,5 +1,5 @@
 #include <windows.h>
-#include <amanita/aResource.h>
+#include <amanita/Resource.h>
 #include "_resource.h"
 
 aAPP_ICON		ICON		AMANITA_APP_ICON

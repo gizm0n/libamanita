@@ -15,7 +15,7 @@
  * @ingroup sdl
  */
 class aGfxDisplay : public aGfxComponent,public aGfxKeyListener,public aGfxMouseListener,public aGfxMouseMotionListener,public aGfxActionListener {
-aObject_Instance(aGfxDisplay)
+Object_Instance(aGfxDisplay)
 
 private:
 	static aGfxDisplay *activeDisplay;

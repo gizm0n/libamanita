@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include <amanita/db/aDatabase.h>
-#include <amanita/db/aRecord.h>
-#include <amanita/db/aResult.h>
+#include <amanita/db/Database.h>
 
 int main(int argc, char *argv[]) {
 	int i,j,exists = 0;
@@ -15,9 +13,9 @@ int main(int argc, char *argv[]) {
 		fclose(fp);
 	} else perror(fn);
 
-	aDatabase db(fn);
-	aResult rs;
-	aRecord *r;
+	Database db(fn);
+	Result rs;
+	Record *r;
 
 	if(!exists) {
 		time_t t = time(0);

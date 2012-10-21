@@ -40,11 +40,11 @@ struct aMenuItem {
 };
 
 class aMenu : public aWidget {
-friend class aApplication;
+friend class Application;
 friend class aWindow;
 
 /** @cond */
-aObject_Instance(aMenu)
+Object_Instance(aMenu)
 /** @endcond */
 
 private:

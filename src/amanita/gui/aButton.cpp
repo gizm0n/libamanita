@@ -27,7 +27,7 @@ void button_toggled_callback(GtkWidget *widget,gpointer data) {
 }
 #endif
 
-aObject_Inheritance(aButton,aWidget)
+Object_Inheritance(aButton,aWidget)
 
 aButton::aButton(widget_event_handler weh) : aWidget(weh,aWIDGET_BUTTON),group(0) {
 }

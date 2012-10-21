@@ -1,13 +1,13 @@
 
 #include <stdio.h>
-#include <amanita/aApplication.h>
-#include <amanita/net/aHttp.h>
+#include <amanita/Application.h>
+#include <amanita/net/Http.h>
 
 int main(int argc, char *argv[]) {
-	aApplication app(aINIT_SOCKETS);
-	aHttp http;
+	Application app(INIT_SOCKETS);
+	Http http;
 	app.open(argc,argv);
-	http.setUserAgent("aHttp Class User-Agent, v.0.1");
+	http.setUserAgent("Http Class User-Agent, v.0.1");
 
 	http.get("www.google.com","");
 

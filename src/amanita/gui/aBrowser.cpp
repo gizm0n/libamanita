@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <amanita/aApplication.h>
+#include <amanita/Application.h>
 #include <amanita/gui/aBrowser.h>
 
 
@@ -719,7 +719,7 @@ LRESULT CALLBACK AmanitaBrowserProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lpar
 
 
 
-aObject_Inheritance(aBrowser,aWidget)
+Object_Inheritance(aBrowser,aWidget)
 
 aBrowser::aBrowser(widget_event_handler weh) : aWidget(weh,aWIDGET_BROWSER) {
 #ifdef USE_WIN32

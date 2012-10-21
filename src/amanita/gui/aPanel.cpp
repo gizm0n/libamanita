@@ -7,8 +7,8 @@
 #include <windows.h>
 #include <commctrl.h>
 #endif
-#include <amanita/aApplication.h>
-#include <amanita/aResource.h>
+#include <amanita/Application.h>
+#include <amanita/Resource.h>
 #include <amanita/gui/aPanel.h>
 #include <amanita/gui/aWindow.h>
 
@@ -22,7 +22,7 @@ void button_clicked_callback(GtkWidget *widget,gpointer data) {
 }
 #endif
 
-aObject_Inheritance(aPanel,aWidget)
+Object_Inheritance(aPanel,aWidget)
 
 aPanel::aPanel(widget_event_handler weh,aPanelButton *b) : aWidget(weh,aWIDGET_PANEL) {
 	buttons = 0;

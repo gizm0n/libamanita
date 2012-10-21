@@ -8,7 +8,7 @@
  * @date Created: 2012-02-07
  */ 
 
-#include <amanita/aVector.h>
+#include <amanita/Vector.h>
 #include <amanita/gui/aWidget.h>
 
 
@@ -35,11 +35,11 @@ struct aNotebookTab {
 	char *name;
 };
 
-class aNotebookPage : public aObject {
+class aNotebookPage : public Object {
 friend class aNotebook;
 
 /** @cond */
-aObject_Instance(aNotebookPage)
+Object_Instance(aNotebookPage)
 /** @endcond */
 
 protected:
@@ -62,11 +62,11 @@ class aNotebook : public aWidget {
 friend class aWindow;
 
 /** @cond */
-aObject_Instance(aNotebook)
+Object_Instance(aNotebook)
 /** @endcond */
 
 private:
-	aVector pages;
+	Vector pages;
 	int selected;
 
 #ifdef USE_WIN32

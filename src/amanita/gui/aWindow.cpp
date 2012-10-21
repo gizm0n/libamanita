@@ -13,8 +13,7 @@
 #include <windows.h>
 #include <commctrl.h>
 #endif
-#include <amanita/aApplication.h>
-#include <amanita/aResource.h>
+#include <amanita/Resource.h>
 #include <amanita/gui/aWindow.h>
 #include <amanita/gui/aMenu.h>
 #include <amanita/gui/aStatus.h>
@@ -82,9 +81,9 @@ LRESULT CALLBACK AmanitaMainWndProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lpar
 
 
 
-aObject_Inheritance(aWindow,aContainer)
+Object_Inheritance(aWindow,aContainer)
 
-aWindow::aWindow(aApplication *a,widget_event_handler weh) : aContainer(weh,aWIDGET_WINDOW) {
+aWindow::aWindow(Application *a,widget_event_handler weh) : aContainer(weh,aWIDGET_WINDOW) {
 	app = a;
 	window = 0;
 	menu = 0;

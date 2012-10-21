@@ -29,7 +29,7 @@ class aGfxFont;
  * @ingroup sdl
  */
 class aGfxButton : public aGfxComponent,public aGfxMouseListener {
-aObject_Instance(aGfxButton)
+Object_Instance(aGfxButton)
 
 private:
 	struct _settings {
