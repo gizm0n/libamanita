@@ -100,6 +100,10 @@ static const char *char_style = "'''''";
 
 namespace a {
 
+
+Object_Inheritance(Wiki,String)
+
+
 WikiData::WikiData(Wiki &w) : ref(0),tag_handlers(),link_handlers() {
 	wiki = &w;
 	target = 0;
@@ -363,7 +367,7 @@ WikiFile::WikiFile(WikiLink &l,const char *dir[]) {
 //debug_output("WikiFile::WikiFile(name: %s)\n",link->name);
 	if((p=strrchr(link->name,'.'))) {
 		ext = a::tolower(strdup(&p[1]));
-		n = Vector::find(file_extensions,ext);
+		n = search(file_extensions,ext);
 		if(n!=-1) {
 			type = file_types[n];
 			name = strdup(link->name);
@@ -1182,7 +1186,7 @@ void Wiki::matchWikiTag(WikiParams &p) {
 	p.text->substr(p.tag,i,j-i);
 	l = strlen(p.tag);
 	th = data->getTagHandler(p.tag);
-	if(!th) html = Vector::find(html_tags,p.tag);
+	if(!th) html = search(html_tags,p.tag);
 //debug_output("\nmatchWikiTag(tag: %s, html: %d, lh: %p)\n",p.tag,(int)html,th);
 	if(html!=-1 || th) {
 		k = p.text->charAt(j)=='>'? j : p.text->find('>',j);
@@ -1250,7 +1254,7 @@ void Wiki::matchBBTag(WikiParams &p) {
 	p.text->substr(p.tag,i,n-i);
 	l = strlen(p.tag);
 //echo '<p>matchBBTag(tag='.$tag.')</p>';
-	bb = Vector::find(bb_tags,p.tag);
+	bb = search(bb_tags,p.tag);
 	if(bb!=-1) {
 		char s1[l+2],s2[l+3];
 		i = p.text->charAt(n)!=']'? p.text->find(']',n) : n;

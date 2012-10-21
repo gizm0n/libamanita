@@ -12,13 +12,16 @@ static const char *key_escape_chars[] = { ";#=:","#!=: " };
 static const char *key_delim_chars[] = { "=:\n","=: \t\n" };
 
 
+namespace a {
+
+
 Object_Inheritance(Properties,Collection)
 
 Properties::Properties(int l,style_t st) : Collection(),first(0),last(0),table(0),full(0),lang(l),style(st) {
 	cap = 11;
 	if(lang!=LANG_CFG && lang!=LANG_INI && lang!=LANG_PROPERTIES) lang = LANG_CFG;
 	if(lang==LANG_PROPERTIES)
-		style &= ~(aPROP_STYLE_SECTIONS|aPROP_STYLE_VALUE_COMMENTS|aPROP_STYLE_KEY_INDENT);
+		style &= ~(PROP_STYLE_SECTIONS|PROP_STYLE_VALUE_COMMENTS|PROP_STYLE_KEY_INDENT);
 	cc = comment_chars[lang==LANG_PROPERTIES? 1 : 0];
 	kec = key_escape_chars[lang==LANG_PROPERTIES? 1 : 0];
 	kdc = key_delim_chars[lang==LANG_PROPERTIES? 1 : 0];
@@ -111,7 +114,7 @@ void Properties::rehash(style_t st) {
 		node *n1,*n2;
 		if(st!=style) {
 			for(i=0; i<cap; ++i) if((n1=t1[i])) while(n1) {
-				n1->hash = crc32((char *)n1->key,style&aPROP_STYLE_CASE_INSENSITIVE);
+				n1->hash = crc32((char *)n1->key,style&PROP_STYLE_CASE_INSENSITIVE);
 				n2 = n1->table,h = n1->hash%c,n1->table = table[h],table[h] = n1,n1 = n2;
 			}
 		} else  for(i=0; i<cap; ++i) if((n1=t1[i])) while(n1)
@@ -135,7 +138,7 @@ void Properties::addNode(node *n) {
 
 void Properties::putNode(node *n) {
 /*	if(sz && !(style&HASH_STYLE_KEY_MULTIPLES)) {
-		node *n1 = table[crc32(key,style&aPROP_STYLE_CASE_INSENSITIVE)%cap];
+		node *n1 = table[crc32(key,style&PROP_STYLE_CASE_INSENSITIVE)%cap];
 		if(style&HASH_STYLE_CASE_INSENSITIVE) for(; n1; n1=n1->table)
 			if(n->hash==n1->hash && !stricmp(n1->key,n->key)) break;
 		else for(; n1; n1=n1->table)
@@ -149,7 +152,7 @@ void Properties::putNode(node *n) {
 	}*/
 //debug_output("putNode: %s\n",n->key);
 	if(sz==full) rehash(style);
-	n->hash = crc32(n->key,style&aPROP_STYLE_CASE_INSENSITIVE);
+	n->hash = crc32(n->key,style&PROP_STYLE_CASE_INSENSITIVE);
 	hash_t c = n->hash%cap;
 	n->table = table[c],table[c] = n;
 	++sz;
@@ -159,10 +162,10 @@ void Properties::putNode(node *n) {
 
 Properties::node *Properties::removeNode(const char *key) {
 	if(!sz) return 0;
-	hash_t h = crc32(key,style&aPROP_STYLE_CASE_INSENSITIVE);
+	hash_t h = crc32(key,style&PROP_STYLE_CASE_INSENSITIVE);
 	int c = h%cap;
 	node *n = table[c],*n0 = 0;
-	if(style&aPROP_STYLE_CASE_INSENSITIVE) for(; n; n0=n,n=n->table) {
+	if(style&PROP_STYLE_CASE_INSENSITIVE) for(; n; n0=n,n=n->table) {
 		if(n->hash==h && !stricmp(n->key,key)) break;
 	} else for(; n; n0=n,n=n->table)
 		if(n->hash==h && !strcmp((char *)n->key,key)) break;
@@ -175,9 +178,9 @@ Properties::node *Properties::removeNode(const char *key) {
 
 Properties::node *Properties::getNode(const char *key) {
 	if(!sz) return 0;
-	hash_t h = crc32(key,style&aPROP_STYLE_CASE_INSENSITIVE);
+	hash_t h = crc32(key,style&PROP_STYLE_CASE_INSENSITIVE);
 	node *n = table[h%cap];
-	if(style&aPROP_STYLE_CASE_INSENSITIVE) for(; n; n=n->table) {
+	if(style&PROP_STYLE_CASE_INSENSITIVE) for(; n; n=n->table) {
 		if(n->hash==h && !stricmp(n->key,key)) break;
 	} else for(; n; n=n->table)
 		if(n->hash==h && !strcmp((char *)n->key,key)) break;
@@ -188,7 +191,7 @@ void Properties::set(const char *section,const char *key,const char *value) {
 	if(key) {
 		String s;
 		node *n,*n1 = 0,*n0 = 0;
-		if(!(style&aPROP_STYLE_SECTIONS)) section = 0;
+		if(!(style&PROP_STYLE_SECTIONS)) section = 0;
 		getKey(s,section,key);
 		n = getNode((const char *)s);
 		if(n) {
@@ -229,7 +232,7 @@ void Properties::remove(const char *section,const char *key) {
 	if(key) {
 		String s;
 		node *n,*n1 = 0;
-		if(!(style&aPROP_STYLE_SECTIONS)) section = 0;
+		if(!(style&PROP_STYLE_SECTIONS)) section = 0;
 		getKey(s,section,key);
 		n = removeNode((const char *)s);
 		if(!n) return;
@@ -256,7 +259,7 @@ value_t Properties::get(const char *key,type_t &type) {
 
 value_t Properties::get(const char *section,const char *key,type_t &type) {
 	String s;
-	if(!(style&aPROP_STYLE_SECTIONS)) section = 0;
+	if(!(style&PROP_STYLE_SECTIONS)) section = 0;
 	getKey(s,section,key);
 	return get((const char *)s,type);
 }
@@ -298,7 +301,7 @@ size_t Properties::print(FILE *fp) {
 //				fputs((p=strchr(n->key,'~'))? p+1 : n->key,fp);
 //fputs("{key:",fp);
 //fprintf(fp,"[%s]",n->key);
-				if((style&aPROP_STYLE_SECTIONS) && (p=strchr(n->key,'#'))) s = p+1;
+				if((style&PROP_STYLE_SECTIONS) && (p=strchr(n->key,'#'))) s = p+1;
 				else s = n->key;
 				s.unescape();
 				s.print();
@@ -381,7 +384,7 @@ size_t Properties::load(String &data) {
 		}
 		if(j>i) {
 			j = data.left(j," \t");
-			if(j>i && (style&aPROP_STYLE_STORE_COMMENTS)) {
+			if(j>i && (style&PROP_STYLE_STORE_COMMENTS)) {
 //data.substr(s,i,j-i);
 //debug_output("Comment2[%d,%d,%d]: {%s}\n",(int)i,(int)j,(int)(j-i),(const char *)s);
 				comment.append(data,i,j-i);
@@ -393,12 +396,12 @@ size_t Properties::load(String &data) {
 		}
 		if(i<l) {
 			if((j=data.right(i))!=i) {
-				if(style&aPROP_STYLE_KEY_INDENT) ind.append(data,i,j-i);
+				if(style&PROP_STYLE_KEY_INDENT) ind.append(data,i,j-i);
 //debug_output("ind: [%s]\n",(const char *)ind);
 				i = j;
 			}
 			c = data[i];
-			if(c=='[' && (style&aPROP_STYLE_SECTIONS)) {
+			if(c=='[' && (style&PROP_STYLE_SECTIONS)) {
 				++i,j = data.matchToken("]\n",i,0,TOKEN_ESCAPE);//findChar("]\n",i);
 				if(j==-1 || data[j]=='\n') break;
 				key.append(data,i,j-i);
@@ -431,7 +434,7 @@ size_t Properties::load(String &data) {
 				k = 1;
 				data.expand(j,k," \t");
 				if(j==i) break;
-				if((style&aPROP_STYLE_STORE_DELIM) && !data.equals("=",j,k)) {
+				if((style&PROP_STYLE_STORE_DELIM) && !data.equals("=",j,k)) {
 					delim.append(data,j,k);
 //debug_output("delim: [%s]\n",(const char *)delim);
 				}
@@ -442,7 +445,7 @@ size_t Properties::load(String &data) {
 //debug_output("key: [%s] i: %ld, j: %ld, k: %ld\n",(const char *)key,i,j,k);
 				i = j+k;
 				if(i>=l) break;
-				j = data.matchValue(lang,i,0,(style&aPROP_STYLE_VALUE_COMMENTS)? 0 : MATCH_COMMENTS);
+				j = data.matchValue(lang,i,0,(style&PROP_STYLE_VALUE_COMMENTS)? 0 : MATCH_COMMENTS);
 				if(j==i) break;
 				k = j;
 				if(isquote(data[i]) && data[i]==data[j-1]) q = data[i],++i,--k;
@@ -455,7 +458,7 @@ size_t Properties::load(String &data) {
 				if(data[i]!='\n') {
 					j = data.find('\n',i);
 					if(j==-1) j = l;
-					if(style&aPROP_STYLE_STORE_COMMENTS) comment.append(data,i,j-i);
+					if(style&PROP_STYLE_STORE_COMMENTS) comment.append(data,i,j-i);
 //debug_output("comment: [%s]\n",(const char *)comment);
 					i = j;
 				}
@@ -536,5 +539,6 @@ size_t Properties::save(FILE *fp) {
 	return i;*/
 }
 
+}; /* namespace a */
 
 

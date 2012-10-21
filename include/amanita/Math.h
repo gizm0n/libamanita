@@ -4,7 +4,7 @@
 /**
  * @file amanita/Math.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -16,9 +16,6 @@
 /** Amanita Namespace */
 namespace a {
 
-/** A collection of mathematical functions.
- * @ingroup amanita
- */
 
 /** @name Constants
  * @{ */
@@ -171,7 +168,7 @@ extern long modpow(long b,long e,long m);
 extern long long modpow(long long b,long long e,long long m);
 /** @} */
 
-/** @name Prime
+/** @name Prime numbers
  * @{ */
 /** Returns the largest prime factor of unsigned long long n. */
 extern long long factor(long long n);
@@ -184,9 +181,6 @@ extern long long nextprime(long long n);
 /** @} */
 
 }; /* namespace a */
-
-
-using namespace a;
 
 
 #endif /* _AMANITA_MATH_H */

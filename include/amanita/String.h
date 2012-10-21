@@ -4,7 +4,7 @@
 /**
  * @file amanita/String.h  
  * @author Per Löwgren
- * @date Modified: 2012-10-18
+ * @date Modified: 2012-10-21
  * @date Created: 2003-11-30
  */ 
 
@@ -157,10 +157,10 @@ inline bool isutf8(unsigned char c) { return c&0x80; }
  * long, a negative value counts from the end of the string. For example, in a string 
  * "abc def ghi jkl mno pqr stu vwx y. abc def" (that has length 42), a call to
  * <tt>find("abc",-20,-2)</tt> will search in the string for "abc" from the position 22 until
- * position 40. A value of zero for the l-length parameter, searches until the end of the string. 
+ * position 40. A value of zero for the l-length parameter, searches until the end of the string.
+ * 
  * @ingroup amanita */
 class String : public Object {
-
 /** @cond */
 Object_Instance(String)
 /** @endcond */
@@ -598,9 +598,6 @@ public:
 }; /* String */
 
 }; /* namespace a */
-
-
-using namespace a;
 
 
 #endif /* _AMANITA_STRING_H */

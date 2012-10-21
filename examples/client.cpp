@@ -3,6 +3,8 @@
 #include <amanita/Application.h>
 #include <amanita/net/Client.h>
 
+using namespace a;
+
 
 Client *client;
 

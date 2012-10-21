@@ -4,7 +4,7 @@
 /**
  * @file amanita/Object.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -25,8 +25,8 @@ namespace a {
  * When instantiated statically with Object, the Class object is created before
  * main is called and therefore it can be used safely itn the code except for in
  * other static code.
- * @ingroup amanita
- */
+ * 
+ * @ingroup amanita */
 class Class {
 friend class Object;
 
@@ -49,7 +49,7 @@ public:
 	Class(const char *nm,Class *s);
 	~Class();
 
-	bool instanceOf(Class &c);						//!< Test if this is an instance of c, that is, if this is the same or inherit c.
+	bool instanceOf(Class &c);							//!< Test if this is an instance of c, that is, if this is the same or inherit c.
 	uint16_t getID() { return id; }					//!< Get ID for class.
 	const char *getName() { return name; }			//!< Get class name.
 	/** Get class that this class inherit from. */
@@ -233,8 +233,8 @@ This/these class(es) inherit the class A:
  * @endcode
  * @see Object_Instance(class_name)
  * @see Object_Inheritance(class_name,super_name)
- * @ingroup amanita
- */
+ * 
+ * @ingroup amanita */
 class Object {
 private:
 	/** Statically stored instance of Class. */
@@ -289,8 +289,6 @@ public:
 
 }; /* namespace a */
 
-
-using namespace a;
 
 #endif /* _AMANITA_OBJECT_H */
 

@@ -9,6 +9,8 @@
 #include <sys/time.h>
 #include <amanita/Random.h>
 
+using namespace a;
+
 
 int main(int argc,char *argv[]) {
 	int i,n = 1000000;

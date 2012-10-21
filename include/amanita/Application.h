@@ -4,7 +4,7 @@
 /**
  * @file amanita/Application.h
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-12-01
  */ 
 
@@ -12,19 +12,20 @@
 #include <time.h>
 #include <inttypes.h>
 #include <libintl.h>
-#include <amanita/Config.h>
-#include <amanita/Thread.h>
-
-
-class aWindow;
-
 #ifdef USE_GTK
 #include <gtk/gtk.h>
 #endif
-
 #ifdef USE_WIN32
 #include <windows.h>
+#endif
+#include <amanita/Config.h>
+#include <amanita/Thread.h>
+//#include <amanita/tk/Window.h>
 
+
+
+/** @cond */
+#ifdef USE_WIN32
 #ifdef main
 #undef main
 #endif
@@ -32,10 +33,18 @@ class aWindow;
 extern int main(int, char *[]);
 extern HINSTANCE hMainInstance;
 #endif
+/** @endcond */
 
 
 /** Amanita Namespace */
 namespace a {
+/** Amanita Tool Kit Namespace */
+
+
+/** @cond */
+namespace tk { class Window; };
+/** @endcond */
+
 
 /** Flags used when initiating applocation.
  * @see Application(uint32_t,const char *,const char *) */
@@ -63,8 +72,7 @@ enum {
  * @param max The highest number n can be.
  * @param st Status flags. 1=font(s) installed (on Linux call updateFontCache).
  * @see int install(const char *,const char *,Vector &,install_function,void *)
- * @see void updateFontCache()
- */
+ * @see void updateFontCache() */
 typedef void (*install_function)(void *obj,const char *file,int n,int max,int st);
 
 
@@ -74,8 +82,8 @@ typedef void (*install_function)(void *obj,const char *file,int n,int max,int st
  * structure from it. It contains methods for setting up an environment, downloading
  * and installing files from a webserver. Loading and language files and to get textstrings,
  * supporting multilanguage applications etc.
- * @ingroup amanita
- */
+ * 
+ * @ingroup amanita */
 class Application {
 private:
 	unsigned long app_init_params;	//!< 
@@ -93,15 +101,14 @@ private:
 	time_t app_last_access;				//!< Time the application last was executed.
 
 protected:
-	aWindow *window;						//!< Main window for the application.
+	tk::Window *window;					//!< Main window for the application.
 
 public:
 	/** Constructor, initiates the application.
 	 * It automatically looks for directories associated with the project, and 
 	 * @param params Parameters for how to initiate application.
 	 * @param prj Name of the project.
-	 * @param nm Name of the application.
-	 */
+	 * @param nm Name of the application. */
 	Application(uint32_t params=0,const char *prj=0,const char *nm=0);
 	virtual ~Application();
 
@@ -111,9 +118,9 @@ public:
 	int main();								//!< Start main loop.
 	void quit();							//!< Exit the main loop.
 
-	void setMainWindow(aWindow *wnd) { window = wnd; }
-	bool isMainWindow(aWindow *wnd) { return window==wnd; }
-	aWindow *getMainWindow() { return window; }
+	void setMainWindow(tk::Window *wnd) { window = wnd; }
+	bool isMainWindow(tk::Window *wnd) { return window==wnd; }
+	tk::Window *getMainWindow() { return window; }
 
 	virtual void create();				//!< Create aplication, this method should be inherited and used for creating the windows and widgets etc.
 	virtual void destroy();				//!< Destroy application, inherit and use for freeing user created resources.
@@ -153,9 +160,6 @@ public:
 };
 
 }; /* namespace a */
-
-
-using namespace a;
 
 
 #endif /* _AMANITA_APPLICATION_H */

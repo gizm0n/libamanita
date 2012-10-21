@@ -4,7 +4,7 @@
 /**
  * @file amanita/Path.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -65,11 +65,9 @@ typedef void (*path_move)(Path &,int,int,int &,int &,int);
 
 
 
-
-
 /** A class for storing a path-trail, with step coordinates.
- * @ingroup amanita
- */
+ * 
+ * @ingroup amanita */
 class aTrail {
 friend class Path;
 
@@ -115,8 +113,8 @@ public:
 /** A class for making path searches.
  * 
  * The class implements the A* algorithm.
- * @ingroup amanita
- */
+ * 
+ * @ingroup amanita */
 class Path {
 protected:
 	struct node {
@@ -199,10 +197,6 @@ public:
 };
 
 }; /* namespace a */
-
-
-using namespace a;
-
 
 
 

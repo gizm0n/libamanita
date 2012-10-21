@@ -3,6 +3,8 @@
 #include <string.h>
 #include <amanita/Word.h>
 
+using namespace a;
+
 int main(int argc, char *argv[]) {
 	int i,l,n;
 	const char *s;

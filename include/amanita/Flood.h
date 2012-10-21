@@ -4,13 +4,14 @@
 /**
  * @file amanita/Flood.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
 
 /** Amanita Namespace */
 namespace a {
+
 
 enum {
 	FLOOD_HWRAP			= 0x01,	//<! Flood fill wrap around edges horizontally.
@@ -21,8 +22,8 @@ enum {
  * 
  * This class flood fills an area in a 2D vector. This can be useful, for example,
  * when generating maps for games.
- * @ingroup amanita
- */
+ * 
+ * @ingroup amanita */
 class Flood {
 private:
 	int *table;
@@ -75,10 +76,6 @@ public:
 };
 
 }; /* namespace a */
-
-
-using namespace a;
-
 
 
 #endif /* _AMANITA_FLOOD_H */

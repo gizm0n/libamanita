@@ -9,7 +9,7 @@
 
 
 static int sqlite_callback(void *source,int argc,char **argv,char **azColName) {
-	if(source) ((Result *)source)->addRecord(argc,argv,azColName);
+	if(source) ((a::Result *)source)->addRecord(argc,argv,azColName);
 	return 0;
 }
 

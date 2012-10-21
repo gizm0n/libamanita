@@ -1,8 +1,17 @@
 #ifndef _AMANITA_BYTES_H
 #define _AMANITA_BYTES_H
 
+/**
+ * @file amanita/Bytes.h
+ * @author Per Löwgren
+ * @date Modified: 2012-10-21
+ * @date Created: 2012-01-09
+ */ 
+
 #include <stdint.h>
 
+
+/** @cond */
 #ifdef WIN32
 // Windows is little endian only 
 #define __LITTLE_ENDIAN 1234
@@ -100,5 +109,8 @@ typedef unsigned long long int uint64_t;
 #if __BYTE_ORDER != __BIG_ENDIAN && __BYTE_ORDER != __LITTLE_ENDIAN
 #error "Unknown/unsupported byte order!"
 #endif
+/** @endcond */
 
-#endif
+
+#endif /* _AMANITA_BYTES_H */
+

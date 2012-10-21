@@ -4,7 +4,7 @@
 /**
  * @file amanita/Vector.h  
  * @author Per Löwgren
- * @date Modified: 2012-03-11
+ * @date Modified: 2012-10-21
  * @date Created: 2004-03-22
  */ 
 
@@ -22,6 +22,18 @@ class Hashtable;
 /** @endcond */
 
 
+/** @name Functions for handling of arrays.
+ * @{ */
+/** Search through a null-terminated array arr for string s at offset o until l, and return index or -1 if not found.
+ * @param arr Array to search through.
+ * @param s String to search for.
+ * @param o Offset, position to start searching in arr, a negative value counts from the end.
+ * @param l Length of from o to search, if zero or negative length is calculated from the entire length and backward.
+ * @return Index of s in arr, or -1 if fail. */
+long search(const char *arr[],const char *s,long o=0,long l=0);
+/** @} */
+
+
 /** A generic multitype vector.
  * 
  * This vector differs from the standard C++ vector in that it isn't build with templates,
@@ -36,10 +48,10 @@ class Hashtable;
  * All these overloaded methods are actually inline methods, most of them, so no need for panic,
  * the compiled file is not very large, and there is very little overhead to handle all these
  * different types in reality.
+ * 
  * @ingroup amanita */
 class Vector : public Collection {
 friend class Hashtable;
-
 /** @cond */
 Object_Instance(Vector)
 /** @endcond */
@@ -308,18 +320,10 @@ public:
 	size_t save(const char *fn,const char *l=0);
 	size_t save(FILE *fp,const char *l=0);
 	/** @} */
-
-	/** @name Static functions for handling of arrays.
-	 * @{ */
-	/** Search through a null-terminated array arr for string s at offset o until l, and return index or -1 if not found. */
-	static long find(const char *arr[],const char *s,long o=0,long l=0);
-	/** @} */
 };
 
 }; /* namespace a */
 
-
-using namespace a;
 
 
 #endif /* _AMANITA_VECTOR_H */

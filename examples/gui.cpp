@@ -5,20 +5,20 @@
 #include <cairo.h>
 #include "../src/amanita/_config.h"
 #include <amanita/Application.h>
-#include <amanita/gui/aMenu.h>
-#include <amanita/gui/aNotebook.h>
-#include <amanita/gui/aStatus.h>
-#include <amanita/gui/aWindow.h>
-#include <amanita/gui/aBrowser.h>
-#include <amanita/gui/aCanvas.h>
-#include <amanita/gui/aCairo.h>
-#include <amanita/gui/aContainer.h>
-#include <amanita/gui/aButton.h>
-#include <amanita/gui/aLabel.h>
-#include <amanita/gui/aText.h>
-#include <amanita/gui/aSelect.h>
-#include <amanita/gui/aList.h>
-#include <amanita/gui/aPanel.h>
+#include <amanita/tk/Menu.h>
+#include <amanita/tk/Notebook.h>
+#include <amanita/tk/Status.h>
+#include <amanita/tk/Window.h>
+#include <amanita/tk/Browser.h>
+#include <amanita/tk/Canvas.h>
+#include <amanita/tk/Cairo.h>
+#include <amanita/tk/Container.h>
+#include <amanita/tk/Button.h>
+#include <amanita/tk/Label.h>
+#include <amanita/tk/Text.h>
+#include <amanita/tk/Select.h>
+#include <amanita/tk/List.h>
+#include <amanita/tk/Panel.h>
 
 //#ifdef USE_GTK
 //#include "../icons/16x16/amanita.xpm"
@@ -30,6 +30,10 @@
 #ifdef USE_SCINTILLA
 #include <SciLexer.h>
 #endif
+
+using namespace a;
+using namespace a::tk;
+
 
 static const char *html_page = "<html>\n\
 <body>\n\
@@ -167,7 +171,7 @@ enum {
 
 class GuiApp : public Application {
 private:
-	aNotebook *notebook;
+	Notebook *notebook;
 public:
 	GuiApp(uint32_t params,const char *prj,const char *nm) : Application(params,prj,nm) {}
 	virtual ~GuiApp() {}
@@ -176,14 +180,14 @@ public:
 };
 
 
-GuiApp app(INIT_GUI,"GUI","aWidget Example");
+GuiApp app(INIT_GUI,"GUI","Widget Example");
 
 
-static uint32_t window_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
+static uint32_t window_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
 	return 0;
 }
 
-static uint32_t menu_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
+static uint32_t menu_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
 fprintf(stderr,"menu_events(%s)\n",(const char *)p2);
 fflush(stderr);
 	if(p1>=MENU_ID_PAGE1 && p1<=MENU_ID_PAGE4) app.selectPage(p1-MENU_ID_PAGE1);
@@ -194,15 +198,15 @@ fflush(stderr);
 	return 0;
 }
 
-static uint32_t notebook_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
+static uint32_t notebook_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
 fprintf(stderr,"notebook_events(%d,%s)\n",(int)e,(char *)p3);
 	return 0;
 }
 
-static uint32_t canvas_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
+static uint32_t canvas_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
 //fprintf(stderr,"canvas_events(w: %p, e: %d, p1: %ld, p2: %ld, p3: %ld)\n",w,e,p1,p2,p3);
-	if(e==aCANVAS_PAINT) {
-		aCanvas *c = (aCanvas *)w;
+	if(e==CANVAS_PAINT) {
+		Canvas *c = (Canvas *)w;
 		c->setColor(0xff0000);
 		c->fillRectangle(0,0,c->getWidth(),c->getHeight());
 		c->setColor(0x0000ff);
@@ -212,10 +216,10 @@ static uint32_t canvas_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intp
 	return 0;
 }
 
-static uint32_t cairo_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
+static uint32_t cairo_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
 //fprintf(stderr,"cairo_events(w: %p, e: %d, p1: %ld, p2: %ld, p3: %ld)\n",w,e,p1,p2,p3);
-	if(e==aCAIRO_PAINT) {
-		aCanvas *c = (aCanvas *)w;
+	if(e==CAIRO_PAINT) {
+		Canvas *c = (Canvas *)w;
 		cairo_t *cr = (cairo_t *)p1;
 		cairo_set_line_width(cr,1);
 		cairo_set_source_rgb(cr,0.0,0.0,1.0); 
@@ -229,27 +233,27 @@ static uint32_t cairo_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intpt
 	return 0;
 }
 /*
-static uint32_t button_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
+static uint32_t button_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
 fprintf(stderr,"button_events(%s, %d)\n",w->getText(),(int)p1);
 	return 0;
 }
 
-static uint32_t choice_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
-fprintf(stderr,"choice_events(%s)\n",((aSelect *)w)->getItem());
+static uint32_t choice_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
+fprintf(stderr,"choice_events(%s)\n",((Select *)w)->getItem());
 	return 0;
 }
 
-static uint32_t list_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
-fprintf(stderr,"list_events(%s)\n",((aList *)w)->getColumn(0));
+static uint32_t list_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
+fprintf(stderr,"list_events(%s)\n",((List *)w)->getColumn(0));
 	return 0;
 }
 */
-static uint32_t text_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
+static uint32_t text_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
 fprintf(stderr,"text_events()\n");
 	return 0;
 }
 
-static uint32_t panel_events(aWidget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
+static uint32_t panel_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
 fprintf(stderr,"panel_events(p1: %d, p2: %d)\n",(int)p1,(int)p2);
 fflush(stderr);
 	return 0;
@@ -259,27 +263,27 @@ fflush(stderr);
 void GuiApp::create() {
 	int /*i,*/n/*,s*/;
 //	char str[1025];
-	aWindow *window;
-	aBrowser *browser;
-	aCairo *cairo;
-	aCanvas *canvas;
-/*	aWindow *dialog;
-	aContainer *hbox1;
-	aContainer *hbox2;*/
-	aContainer *vbox1;
-/*	aContainer *vbox2;
-	aButton *button,*group;
-	aLabel *label;
-	aSelect *choice;
-	aList *list;*/
-	aText *text;
-	aPanel *panel;
+	Window *window;
+	Browser *browser;
+	Cairo *cairo;
+	Canvas *canvas;
+/*	Window *dialog;
+	Container *hbox1;
+	Container *hbox2;*/
+	Container *vbox1;
+/*	Container *vbox2;
+	Button *button,*group;
+	Label *label;
+	Select *choice;
+	List *list;*/
+	Text *text;
+	Panel *panel;
 
-	window = new aWindow(this,window_events);
+	window = new Window(this,window_events);
 	setMainWindow(window);
-	window->setStyle(aWINDOW_RESIZABLE|aWINDOW_CENTER,900,600);
+	window->setStyle(WINDOW_RESIZABLE|WINDOW_CENTER,900,600);
 	{
-		const aWindowIcon icons[] = {
+		const WindowIcon icons[] = {
 #ifdef USE_GTK
 //			{ 16,0,amanita_xpm },
 			{ 16,0,0,"../icons/16x16/amanita.png" },
@@ -292,11 +296,11 @@ void GuiApp::create() {
 		{0}};
 		window->setIcons(icons);
 
-		const aMenuItem items[] = {
+		const MenuItem items[] = {
 			{ -1,MENU_ID_FILE,"File",true,-1 },
-				{ MENU_ID_FILE,MENU_ID_NEW,"New",true,aKEY_n,aKEY_CONTROL },
-				{ MENU_ID_FILE,MENU_ID_SAVE,"Save",true,aKEY_s,aKEY_CONTROL },
-				{ MENU_ID_FILE,MENU_ID_LOAD,"Load",true,aKEY_l,aKEY_CONTROL },
+				{ MENU_ID_FILE,MENU_ID_NEW,"New",true,KEY_n,KEY_CONTROL },
+				{ MENU_ID_FILE,MENU_ID_SAVE,"Save",true,KEY_s,KEY_CONTROL },
+				{ MENU_ID_FILE,MENU_ID_LOAD,"Load",true,KEY_l,KEY_CONTROL },
 				{ MENU_ID_FILE,-1 },
 				{ MENU_ID_FILE,MENU_ID_PAGE,"Select Page",true,-1 },
 				{ MENU_ID_PAGE,MENU_ID_PAGE1,"Page 1",true,-1 },
@@ -304,59 +308,59 @@ void GuiApp::create() {
 				{ MENU_ID_PAGE,MENU_ID_PAGE3,"Page 3",true,-1 },
 				{ MENU_ID_PAGE,MENU_ID_PAGE4,"Page 4",true,-1 },
 				{ MENU_ID_FILE,-1 },
-				{ MENU_ID_FILE,MENU_ID_PRINT,"Print",true,aKEY_p,aKEY_CONTROL },
+				{ MENU_ID_FILE,MENU_ID_PRINT,"Print",true,KEY_p,KEY_CONTROL },
 				{ MENU_ID_FILE,-1 },
-				{ MENU_ID_FILE,MENU_ID_QUIT,"Quit",true,aKEY_q,aKEY_CONTROL },
+				{ MENU_ID_FILE,MENU_ID_QUIT,"Quit",true,KEY_q,KEY_CONTROL },
 			{ -1,MENU_ID_HELP,"Help",true,-1 },
-				{ MENU_ID_HELP,MENU_ID_CONTENT,"Content",true,aKEY_F1,0 },
+				{ MENU_ID_HELP,MENU_ID_CONTENT,"Content",true,KEY_F1,0 },
 				{ MENU_ID_HELP,-1 },
 				{ MENU_ID_HELP,MENU_ID_ABOUT,"About",true,-1 },
 			{ -1,-1 }
 		};
-		window->setMenu(new aMenu(menu_events,items));
+		window->setMenu(new Menu(menu_events,items));
 
 		const int cols[] = { 200,150,200,-1 };
-		window->setStatus(new aStatus(cols));
+		window->setStatus(new Status(cols));
 	}
 
-	notebook = new aNotebook(notebook_events);
-	notebook->setStyle(aFILL|/*aNOTEBOOK_CLOSE_BUTTON|*/aNOTEBOOK_HIDE_TABS);
+	notebook = new Notebook(notebook_events);
+	notebook->setStyle(FILL|/*NOTEBOOK_CLOSE_BUTTON|*/NOTEBOOK_HIDE_TABS);
 fprintf(stderr,"window->add(notebook);\n");
 	window->add(notebook);
 	window->open(0);
 
-	window->updateStatus(0,"aWidget Example");
+	window->updateStatus(0,"Widget Example");
 	window->updateStatus(1,PACKAGE_STRING);
 	window->updateStatus(2,"Per Löwgren 2012");
 
-	browser = new aBrowser(0);
-	browser->setStyle(aFILL);
+	browser = new Browser(0);
+	browser->setStyle(FILL);
 	notebook->openPage("Browser Tab",browser);
 	browser->setHtmlContent(html_page);
 
-	cairo = new aCairo(cairo_events);
-	cairo->setStyle(aFILL);
+	cairo = new Cairo(cairo_events);
+	cairo->setStyle(FILL);
 	notebook->openPage("Cairo Tab",cairo);
 
-	canvas = new aCanvas(canvas_events);
-	canvas->setStyle(aFILL);
+	canvas = new Canvas(canvas_events);
+	canvas->setStyle(FILL);
 	notebook->openPage("Canvas Tab",canvas);
 
-/*	hbox1 = new aContainer();
-	hbox1->setStyle(aHORIZONTAL|aEXPAND|aFILL,0,0,10,5);
-	hbox2 = new aContainer();
-	hbox2->setStyle(aHORIZONTAL|aEXPAND|aFILL,0,0,0,5);
-	vbox1 = new aContainer();
-	vbox1->setStyle(aVERTICAL|aFILL,0,0,0,5);
+/*	hbox1 = new Container();
+	hbox1->setStyle(HORIZONTAL|EXPAND|FILL,0,0,10,5);
+	hbox2 = new Container();
+	hbox2->setStyle(HORIZONTAL|EXPAND|FILL,0,0,0,5);
+	vbox1 = new Container();
+	vbox1->setStyle(VERTICAL|FILL,0,0,0,5);
 	vbox1->setText("Widgets");
-	vbox2 = new aContainer();
-	vbox2->setStyle(aVERTICAL|aEXPAND|aFILL,0,0,0,5);
+	vbox2 = new Container();
+	vbox2->setStyle(VERTICAL|EXPAND|FILL,0,0,0,5);
 
 	for(i=0; i<5; ++i) {
-		s = aFILL;
-		if(i>=1 && i<=2) s = aFILL|aBUTTON_CHECKBOX;
-		else if(i>=3 && i<=4) s = aFILL|aBUTTON_RADIOBUTTON;
-		button = new aButton(button_events);
+		s = FILL;
+		if(i>=1 && i<=2) s = FILL|BUTTON_CHECKBOX;
+		else if(i>=3 && i<=4) s = FILL|BUTTON_RADIOBUTTON;
+		button = new Button(button_events);
 		if(i==3) group = button;
 		else if(i>3) button->setGroup(group);
 		button->setStyle(s);
@@ -364,23 +368,23 @@ fprintf(stderr,"window->add(notebook);\n");
 		button->setText(str);
 		vbox1->add(button);
 	}
-	choice = new aSelect(choice_events);
+	choice = new Select(choice_events);
 	for(i=0; i<10; ++i) {
 		sprintf(str,"Choice %d",i+1);
 		choice->addItem(str);
 	}
 	choice->select(5);
 	vbox1->add(choice);
-	label = new aLabel(0);
-	label->setStyle(aFILL|aLABEL_LEFT);
+	label = new Label(0);
+	label->setStyle(FILL|LABEL_LEFT);
 	label->setText("Label");
 	vbox1->add(label);
-	text = new aText(0);
+	text = new Text(0);
 	sprintf(str,"Text %d",++n);
 	text->setText(str);
 	vbox1->add(text);
-	choice = new aSelect(choice_events);
-	choice->setStyle(aFILL|aSELECT_ENTRY);
+	choice = new Select(choice_events);
+	choice->setStyle(FILL|SELECT_ENTRY);
 	for(i=0; i<10; ++i) {
 		sprintf(str,"Choice Entry %d",i+1);
 		choice->addItem(str);
@@ -388,8 +392,8 @@ fprintf(stderr,"window->add(notebook);\n");
 	vbox1->add(choice);
 	hbox2->add(vbox1);
 
-	list = new aList(list_events);
-	list->setStyle(aEXPAND|aFILL);
+	list = new List(list_events);
+	list->setStyle(EXPAND|FILL);
 	{
 		const char *cols = "Name|Number|Astrology";
 		const int col_widths[] = { 100,40,100 };
@@ -398,66 +402,66 @@ fprintf(stderr,"window->add(notebook);\n");
 	hbox2->add(list);
 	vbox2->add(hbox2);
 
-	button = new aButton(button_events);
-	button->setStyle(aFILL|aBUTTON_DEFAULT);
+	button = new Button(button_events);
+	button->setStyle(FILL|BUTTON_DEFAULT);
 	sprintf(str,"Button %d",++n);
 	button->setText(str);
 	vbox2->add(button);
 	hbox1->add(vbox2);
 
-	text = new aText(text_events);
-	text->setStyle(aFILL|aTEXT_MULTILINE,240,0);
+	text = new Text(text_events);
+	text->setStyle(FILL|TEXT_MULTILINE,240,0);
 	sprintf(str,"Text %d",++n);
 	text->setText(str);
 	hbox1->add(text);
 
 //	notebook->openPage("Widgets Tab",hbox1);
 
-	dialog = new aWindow(this,window_events);
-	dialog->setStyle(aWINDOW_DIALOG|aWINDOW_CENTER,640,480);
+	dialog = new Window(this,window_events);
+	dialog->setStyle(WINDOW_DIALOG|WINDOW_CENTER,640,480);
 
 	dialog->add(hbox1);
 	dialog->open(window);
 
-	button->setFont("Times New Roman",20,aFONT_BOLD);*/
+	button->setFont("Times New Roman",20,FONT_BOLD);*/
 
-	vbox1 = new aContainer();
-	vbox1->setStyle(aVERTICAL|aFILL|aEXPAND);
+	vbox1 = new Container();
+	vbox1->setStyle(VERTICAL|FILL|EXPAND);
 
 	{
-		aPanelButton buttons[] = {
-			{ aPANEL_BUTTON,aPANEL_NEW,1,0,0,"New Page Tooltip",0 },
-			{ aPANEL_BUTTON,aPANEL_OPEN,2,0,0,"Open Page Tooltip",0 },
-			{ aPANEL_BUTTON,aPANEL_SAVE,3,0,0,"Save Page Tooltip",0 },
-			{ aPANEL_SEPARATOR,0,0,0,0,0,0 },
-			{ aPANEL_BUTTON,aPANEL_COPY,4,0,0,0,0 },
-			{ aPANEL_BUTTON,aPANEL_CUT,5,0,0,0,0 },
-			{ aPANEL_BUTTON,aPANEL_PASTE,6,0,0,0,0 },
-			{ aPANEL_SEPARATOR,0,0,0,0,0,0 },
-			{ aPANEL_BUTTON,aPANEL_FIND,7,0,0,0,0 },
-			{ aPANEL_BUTTON,aPANEL_FIND_AND_REPLACE,8,0,0,0,0 },
-			{ aPANEL_BUTTON,aPANEL_DELETE,9,0,0,0,0 },
-			{ aPANEL_SEPARATOR,0,0,0,0,0,0 },
-			{ aPANEL_BUTTON,aPANEL_UNDO,10,0,0,0,0 },
-			{ aPANEL_BUTTON,aPANEL_REDO,11,0,0,0,0 },
-			{ aPANEL_SEPARATOR,0,0,0,0,0,0 },
-			{ aPANEL_BUTTON,aPANEL_PRINT_PREVIEW,12,0,0,0,0 },
-			{ aPANEL_BUTTON,aPANEL_PRINT,13,0,0,0,0 },
-			{ aPANEL_SEPARATOR,0,0,0,0,0,0 },
-			{ aPANEL_CHECK,aPANEL_BOLD,12,0,0,0,0 },
-			{ aPANEL_CHECK,aPANEL_ITALIC,12,0,0,0,0 },
-			{ aPANEL_CHECK,aPANEL_UNDERLINE,12,0,0,0,0 },
-			{ aPANEL_CHECK,aPANEL_STRIKE,12,0,0,0,0 },
-			{ aPANEL_SEPARATOR,0,0,0,0,0,0 },
-			{ aPANEL_BUTTON,aPANEL_ZOOM_IN,12,0,"Zoom In","Zoom In Tooltip",0 },
+		PanelButton buttons[] = {
+			{ PANEL_BUTTON,PANEL_NEW,1,0,0,"New Page Tooltip",0 },
+			{ PANEL_BUTTON,PANEL_OPEN,2,0,0,"Open Page Tooltip",0 },
+			{ PANEL_BUTTON,PANEL_SAVE,3,0,0,"Save Page Tooltip",0 },
+			{ PANEL_SEPARATOR,0,0,0,0,0,0 },
+			{ PANEL_BUTTON,PANEL_COPY,4,0,0,0,0 },
+			{ PANEL_BUTTON,PANEL_CUT,5,0,0,0,0 },
+			{ PANEL_BUTTON,PANEL_PASTE,6,0,0,0,0 },
+			{ PANEL_SEPARATOR,0,0,0,0,0,0 },
+			{ PANEL_BUTTON,PANEL_FIND,7,0,0,0,0 },
+			{ PANEL_BUTTON,PANEL_FIND_AND_REPLACE,8,0,0,0,0 },
+			{ PANEL_BUTTON,PANEL_DELETE,9,0,0,0,0 },
+			{ PANEL_SEPARATOR,0,0,0,0,0,0 },
+			{ PANEL_BUTTON,PANEL_UNDO,10,0,0,0,0 },
+			{ PANEL_BUTTON,PANEL_REDO,11,0,0,0,0 },
+			{ PANEL_SEPARATOR,0,0,0,0,0,0 },
+			{ PANEL_BUTTON,PANEL_PRINT_PREVIEW,12,0,0,0,0 },
+			{ PANEL_BUTTON,PANEL_PRINT,13,0,0,0,0 },
+			{ PANEL_SEPARATOR,0,0,0,0,0,0 },
+			{ PANEL_CHECK,PANEL_BOLD,12,0,0,0,0 },
+			{ PANEL_CHECK,PANEL_ITALIC,12,0,0,0,0 },
+			{ PANEL_CHECK,PANEL_UNDERLINE,12,0,0,0,0 },
+			{ PANEL_CHECK,PANEL_STRIKE,12,0,0,0,0 },
+			{ PANEL_SEPARATOR,0,0,0,0,0,0 },
+			{ PANEL_BUTTON,PANEL_ZOOM_IN,12,0,"Zoom In","Zoom In Tooltip",0 },
 		{0}};
-		panel = new aPanel(panel_events,buttons);
-		panel->setStyle(aFILL);
+		panel = new Panel(panel_events,buttons);
+		panel->setStyle(FILL);
 	}
 //	panel->setButtonImage(PANEL_BITMAP);
 	vbox1->add(panel);
-	text = new aText(text_events);
-	text->setStyle(aFILL|aEXPAND|aTEXT_SOURCE);
+	text = new Text(text_events);
+	text->setStyle(FILL|EXPAND|TEXT_SOURCE);
 	vbox1->add(text);
 	notebook->openPage("Source Tab",vbox1);
 
@@ -505,7 +509,7 @@ fprintf(stderr,"window->add(notebook);\n");
 		GtkSourceLanguageManager *lang_man = gtk_source_language_manager_new();
 //		const char * const *arr = gtk_source_language_manager_get_language_ids(lang_man);
 //		for(int i=0; arr[i]; ++i)
-//			debug_output("aText::create(id[%d]: %s)\n",i,arr[i]);
+//			debug_output("Text::create(id[%d]: %s)\n",i,arr[i]);
 		GtkSourceLanguage *lang = gtk_source_language_manager_get_language(lang_man,"c");
 		gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(buffer),lang);
 		gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(editor),GTK_WRAP_WORD_CHAR);

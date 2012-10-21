@@ -4,7 +4,7 @@
 /**
  * @file amanita/Integer.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -18,8 +18,8 @@ namespace a {
 
 
 /** A class for calculating big integers.
- * @ingroup amanita
- */
+ * 
+ * @ingroup amanita */
 class Integer {
 private:
 	enum {
@@ -232,9 +232,6 @@ public:
 };
 
 }; /* namespace a */
-
-
-using namespace a;
 
 
 #endif /* _AMANITA_INTEGER_H */

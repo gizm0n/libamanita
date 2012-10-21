@@ -4,7 +4,7 @@
 /**
  * @file amanita/db/Database.h
  * @author Per Löwgren
- * @date Modified: 2012-03-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -12,15 +12,18 @@
 #include <amanita/db/Result.h>
 
 
+/** @cond */
 struct sqlite3;
+/** @endcond */
+
 
 /** Amanita Namespace */
 namespace a {
 
 
 /** This class opens a SQLite database and executes queries to the database.
- * @ingroup db
- */
+ * 
+ * @ingroup db */
 class Database {
 private:
 	char file[256];
@@ -44,8 +47,6 @@ public:
 
 }; /* namespace a */
 
-
-using namespace a;
 
 
 #endif /* _AMANITA_DB_DATABASE_H */

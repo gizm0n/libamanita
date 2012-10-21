@@ -4,7 +4,7 @@
 /**
  * @file amanita/db/Record.h
  * @author Per Löwgren
- * @date Modified: 2012-03-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -16,11 +16,14 @@
 /** Amanita Namespace */
 namespace a {
 
+
 /** @cond */
 class Result;
 /** @endcond */
 
+
 /** Record.
+ * 
  * @ingroup db */
 class Record {
 private:
@@ -57,9 +60,6 @@ public:
 };
 
 }; /* namespace a */
-
-
-using namespace a;
 
 
 

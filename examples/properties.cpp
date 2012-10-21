@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <amanita/Properties.h>
 
+using namespace a;
+
 int main(int argc, char *argv[]) {
 	const char *fn = argc>=2? argv[1] : "properties.cfg";
 	int lang = strstr(fn,".ini")? LANG_INI : strstr(fn,".properties")? LANG_PROPERTIES : LANG_CFG;

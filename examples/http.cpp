@@ -3,6 +3,8 @@
 #include <amanita/Application.h>
 #include <amanita/net/Http.h>
 
+using namespace a;
+
 int main(int argc, char *argv[]) {
 	Application app(INIT_SOCKETS);
 	Http http;

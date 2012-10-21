@@ -4,7 +4,7 @@
 /**
  * @file amanita/Dictionary.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-09-07
  */ 
 
@@ -17,10 +17,12 @@ namespace a {
 /** A quick lookup class.
  * 
  * The Dictionary class generates an indexed list of words with attached numerical values.
- * @ingroup amanita
- */
+ * 
+ * @ingroup amanita */
 class Dictionary : public Collection {
+/** @cond */
 Object_Instance(Dictionary)
+/** @endcond */
 
 public:
 	struct word {
@@ -58,8 +60,6 @@ public:
 
 }; /* namespace a */
 
-
-using namespace a;
 
 #endif /* _AMANITA_DICTIONARY_H */
 

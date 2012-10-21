@@ -3,6 +3,8 @@
 #include <amanita/Application.h>
 #include <amanita/net/Server.h>
 
+using namespace a;
+
 Server *server;
 
 void send_server_message(Connection c,const char *format, ...) {

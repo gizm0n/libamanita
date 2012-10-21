@@ -3,7 +3,7 @@
 /**
  * @file amanita/net/Http.h
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2008-04-09
  */ 
 
@@ -114,6 +114,7 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
  * @endcode
+ * 
  * @ingroup net */
 class Http {
 private:
@@ -261,9 +262,6 @@ public:
 };
 
 }; /* namespace a */
-
-
-using namespace a;
 
 
 #endif /* _AMANITA_NET_HTTP_H */

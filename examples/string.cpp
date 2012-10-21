@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <amanita/String.h>
 
+using namespace a;
+
 int main(int argc, char *argv[]) {
 	String str;
 	str << "\

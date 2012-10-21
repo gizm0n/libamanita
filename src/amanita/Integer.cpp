@@ -11,6 +11,8 @@
 #include <amanita/Random.h>
 
 
+namespace a {
+
 
 Integer::~Integer() {
 	free(num);
@@ -434,10 +436,10 @@ Integer &Integer::random(size_t n) {
 		size_t i = (n/32)+((n%32)!=0);
 		if(i>len) resize(i-len);
 		else len = i;
-		for(i=0; i<len-1; i++) num[i] = ::rnd.uint32();
+		for(i=0; i<len-1; i++) num[i] = a::rnd.uint32();
 		n %= 32;
 		if(n==0) n = 32;
-		num[len-1] = (n==32? ::rnd.uint32() : ::rnd.uintN(n)) | (0x80000000>>(32-n));
+		num[len-1] = (n==32? a::rnd.uint32() : a::rnd.uintN(n)) | (0x80000000>>(32-n));
 	}
 	return *this;
 }
@@ -515,5 +517,7 @@ void Integer::print(FILE *fp) const {
 	//fprintf(fp,"[%lu]",(unsigned long)len);
 	fflush(fp);
 }
+
+}; /* namespace a */
 
 

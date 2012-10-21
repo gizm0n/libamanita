@@ -4,7 +4,7 @@
 /**
  * @file amanita/Regex.h  
  * @author Per Löwgren
- * @date Modified: 2010-08-01
+ * @date Modified: 2012-10-21
  * @date Created: 2004-12-30
  */ 
 
@@ -26,8 +26,10 @@ enum {
 };
 
 
+/** @cond */
 class REBlock;
 class REMatch;
+/** @endcond */
 
 
 /** A simple class for compiling regex code and performing text searches.
@@ -99,12 +101,12 @@ int main(int argc, char *argv[]) {
  * If you are not familiar with regex-code, there is a good article about it on Wikipedia:
  * http://en.wikipedia.org/wiki/Regular_expression
  * 
- * 
- * @ingroup amanita
- */
+ * @ingroup amanita */
 class Regex {
+/** @cond */
 friend class REBlock;
 friend class REMatch;
+/** @endcond */
 
 private:
 	uint32_t mod;				//!< Modifiers as flags.
@@ -188,8 +190,6 @@ public:
 
 }; /* namespace a */
 
-
-using namespace a;
 
 
 #endif /* _AMANITA_REGEX_H */

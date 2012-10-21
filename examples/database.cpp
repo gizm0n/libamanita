@@ -4,6 +4,9 @@
 #include <time.h>
 #include <amanita/db/Database.h>
 
+using namespace a;
+
+
 int main(int argc, char *argv[]) {
 	int i,j,exists = 0;
 	const char *fn = "database.db";
