@@ -4,7 +4,7 @@
 #include <string.h>
 #include <cairo.h>
 #include "../src/amanita/_config.h"
-#include <amanita/Application.h>
+#include <amanita/tk/Application.h>
 #include <amanita/tk/Menu.h>
 #include <amanita/tk/Notebook.h>
 #include <amanita/tk/Status.h>
@@ -180,7 +180,7 @@ public:
 };
 
 
-GuiApp app(INIT_GUI,"GUI","Widget Example");
+GuiApp app(APP_TK,"GUI","Widget Example");
 
 
 static uint32_t window_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
@@ -284,15 +284,9 @@ void GuiApp::create() {
 	window->setStyle(WINDOW_RESIZABLE|WINDOW_CENTER,900,600);
 	{
 		const WindowIcon icons[] = {
-#ifdef USE_GTK
-//			{ 16,0,amanita_xpm },
-			{ 16,0,0,"../icons/16x16/amanita.png" },
-			{ 48,0,0,"../icons/48x48/amanita.png" },
-#endif
-#ifdef USE_WIN32
-			{ 16,aAPP_ICON },
-			{ 48,aAPP_ICON },
-#endif
+			{ 16,AMANITA_ICON,0,"../icons/16x16/amanita.png" },
+//			{ 32,0,amanita32_xpm },
+			{ 488,AMANITA_ICON,0,"../icons/48x48/amanita.png" },
 		{0}};
 		window->setIcons(icons);
 

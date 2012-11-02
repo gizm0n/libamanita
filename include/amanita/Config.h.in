@@ -8,13 +8,13 @@
  * @date Created: 2012-03-01
  */ 
 
-/** @cond */
 #define AMANITA_VERSION "@PACKAGE_VERSION@"
 
 #cmakedefine USE_PTHREADS
 #cmakedefine USE_WIN32_THREADS
 
 #cmakedefine USE_UNIX
+#cmakedefine USE_LINUX
 
 #cmakedefine GUI_GTK
 #cmakedefine USE_GTK
@@ -37,7 +37,20 @@
 #define USE_SOURCEVIEW
 #endif
 #endif
-/** @endcond */
+
+#cmakedefine HAVE_DD
+
+#cmakedefine HAVE_SDL
+#cmakedefine HAVE_SDL_TTF
+#cmakedefine HAVE_SDL_IMG
+
+#ifdef HAVE_DD
+#define USE_DD
+#else
+#ifdef HAVE_SDL
+#define USE_SDL
+#endif
+#endif
 
 #include <amanita/Resource.h>
 

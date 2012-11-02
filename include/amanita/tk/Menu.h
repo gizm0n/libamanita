@@ -14,12 +14,13 @@
 
 /** Amanita Namespace */
 namespace a {
-
-class Application;
-
-
 /** Amanita Tool Kit Namespace */
 namespace tk {
+
+
+/** @cond */
+class Application;
+/** @endcond */
 
 
 enum {
@@ -57,7 +58,7 @@ struct MenuItem {
  * 
  * @ingroup tk */
 class Menu : public Widget {
-friend class a::Application;
+friend class Application;
 friend class Window;
 /** @cond */
 Object_Instance(Menu)

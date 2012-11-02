@@ -40,8 +40,8 @@ private:
 		Image *img;
 		Font *font1,*font2;
 		struct button {
-			SDL_Rect *l1,*l2,*c1,*c2,*c3,*r1,*r2,*b1,*b2;
-			SDL_Rect ins;
+			rect16_t *l1,*l2,*c1,*c2,*c3,*r1,*r2,*b1,*b2;
+			rect16_t ins;
 		} top,bottom;
 	};
 	static _settings _s;
@@ -51,7 +51,7 @@ protected:
 		char *text;
 		int index;
 		int tw1,tw2;
-		SDL_Rect r;
+		rect16_t r;
 	};
 	int style,ntabs,act;
 	tab *tabs;
@@ -95,7 +95,7 @@ public:
 	 * 24 = Bottom tabset, Insets, Right
 	 * 25 = Bottom tabset, Insets, Bottom
 	 **/
-	static void setDefaultSettings(Image *img,Font *f1,Font *f2,Uint32 data[26]);
+	static void setDefaultSettings(Image *img,Font *f1,Font *f2,uint32_t data[26]);
 
 	void setStyle(int st=0);
 	void setTabs(const char *str[],int len);

@@ -52,21 +52,15 @@ private:
 	thread_function function;
 	void *data;
 
-/*#ifdef USE_SDL
-	static int _run(void *d);*/
-#ifdef USE_PTHREADS
-	static void *_run(void *d);
-#endif
-#ifdef USE_WIN32_THREADS
-	static DWORD WINAPI _run(void *d);
-#endif
-
 	void createMutex();
 	void deleteMutex();
 
 public:
 	Thread();
 	~Thread();
+
+	thread_function getFunction() { return function; }
+	void *getData() { return data; }
 
 	void start(thread_function f,void *d=0);
 	void stop();

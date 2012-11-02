@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <amanita/Application.h>
+#include <amanita/tk/Application.h>
 #include <amanita/tk/Browser.h>
 
 

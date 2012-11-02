@@ -2,10 +2,12 @@
 #include "../_config.h"
 #include <stdlib.h>
 #include <string.h>
+#ifdef USE_SDL
 #include <SDL/SDL_image.h>
+#endif
 #include <png.h>
-#include <amanita/gui/Image.h>
 #include <amanita/gui/Graphics.h>
+#include <amanita/gui/Image.h>
 
 
 namespace a {
@@ -26,10 +28,12 @@ Image::Image() : Object(),name(0),file(0),surface(0),map(0),mapSize(0),mapRow(0)
 
 Image::Image(int w,int h) : Object(),name(0),file(0),surface(0),map(0) {
 	created++;
-	SDL_PixelFormat *f = g.getScreenFormat();
-	SDL_Surface *s = SDL_CreateRGBSurface(/*SDL_HWSURFACE*/SDL_SWSURFACE,w,h,
+#ifdef USE_SDL
+	SDL_PixelFormat *f = g.getCanvas()->format;
+	Surface s = SDL_CreateRGBSurface(/*SDL_HWSURFACE*/SDL_SWSURFACE,w,h,
 			f->BitsPerPixel,f->Rmask,f->Gmask,f->Bmask,f->Amask);
 	surface = s;
+#endif
 	createMap(1);
 }
 
@@ -45,18 +49,26 @@ Image::~Image() {
 	deleted++;
 	if(name) { free(name);name = 0; }
 	if(file) { free(file);file = 0; }
-	if(surface) { SDL_FreeSurface(surface);surface = 0; }
+	if(surface) {
+#ifdef USE_SDL
+		SDL_FreeSurface(surface);
+#endif
+		surface = 0;
+	}
 	if(map) { free(map);map = 0; }
 }
 
 void Image::createMap(int sz) {
 	if(map) free(map);
 	if(sz<=0) sz = 1;
-	mapRow = 0,mapSize = sz,map = (SDL_Rect *)malloc(sizeof(SDL_Rect)*mapSize);
+	mapRow = 0,mapSize = sz,map = (rect16_t *)malloc(sizeof(rect16_t)*mapSize);
+#ifdef USE_SDL
 	setCell(0,0,0,surface->w,surface->h);
+#endif
 }
 
 void Image::createMap(int rw,int rh) {
+#ifdef USE_SDL
 //printf("Image::createMap(sx=%d,sy=%d)\n",sx,sy);
 //fflush(stdout);
 	mapRow = (surface->w/rw);
@@ -67,28 +79,31 @@ void Image::createMap(int rw,int rh) {
 //printf("Image::createMap(mapSize=%d)\n",mapSize);
 //fflush(stdout);
 	if(map) free(map);
-	map = (SDL_Rect *)malloc(sizeof(SDL_Rect)*mapSize);
+	map = (rect16_t *)malloc(sizeof(rect16_t)*mapSize);
 	setCell(0,0,0,surface->w,surface->h);
 	for(unsigned int x,y=0,i=1; y<rows; y++)
 		for(x=0; x<mapRow; x++,i++)
 			setCell(i,x*rw,y*rh,rw,rh);
+#endif
 }
 
-void Image::createMap(SDL_Rect *m,int l) {
+void Image::createMap(rect16_t *m,int l) {
 	mapSize = l;
 	mapRow = 0;
 //printf("Image::createMap(width=%d,height=%d,mapSize=%d,mapRow=%d)\n",d[2],d[3],mapSize,mapRow);
 //fflush(stdout);
 	if(map) free(map);
-	map = (SDL_Rect *)malloc(sizeof(SDL_Rect)*mapSize);
-	memcpy(map,m,sizeof(SDL_Rect)*mapSize);
+	map = (rect16_t *)malloc(sizeof(rect16_t)*mapSize);
+	memcpy(map,m,sizeof(rect16_t)*mapSize);
 }
 
 
 void Image::load(const char *fn) {
-	SDL_Surface *s = IMG_Load(fn);
+#ifdef USE_SDL
+	Surface s = IMG_Load(fn);
 	surface = SDL_DisplayFormat(s);
 	SDL_FreeSurface(s);
+#endif
 }
 
 
@@ -198,9 +213,13 @@ fflush(stdout);
 
 
 Image **Image::parseXIM(const char *p,const char *lines[],int &n) {
+#ifdef USE_DD
+	return 0;
+#endif
+#ifdef USE_SDL
 	struct mapping {
 		int sz,rw,rh;
-		SDL_Rect *r;
+		rect16_t *r;
 	};
 	struct image_template {
 		char *name,*path,*data;
@@ -218,8 +237,8 @@ Image **Image::parseXIM(const char *p,const char *lines[],int &n) {
 	char *p1 = NULL,*p2 = NULL,c = '\0';
 	int dd[6],ds = 128,dn,dq;
 	mapping *d = (mapping *)malloc(sizeof(mapping)*ds);
-	SDL_Rect *dr;
-	SDL_Surface *s;
+	rect16_t *dr;
+	Surface s;
 
 	for(i=0,nimages=0; i<nlines; i++) {
 		t = &templates[i],f = strlen(lines[i])+1;
@@ -329,12 +348,12 @@ Image **Image::parseXIM(const char *p,const char *lines[],int &n) {
 							r = (w/rw)*(h/rh);
 // printf("Image::parseXIM(v=%d,sz=%d,x=%d,y=%d,w=%d,h=%d,rw=%d,rh=%d)\n",v,r,x,y,w,h,rw,rh);
 // fflush(stdout);
-							d[dn].sz = r,d[dn].r = (SDL_Rect *)malloc(sizeof(SDL_Rect)*r);
+							d[dn].sz = r,d[dn].r = (rect16_t *)malloc(sizeof(rect16_t)*r);
 							for(y1=y,r=0; y1+rh<=y+h; y1+=rh) for(x1=x; x1+rw<=x+w; x1+=rw)
-								d[dn].r[r++] = (SDL_Rect){x1,y1,rw,rh};
+								d[dn].r[r++] = (rect16_t){x1,y1,rw,rh};
 							dn++;
 						} else if(v>=4) {
-							dr = d[dn].r = (SDL_Rect *)malloc(sizeof(SDL_Rect));
+							dr = d[dn].r = (rect16_t *)malloc(sizeof(rect16_t));
 							d[dn].sz = 1,dr->x = dd[0],dr->y = dd[1],dr->w = dd[2],dr->h = dd[3];
 // printf("Image::parseXIM(v=%d,sz=%d,x=%d,y=%d,w=%d,h=%d)\n",v,d[dn].sz,dr->x,dr->y,dr->w,dr->h);
 // fflush(stdout);
@@ -405,9 +424,9 @@ fflush(stdout);
 		for(f=0,dq=0; f<dn; f++) {
 			if(d[f].sz==-1) {
 				rw = d[f].rw,rh = d[f].rh,r = (w/rw)*(h/rh);
-				d[f].sz = r,d[f].r = (SDL_Rect *)malloc(sizeof(SDL_Rect)*r);
+				d[f].sz = r,d[f].r = (rect16_t *)malloc(sizeof(rect16_t)*r);
 				for(y1=0,r=0; y1+rh<=h; y1+=rh) for(x1=0; x1+rw<=w; x1+=rw)
-					d[f].r[r++] = (SDL_Rect){x1,y1,rw,rh};
+					d[f].r[r++] = (rect16_t){x1,y1,rw,rh};
 // printf("Image::parseXIM(w=%d,h=%d,rw=%d,rh=%d,d[f].sz=%d,r=%d)\n",w,h,rw,rh,d[f].sz,r);
 // fflush(stdout);
 			}
@@ -417,8 +436,8 @@ fflush(stdout);
 // fflush(stdout);
 		img->mapSize = 1+dq;
 		img->mapRow = 0;
-		img->map = (SDL_Rect *)malloc(sizeof(SDL_Rect)*img->mapSize);
-		img->map[0] = (SDL_Rect){0,0,w,h};
+		img->map = (rect16_t *)malloc(sizeof(rect16_t)*img->mapSize);
+		img->map[0] = (rect16_t){0,0,w,h};
 		for(f=0,v=1; f<dn; f++) {
 			r=0,b=d[f].sz;
 // printf("Image::parseXIM(5,f=%d,v=%d,b=%d)\n",f,v,b);
@@ -429,7 +448,7 @@ fflush(stdout);
 		img->name = strdup(name);
 		img->file = strdup(path);
 // for(f=0; f<img->mapSize; f++) {
-// SDL_Rect &rect = img->map[f];
+// rect16_t &rect = img->map[f];
 // printf("Image::parseXIM(map[%d]=(x=%d,y=%d,w=%d,h=%d))\n",f,rect.x,rect.y,rect.w,rect.h);
 // fflush(stdout);
 // }
@@ -444,6 +463,7 @@ fflush(stdout);
 // fflush(stdout);
 	n = nimages;
 	return images;
+#endif
 }
 
 void Image::formatString(char *str,const char *p,const char *format,int num) {
@@ -459,8 +479,11 @@ void Image::formatString(char *str,const char *p,const char *format,int num) {
 }
 
 
-bool Image::save(const char *fn,SDL_Surface *s) {
+bool Image::save(const char *fn,Surface s) {
+#ifdef USE_SDL
 	if(strstr(fn,".bmp")) return SDL_SaveBMP(s,fn)==0;
+#endif
+#ifndef USE_WIN32
 	if(strstr(fn,".png")) {
 		bool ret = false;
 		FILE *fp = fopen(fn,"wb");
@@ -530,22 +553,25 @@ bool Image::save(const char *fn,SDL_Surface *s) {
 		} else perror(fn);
 		return ret;
 	}
+#endif
 	return false;
 }
 
 
-inline void Image::draw(SDL_Rect &src,SDL_Rect &dst) {
-	SDL_BlitSurface(surface,&src,g.getCanvas(),&dst);
+inline void Image::draw(rect16_t &src,rect16_t &dst) {
+#ifdef USE_SDL
+	SDL_BlitSurface(surface,(SDL_Rect *)&src,g.getCanvas(),(SDL_Rect *)&dst);
+#endif
 }
 
-void Image::draw(int x,int y,SDL_Rect &src) {
-	SDL_Rect dst = { x,y,0,0 };
+void Image::draw(int x,int y,rect16_t &src) {
+	rect16_t dst = { x,y,0,0 };
 	draw(src,dst);
 }
 
-void Image::draw(int x,int y,int w,int h,SDL_Rect &src) {
+void Image::draw(int x,int y,int w,int h,rect16_t &src) {
 	int i,j;
-	SDL_Rect r,dst = { 0,0,0,0 };
+	rect16_t r,dst = { 0,0,0,0 };
 	for(i=0; i<h; i+=src.h)
 		for(j=0; j<w; j+=src.w) {
 			dst.x = x+j,dst.y = y+i;

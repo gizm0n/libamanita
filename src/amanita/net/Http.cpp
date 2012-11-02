@@ -137,8 +137,8 @@ namespace a {
 
 Http::Http() : timeout(-1),multipart(0),ver(.0f),status(0) {}
 
-Http::Http(Application &a) : timeout(-1),multipart(0),ver(.0f),status(0) {
-	setUserAgent(a.getUserAgent());
+Http::Http(Main &app) : timeout(-1),multipart(0),ver(.0f),status(0) {
+	setUserAgent(app.getUserAgent());
 }
 
 Http::~Http() {

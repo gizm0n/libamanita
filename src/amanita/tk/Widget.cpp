@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <amanita/Application.h>
 #include <amanita/String.h>
+#include <amanita/tk/Application.h>
 #include <amanita/tk/Browser.h>
 #include <amanita/tk/Widget.h>
 #include <amanita/tk/Window.h>
@@ -374,9 +374,9 @@ void Widget::captureEvents() {
 void Widget::makeLayout(int x,int y,int w,int h) {
 //debug_output("Widget::makeLayout(x: %d, y: %d, w: %d, h: %d)\n",x,y,w,h);
 	this->x = x+border,this->y = y+border;
-	if((style&aFILL) || !min_width) width = w-border*2;
+	if((style&FILL) || !min_width) width = w-border*2;
 	else width = min_width-border*2;
-	if((style&aFILL) || !min_height) height = h-border*2;
+	if((style&FILL) || !min_height) height = h-border*2;
 	else height = min_height-border*2;
 }
 

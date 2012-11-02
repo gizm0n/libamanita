@@ -8,10 +8,13 @@
  * @date Created: 2008-09-07
  */ 
 
+#ifdef USE_SDL
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
+#endif
 #include <amanita/Object.h>
 #include <amanita/Fontmetrics.h>
+#include <amanita/gui/Graphics.h>
 
 
 /** Amanita Namespace */
@@ -30,6 +33,16 @@ enum {
 };
 
 
+enum {
+#ifdef USE_DD
+	FONT_NORMAL			= 0,
+#endif
+#ifdef USE_SDL
+	FONT_NORMAL			= TTF_STYLE_NORMAL,
+#endif
+};
+
+
 /** A class for handling fonts.
  * 
  * @ingroup gui */
@@ -41,15 +54,15 @@ Object_Instance(Font)
 private:
 	char *name;
 	Fontmetrics metrics;
-	SDL_Surface *glyphs[256];
+	Surface glyphs[256];
 
 public:
 
-	Font(const char *file,int size,int style=TTF_STYLE_NORMAL,long color=0,int render=0);
+	Font(const char *file,int size,int style=FONT_NORMAL,long color=0,int render=0);
 	~Font();
 
 	const char *getName() { return name; }
-	SDL_Surface *getGlyphSurface(int c) { return glyphs[c]; }
+	Surface getGlyphSurface(int c) { return glyphs[c]; }
 	const Fontmetrics &getFontMetrics() { return metrics; }
 	int getHeight() { return metrics.height; }
 	int getAscent() { return metrics.ascent; }

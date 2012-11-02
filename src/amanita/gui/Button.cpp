@@ -89,7 +89,7 @@ void Button::setTextAlign(int align) {
 }
 
 void Button::setInsets(int l,int t,int r,int b) {
-	bt.ins = (SDL_Rect){ l,t,r,b };
+	bt.ins = (rect16_t){ l,t,r,b };
 	setTextAlign(bt.align);
 }
 
@@ -108,7 +108,7 @@ void Button::paint(time_t time) {
 		_s.img->draw(getX()+getWidth()-st.br->w,getY()+getHeight()-st.br->h,*st.br);
 	}
 	if(bt.ic.img) {
-		SDL_Rect &r = *bt.ic.img->getCell(bt.ic.index);
+		rect16_t &r = *bt.ic.img->getCell(bt.ic.index);
 		bt.ic.img->draw(getX()+(getWidth()-r.w)/2,getY()+(getHeight()-r.h)/2,r);
 	}
 	if(bt.text) bt.font->print(getX()+bt.tx,getY()+bt.ty+(isEnabled() && isMouseDown()? 1 : 0),bt.text);

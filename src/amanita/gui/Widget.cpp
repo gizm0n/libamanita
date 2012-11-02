@@ -51,7 +51,7 @@ bool Widget::setKeyFocus(Widget *c) {
 }
 
 Widget::Widget(int x,int y,int w,int h) : Object() {
-	com = (component){ 0ul,0,ENABLED|VISIBLE|LOCKED|OPAQUE,x,y,w,h,0,0,0 };
+	com = (component){ 0ul,0,COM_ENABLED|COM_VISIBLE|COM_LOCKED|COM_OPAQUE,x,y,w,h,0,0,0 };
 	if(!keyFocus) keyFocus = this;
 	focusListener = 0,keyListener = 0,mouseListener = 0,mouseMotionListener = 0,actionListener = 0;
 }
@@ -136,13 +136,13 @@ bool Widget::contains(Widget *c) {
 	while(c && c!=this) c = c->com.p;
 	return c && c==this;
 }
-bool Widget::contains(const SDL_Rect &r,int x,int y) {
+bool Widget::contains(const rect16_t &r,int x,int y) {
 	return x>=com.x+r.x && y>=com.y+r.y && x<com.x+r.x+r.w && y<com.y+r.y+r.h;
 }
 
 bool Widget::isShowing() {
 	return com.x+com.w>0 && com.y+com.h>0 &&
-		com.x<g.getScreenWidth() && com.y<g.getScreenHeight();
+		com.x<g.getWidth() && com.y<g.getHeight();
 }
 
 void Widget::paint(time_t time) {}
@@ -151,7 +151,7 @@ void Widget::paintAll(time_t time) {
 	if(!isVisible() || !com.ch) return;
 	Widget *c;
 	if(clipBounds()) {
-		SDL_Rect r1 = g.getClip(),r2 = { com.x,com.y,com.w,com.h };
+		rect16_t r1 = g.getClip(),r2 = { com.x,com.y,com.w,com.h };
 		if(r2.x<r1.x) r2.w -= r1.x-r2.x,r2.x = r1.x;
 		if(r2.x+r2.w>r1.x+r1.w) r2.w = r1.x+r1.w-r2.x;
 		if(r2.y<r1.y) r2.h -= r1.y-r2.y,r2.y = r1.y;

@@ -8,8 +8,8 @@
  * @date Created: 2012-01-28
  */ 
 
-#include <amanita/Application.h>
 #include <amanita/Resource.h>
+#include <amanita/tk/Application.h>
 #include <amanita/tk/Container.h>
 
 /** Amanita Namespace */

@@ -107,7 +107,25 @@ if(HAVE_SCINTILLA)
 	else()
 		set(SCINTILLA_LIB scintilla)
 	endif()
-endif(HAVE_SCINTILLA)
+endif()
+
+
+find_package(SDL)
+if(SDL_FOUND)
+	message("SDL")
+	set(HAVE_SDL 1)
+	find_package(SDL_image)
+	if(SDLIMAGE_FOUND)
+		message("SDL_image")
+		set(HAVE_SDL_IMG 1)
+	endif()
+	find_package(SDL_ttf)
+	if(SDLTTF_FOUND)
+		message("SDL_ttf")
+		set(HAVE_SDL_TTF 1)
+	endif()
+endif()
+
 
 include_directories(
 	"${PROJECT_SOURCE_DIR}/include"
@@ -117,12 +135,12 @@ include_directories(
 if(CMAKE_TOOLCHAIN_FILE)
 endif()
 
-if(CMAKE_C_COMPILER_ID STREQUAL GNU)
-	SET(CMAKE_CXX_FLAGS "-Wall -fno-rtti")
-	SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-	SET(CMAKE_CXX_FLAGS_RELEASE "-O1")
-	SET(CMAKE_CXX_FLAGS_DEBUG  "-Werror -O0 -g")
-endif()
+#if(CMAKE_C_COMPILER_ID STREQUAL GNU)
+#	SET(CMAKE_CXX_FLAGS "-Wall -fno-rtti")
+#	SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+#	SET(CMAKE_CXX_FLAGS_RELEASE "-O1")
+#	SET(CMAKE_CXX_FLAGS_DEBUG  "-Werror -O0 -g")
+#endif()
 
 if(UNIX)
 	set(USE_UNIX 1)
@@ -134,6 +152,7 @@ if(UNIX)
 		set(USE_APPLE 1)
 	else()
 		message("Unix or Linux")
+		set(USE_LINUX 1)
 		set(GUI "GTK+")
 		set(GUI_GTK 1)
 		set(USE_GTK 1)
@@ -152,19 +171,21 @@ else()
 		set(USE_WCHAR 1)
 		set(GUI_WIN32 1)
 		set(USE_WIN32 1)
+		set(HAVE_DD 1)
+		set(USE_DD 1)
 		link_libraries(intl comctl32 ws2_32 ole32)
 		add_definitions(-DWIN32_LEAN_AND_MEAN)
 
-		set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> <FLAGS> <DEFINES> -O coff -o <OBJECT> <SOURCE>")
+		set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> <FLAGS> -O coff <DEFINES> -i <SOURCE> -o <OBJECT>")
 		enable_language(RC)
 
 		if(MSVC)
 			add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -subsystem:windows")
 		endif(MSVC)
-#		if(CMAKE_C_COMPILER_ID STREQUAL GNU)
-#			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-subsystem,windows")
-#		endif()
+		if(CMAKE_C_COMPILER_ID STREQUAL GNU)
+			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-subsystem,windows")
+		endif()
 		if(MINGW)
 			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static-libgcc")
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
@@ -172,8 +193,8 @@ else()
 			set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -static-libgcc -static-libstdc++ -s")
 		endif()
 
-		set(PACKAGE_DATADIR data)
-		set(PACKAGE_ICONSDIR icons)
+		set(PACKAGE_DATADIR "data")
+		set(PACKAGE_ICONSDIR "icons")
 		set(PACKAGE_LOCALEDIR "data\\locale")
 	else()
 		message("Unknown")
@@ -185,7 +206,7 @@ endif()
 if(UNIX)
 	if(APPLE)
 	else()
-		install(FILES icons/16x16/amanita.xpm DESTINATION share/pixmaps)
+		install(FILES icons/32x32/amanita.xpm DESTINATION share/pixmaps)
 		install(FILES icons/16x16/amanita.png DESTINATION share/icons/hicolor/16x16/apps)
 		install(FILES icons/48x48/amanita.png DESTINATION share/icons/hicolor/48x48/apps)
 
@@ -223,14 +244,16 @@ configure_file(
 message("GUI system is ${GUI}")
 
 set(amanita_src
-	src/amanita/Application.cpp
 	src/amanita/Collection.cpp
+	src/amanita/Colorcycle.cpp
 	src/amanita/Config.cpp
 	src/amanita/Dictionary.cpp
 	src/amanita/File.cpp
 	src/amanita/Flood.cpp
+	src/amanita/Fractal.cpp
 	src/amanita/Hashtable.cpp
 	src/amanita/Integer.cpp
+	src/amanita/Main.cpp
 	src/amanita/Math.cpp
 	src/amanita/Object.cpp
 	src/amanita/Path.cpp
@@ -245,6 +268,7 @@ set(amanita_src
 	src/amanita/db/Database.cpp
 	src/amanita/db/Record.cpp
 	src/amanita/db/Result.cpp
+	src/amanita/gui/Application.cpp
 	src/amanita/gui/Button.cpp
 	src/amanita/gui/Display.cpp
 	src/amanita/gui/Font.cpp
@@ -263,6 +287,7 @@ set(amanita_src
 	src/amanita/net/Http.cpp
 	src/amanita/net/Server.cpp
 	src/amanita/net/Socket.cpp
+	src/amanita/tk/Application.cpp
 	src/amanita/tk/Browser.cpp
 	src/amanita/tk/Button.cpp
 	src/amanita/tk/Cairo.cpp
@@ -319,16 +344,18 @@ add_library(mandragora STATIC ${mandragora_src})
 
 
 install(FILES
-	include/amanita/Application.h
 	include/amanita/Bytes.h
 	include/amanita/Collection.h
+	include/amanita/Colorcycle.h
 	${PROJECT_BINARY_DIR}/include/amanita/Config.h
 	include/amanita/Dictionary.h
 	include/amanita/File.h
 	include/amanita/Flood.h
 	include/amanita/Fontmetrics.h
+	include/amanita/Fractal.h
 	include/amanita/Hashtable.h
 	include/amanita/Integer.h
+	include/amanita/Main.h
 	include/amanita/Math.h
 	include/amanita/Object.h
 	include/amanita/Path.h
@@ -352,6 +379,7 @@ install(FILES
 )
 
 install(FILES
+	include/amanita/gui/Application.h
 	include/amanita/gui/Button.h
 	include/amanita/gui/Display.h
 	include/amanita/gui/Event.h
@@ -379,6 +407,7 @@ install(FILES
 )
 
 install(FILES
+	include/amanita/tk/Application.h
 	include/amanita/tk/Browser.h
 	include/amanita/tk/Button.h
 	include/amanita/tk/Cairo.h
@@ -450,13 +479,14 @@ if(EXAMPLES)
 
 	if(WIN32)
 		add_executable(browser WIN32 examples/browser.cpp ${RC_FILE})
+		target_link_libraries(browser amanita)
 	else()
 		add_executable(browser examples/browser.cpp)
+		target_link_libraries(browser amanita ${GTK2_LIBRARIES} ${WEBKIT_LIBRARIES})
 	endif()
-	target_link_libraries(browser amanita ${GTK2_LIBRARIES} ${WEBKIT_LIBRARIES})
 
 	add_executable(client examples/client.cpp)
-	target_link_libraries(client amanita ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES})
+	target_link_libraries(client amanita ${CMAKE_THREAD_LIBS_INIT})
 
 	add_executable(database examples/database.cpp)
 	target_link_libraries(database amanita sqlite3)
@@ -465,11 +495,20 @@ if(EXAMPLES)
 	target_link_libraries(entropy amanita)
 
 	if(WIN32)
+		add_executable(fractal WIN32 examples/fractal.cpp ${RC_FILE})
+		target_link_libraries(fractal amanita ddraw dxguid uuid olepro32 ole32)
+	elseif(HAVE_SDL)
+		add_executable(fractal examples/fractal.cpp)
+		target_link_libraries(fractal amanita ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLTTF_LIBRARY})
+	endif()
+
+	if(WIN32)
 		add_executable(gui WIN32 examples/gui.cpp ${RC_FILE})
+		target_link_libraries(gui amanita ${GTK2_LIBRARIES} ${SCINTILLA_LIB} ${SOURCEVIEW_LIBRARIES})
 	else()
 		add_executable(gui examples/gui.cpp)
+		target_link_libraries(gui amanita ${GTK2_LIBRARIES} ${WEBKIT_LIBRARIES} ${SCINTILLA_LIB} ${SOURCEVIEW_LIBRARIES})
 	endif()
-	target_link_libraries(gui amanita ${GTK2_LIBRARIES} ${WEBKIT_LIBRARIES} ${SCINTILLA_LIB} ${SOURCEVIEW_LIBRARIES})
 
 	add_executable(hashtable examples/hashtable.cpp)
 	target_link_libraries(hashtable amanita)
@@ -478,7 +517,7 @@ if(EXAMPLES)
 	target_link_libraries(horoscope mandragora m)
 
 	add_executable(http examples/http.cpp)
-	target_link_libraries(http amanita ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES})
+	target_link_libraries(http amanita ${CMAKE_THREAD_LIBS_INIT})
 
 	add_executable(properties examples/properties.cpp)
 	target_link_libraries(properties amanita)
@@ -493,7 +532,7 @@ if(EXAMPLES)
 	target_link_libraries(regex amanita)
 
 	add_executable(server examples/server.cpp)
-	target_link_libraries(server amanita ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES})
+	target_link_libraries(server amanita ${CMAKE_THREAD_LIBS_INIT})
 
 	add_executable(string examples/string.cpp)
 	target_link_libraries(string amanita)

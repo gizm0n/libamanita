@@ -64,6 +64,7 @@ void Textbox::hideMessage(Textbox *m,int id) {
 }
 
 bool Textbox::keyDown(KeyEvent &ke) {
+#ifdef USE_SDL
 	switch(ke.sym) {
 		case SDLK_ESCAPE:
 			if(style==TEXTBOX_YES_NO || style==TEXTBOX_OK_CANCEL) {
@@ -73,6 +74,7 @@ bool Textbox::keyDown(KeyEvent &ke) {
 		case SDLK_RETURN:hideMessage(this,style==TEXTBOX_YES || style==TEXTBOX_YES_NO? COM_ID_YES : COM_ID_OK);break;
 		default:return false;
 	}
+#endif
 	return true;
 }
 

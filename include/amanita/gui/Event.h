@@ -38,7 +38,7 @@ struct KeyEvent {
 struct MouseEvent {
 	Widget *source;
 	uint16_t x,y;
-	Uint8 button;
+	uint8_t button;
 	uint16_t clicks;
 };
 

@@ -7,8 +7,8 @@
 #include <windows.h>
 #include <commctrl.h>
 #endif
-#include <amanita/Application.h>
 #include <amanita/Resource.h>
+#include <amanita/tk/Application.h>
 #include <amanita/tk/Panel.h>
 #include <amanita/tk/Window.h>
 
@@ -90,7 +90,7 @@ void Panel::create(Window *wnd,uint32_t st) {
 
 	for(n=0; buttons[n].style; ++n);
 
-	HIMAGELIST il = ImageList_LoadBitmap(hMainInstance,MAKEINTRESOURCE(aSTOCK_ICONS),24,24,0xff00ff);
+	HIMAGELIST il = ImageList_LoadBitmap(hMainInstance,MAKEINTRESOURCE(AMANITA_ICONS),24,24,0xff00ff);
 //	HIMAGELIST il = ImageList_LoadBitmap(hMainInstance,MAKEINTRESOURCE(1001),24,24,0xff00ff);
 //	HIMAGELIST il = ImageList_LoadImage(hMainInstance,MAKEINTRESOURCE(WIN32_STOCK_ICONS),24,24,0xff00ff,IMAGE_BITMAP,LR_SHARED);
 	SendMessage((HWND)component,TB_SETIMAGELIST,0,(LPARAM)il);

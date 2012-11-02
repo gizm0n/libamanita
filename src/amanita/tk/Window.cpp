@@ -149,14 +149,15 @@ void Window::open(Window *p) {
 		if(icons) {
 			WindowIcon *icon,*icon_b = 0,*icon_sm = 0;
 			for(icon=icons; icon->size>0; ++icon)
-				if(icon->size==16) icon_sm = icon;
-				else if(!icon_b || icon_b->size<icon->size) icon_b = icon;
+				if(icon->size==16 && icon->id>0) icon_sm = icon;
+				else if((!icon_b || icon_b->size<icon->size) && icon->id>0) icon_b = icon;
 			if(icon_b) hicon = (HICON)LoadImage(hMainInstance,MAKEINTRESOURCE(icon_b->id),IMAGE_ICON,0,0,LR_SHARED);
 			if(icon_sm) hicon_sm = (HICON)LoadImage(hMainInstance,MAKEINTRESOURCE(icon_sm->id),IMAGE_ICON,16,16,LR_SHARED);
+debug_output("Window::open(hicon: %p[%d], hicon_sm: %p[%d])\n",hicon,icon_b->id,hicon_sm,icon_sm->id);
 			clearIcons();
 		}
-		if(!hicon) hicon = LoadIcon(NULL,IDI_APPLICATION);
-		if(!hicon_sm) hicon_sm = LoadIcon(NULL,IDI_APPLICATION);
+		if(!hicon) hicon = LoadIcon(0,IDI_APPLICATION);
+		if(!hicon_sm) hicon_sm = LoadIcon(0,IDI_APPLICATION);
 		WNDCLASSEX wndclassx;
 		wndclassx.cbSize				= sizeof(wndclassx);
 		wndclassx.style				= CS_HREDRAW|CS_VREDRAW;
@@ -191,7 +192,7 @@ void Window::open(Window *p) {
 	}
 	tfree(t);
 
-	if(!hwnd) MessageBox(NULL,_T("Window Creation Failed!"),_T("Error!"),MB_ICONEXCLAMATION|MB_OK);
+	if(!hwnd) MessageBox(0,_T("Window Creation Failed!"),_T("Error!"),MB_ICONEXCLAMATION|MB_OK);
 #endif
 }
 
@@ -280,10 +281,10 @@ void Window::setIcons(const WindowIcon icons[]) {
 #ifdef USE_WIN32
 		HICON hicon;
 		for(icon=icons; icon->size>0; ++icon) {
-			if(icon->size==16) {
+			if(icon->size==16 && icon->id>0) {
 				hicon = (HICON)LoadImage(hMainInstance,MAKEINTRESOURCE(icon->id),IMAGE_ICON,16,16,LR_SHARED);
 				SendMessage((HWND)component,WM_SETICON,ICON_SMALL,(LPARAM)hicon);
-			} else {
+			} else if(icon->id>0) {
 				hicon = (HICON)LoadImage(hMainInstance,MAKEINTRESOURCE(icon->id),IMAGE_ICON,0,0,LR_SHARED);
 				SendMessage((HWND)component,WM_SETICON,ICON_BIG,(LPARAM)hicon);
 			}

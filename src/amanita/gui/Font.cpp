@@ -9,10 +9,12 @@
 namespace a {
 namespace gui {
 
+
 Object_Inheritance(Font,Object)
 
 
 Font::Font(const char *file,int size,int style,long color,int render) : Object() {
+#ifdef USE_SDL
 	SDL_Color fg = { (char)(color>>16),(char)(color>>8),(char)(color),255 };
 	SDL_Color bg = { 255,255,255,255 };
 
@@ -61,6 +63,7 @@ fflush(stderr);
 	TTF_CloseFont(font);
 //::fprintf(stderr,"Font::Font(4)\n");
 //fflush(stderr);
+#endif
 }
 
 
@@ -71,7 +74,9 @@ fflush(stderr);
 	for(int i=0; i<256; i++) {
 // ::fprintf(stderr,"Font::~Font(i=%d,c=%c)\n",i,(char)i);
 // fflush(stderr);
+#ifdef USE_SDL
 		if(glyphs[i]) SDL_FreeSurface(glyphs[i]);
+#endif
 		glyphs[i] = 0;
 	}
 // ::fprintf(stderr,"Font::~Font(done)\n");
@@ -95,14 +100,17 @@ int Font::stringWidth(const char *str,int i,int l) {
 }
 
 void Font::putchar(int x,int y,unsigned char c) {
+#ifdef USE_SDL
 	if(glyphs[c]) {
 		Glyphmetrics &gl = metrics.glyphs[c];
 		SDL_Rect r = { metrics.adjx+x+gl.minx,metrics.adjy+y-gl.maxy };
 		SDL_BlitSurface(glyphs[c],0,g.getCanvas(),&r);
 	}
+#endif
 }
 
 void Font::print(int x,int y,const char *str) {
+#ifdef USE_SDL
 	SDL_Rect r;
 	unsigned char c;
 	x += metrics.adjx,y += metrics.adjy;
@@ -112,6 +120,7 @@ void Font::print(int x,int y,const char *str) {
 		if(glyphs[c]) SDL_BlitSurface(glyphs[c],0,g.getCanvas(),&r);
 		x += gl.advance+metrics.spacing;
 	}
+#endif
 }
 
 void Font::print(int x,int y,int a,const char *str) {

@@ -59,8 +59,8 @@ void Tooltip::setText(const char *text) {
 bool Tooltip::paintToolTip(TooltipEvent &tte) {
 	if(!tt.text || !*tt.text) return false;
 	tt.x = tte.x,tt.y = tte.y+16;
-	if(tt.x+tt.w>g.getScreenWidth()) tt.x = g.getScreenWidth()-1-tt.w;
-	if(tt.y+tt.h>g.getScreenHeight()) tt.y = tte.y-1-tt.h;
+	if(tt.x+tt.w>g.getWidth()) tt.x = g.getWidth()-1-tt.w;
+	if(tt.y+tt.h>g.getHeight()) tt.y = tte.y-1-tt.h;
 
 	paintToolTipRect(tt.x,tt.y,tt.w,tt.h);
 	int y = tt.y+_s.t->h+_s.ins.y+_s.font->getAscent();

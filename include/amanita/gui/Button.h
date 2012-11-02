@@ -48,7 +48,7 @@ private:
 		Image *img;
 		Font *font;
 		struct state {
-			SDL_Rect *tl,*t,*tr,*l,*r,*bl,*b,*br,*c;
+			rect16_t *tl,*t,*tr,*l,*r,*bl,*b,*br,*c;
 		} st[4];
 	};
 	static _settings _s;
@@ -63,8 +63,8 @@ private:
 		short tw;					//!< Text width
 		short tx;					//!< X-coordinate of text
 		short ty;					//!< Y-coordinate of text
-		Font *font;				//!< Button text font
-		SDL_Rect ins;				//!< Button insets
+		Font *font;					//!< Button text font
+		rect16_t ins;				//!< Button insets
 	} bt;
 
 public:

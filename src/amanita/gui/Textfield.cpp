@@ -32,6 +32,7 @@ fflush(stderr);
 	if(!isEnabled()) return false;
 	if(ke.unicode>=' ' && ke.unicode<=0xff) insert((char)ke.unicode),moveCaretRight();
 	else switch(ke.sym) {
+#ifdef USE_SDL
 		case SDLK_BACKSPACE:
 			if(getCaret()>0) Text::remove(1),moveCaretLeft();
 			else return false;
@@ -55,6 +56,7 @@ fflush(stderr);
 			} else { insert('\n'),moveCaretRight();break; }
 			return false;
 		case SDLK_ESCAPE:setKeyFocus(getParent());return false;
+#endif
 		default:return false;
 	}
 	caretTimer = 4;

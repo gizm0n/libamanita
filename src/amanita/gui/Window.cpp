@@ -51,8 +51,8 @@ void Window::setDefaultSettings(Image *img,Image *bgimg,Font *f,uint32_t data[21
 
 void Window::setStyle(int st) {
 	fr = _s.fr;
-	if(st&TOP_CAPTION) fr.tl = _s.cap.tl,fr.t = _s.cap.t,fr.tr = _s.cap.tr;
-	if(st&BOTTOM_CAPTION) fr.bl = _s.cap.bl,fr.b = _s.cap.b,fr.br = _s.cap.br;
+	if(st&CAPTION_TOP) fr.tl = _s.cap.tl,fr.t = _s.cap.t,fr.tr = _s.cap.tr;
+	if(st&CAPTION_BOTTOM) fr.bl = _s.cap.bl,fr.b = _s.cap.b,fr.br = _s.cap.br;
 	if(st&CLOSE_BUTTON) {
 		if(!cb) {
 			cb = new Icon(COM_ID_CLOSE);
@@ -73,7 +73,7 @@ fflush(stderr);
 }
 
 void Window::moveToCenter() {
-	setLocation((g.getScreenWidth()-getWidth())/2,(g.getScreenHeight()-getHeight())/2);
+	setLocation((g.getWidth()-getWidth())/2,(g.getHeight()-getHeight())/2);
 }
 
 bool Window::mouseDown(MouseEvent &me) {
