@@ -26,8 +26,8 @@ class Icon;
 
 
 enum {
-	TOP_CAPTION			= 1,
-	BOTTOM_CAPTION		= 2,
+	CAPTION_TOP			= 1,
+	CAPTION_BOTTOM		= 2,
 	CLOSE_BUTTON		= 4,
 };
 
@@ -47,7 +47,7 @@ protected:
 		uint32_t bgindex,bgcol;
 		Font *font;
 		struct frame {
-			SDL_Rect *tl,*t,*tr,*l,*r,*bl,*b,*br;
+			rect16_t *tl,*t,*tr,*l,*r,*bl,*b,*br;
 		} fr,cap;
 		struct button {
 			int x,y;

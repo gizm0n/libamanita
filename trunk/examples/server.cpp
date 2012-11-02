@@ -1,6 +1,6 @@
 
 #include <stdio.h>
-#include <amanita/Application.h>
+#include <amanita/Main.h>
 #include <amanita/net/Server.h>
 
 using namespace a;
@@ -79,7 +79,7 @@ uint32_t server_listener(Socket *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t 
 
 int main(int argc, char *argv[]) {
 	char text[1024];
-	Application app(INIT_SOCKETS);
+	Main app(APP_SOCKETS);
 	app.open(argc,argv);
 	server = new Server(server_listener);
 	server->start(2012);

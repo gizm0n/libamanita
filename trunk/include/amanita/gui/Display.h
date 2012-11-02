@@ -28,7 +28,7 @@ Object_Instance(Display)
 
 private:
 	static Display *activeDisplay;
-	SDL_Rect screen;
+	rect16_t screen;
 
 protected:
 	static void setActiveDisplay(Display *d) { activeDisplay = d; }

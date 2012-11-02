@@ -66,12 +66,16 @@
 #ifdef USE_WCHAR
 typedef wchar_t tchar_t;
 #define TEOF WEOF
+#ifndef TEXT
 #define TEXT(s) L##s
+#endif
 #define _T(s) L##s
 #else
 typedef char tchar_t;
 #define TEOF EOF
+#ifndef TEXT
 #define TEXT(s) s
+#endif
 #define _T(s) s
 #endif
 

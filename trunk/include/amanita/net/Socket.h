@@ -11,8 +11,6 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <amanita/Thread.h>
-
 #ifdef USE_GTK
 #include <unistd.h>
 #include <sys/types.h>
@@ -21,13 +19,13 @@
 #include <netdb.h>
 #include <string.h>
 #include <errno.h>
-#include <amanita/Bytes.h>
 #endif
 #ifdef USE_WIN32
 #include <winsock2.h>
 #include <windows.h>
-#include <amanita/Bytes.h>
 #endif
+#include <amanita/Bytes.h>
+#include <amanita/Thread.h>
 
 
 /** Amanita Namespace */

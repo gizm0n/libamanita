@@ -13,7 +13,7 @@ Object_Inheritance(Display,Widget)
 
 Display *Display::activeDisplay = 0;
 
-Display::Display() : Widget(0,0,g.getScreenWidth(),g.getScreenHeight()) {
+Display::Display() : Widget(0,0,g.getWidth(),g.getHeight()) {
 	// setInstance(Screen::Class);
 	setScreen(0,0,getWidth(),getHeight());
 	setKeyListener(this);

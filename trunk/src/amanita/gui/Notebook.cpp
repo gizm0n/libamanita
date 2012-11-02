@@ -25,7 +25,7 @@ Notebook::~Notebook() {
 	deleteTabs();
 }
 
-void Notebook::setDefaultSettings(Image *img,Font *f1,Font *f2,Uint32 data[26]) {
+void Notebook::setDefaultSettings(Image *img,Font *f1,Font *f2,uint32_t data[26]) {
 	_s = (_settings){
 		img,f1,f2,
 		{
@@ -59,14 +59,14 @@ void Notebook::setTabs(const char *str[],int len) {
 		tb.index = i;
 		tb.tw1 = _s.font1->stringWidth(tb.text);
 		tb.tw2 = _s.font2->stringWidth(tb.text);
-		tb.r = (SDL_Rect){ 0,0,0,0 };
+		tb.r = (rect16_t){ 0,0,0,0 };
 	}
 	updateTabs();
 }
 
 void Notebook::updateTabs() {
 	if(!tabs) return;
-	SDL_Rect *r;
+	rect16_t *r;
 	int i,tw,w = 0,h = t->b2->h>t->b1->h? t->b2->h : t->b1->h;
 	for(i=0; i<ntabs; i++) {
 		tab &tb = tabs[i];
@@ -104,7 +104,7 @@ int Notebook::getPreviousTab(int n) {
 
 bool Notebook::mouseDown(MouseEvent &me) {
 	if(tabs) for(int i=0; i<ntabs; i++) {
-		SDL_Rect &r = tabs[i].r;
+		rect16_t &r = tabs[i].r;
 		if(me.x>=getX()+r.x && me.y>=getY()+r.y && me.x<getX()+r.x+r.w && me.y<getY()+r.y+r.h) {
 			if(i!=act) {
 				setActiveTab(i);
@@ -119,7 +119,7 @@ bool Notebook::mouseDown(MouseEvent &me) {
 
 void Notebook::paint(time_t time) {
 	if(!tabs) return;
-	SDL_Rect *r;
+	rect16_t *r;
 	int i,x = 0,w;
 	for(i=0; i<ntabs; i++) {
 		tab &tb = tabs[i];

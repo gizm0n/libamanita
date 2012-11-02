@@ -151,6 +151,7 @@ void Text::arrange(int from) {
 
 void Text::drawText(int x,int y,int a,bool showCaret) {
 	if(!font) return;
+#ifdef USE_SDL
 	drawing = true;
 	int i = 0;
 	const Fontmetrics &metrics = font->getFontMetrics();
@@ -194,6 +195,7 @@ void Text::drawText(int x,int y,int a,bool showCaret) {
 		SDL_BlitSurface(font->getGlyphSurface((int)'|'),0,canvas,&r);
 	}
 	drawing = false;
+#endif
 }
 
 }; /* namespace gui */

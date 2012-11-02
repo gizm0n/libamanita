@@ -1,6 +1,6 @@
 
 #include <stdio.h>
-#include <amanita/Application.h>
+#include <amanita/tk/Application.h>
 #include <amanita/tk/Browser.h>
 #include <amanita/tk/Window.h>
 
@@ -29,7 +29,7 @@ public:
 };
 
 
-BrowserApp app(INIT_GUI,"Browser","Browser Example");
+BrowserApp app(APP_TK,"Browser","Browser Example");
 
 
 static uint32_t window_events(Widget *s,uint32_t st,intptr_t p1,intptr_t p2,intptr_t p3) {

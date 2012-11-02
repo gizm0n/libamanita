@@ -188,12 +188,14 @@ size_t bits(long long n) {
 
 long gcd(long a,long b) {
 	long t;
+	if(!a || !b) return a|b;
 	while(b) t = b,b = a%b,a = t;
 	return a;
 }
 
 long long gcd(long long a,long long b) {
 	long long t;
+	if(!a || !b) return a|b;
 	while(b) t = b,b = a%b,a = t;
 	return a;
 }

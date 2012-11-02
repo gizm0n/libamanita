@@ -39,7 +39,7 @@ void Icon::setDefaultSettings(Image *img,uint32_t data[4]) {
 void Icon::setImage(Image *img,int plain,int active,int down,int disabled) {
 	ib = (iconbutton){ img,plain,active,down,disabled };
 	if(ib.img) {
-		SDL_Rect *r = ib.img->getCell(ib.plain);
+		rect16_t *r = ib.img->getCell(ib.plain);
 		setSize(r->w,r->h);
 	}
 }

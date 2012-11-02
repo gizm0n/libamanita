@@ -9,12 +9,11 @@
  */ 
 
 #include <stdint.h>
+#include <amanita/Geometry.h>
 #include <amanita/Object.h>
 #include <amanita/Vector.h>
 #include <amanita/gui/Event.h>
 
-
-struct SDL_Rect;
 
 
 /** Amanita Namespace */
@@ -38,13 +37,13 @@ Object_Instance(Widget)
 
 private:
 	enum {
-		VALID				= 0x00000010,
-		ENABLED			= 0x00000020,
-		VISIBLE			= 0x00000040,
-		LOCKED			= 0x00000080,
-		OPAQUE			= 0x00000100,
-		CLIP				= 0x00000200,
-		MODAL				= 0x00001000,
+		COM_VALID		= 0x00000010,
+		COM_ENABLED		= 0x00000020,
+		COM_VISIBLE		= 0x00000040,
+		COM_LOCKED		= 0x00000080,
+		COM_OPAQUE		= 0x00000100,
+		COM_CLIP			= 0x00000200,
+		COM_MODAL		= 0x00001000,
 	};
 	struct component {
 		size_t cnt;							//!< Counter for number of bindings to component. When 0 component is deleted.
@@ -106,24 +105,24 @@ public:
 	int getHeight() { return com.h; }
 	bool contains(Widget *c);
 	bool contains(int x,int y) { return x>=com.x && y>=com.y && x<com.x+com.w && y<com.y+com.h; }
-	bool contains(const SDL_Rect &r,int x,int y);
-	void invalidate() { if(com.status&VALID) com.status ^= VALID; }
-	virtual void validate() { com.status |= VALID; }
-	bool isValid() { return com.status&VALID; }
-	void setEnabled(bool e) { com.status |= ENABLED;if(!e) com.status ^= ENABLED; }
-	bool isEnabled() { return com.status&ENABLED; }
-	void setVisible(bool v) { com.status |= VISIBLE;if(!v) com.status ^= VISIBLE;setKeyFocus(this); }
+	bool contains(const rect16_t &r,int x,int y);
+	void invalidate() { if(com.status&COM_VALID) com.status ^= COM_VALID; }
+	virtual void validate() { com.status |= COM_VALID; }
+	bool isValid() { return com.status&COM_VALID; }
+	void setEnabled(bool e) { com.status |= COM_ENABLED;if(!e) com.status ^= COM_ENABLED; }
+	bool isEnabled() { return com.status&COM_ENABLED; }
+	void setVisible(bool v) { com.status |= COM_VISIBLE;if(!v) com.status ^= COM_VISIBLE;setKeyFocus(this); }
 	void show() { setVisible(true); }
 	void hide() { setVisible(false); }
-	bool isVisible() { return com.status&VISIBLE; }
-	void setLocked(bool l) { com.status |= LOCKED;if(!l) com.status ^= LOCKED; }
-	bool isLocked() { return com.status&LOCKED; }
-	void setOpaque(bool o) { com.status |= OPAQUE;if(!o) com.status ^= OPAQUE; }
-	bool isOpaque() { return com.status&OPAQUE; }
-	void setClipBounds(bool c) { com.status |= CLIP;if(!c) com.status ^= CLIP; }
-	bool clipBounds() { return com.status&CLIP; }
-	void setModal(bool m) { com.status |= MODAL;if(m) setVisible(false);else com.status ^= MODAL; }
-	bool isModal() { return com.status&MODAL; }
+	bool isVisible() { return com.status&COM_VISIBLE; }
+	void setLocked(bool l) { com.status |= COM_LOCKED;if(!l) com.status ^= COM_LOCKED; }
+	bool isLocked() { return com.status&COM_LOCKED; }
+	void setOpaque(bool o) { com.status |= COM_OPAQUE;if(!o) com.status ^= COM_OPAQUE; }
+	bool isOpaque() { return com.status&COM_OPAQUE; }
+	void setClipBounds(bool c) { com.status |= COM_CLIP;if(!c) com.status ^= COM_CLIP; }
+	bool clipBounds() { return com.status&COM_CLIP; }
+	void setModal(bool m) { com.status |= COM_MODAL;if(m) setVisible(false);else com.status ^= COM_MODAL; }
+	bool isModal() { return com.status&COM_MODAL; }
 	bool isShowing();
 	bool isMouseDown() { return this==mouseDownFocus; }
 	bool isMouseOver() { return this==mouseOverFocus; }

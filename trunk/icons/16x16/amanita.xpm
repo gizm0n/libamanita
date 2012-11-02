@@ -1,5 +1,5 @@
 /* XPM */
-static const char * amanita_xpm[] = {
+static const char *amanita16_xpm[] = {
 "16 16 93 2",
 "  	c None",
 ". 	c #C40B02",

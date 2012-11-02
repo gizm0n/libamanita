@@ -8,7 +8,7 @@
  */ 
 
 
-#include <amanita/Application.h>
+#include <amanita/Main.h>
 #include <amanita/Hashtable.h>
 #include <amanita/net/Socket.h>
 
@@ -95,7 +95,7 @@ enum HTTP_MIMES {
 #include <amanita/net/Http.h>
 
 int main(int argc, char *argv[]) {
-	Application app(INIT_SOCKETS);
+	Main app(APP_SOCKETS);
 	Http http;
 	app.open(argc,argv);
 	http.setUserAgent("Http Class User-Agent, v.0.1");
@@ -129,7 +129,7 @@ private:
 
 public:
 	Http();
-	Http(Application &a);
+	Http(Main &app);
 	~Http();
 
 	

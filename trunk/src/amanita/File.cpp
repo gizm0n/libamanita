@@ -1,11 +1,14 @@
 
 #include "_config.h"
-#include <string.h>
+#include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
-#if defined USE_GTK
-#include <glib.h>
-#include <glib/gstdio.h>
+#if defined USE_LINUX
+//#include <glib.h>
+//#include <glib/gstdio.h>
+#include <errno.h>
+#include <pwd.h>
 #include <sys/types.h>
 #include <unistd.h>
 #endif
@@ -19,8 +22,11 @@
 namespace a {
 
 bool exists(const char *fn) {
-#ifdef USE_GLIB
-	return g_file_test(fn,G_FILE_TEST_EXISTS);
+#ifdef USE_LINUX
+	struct stat st;
+	errno = 0;
+	return stat(fn,&st)==0 || errno!=ENOENT;
+//	return g_file_test(fn,G_FILE_TEST_EXISTS);
 #endif
 #ifdef USE_WIN32
 #ifdef USE_WCHAR
@@ -40,15 +46,15 @@ bool exists(const char *fn) {
 }
 
 time_t accessed(const char *fn) {
-	struct stat attrib;
-	if(!exists(fn) || stat(fn,&attrib)==-1) return 0;
-	return attrib.st_atime;
+	struct stat st;
+	if(stat(fn,&st)==-1) return 0;
+	return st.st_atime;
 }
 
 time_t modified(const char *fn) {
-	struct stat attrib;
-	if(!exists(fn) || stat(fn,&attrib)==-1) return 0;
-	return attrib.st_mtime;
+	struct stat st;
+	if(stat(fn,&st)==-1) return 0;
+	return st.st_mtime;
 }
 
 long copy(const char *s,const char *d) {
@@ -78,9 +84,9 @@ long copy(FILE *s,FILE *d) {
 
 
 bool remove(const char *fn) {
-#ifdef USE_GLIB
-	return ::g_remove(fn)==0;
-#endif
+//#ifdef USE_GLIB
+//	return ::g_remove(fn)==0;
+//#endif
 #ifdef USE_WIN32
 #ifdef USE_WCHAR
 	wchar_t *wfn = char2w(fn);
@@ -92,16 +98,16 @@ bool remove(const char *fn) {
 	if(n&FILE_ATTRIBUTE_READONLY) return false;
 	if(n&FILE_ATTRIBUTE_DIRECTORY) return RemoveDirectory((LPCTSTR)fn)!=0;
 	else return DeleteFile((LPCTSTR)fn)==TRUE;
-//#else
-//	return ::remove(fn)==0;
+#else
+	return ::remove(fn)==0;
 #endif
 }
 
 
 bool mkdir(const char *dir,int p) {
-#ifdef USE_GLIB
-	return ::g_mkdir(dir,p)==0;
-#endif
+//#ifdef USE_GLIB
+//	return ::g_mkdir(dir,p)==0;
+//#endif
 #ifdef USE_WIN32
 #ifdef USE_WCHAR
 	wchar_t *wdir = char2w(dir);
@@ -111,19 +117,17 @@ bool mkdir(const char *dir,int p) {
 #else
 	return CreateDirectory(dir,NULL)==TRUE;
 #endif
-//#else
-//	return ::mkdir(dn,p)==0;
+#else
+	return ::mkdir(dir,p)==0;
 #endif
 }
 
 
-void executable(char *fn,int l) {
-#ifdef USE_GLIB
-	char link[64];
-	pid_t pid;
+void executable(char *fn,size_t l) {
+#ifdef USE_LINUX
+	char link[32];
 	int ret;
-	pid = getpid();
-	snprintf(link,sizeof(link),"/proc/%i/exe",pid);
+	sprintf(link,"/proc/%i/exe",getpid());
 	ret = readlink(link,fn,l);
 	fn[ret] = '\0';
 #endif
@@ -140,9 +144,10 @@ void executable(char *fn,int l) {
 #endif
 }
 
-void homedir(char *dir,int l) {
-#ifdef USE_GLIB
-	snprintf(dir,l,"%s",g_get_home_dir());
+void homedir(char *dir,size_t l) {
+#ifdef USE_LINUX
+	struct passwd *pw = getpwuid(getuid());
+	snprintf(dir,l,"%s",pw->pw_dir);
 #endif
 #ifdef USE_WIN32
 #ifdef USE_WCHAR
@@ -160,8 +165,8 @@ void homedir(char *dir,int l) {
 #endif
 }
 
-void applicationdir(char *dir,int l) {
-#ifdef USE_GLIB
+void applicationdir(char *dir,size_t l) {
+#ifdef USE_LINUX
 	executable(dir,l);
 	char *p = strrchr(dir,'/');
 	if(p) *p = '\0';
@@ -182,9 +187,10 @@ void applicationdir(char *dir,int l) {
 #endif
 }
 
-void fontsdir(char *dir,int l) {
+void fontsdir(char *dir,size_t l) {
 #ifdef USE_GLIB
-	snprintf(dir,l,"%s/.fonts",g_get_home_dir());
+	struct passwd *pw = getpwuid(getuid());
+	snprintf(dir,l,"%s/.fonts",pw->pw_dir);
 #endif
 #ifdef USE_WIN32
 #ifdef USE_WCHAR
@@ -200,9 +206,10 @@ void fontsdir(char *dir,int l) {
 #endif
 }
 
-void systemdir(char *dir,int l) {
-#ifdef USE_GLIB
-	snprintf(dir,l,"%s",g_get_home_dir());
+void systemdir(char *dir,size_t l) {
+#ifdef USE_LINUX
+	struct passwd *pw = getpwuid(getuid());
+	snprintf(dir,l,"%s",pw->pw_dir);
 #endif
 #ifdef USE_WIN32
 #ifdef USE_WCHAR
@@ -217,8 +224,8 @@ void systemdir(char *dir,int l) {
 #endif
 }
 
-void currentdir(char *dir,int l) {
-#ifdef USE_GLIB
+void currentdir(char *dir,size_t l) {
+#ifdef USE_LINUX
 	getcwd(dir,l);
 #endif
 #ifdef USE_WIN32
@@ -235,7 +242,7 @@ void currentdir(char *dir,int l) {
 }
 
 
-const char *File::dirsep = aFILE_DIRSEP;
+const char *File::dirsep = FILE_DIRSEP;
 
 
 File &File::open(const char *a,const char *fn, ...) {

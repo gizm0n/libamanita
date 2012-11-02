@@ -9,33 +9,36 @@
 #include <amanita/Thread.h>
 
 
+
 namespace a {
 
 
 /*#ifdef USE_SDL
-int Thread::_run(void *d) {
+static int Thread_run(void *d) {
 	Thread &t = *(Thread *)d;
-	t.function(t.data);
+	thread_function f = t.getFunction();
+	f(t.getData());
 	return 0;
 }*/
 #ifdef USE_PTHREADS
-void *Thread::_run(void *d) {
+static void *Thread_run(void *d) {
 	Thread &t = *(Thread *)d;
+	thread_function f = t.getFunction();
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE,0);
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,0);
-	t.function(t.data);
+	f(t.getData());
 	pthread_exit(0);
 	return 0;
 }
 #endif
 #ifdef USE_WIN32_THREADS
-DWORD WINAPI Thread::_run(void *d) {
+static DWORD WINAPI Thread_run(void *d) {
 	Thread &t = *(Thread *)d;
-	t.function(t.data);
+	thread_function f = t.getFunction();
+	f(t.getData());
 	return 0;
 }
 #endif
-
 
 
 
@@ -55,15 +58,15 @@ void Thread::start(thread_function f,void *d) {
 	data = d;
 /*#ifdef USE_SDL
 	timer = SDL_GetTicks();
-	thread = SDL_CreateThread(_run,this);*/
+	thread = SDL_CreateThread(Thread_run,this);*/
 #ifdef USE_PTHREADS
 	gettimeofday(&time,0);
 	thread = (pthread_t *)malloc(sizeof(pthread_t));
-	pthread_create(thread,0,_run,this);
+	pthread_create(thread,0,Thread_run,this);
 #endif
 #ifdef USE_WIN32_THREADS
 	gettimeofday(&time,0);
-	CreateThread(NULL,0,_run,this,0,NULL);
+	thread = CreateThread(NULL,0,Thread_run,this,0,NULL);
 #endif
 }
 
@@ -72,14 +75,19 @@ void Thread::stop() {
 	if(thread) SDL_WaitThread(thread,0);*/
 #ifdef USE_PTHREADS
 	if(thread) {
-		pthread_join(*thread,0);
-		free(thread);
+		pthread_t *t = thread;
+		thread = 0;
+		pthread_join(*t,0);
+		free(t);
 	}
 #endif
 #ifdef USE_WIN32_THREADS
-	if(thread) WaitForSingleObject(thread,INFINITE);
+	if(thread) {
+		HANDLE t = thread;
+		thread = 0;
+		WaitForSingleObject(t,INFINITE);
+	}
 #endif
-	thread = 0;
 	function = 0;
 	data = 0;
 }

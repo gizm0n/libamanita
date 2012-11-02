@@ -32,8 +32,8 @@ protected:
 	struct _settings {
 		Image *img;
 		Font *font;
-		SDL_Rect *tl,*t,*tr,*l,*r,*bl,*b,*br,*c;
-		SDL_Rect ins;
+		rect16_t *tl,*t,*tr,*l,*r,*bl,*b,*br,*c;
+		rect16_t ins;
 	};
 	static _settings _s;
 

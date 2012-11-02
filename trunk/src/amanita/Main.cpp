@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <locale.h>
-
 #ifdef USE_WIN32
 #ifdef WIN32_LEAN_AND_MEAN
 #undef WIN32_LEAN_AND_MEAN
@@ -17,18 +16,13 @@
 #define _WIN32_IE	0x0501
 #include <winsock2.h>
 #include <windows.h>
-//#include <ctype.h>
-#include <commctrl.h>
-//#include <richedit.h>
 #endif
-
-#include <amanita/Application.h>
-#include <amanita/tk/Menu.h>
+#include <amanita/Main.h>
 #include <amanita/File.h>
 #include <amanita/String.h>
 //#include <amanita/Vector.h>
 //#include <amanita/net/Http.h>
-#include <amanita/tk/Window.h>
+
 
 
 #ifdef USE_WIN32
@@ -44,12 +38,11 @@ int WINAPI WinMain(HINSTANCE hi,HINSTANCE hp,LPSTR cmd,int show) {
 	}
 	LocalFree(args);
 	hMainInstance = hi;
+//debug_output("hMainInstance: %x\n",hMainInstance);
 	i = main(argc,argv);
 	while(--argc>=0) free(argv[argc]);
 	return i;
 }
-
-using namespace a::tk;
 #endif
 
 
@@ -58,11 +51,11 @@ namespace a {
 //#define _QUOTE_MACRO(x) #x
 //#define QUOTE_MACRO(x) _QUOTE_MACRO(x)
 
-Application::Application(uint32_t params,const char *prj,const char *nm) : app_thread() {
+Main::Main(uint32_t p,const char *prj,const char *nm) : app_thread() {
 	FILE *fp;
 	char str[257],home[257],data[257];
 
-	app_init_params = params;
+	app_params = p;
 	app_out = 0;
 	app_project = 0;
 	app_name = 0;
@@ -74,12 +67,11 @@ Application::Application(uint32_t params,const char *prj,const char *nm) : app_t
 	app_local_id = 0;
 	app_local_time = 0;
 	app_last_access = 0;
-	window = 0;
 
 	setProjectName(prj);
 	setApplicationName(nm);
 
-	if((app_init_params&INIT_DIRECTORIES)) {
+	if((app_params&APP_DIRECTORIES)) {
 		homedir(str,256);
 #if defined USE_GTK
 		sprintf(home,"%s/.%s/",str,app_project);
@@ -95,46 +87,47 @@ Application::Application(uint32_t params,const char *prj,const char *nm) : app_t
 			snprintf(data,256,"/usr/local/share/%s/",app_project);
 			if(!exists(data)) {
 				snprintf(data,256,"%s/.local/share/%s/",home,app_project);
-				if(!exists(data)) sprintf(data,"%sdata" aFILE_DIRSEP,home);
+				if(!exists(data)) sprintf(data,"%sdata" FILE_DIRSEP,home);
 			}
 		}
 #elif defined USE_WIN32
-		sprintf(data,"%sdata" aFILE_DIRSEP,home);
+		sprintf(data,"%sdata" FILE_DIRSEP,home);
 #endif
 
 		fontsdir(str,256);
-		strcat(str,aFILE_DIRSEP);
+		strcat(str,FILE_DIRSEP);
 		if(!exists(str)) mkdir(str);
-debug_output("app_dir_fonts=%s\n",str);
+//debug_output("app_dir_fonts=%s\n",str);
 		app_fonts_dir = strdup(str);
 	} else {
 		currentdir(str,256);
-		sprintf(home,"%s" aFILE_DIRSEP,str);
+		sprintf(home,"%s" FILE_DIRSEP,str);
 		strcpy(data,home);
 	}
 
 	app_home_dir = strdup(home);
-debug_output("app_home_dir: %s\n",home);
+//debug_output("app_home_dir: %s\n",home);
 	app_data_dir = strdup(data);
-debug_output("app_data_dir: %s\n",data);
+//debug_output("app_data_dir: %s\n",data);
 	
-	if((app_init_params&INIT_LOG)) {
+	if((app_params&APP_LOG)) {
 		sprintf(str,"%s%s.log",app_home_dir,app_project);
 		app_last_access = modified(str);
-debug_output("logfile: %s\nlast_access %" PRIu64 "\n\n",str,(uint64_t)app_last_access);
+//debug_output("logfile: %s\nlast_access %" PRIu64 "\n\n",str,(uint64_t)app_last_access);
 		if(!(app_out=fopen(str,"wb")) ||
 			!(fp=freopen(str,"ab",app_out)) ||
 			!(fp=freopen(str,"ab",stdout)) ||
 			!(fp=freopen(str,"ab",stderr))) perror(str);
-debug_output("Application::Application()");
+//debug_output("Main::Main()");
 	} else {
 		executable(str,256);
 		app_last_access = accessed(str);
 	}
 }
 
-Application::~Application() {
-debug_output("Application::~Application()\n");
+Main::~Main() {
+//debug_output("Main::~Main()\n");
+	stop();
 	if(app_user_agent && app_user_agent!=app_project) free(app_user_agent);
 	app_user_agent = 0;
 	if(app_name && app_name!=app_project) free(app_name);
@@ -153,172 +146,41 @@ debug_output("Application::~Application()\n");
 
 	if(app_out) fclose(app_out);
 	app_out = 0;
-
-	if(window) delete window;
-	window = 0;
-debug_output("Completely finalized, could not have gone better! You the Man!\n");
+//debug_output("Completely finalized, could not have gone better! You the Man!\n");
+	printf("\n");
 }
 
 
-uint32_t Application::open(int argc,char *argv[]) {
-	if((app_init_params&INIT_GETTEXT)) {
-debug_output("Application::init(AMANITA_INIT_GETTEXT,project=%s,localedir=%s)",app_project,app_locale_dir);
+uint32_t Main::open(int argc,char *argv[]) {
+	if((app_params&APP_GETTEXT)) {
+//debug_output("Main::init(AMANITA_APP_GETTEXT,project=%s,localedir=%s)",app_project,app_locale_dir);
 		setlocale(LC_ALL,"");
 		bindtextdomain(app_project,app_locale_dir? app_locale_dir : ".");
 		textdomain(app_project);
 	}
 
-#ifdef USE_GTK
-	gtk_init(&argc,&argv);
-	if((app_init_params&INIT_GUI)) {
-		gtk_rc_parse_string (""
-			"style \"scrollbar-style\" {\n"
-			"  GtkScrolledWindow::scrollbar-spacing = 0\n"
-			"}\n\n"
-			"style \"notebook-style\" {\n"
-			"  GtkWidget::focus-padding = 0\n"
-			"  GtkWidget::focus-line-width = 0\n"
-			"  GtkNotebook::tab-curvature = 0\n"
-			"  GtkNotebook::tab-overlap = -1\n"
-//			"  xthickness = 0\n"
-//			"  ythickness = 0\n"
-			"}\n\n"
-			"style \"tab-close-button-style\" {\n"
-			"  GtkWidget::focus-padding = 0\n"
-			"  GtkWidget::focus-line-width = 0\n"
-//			"  xthickness = 0\n"
-//			"  ythickness = 0\n"
-			"}\n\n"
-			"widget \"*GtkScrolledWindow*\" style \"scrollbar-style\"\n"
-			"widget \"*GtkNotebook*\" style \"notebook-style\"\n"
-			"widget \"*.tab-close-button\" style \"tab-close-button-style\"\n"
-		);
-	}
-	g_type_init();
-	if((app_init_params&INIT_THREADS)) {
-		if(!g_thread_supported()) g_thread_init(0);
-		gdk_threads_init();
-	}
-#endif
-
-	if((app_init_params&INIT_SOCKETS)) {
-/*#ifdef USE_SDL
-		if(SDLNet_Init()==-1) return INIT_SOCKETS;
-#endif*/
+	if(app_params&APP_SOCKETS) {
 #ifdef USE_WIN32
 		WSADATA wsadata;
 		if(WSAStartup(MAKEWORD(2,0),&wsadata)!=0) {
-debug_output("Socket Initialization Error.\n");
+//debug_output("Socket Initialization Error.\n");
 			WSACleanup();
-			return INIT_SOCKETS;
+			return APP_SOCKETS;
 		}
 #endif
 	}
-#ifdef USE_WIN32
-	if((app_init_params&INIT_GUI)) {
-		INITCOMMONCONTROLSEX commctrl = { sizeof(INITCOMMONCONTROLSEX),0xffffffff };
-		OleInitialize(0);
-		InitCommonControlsEx(&commctrl);
-	}
-#endif
 	return 0;
 }
 
 
-uint32_t Application::close() {
-	if((app_init_params&INIT_SOCKETS)) {
-#ifdef USE_SDL
-		SDLNet_Quit();
-#endif
+uint32_t Main::close() {
+	if(app_params&APP_SOCKETS) {
 #ifdef USE_WIN32
 		WSACleanup();
 #endif
 	}
-	if((app_init_params&INIT_GUI)) {
-#ifdef USE_WIN32
-		OleUninitialize();
-#endif
-	}
 	return 0;
 }
-
-int Application::main() {
-#ifdef USE_GTK
-	create();
-	if((app_init_params&INIT_THREADS)) {
-		gdk_threads_enter();
-		gtk_main();
-		gdk_threads_leave();
-	} else {
-		gtk_main();
-	}
-	return 0;
-#endif
-
-#ifdef USE_WIN32
-	HACCEL hacc = 0;
-	HWND hwnd = 0;
-	MSG msg;
-
-	create();
-
-	if(window && window->getMenu()) {
-		MenuItem *items = window->getMenu()->items,*m;
-		int i,n,nitems = window->getMenu()->nitems;
-		for(i=0,n=0,m=items; m && i<nitems; ++i,++m) if(m->acc!=-1) ++n;
-		if(n>0) {
-			ACCEL accel[n],*a;
-			for(i=0,m=items,a=accel; i<nitems; ++i,++m) if(m->acc!=-1) {
-				a->fVirt = (m->acc_mod==KEY_CONTROL? FCONTROL : (m->acc_mod==KEY_ALT? FALT : 0))|FVIRTKEY;
-				a->key = m->acc;
-				a->cmd = WIDGET_MAKE_ID(WIDGET_MENU,m->index);
-				++a;
-			}
-			hacc = CreateAcceleratorTable(accel,n);
-			hwnd = (HWND)window->getComponent();
-		}
-	}
-
-	while(GetMessage(&msg,NULL,0,0)) {
-		if((!hacc || !TranslateAccelerator(hwnd,hacc,&msg))) {
-			if(msg.message==WM_QUIT) break;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
-	return msg.wParam;
-#endif
-}
-
-void Application::quit() {
-debug_output("Application::exit()\n");
-#ifdef USE_GTK
-	gtk_main_quit();
-#endif
-#ifdef USE_WIN32
-	PostQuitMessage(0);
-#endif
-}
-
-
-void Application::create() {
-}
-
-void Application::destroy() {
-	quit();
-}
-/*
-void Application::add(Component c,Widget *w) {
-	Component handle;
-	handle = w->create(window,0);
-#if defined(USE_GTK)
-	gtk_container_add(GTK_CONTAINER(window),(GtkWidget *)handle);
-#elif defined(USE_WIN32)
-	w->hinst = hinst;
-#endif
-	child = w;
-}
-*/
 
 enum {
 	HOME,
@@ -354,7 +216,7 @@ static void extract_dir(char *dir,const char *str,const char **dirs) {
 	*dir = '\0';
 }
 
-int Application::install(const char *host,const char *files,install_function func,void *obj) {
+int Main::install(const char *host,const char *files,install_function func,void *obj) {
 	char str[257],*p,from[257],to[257],from_dir[257],to_dir[257];
 	const char *p1,*p2,*dirs[] = { app_home_dir,app_data_dir,app_locale_dir,app_fonts_dir,host };
 	int n,http,cp;
@@ -391,8 +253,8 @@ int Application::install(const char *host,const char *files,install_function fun
 }
 
 /*
-int Application::install(const char *host,const char *path,Vector &files,install_function func,void *obj) {
-debug_output("Application::install(host=\"%s\",path=\"%s\")\n",host,path);
+int Main::install(const char *host,const char *path,Vector &files,install_function func,void *obj) {
+debug_output("Main::install(host=\"%s\",path=\"%s\")\n",host,path);
 	int i,n,f,pl = path? strlen(path) : 0,st = 0;
 	const char *home = getHomeDir();
 	const char *fonts = getFontsDir();
@@ -433,16 +295,27 @@ debug_output("sz=%lu\n",(unsigned long)sz);
 }
 */
 
-#if defined USE_GTK
-void Application::updateFontCache() {
-	const char *p;
-	gchar *so,*se;
-	g_spawn_command_line_sync(p="fc-cache -f -v",&so,&se,NULL,NULL);
-debug_output("spawn: %s\nstdout:\n%sstderr:\n\n%s",p,so,se);
+static void Main_run(void *data) {
+	((Main *)data)->run();
 }
-#endif
 
-void Application::setProjectName(const char *prj) {
+void Main::start(thread_function f) {
+	app_thread.start(f? f : Main_run,this);
+}
+
+void Main::stop() {
+	app_thread.stop();
+}
+
+void Main::kill() {
+	app_thread.kill();
+}
+
+void Main::run() {
+}
+
+
+void Main::setProjectName(const char *prj) {
 	if(!prj || !*prj) return;
 	if(app_project) free(app_project);
 	app_project = strdup(prj);
@@ -450,34 +323,34 @@ void Application::setProjectName(const char *prj) {
 	if(!app_user_agent || app_user_agent==app_project) app_user_agent = app_project;
 }
 
-void Application::setApplicationName(const char *nm) {
+void Main::setApplicationName(const char *nm) {
 	if(!nm || !*nm) return;
 	if(app_name && app_name!=app_project) free(app_name);
 	app_name = strdup(nm);
 }
 
-void Application::setUserAgent(const char *ua) {
+void Main::setUserAgent(const char *ua) {
 	if(!ua || !*ua) return;
 	if(app_user_agent && app_user_agent!=app_project) free(app_user_agent);
 	app_user_agent = strdup(ua);
 }
 
-void Application::setHomeDir(const char *dir) {
+void Main::setHomeDir(const char *dir) {
 	if(app_home_dir) free(app_home_dir);
 	app_home_dir = strdup(dir);
 }
 
-void Application::setDataDir(const char *dir) {
+void Main::setDataDir(const char *dir) {
 	if(app_data_dir) free(app_data_dir);
 	app_data_dir = strdup(dir);
 }
 
-void Application::setLocaleDir(const char *dir) {
+void Main::setLocaleDir(const char *dir) {
 	if(app_locale_dir) free(app_locale_dir);
 	app_locale_dir = strdup(dir);
 }
 
-void Application::setFontsDir(const char *dir) {
+void Main::setFontsDir(const char *dir) {
 	if(app_locale_dir) free(app_fonts_dir);
 	app_fonts_dir = strdup(dir);
 }

@@ -1,6 +1,6 @@
 
 #include <stdio.h>
-#include <amanita/Application.h>
+#include <amanita/Main.h>
 #include <amanita/net/Client.h>
 
 using namespace a;
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 	else {
 		char text[1024-SOCKET_HEADER-1];
 		uint8_t data[1024],*p;
-		Application app(INIT_SOCKETS);
+		Main app(APP_SOCKETS);
 		app.open(argc,argv);
 		client = new Client(client_listener);
 		client->start(argv[1]);

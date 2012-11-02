@@ -11,8 +11,17 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#ifdef USE_DD
+#include <windows.h>
+#include <ddraw.h>
+#include <olectl.h> 
+#endif
+#ifdef USE_SDL
 #include <SDL/SDL.h>
+#endif
+#include <amanita/Geometry.h>
 #include <amanita/gui/Image.h>
+
 
 
 /** Amanita Namespace */
@@ -22,71 +31,100 @@ namespace gui {
 
 
 /** @cond */
+class Application;
 class Font;
+#ifdef USE_DD
+class FontEngine;
+#endif
 /** @endcond */
+
+
+#ifdef USE_SDL
+typedef SDL_Surface *Surface;
+#endif
+#ifdef USE_DD
+typedef LPDIRECTDRAWSURFACE7 Surface;
+#endif
 
 
 /** This class loads and handles graphics, like java.awt.Graphics in the java language.
  * 
  * @ingroup gui */
 class Graphics {
+friend class Application;
 private:
-	SDL_Rect cl;
-	SDL_Surface *screen,*canvas,*icon;
-	Font *font;
+	Application *app;							//!< 
+#ifdef USE_DD
+	HWND hwnd;
+	HDC hdc;
+	int width;
+	int height;
+	int bpp;
+	int pitch;
+	uint8_t *pixels;
+	DDSURFACEDESC2 ddsd;
+	LPDIRECTDRAW7 dd;
+	LPDIRECTDRAWCLIPPER lpclip;
+	FontEngine *fontEngine;
+	Surface front;
+	Surface back;
+#endif
+#ifdef USE_SDL
+	Surface screen;							//!< 
+	Surface icon;								//!< 
+#endif
+	Surface canvas;							//!< 
+	Font *font;									//!< 
+	rect16_t cl;								//!< 
 
-	static void initSDL(const char *caption,const char *ic1,SDL_Surface *ic2,int w,int h,int d,int f);
+	void init(Application &a);
+	void openDisplay(int w,int h,int d=0);
+	void close();
+#ifdef USE_DD
+	void setHWND(HWND w);
+	void eraseDesc();
+#endif
+#ifdef USE_SDL
+	void setXPMIcon(const char **xpm);
+	void setPNGIcon(const char *png);
+#endif
 
 public:
+	Graphics();
+	~Graphics();
 
-	static void init(int w,int h,int d,int f) { initSDL(0,0,0,w,h,d,f); }
-	static void init(const char *caption,int w,int h,int d,int f) { initSDL(caption,0,0,w,h,d,f); }
-	static void init(const char *caption,const char *ic,int w,int h,int d,int f) { initSDL(caption,ic,0,w,h,d,f); }
-	static void init(const char *caption,Image *ic,int w,int h,int d,int f) { initSDL(caption,0,ic->getSurface(),w,h,d,f); }
-	static void init(const char *caption,Image &ic,int w,int h,int d,int f) { initSDL(caption,0,ic.getSurface(),w,h,d,f); }
-	static void init(const char *caption,SDL_Surface *ic,int w,int h,int d,int f) { initSDL(caption,0,ic,w,h,d,f); }
-	static void close();
+	int getWidth();
+	int getHeight();
 
-	static void setCaption(const char *caption) { SDL_WM_SetCaption(caption,caption); }
-	static void setCaption(const char *title,const char *icon) { SDL_WM_SetCaption(title,icon); }
+	void setCanvas(Image *image) { setCanvas(image->surface); }
+	void setCanvas(Image &image) { setCanvas(image.surface); }
+	void setCanvas(Surface surface) { canvas = surface; }
+	Surface getCanvas() { return canvas; }
+	void resetCanvas();
 
-	Graphics() : screen(0),canvas(0),icon(0),font(0) {}
-	Graphics(Image *sc) : screen(sc->surface),canvas(sc->surface),icon(0),font(0) {}
-	Graphics(Image &sc) : screen(sc.surface),canvas(sc.surface),icon(0),font(0) {}
-	Graphics(SDL_Surface *sc) : screen(sc),canvas(sc),icon(0),font(0) {}
-	~Graphics() {}
+	void lock();
+	void unlock();
+	void flip();
 
-	int getScreenWidth() { return screen->w; }
-	int getScreenHeight() { return screen->h; }
+	int getPitch();
+	int getBytesPerPixel();
+	void *getPixels();
 
-	void flip() { SDL_Flip(screen); }
+	void resetClip();
+	void setClip(rect16_t &r);
+	void setClip(int x,int y,int w,int h);
+	rect16_t getClip() { return cl; }
 
-	SDL_Surface *getScreen() { return screen; }
-	SDL_PixelFormat *getScreenFormat() { return screen->format; }
-	void setCanvas(Image *image) { setCanvas(image->getSurface()); }
-	void setCanvas(Image &image) { setCanvas(image.getSurface()); }
-	void setCanvas(SDL_Surface *surface) { canvas = surface; }
-	SDL_Surface *getCanvas() { return canvas; }
-	void resetCanvas() { canvas = screen; }
-
-	void lock() { if(SDL_MUSTLOCK(canvas)) SDL_LockSurface(canvas); }
-	void unlock() { if(SDL_MUSTLOCK(canvas)) SDL_UnlockSurface(canvas); }
-
-	void resetClip() { cl = (SDL_Rect){ 0,0,screen->w,screen->h };SDL_SetClipRect(canvas,0); }
-	void setClip(SDL_Rect &r) { cl = r;SDL_SetClipRect(canvas,&cl); }
-	void setClip(int x,int y,int w,int h) { cl = (SDL_Rect){ x,y,w,h };SDL_SetClipRect(canvas,&cl); }
-	SDL_Rect getClip() { return cl; }
-
-	uint32_t mapRGB(uint32_t c) { return SDL_MapRGB(canvas->format,c>>16,c>>8,c); }
-	uint32_t mapRGB(Uint8 r,Uint8 g,Uint8 b) { return SDL_MapRGB(canvas->format,r,g,b); }
+	uint32_t mapRGB(uint32_t c) { return mapRGB((c>>16)&0xff,(c>>8)&0xff,c&0xff); }
+	uint32_t mapRGB(uint8_t r,uint8_t g,uint8_t b);
 	void pixel(int x,int y,uint32_t c);
 	void draw(int x,int y,Image *s,int i) { draw(x,y,s->surface,s->getCell(i)); }
 	void draw(int x,int y,Image &s,int i) { draw(x,y,s.surface,s.getCell(i)); }
-	void draw(int x,int y,Image *s,SDL_Rect *src) { draw(x,y,s->surface,src); }
-	void draw(int x,int y,Image &s,SDL_Rect *src) { draw(x,y,s.surface,src); }
-	void draw(int x,int y,Image *s,SDL_Rect &src) { draw(x,y,s->surface,&src); }
-	void draw(int x,int y,Image &s,SDL_Rect &src) { draw(x,y,s.surface,&src); }
-	void draw(int x,int y,SDL_Surface *s,SDL_Rect *src);
+	void draw(int x,int y,Image *s,rect16_t *src) { draw(x,y,s->surface,src); }
+	void draw(int x,int y,Image &s,rect16_t *src) { draw(x,y,s.surface,src); }
+	void draw(int x,int y,Image *s,rect16_t &src) { draw(x,y,s->surface,&src); }
+	void draw(int x,int y,Image &s,rect16_t &src) { draw(x,y,s.surface,&src); }
+	void draw(int x,int y,Surface s,rect16_t *src);
 	void drawLine(int x1,int y1,int x2,int y2,uint32_t c);
 	void drawCircle(int x,int y,int r,uint32_t c) {}
 	void drawEllipse(int x,int y,int w,int h,uint32_t c) {}
@@ -105,7 +143,9 @@ public:
 	bool screenDump(const char *fn);
 };
 
+
 extern Graphics g;
+
 
 }; /* namespace gui */
 }; /* namespace a */

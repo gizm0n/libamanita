@@ -1,10 +1,10 @@
-#ifndef _AMANITA_APPLICATION_H
-#define _AMANITA_APPLICATION_H
+#ifndef _AMANITA_MAIN_H
+#define _AMANITA_MAIN_H
 
 /**
- * @file amanita/Application.h
+ * @file amanita/Main.h
  * @author Per Löwgren
- * @date Modified: 2012-10-21
+ * @date Modified: 2012-10-23
  * @date Created: 2008-12-01
  */ 
 
@@ -12,23 +12,16 @@
 #include <time.h>
 #include <inttypes.h>
 #include <libintl.h>
-#ifdef USE_GTK
-#include <gtk/gtk.h>
-#endif
-#ifdef USE_WIN32
-#include <windows.h>
-#endif
 #include <amanita/Config.h>
 #include <amanita/Thread.h>
 //#include <amanita/tk/Window.h>
-
-
 
 /** @cond */
 #ifdef USE_WIN32
 #ifdef main
 #undef main
 #endif
+/* Define main as amanita_main to force the use of WinMain. */
 #define main amanita_main
 extern int main(int, char *[]);
 extern HINSTANCE hMainInstance;
@@ -38,29 +31,26 @@ extern HINSTANCE hMainInstance;
 
 /** Amanita Namespace */
 namespace a {
-/** Amanita Tool Kit Namespace */
-
-
-/** @cond */
-namespace tk { class Window; };
-/** @endcond */
 
 
 /** Flags used when initiating applocation.
- * @see Application(uint32_t,const char *,const char *) */
+ * @see Main(uint32_t,const char *,const char *) */
 enum {
-	INIT_DIRECTORIES		= 0x00000001,	//!< Automatically manage directories, eg. ~/.project etc. Don't set this flag if you manage directories manually.
-	INIT_LOG					= 0x00000002,	//!< Open a log-file for stdout and stderr.
-	INIT_CONSOLE			= 0x00000010,	//!< Create a console application.
-	INIT_WINDOWED			= 0x00000020,	//!< Create a windowed application.
-	INIT_FULLSCREEN		= 0x00000040,	//!< Create a fullscreen application.
-	INIT_GETTEXT			= 0x00000200,	//!<
-	INIT_THREADS			= 0x00001000,	//!<
-	INIT_SOCKETS			= 0x00002000,	//!<
-	INIT_GUI					= 0x00010000,	//!<
-	INIT_SDL					= 0x01000008,	//!<
-	INIT_SDL_TTF			= 0x03000000,	//!<
-	INIT_SDL_IMAGE			= 0x05000000,	//!<
+	APP_DIRECTORIES		= 0x00000001,	//!< Automatically manage directories, eg. ~/.project etc. Don't set this flag if you manage directories manually.
+	APP_LOG					= 0x00000002,	//!< Open a log-file for stdout and stderr.
+	APP_CONSOLE				= 0x00000010,	//!< Create a console application.
+	APP_WINDOWED			= 0x00000020,	//!< Create a windowed application.
+	APP_FULLSCREEN			= 0x00000040,	//!< Create a fullscreen application.
+	APP_GETTEXT				= 0x00000100,	//!<
+	APP_THREADS				= 0x00000200,	//!<
+	APP_SOCKETS				= 0x00000400,	//!<
+	APP_TK					= 0x00001000,	//!<
+	APP_GUI					= 0x00ff0000,	//!<
+	APP_SDL					= 0x00010000,	//!<
+	APP_SDL_TTF				= 0x00030000,	//!<
+	APP_SDL_IMG				= 0x00050000,	//!<
+	APP_DD					= 0x00100000,	//!< Initialize DirectDraw
+	APP_AUDIO				= 0x01000000,	//!<
 };
 
 
@@ -84,9 +74,9 @@ typedef void (*install_function)(void *obj,const char *file,int n,int max,int st
  * supporting multilanguage applications etc.
  * 
  * @ingroup amanita */
-class Application {
-private:
-	unsigned long app_init_params;	//!< 
+class Main {
+protected:
+	uint32_t app_params;					//!< 
 	FILE *app_out;							//!< Output log-file, stdout and stderr is written to this file too.
 	char *app_project;					//!< Project name.
 	char *app_name;						//!< Application name, the name of this application. There can be many applications within the same project.
@@ -100,41 +90,49 @@ private:
 	time_t app_local_time;				//!<
 	time_t app_last_access;				//!< Time the application last was executed.
 
-protected:
-	tk::Window *window;					//!< Main window for the application.
-
 public:
 	/** Constructor, initiates the application.
 	 * It automatically looks for directories associated with the project, and 
-	 * @param params Parameters for how to initiate application.
+	 * @param p Parameters for how to initiate application.
 	 * @param prj Name of the project.
 	 * @param nm Name of the application. */
-	Application(uint32_t params=0,const char *prj=0,const char *nm=0);
-	virtual ~Application();
+	Main(uint32_t p=0,const char *prj=0,const char *nm=0);
+	virtual ~Main();
+
+	bool manageDirectories() { return app_params&APP_DIRECTORIES; }
+	bool useLog() { return app_params&APP_LOG; }
+	bool isConsole() { return app_params&APP_CONSOLE; }
+	bool isWindowed() { return app_params&APP_WINDOWED; }
+	bool isFullscreen() { return app_params&APP_FULLSCREEN; }
+	bool useGettext() { return app_params&APP_GETTEXT; }
+	bool useThreads() { return app_params&APP_THREADS; }
+	bool useSockets() { return app_params&APP_SOCKETS; }
+	bool useToolkit() { return app_params&APP_TK; }
+	bool useGUI() { return app_params&APP_GUI; }
+	bool useSDL() { return app_params&APP_SDL; }
+	bool useDirectDraw() { return app_params&APP_DD; }
+	bool useAudio() { return app_params&APP_AUDIO; }
 
 	/** Initialize application, initialize resources. */
-	uint32_t open(int argc,char *argv[]);
-	uint32_t close();						//!< Close application, uninitialize and shut down the application, free resources.
-	int main();								//!< Start main loop.
-	void quit();							//!< Exit the main loop.
-
-	void setMainWindow(tk::Window *wnd) { window = wnd; }
-	bool isMainWindow(tk::Window *wnd) { return window==wnd; }
-	tk::Window *getMainWindow() { return window; }
-
-	virtual void create();				//!< Create aplication, this method should be inherited and used for creating the windows and widgets etc.
-	virtual void destroy();				//!< Destroy application, inherit and use for freeing user created resources.
+	virtual uint32_t open(int argc,char *argv[]);
+	/** Close application, uninitialize and shut down the application, free resources. */
+	virtual uint32_t close();
 
 	int install(const char *host,const char *files,install_function func=0,void *obj=0);
 /*
 	int install(const char *host,const char *path,Vector &files,install_function func=0,void *obj=0);
 */
-#if defined USE_GTK
-	void updateFontCache();
-#endif
 
 	void lock() { app_thread.lock(); }
 	void unlock() { app_thread.unlock(); }
+
+	void start(thread_function f=0);
+	void stop();
+	void kill();
+	virtual void run();
+	void pauseFPS(int fps) { app_thread.pauseFPS(fps); }
+	void pause(int millis) { app_thread.pause(millis); }
+	bool isRunning() { return app_thread.isRunning(); }
 
 	void setProjectName(const char *prj);
 	const char *getProjectName() { return app_project; }
@@ -162,5 +160,5 @@ public:
 }; /* namespace a */
 
 
-#endif /* _AMANITA_APPLICATION_H */
+#endif /* _AMANITA_MAIN_H */
 

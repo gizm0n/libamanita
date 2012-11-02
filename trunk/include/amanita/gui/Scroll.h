@@ -45,16 +45,16 @@ private:
 	struct _settings {
 		Image *img;
 		struct button {
-			SDL_Rect *size;
+			rect16_t *size;
 			int plain,active,down,disabled;
 		} up,down,left,right,slide;
-		SDL_Rect *vbar,*hbar;
+		rect16_t *vbar,*hbar;
 	};
 	static _settings _s;
 
 	int style,val,min,max,inc;
 	Icon *bmin,*bmax,*bslide;
-	SDL_Rect *bar,slide;
+	rect16_t *bar,slide;
 	ActionEvent ae;
 
 public:

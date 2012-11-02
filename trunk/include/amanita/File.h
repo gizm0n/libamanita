@@ -14,10 +14,10 @@
 
 /** @cond */
 #ifdef USE_UNIX
-#define aFILE_DIRSEP "/"
+#define FILE_DIRSEP "/"
 #endif
 #ifdef USE_WIN32
-#define aFILE_DIRSEP "\\"
+#define FILE_DIRSEP "\\"
 #endif
 /** @endcond */
 
@@ -61,27 +61,27 @@ extern bool mkdir(const char *dir,int p=0700);
 /** Filename of the executable, that is the application calling the function.
  * @param fn The function writes file name to fn.
  * @param l Length in bytes of fn. */
-extern void executable(char *fn,int l);
+extern void executable(char *fn,size_t l);
 /** Home directory, on Linux this is ~/ on windows this is current directory.
  * @param dir The function writes directory to dir.
  * @param l Length in bytes of dir. */
-extern void homedir(char *dir,int l);
+extern void homedir(char *dir,size_t l);
 /** Directory where executable is located.
  * @param dir The function writes directory to dir.
  * @param l Length in bytes of dir. */
-extern void applicationdir(char *dir,int l);
+extern void applicationdir(char *dir,size_t l);
 /** Directory where fonts are installed.
  * @param dir The function writes directory to dir.
  * @param l Length in bytes of dir. */
-extern void fontsdir(char *dir,int l);
+extern void fontsdir(char *dir,size_t l);
 /** System directory, on Linux this is home dir, for windows this is usually c:\windows.
  * @param dir The function writes directory to dir.
  * @param l Length in bytes of dir. */
-extern void systemdir(char *dir,int l);
+extern void systemdir(char *dir,size_t l);
 /** Current directory, from where application is called.
  * @param dir The function writes directory to dir.
  * @param l Length in bytes of dir. */
-extern void currentdir(char *dir,int l);
+extern void currentdir(char *dir,size_t l);
 
 
 /** A filehandling class.
