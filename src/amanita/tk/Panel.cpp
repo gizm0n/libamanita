@@ -18,7 +18,7 @@ namespace tk {
 
 
 #ifdef USE_GTK
-void button_clicked_callback(GtkWidget *widget,gpointer data) {
+void panel_clicked_callback(GtkWidget *widget,gpointer data) {
 	PanelButton *pb = (PanelButton *)data;
 	Panel *p = pb->panel;
 	widget_event_handler weh = p->getEventHandler();
@@ -75,7 +75,7 @@ void Panel::create(Window *wnd,uint32_t st) {
 		if(b1->style==PANEL_BUTTON || b1->style==PANEL_CHECK) {
 			item = gtk_tool_button_new_from_stock(b1->icon);
 			if(b1->label) gtk_tool_button_set_label(GTK_TOOL_BUTTON(item),b1->label);
-			g_signal_connect(G_OBJECT(item),"clicked",G_CALLBACK(button_clicked_callback),b1);
+			g_signal_connect(G_OBJECT(item),"clicked",G_CALLBACK(panel_clicked_callback),b1);
 		} else if(b1->style==PANEL_SEPARATOR)
 			item = gtk_separator_tool_item_new();
 		gtk_toolbar_insert(GTK_TOOLBAR(component),item,-1);

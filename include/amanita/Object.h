@@ -93,10 +93,10 @@ public:
  * @param class_name This must be the name of the class, as it is. No quotes or anything. */
 #define Object_Instance(class_name) \
 public:\
-	static Class &getClass() { return class_name::instance; }\
-	virtual Class &getInstance() { return class_name::instance; }\
+	static a::Class &getClass() { return class_name::instance; }\
+	virtual a::Class &getInstance() { return class_name::instance; }\
 private:\
-	static Class instance;
+	static a::Class instance;
 
 
 
@@ -112,7 +112,7 @@ Object_Inheritance(A,Object)
  * @param class_name This must be the name of the class, as it is. No quotes or anything.
  * @param super_name This must be the name of the class that this class inherit. */
 #define Object_Inheritance(class_name,super_name) \
-Class class_name::instance(#class_name,&super_name::getClass());
+a::Class class_name::instance(#class_name,&super_name::getClass());
 
 /* Work in progress: These macros will implement capability for multiple inheritance. */
 /*#define aObject_SuperClass(class_name) \

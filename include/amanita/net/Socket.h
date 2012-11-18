@@ -8,6 +8,8 @@
  * @date Created: 2008-09-07
  */ 
 
+#include <amanita/Config.h>
+
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>

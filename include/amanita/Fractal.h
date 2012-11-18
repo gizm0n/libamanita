@@ -16,11 +16,12 @@ namespace a {
 
 
 enum {
-	FRACT_EDGETRACE		= 0x0001,	//<! Use edge tracing (experimental)
-	FRACT_THREADED			= 0x0002,	//<! Use threaded rendering
-	FRACT_BUFFERED			= 0x0004,	//<! Use buffered rendering
-	FRACT_DBUFFERED		= 0x0008,	//<! Use double buffers (not implemented)
-	FRACT_BLOCKRENDER		= 0x0010,	//<! Render in blocks (not implemented)
+	FRACT_FLOAT				= 0x0001,
+	FRACT_EDGETRACE		= 0x0002,	//<! Use edge tracing (experimental)
+	FRACT_THREADED			= 0x0004,	//<! Use threaded rendering
+	FRACT_BUFFERED			= 0x0008,	//<! Use buffered rendering
+	FRACT_DBUFFERED		= 0x0010,	//<! Use double buffers (not implemented)
+	FRACT_BLOCKRENDER		= 0x0020,	//<! Render in blocks (not implemented)
 };
 
 enum {
@@ -37,6 +38,20 @@ enum {
 	SET_JULIA,					//<! The Julia set
 	SET_MANDELBROT,			//<! The Mandelbrot set
 	SET_NUM
+};
+
+enum {
+	PL_MU,
+	PL_INVMU,
+	PL_INVMU25,
+	PL_LAMBDA,
+	PL_INVLAMBDA,
+	PL_INVLAMBDA1,
+	PL_INVMU14,
+	PL_INVMU2,
+	PL_LAMBDANEG,
+	PL_LAMBDASWAP,
+	PL_NUM,
 };
 
 /** Escape time algorithms
@@ -59,10 +74,13 @@ enum {
 /** Fractional Escape time algorithms */
 enum {
 	FE_PLAIN,					//<! Plain, no fractional escape time
-	FE_CIRCLE,					//<! Generate circular fractions
-	FE_SQUARE,					//<! 
-	FE_STRIP,					//<! 
-	FE_HALFPLANE,				//<! 
+	FE_LOGN,						//<! 
+	FE_ZRINB,					//<! 
+	FE_ABSZRB,					//<! 
+	FE_ABSZRB2,					//<! 
+	FE_ABSZIB,					//<! 
+	FE_ABSZIB2,					//<! 
+	FE_ABSZRIB,					//<! 
 	FE_NUM						//<! 
 };
 
@@ -73,12 +91,12 @@ enum {
 	DE_STRIPES,					//<! Modulo(N,1) == 1
 	DE_BINARY,					//<! Zi      > 0
 	DE_FEATHERS,				//<! Abs(Zr) < B   or   Abs(Zi) < B
-	DE_4,							//<! Zr      > 0
-	DE_5,							//<! Abs(Zr) < B
-	DE_6,							//<! Abs(Zi) < B
-	DE_7,							//<! Zr      > 0   and  Zi      > 0
-	DE_8,							//<! Zr      > 0   or   Zi      > 0
-	DE_9,							//<! Abs(Zr) < B   and  Abs(Zi) < B
+	DE_1,							//<! Zr      > 0
+	DE_2,							//<! Abs(Zr) < B
+	DE_3,							//<! Abs(Zi) < B
+	DE_4,							//<! Zr      > 0   and  Zi      > 0
+	DE_5,							//<! Zr      > 0   or   Zi      > 0
+	DE_6,							//<! Abs(Zr) < B   and  Abs(Zi) < B
 	DE_NUM
 };
 
@@ -87,6 +105,19 @@ enum {
 class Fractal;
 class Thread;
 /** @endcond */
+
+
+struct ZoomNode {
+	double x;
+	double y;
+	double z;
+	int pause;
+	ZoomNode *next;
+
+	ZoomNode(double x,double y,double z) : x(x),y(y),z(z),pause(0),next(0) {}
+	~ZoomNode() { if(next) delete next;next = 0; }
+};
+
 
 /** Zoom coordinates
  * @ingroup amanita */
@@ -98,7 +129,15 @@ struct Zoom {
 	double height;			//<! Height of zoom rectangle
 	double left;			//<! Left point of zoom rectangle
 	double top;				//<! Top point of zoom rectangle
-	Zoom() { x = y = width = height = left = top = 0.0; }
+
+	int index;
+	int pause;
+	int state;
+	int steps;
+	double sp;
+	double zsp;
+
+	Zoom() { x = y = width = height = left = top = 0.0,index = pause = state = steps = 0,sp = zsp = 0.0; }
 };
 
 /** The formula for the Mandelbrot and Julia sets, Z^2+C, where Z and C are complex numbers.
@@ -127,8 +166,6 @@ struct Formula {
 
 	/** Constructor*/
 	Formula() { pw = ph = ch = z = zr = zi = zrn = zin = cr = ci = b = b2 = 0.0,i = min = max = 0,tot = 0; }
-	/** Calculate the Z^2+C formula that is the basis for the Mandelbrot and Julia sets. */
-	inline void Z2C() { zi = 2.0*zr*zi+ci,zr = zrn-zin+cr,zrn = zr*zr,zin = zi*zi,++i; }
 	/** Iterate until reaching max or 0.
 	 * @param e Escape time */
 	void iterate(int e);
@@ -139,23 +176,26 @@ struct Formula {
 	 * @param f Fractional escape algorithm
 	 * @param d Decomposition algorithm
 	 * @return A colour index value ranging between 0-ITER_COLOR, that may have flags set from the ITER_* enum */
-	uint16_t color(int f,int d);
+	uint16_t colorIndex(int f,int d);
+	/** Recalculate iterations i to a float value
+	 * @param f Fractional escape algorithm
+	 * @param d Decomposition algorithm
+	 * @return A float value ranging between (-ITER_COLOR)-(+ITER_COLOR), where a value 0f 0.0 is inside the set. */
+	double colorFloat(int f,int d);
 	/** Iterate through the Julia set
 	 * @param x X point in the set
-	 * @param y Y point in the set
-	 * @return A colour index value */
-	uint16_t julia(double x,double y);
+	 * @param y Y point in the set */
+	void julia(double x,double y);
 	/** Iterate through the Mandelbrot set
 	 * @param x X point in the set
-	 * @param y Y point in the set
-	 * @return A colour index value */
-	uint16_t mandelbrot(double x,double y);
+	 * @param y Y point in the set */
+	void mandelbrot(double x,double y);
 };
 
 /** A function pointer to a function of the Formula class
- * @see uint16_t Formula::julia(double,double)
- * @see uint16_t Formula::mandelbrot(double,double) */
-typedef uint16_t (Formula::*formula_func)(double,double);
+ * @see void Formula::julia(double,double)
+ * @see void Formula::mandelbrot(double,double) */
+typedef void (Formula::*formula_func)(double,double);
 
 
 /** A class for calculating fractals of the Mandelbrot and Julia sets.
@@ -175,19 +215,25 @@ protected:
 	double y_point;			//<! Y of point to zoom
 	double width;				//<! Width as double
 	double height;				//<! Height as double
+	ZoomNode *first;			//<! 
+	ZoomNode *last;			//<! 
+	ZoomNode *node;
 	Zoom zoom;					//<! Zoom coordinates in fractal
 	rect16_t zrect;			//<! Zoom coordinates in pixels
 	Formula formula;			//<! The formula for calculating the fractal.
 	int set;						//<! Fractal set, Mandelbrot or Julia
+	int plane;					//<! 
 	int escape;					//<! Escape time algorithm
 	int fraction;				//<! Fractional escape time algorithm
 	int decomp;					//<! Decomposition algorithm
 	int range;					//<! Iteration range, that is maximum iterations is the sum of minimum of previous calculation plus range
 	float radius;				//<! Escape radius/Bailout
-	uint16_t *colors1;		//<! Colour back buffer
-	uint16_t *colors2;		//<! Colour buffer
+	uint16_t *index1;			//<! Colour back buffer
+	uint16_t *index2;			//<! Colour buffer
+	float *float1;				//<! Colour back buffer
+	uint8_t *map;				//<! 
 
-	int percent;				//<! Percent of how much of the fractal has been calculated, range from 0-100, or if reset -1
+	double percent;			//<! Percent of how much of the fractal has been calculated, range from 0-100, or if reset -1
 	long time;					//<! Time in microseconds to calculate fractal
 	int nthreads;				//<! Number of threads
 	Thread *threads;			//<! Threads used if FRACT_THREADED is set
@@ -207,6 +253,15 @@ public:
 	/** Destructor */
 	~Fractal();
 
+	void setSize(int w,int h);
+
+	double getX() { return zoom.x; }
+	double getY() { return zoom.y; }
+	int getWidth() { return sw; }
+	int getHeight() { return sh; }
+
+	uint8_t *getMap() { return map; }
+
 	/** Render fractal
 	 * @param i Maximum number of iterations, if zero an arbitrary value is selected based on results in previous calculation */
 	void render(int i=0);
@@ -223,6 +278,8 @@ public:
 	void calculate(Formula &form,int n,int l,int t,int r,int b,formula_func f);
 	/** Flip back buffer to front */
 	void flip();
+
+	void restart(int s=-1);
 	/** Randomly generate settings for a new fractal, and reset zoom
 	 * @param s Set to use (Mandelbrot or Julia), or if -1 randomly select */
 	void random(int s=-1);
@@ -246,6 +303,9 @@ public:
 	void zoomIn(int x,int y,double z=0.0);
 	/** Zoom out at zoom.x, xoom.y */
 	void zoomOut();
+
+	void setSet(int s);
+	void setPlane(int p);
 	/** Set fractal style
 	 * @param s A string containing a hexadecimal value generated by print functions
 	 * @see int print(char *)
@@ -259,24 +319,37 @@ public:
 	void setStyle(int s,int e,int f,int d);
 
 	/** Reset calculation of fractal (percent set to zero) */
-	void reset() { percent = 0; }
+	void reset() { percent = 0.0; }
 	/** Get percent of calculation
 	 * @return Integer of percent, 0-100 */
-	int getPercent() { return percent; }
+	int getPercent() { return (int)percent; }
 	/** Get colour index buffer
 	 * @return Array of unsigned 16bit integer */
-	uint16_t *getFractal() { return colors2; }
+	uint16_t *getIndex() { return index2; }
+	/** Get colour index buffer
+	 * @return Array of unsigned 16bit integer */
+	float *getFloat() { return float1; }
 	/** Set zoom
 	 * @param x X coordinate in fractal
 	 * @param y Y coordinate in fractal
 	 * @param z Zoom scale, where 1.0 is 1/1
 	 * @param r Zoom rate */
 	void setZoom(double x,double y,double z=1.0,double r=1.0);
+	double getZoom() { return zoom.z; }
 	/** Get zoom rect relative to screen coordinates in pixels
 	 * @param x X point on screen to zoom
 	 * @param y Y point on screen to zoom
 	 * @param z Zoom rectangle containing the left, top, width and height */
 	void getZoom(int &x,int &y,rect16_t &z) { x = (int)x_point,y = (int)y_point,z = zrect; }
+
+	void resetZoom();
+	void addZoomNode();
+	void startZoom();
+	bool nextZoom();
+	bool renderZoom(int i=0);
+	bool isZooming() { return zoom.steps>0 && zoom.index<=zoom.steps; }
+	int getZoomFrame() { return zoom.index; }
+	int getZoomPercent() { return zoom.steps>0? zoom.index*100/zoom.steps : 0; }
 
 	/** Enable edge tracing when calculating fractal */
 	void enableEdgeTracing() { params |= FRACT_EDGETRACE; }
@@ -286,13 +359,8 @@ public:
 	 * @return True if edge tracing is used */
 	bool usingEdgeTracing() { return (params&FRACT_EDGETRACE); }
 
-	/** Print settings, zoom and style for fractal to s, string is ended with a '\0'
-	 * @param s Strung buffer to write to
-	 * @return Number of bytes printed */
-	int print(char *s);
-	/** Print settings, zoom and style to stream fp
-	 * @param fp Stream to write to */
-	void print(FILE *fp);
+	void write(FILE *fp);
+	void read(FILE *fp);
 };
 
 

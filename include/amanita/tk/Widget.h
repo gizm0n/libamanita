@@ -8,6 +8,8 @@
  * @date Created: 2012-01-28
  */ 
 
+#include <amanita/Config.h>
+
 #include <stdint.h>
 #ifdef USE_GTK
 #include <gtk/gtk.h>
@@ -213,24 +215,20 @@ protected:
 	 * @param x X-position of widget.
 	 * @param y Y-position of widget.
 	 * @param w Width of widget.
-	 * @param h Height of widget.
-	 */
+	 * @param h Height of widget. */
 	virtual void makeLayout(int x,int y,int w,int h);
 
 	/** Get minimum width of widget. Only used in win32.
-	 * @return The minimum width.
-	 */
+	 * @return The minimum width. */
 	virtual int getMinimumWidth();
 
 	/** Get minimum height of widget. Only used in win32.
-	 * @return The minimum height.
-	 */
+	 * @return The minimum height. */
 	virtual int getMinimumHeight();
 
 	/** Move widget to the dimensions set by makeLayout. Only used in win32.
 	 * @see makeLayout()
-	 * @return The minimum width.
-	 */
+	 * @return The minimum width. */
 	virtual void move();
 #endif
 
@@ -250,40 +248,33 @@ public:
 
 	/** Create all children and sibling widgets.
 	 * @param p Parent component.
-	 * @param n Boolean value, if set to true will create siblings, otherwise only children.
-	 */
+	 * @param n Boolean value, if set to true will create siblings, otherwise only children. */
 	virtual void createAll(Component p,bool n);
 
 	/** Get the widget associated to an ID.
 	 * @param id ID of component to look up.
-	 * @return The widget associatd with the ID.
-	 */
+	 * @return The widget associatd with the ID. */
 	Widget *getWidget(uint16_t id);
 
 	/** Get the widget associated to a component.
 	 * @param c Component to look up.
-	 * @return The widget associatd with the component.
-	 */
+	 * @return The widget associatd with the component. */
 	Widget *getWidget(Component c);
 
 	/** Get the window of this widget.
-	 * @return A Window object.
-	 */
+	 * @return A Window object. */
 	Window *getWindow() { return window; }
 
 	/** Get the parent widget of this widget.
-	 * @return A Widget.
-	 */
+	 * @return A Widget. */
 	Widget *getParent() { return parent; }
 
 	/** Get component the widget class contains. On GTK+ this is a GtkWidget, on win32 it's a HANDLE, usually a HWND.
-	 * @return The component associated with this widget.
-	 */
+	 * @return The component associated with this widget. */
 	Component getComponent() { return component; }
 
 	/** Get event handle callback function used by this widget to send events to client application.
-	 * @return Event handle callback function.
-	 */
+	 * @return Event handle callback function. */
 	widget_event_handler getEventHandler() { return event_handler; }
 
 	/** Get the unique ID for the widget.
@@ -296,13 +287,11 @@ public:
 
 	/** Get data associated with this widget by user.
 	 * @see setData()
-	 * @return A void *.
-	 */
+	 * @return A void *. */
 	void *getData() { return data; }
 
 	/** Set text shown on or in the widget. 
-	 * @param str Text for widget.
-	 */
+	 * @param str Text for widget. */
 	virtual void setText(const char *str);
 
 	/** Get the text for the widget.
@@ -314,24 +303,20 @@ public:
 	 * @param minw Minimum width.
 	 * @param minh Minimum height.
 	 * @param b Border, free space in pixels around widget.
-	 * @param sp Spacing, space in pixels between sibling widgets.
-	 */
+	 * @param sp Spacing, space in pixels between sibling widgets. */
 	void setStyle(uint32_t st,uint16_t minw=0,uint16_t minh=0,uint8_t b=0,uint8_t sp=0);
 
 	/** Get the widget's style.
 	 * @see setStyle()
-	 * @return An int value of the style.
-	 */
+	 * @return An int value of the style. */
 	uint32_t getStyle() { return style; }
 
 	/** Get the width of the widget.
-	 * @return Width of widget.
-	 */
+	 * @return Width of widget. */
 	int getWidth() { return width; }
 
 	/** Get the height of the widget.
-	 * @return Height of widget.
-	 */
+	 * @return Height of widget. */
 	int getHeight() { return height; }
 
 	/** Show widget. */
@@ -343,8 +328,7 @@ public:
 	/** Set the font of this widget. This method must be called after component has been created.
 	 * @param font String with the name of font face, e.g. "Sans Serif".
 	 * @param sz Size in points of font.
-	 * @param st Style of font, can be any of (FONT_BOLD|FONT_ITALIC|FONT_UNDERLINE|FONT_STRIKE).
-	 */
+	 * @param st Style of font, can be any of FONT_*. */
 	virtual void setFont(const char *font,int sz,int st=0);
 };
 
