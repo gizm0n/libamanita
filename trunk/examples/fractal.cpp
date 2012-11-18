@@ -1,8 +1,28 @@
-
+/*
+ * avconv -y -f image2 -i mov/f%05d.tif -vf "setpts=1.6*PTS" -vcodec mpeg4 -b 4000k -maxrate 4000k -bufsize 4000k -s 640x480 fractal.avi
+ * avconv -y -i fractal.mp4 -s 800x600 -b 6000k -ab 240k fractal2.mp4
+ * avconv -y -i fractal.mp4 -i multiverse3.mp3 -c:v copy -c:a libmp3lame -vol 128 -q:a 4 fractal2.mp4
+ **/
+#include "../src/amanita/_config.h"
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_TIFF_H
+#include <tiffio.h>
+#endif
+#ifdef HAVE_LIBAVCODEC_H
+//#ifdef HAVE_AV_CONFIG_H
+//#undef HAVE_AV_CONFIG_H
+//#endif
+extern "C" {
+//#include "libavcodec/avcodec.h"
+#include "libavformat/avformat.h"
+#include "libswscale/swscale.h"
+#include <libavutil/mathematics.h>
+}
+#endif
+#include <amanita/File.h>
 #include <amanita/Random.h>
 #include <amanita/Thread.h>
 #include <amanita/Colorcycle.h>
@@ -30,168 +50,195 @@ Application app(APP_SDL,"Fractal","Amanita Fractal Explorer");
 const int width = 1024;
 const int height = 768;
 
-const char *colorSchemeNames[] = { "Daylight","Palette","Neon","Gold","Silver","Ebony","Blood","Lapiz Lazuli","Amethyst","Fire","Foliage" };
-const char *colorSchemeChars = "DPNGSEBLAF";
 
-enum {
-	CC_DAYLIGHT,
-	CC_PALETTE,
-	CC_NEON,
-	CC_GOLD,
-	CC_SILVER,
-	CC_EBONY,
-	CC_BLOOD,
-	CC_LAPIZ_LAZULI,
-	CC_AMETHYST,
-	CC_FIRE,
-	CC_FOLIAGE,
-	CC_SCHEMES,
-};
-
-const uint32_t colorSchemes16[] = {
-	// Daylight 0-10
-	0x0000,0x0013,0x9cdf,0xffff,0xffe0,
-	0xf800,0xffe0,0xffff,0x9cdf,0xffff,0x0013,
-	// Palette 11-54
-	0x001f,0x04df,0x07ff,0x07f3,0x07e0,
-	0x9fe0,0xffe0,0xfcc0,0xf800,0xf813,0xf81f,
-	0x000c,0x018c,0x032c,0x0326,0x0320,
-	0x3320,0x6320,0x6180,0x6000,0x6006,0x600c,
-	0x0006,0x0106,0x0186,0x0184,0x0180,
-	0x2180,0x3180,0x3100,0x3000,0x3004,0x3006,
-	0x000c,0x018c,0x032c,0x0326,0x0320,
-	0x3320,0x6320,0x6180,0x6000,0x6006,0x600c,
-	// Neon 55-65
-	0x001f,0x04df,0x07ff,0x07f3,0x07e0,
-	0x9fe0,0xffe0,0xfcc0,0xf800,0xf813,0xf81f,
-	// Gold 66-69
-	0xffe0,0xfff3,0xffe0,0xfcc0,
-	// Silver 70-71
-	0x3186,0xffff,
-	// Ebony 72-73
-	0x0000,0x5186,
-	// Blood 74-75
-	0xc800,0x6000,
-	// Lapiz Lazuli 76-77
-	0x000c,0x0006,
-	// Amethyst 78-79
-	0xc819,0x600c,
-	// Fire 80-81
-	0xf800,0xffe0,
-	// Foliage 82-87
-	0x0180,0x07e0,0x0186,0x0666,0x6186,0x67e6,
-};
-
-const uint32_t colorSchemes32[] = {
-	// Daylight 0-10
-	0x000000,0x000099,0x9999ff,0xffffff,0xffff00,
-	0xff0000,0xffff00,0xffffff,0x9999ff,0xffffff,0x000099,
-	// Palette 11-54
-	0x0000ff,0x0099ff,0x00ffff,0x00ff99,0x00ff00,
-	0x99ff00,0xffff00,0xff9900,0xff0000,0xff0099,0xff00ff,
-	0x000066,0x003366,0x006666,0x006633,0x006600,
-	0x336600,0x666600,0x663300,0x660000,0x660033,0x660066,
-	0x000033,0x002233,0x003333,0x003322,0x003300,
-	0x223300,0x333300,0x332200,0x330000,0x330022,0x330033,
-	0x000066,0x003366,0x006666,0x006633,0x006600,
-	0x336600,0x666600,0x663300,0x660000,0x660033,0x660066,
-	// Neon 55-65
-	0x0000ff,0x0099ff,0x00ffff,0x00ff99,0x00ff00,
-	0x99ff00,0xffff00,0xff9900,0xff0000,0xff0099,0xff00ff,
-	// Gold 66-69
-	0xffff00,0xffff9d,0xffff00,0xff9900,
-	// Silver 70-71
-	0x333333,0xffffff,
-	// Ebony 72-73
-	0x000000,0x553333,
-	// Blood 74-75
-	0xcc0000,0x660000,
-	// Lapiz Lazuli 76-77
-	0x000066,0x000033,
-	// Amethyst 78-79
-	0xcc00cc,0x660066,
-	// Fire 80-81
-	0xff0000,0xffff00,
-	// Foliage 82-87
-	0x003300,0x00ff00,0x003333,0x00cc33,0x663333,0x66ff33,
-};
-
-const int colorSchemeOffset[] = {
-	0,11,55,66,70,72,74,76,78,80,82,
-};
-
-const int colorSchemeLength[] = {
-	11,44,11,4,2,2,2,2,2,2,6
-};
-
-Fractal fractal(width,height,FRACT_THREADED);
+Fractal fractal(width,height,FRACT_EDGETRACE);
 Colorcycle cycle[3];
 int cc[] = { 0,0,0 };
-int bpp;
-bool edges = true;
 
+Fractal *render_fractal = 0;
 Thread render_thread;
+int render_zoom;
 
 static void cycles() {
 	int bpp = g.getBytesPerPixel(),n;
 	if(bpp==2 || bpp==4) {
-		const uint32_t *c = bpp==2? colorSchemes16 : colorSchemes32;
-		const int *o = colorSchemeOffset;
-		const int *l = colorSchemeLength;
 		cc[0] = n = rnd.uint32(CC_SCHEMES);
-fprintf(stderr,"Background: %s\n",colorSchemeNames[n]);
-		cycle[0].setScheme(&c[o[n]],l[n],rnd.int32(l[n]),2,2,bpp==2? 16 : 32);
+		cycle[0].setScheme(n,0,2,2,bpp);
+fprintf(stderr,"Background: %s\n",cycle[0].getSchemeName());
 		for(int i=1; i<3; ++i) {
 			cc[i] = n = rnd.uint32(CC_SCHEMES);
-fprintf(stderr,"Colour %d: %s\n",i,colorSchemeNames[n]);
-			cycle[i].setScheme(&c[o[n]],l[n],rnd.int32(l[n]),rnd.int32(120)+20,rnd.int32(120)+20,bpp==2? 16 : 32);
+			cycle[i].setScheme(n,0,rnd.int32(120)+20,rnd.int32(120)+20,bpp);
+fprintf(stderr,"Colour %d: %s\n",i,cycle[i].getSchemeName());
 		}
 	}
 }
 
-static void render(void *data) {
-fprintf(stderr,"Rendering...\n");
-	int x,y,w = width*4,h = height*4;
-	double scale = (double)height/(double)h;
-	Fractal f(w,h,FRACT_THREADED,&fractal);
-	uint64_t t;
-	uint32_t bg[height*sizeof(uint32_t)];
-	uint32_t fg[ITER_MAX*2*sizeof(uint32_t)];
-	app.lock();
-	cycle[0].writeColors(bg,h,scale);
-	cycle[1].writeColors(fg,ITER_MAX);
-	cycle[2].writeColors(&fg[ITER_MAX],ITER_MAX);
-	app.unlock();
-	f.render(1024);
-	while(f.getPercent()!=100) render_thread.pause(100);
-fprintf(stderr,"Render finished\n");
-	f.flip();
-	{
-		FILE *fp = fopen("fractal.ppm","wb");
-		const char *comment = "# ";/* comment should start with # */
-		const int MaxColorComponentValue = 255;
-		uint8_t color[3072];
-		uint16_t *fr,i;
-		int n,c;
-		fr = f.getFractal();
-		fprintf(fp,"P6\n %s\n %d\n %d\n %d\n",comment,w,h,MaxColorComponentValue);
-		for(y=0,c=0; y<h; ++y) {
-			for(x=0; x<w; ++x) {
-				i = fr[x+y*w];
-				n = (i&ITER_BG)? bg[y] : fg[i&ITER_ALT];
-				color[c] = (n>>16)&0xff;
-				color[c+1] = (n>>8)&0xff;
-				color[c+2] = n&0xff;
-				c += 3;
-				if(c==3072) {
-					fwrite(color,1,c,fp);
-					c = 0;
+
+#ifdef HAVE_TIFF_H
+void saveTIF(const char *fn,int w,int h,uint16_t *fr,uint32_t *bg,uint32_t *fg) {
+fprintf(stderr,"Saving...\n");
+	uint16_t m;
+	int x,y,n;
+	uint8_t *row = (uint8_t *)malloc(w*3*sizeof(uint8_t));
+	if(!row) perror("");
+	else {
+		TIFF *tiff = TIFFOpen(fn,"w");
+		if(tiff) {
+			TIFFSetField(tiff,TIFFTAG_IMAGEWIDTH,w);
+			TIFFSetField(tiff,TIFFTAG_IMAGELENGTH,h);
+			TIFFSetField(tiff,TIFFTAG_COMPRESSION,COMPRESSION_LZW);
+			TIFFSetField(tiff,TIFFTAG_PLANARCONFIG,PLANARCONFIG_CONTIG);
+			TIFFSetField(tiff,TIFFTAG_PHOTOMETRIC,PHOTOMETRIC_RGB);
+			TIFFSetField(tiff,TIFFTAG_BITSPERSAMPLE,8);
+			TIFFSetField(tiff,TIFFTAG_SAMPLESPERPIXEL,3);
+			for(y=0; y<h; ++y) {
+				for(x=0; x<w; ++x) {
+					m = fr[x+y*w];
+					n = m==0? bg[y] : fg[m];
+					row[(x*3)] = (n>>16)&0xff;
+					row[(x*3)+1] = (n>>8)&0xff;
+					row[(x*3)+2] = n&0xff;
+				}
+				if(TIFFWriteScanline(tiff,row,y,w*3)!= 1) {
+					fprintf(stderr,"Could not write image\n");
+					break;
 				}
 			}
-		}
-		if(c>0) fwrite(color,1,c,fp);
-		fclose(fp);
+			TIFFClose(tiff);
+		} else fprintf(stderr,"Could not open outgoing image.\n");
+		free(row);
 	}
+}
+#else
+void savePPM(const char *fn,int w,int h,uint16_t *fr,uint32_t *bg,uint32_t *fg) {
+fprintf(stderr,"Saving...\n");
+	uint16_t m;
+	int x,y,n;
+	uint8_t *row = (uint8_t *)malloc(w*3*sizeof(uint8_t));
+	if(!row) perror("");
+	else {
+		FILE *fp = fopen(fn,"wb");
+		if(fp) {
+			const char *comment = "# ";
+			const int mccv = 255;
+			fprintf(fp,"P6\n %s\n %d\n %d\n %d\n",comment,w,h,mccv);
+			for(y=0; y<h; ++y) {
+				for(x=0; x<w; ++x) {
+					m = fr[x+y*w];
+					n = m==0? bg[y] : fg[m];
+					row[(x*3)] = (n>>16)&0xff;
+					row[(x*3)+1] = (n>>8)&0xff;
+					row[(x*3)+2] = n&0xff;
+				}
+				fwrite(row,1,w*3,fp);
+			}
+			fclose(fp);
+		} else perror(fn);
+		free(row);
+	}
+}
+#endif
+
+#ifdef HAVE_TIFF_H
+void saveTIF(const char *fn,int w,int h,float *fr,uint32_t *bg,uint32_t *fg) {
+fprintf(stderr,"Saving...\n");
+	float m;
+	int x,y,i,n;
+	uint8_t *row = (uint8_t *)malloc(w*3*sizeof(uint8_t));
+	if(!row) perror("");
+	else {
+		TIFF *tiff = TIFFOpen(fn,"w");
+		if(tiff) {
+			TIFFSetField(tiff,TIFFTAG_IMAGEWIDTH,w);
+			TIFFSetField(tiff,TIFFTAG_IMAGELENGTH,h);
+			TIFFSetField(tiff,TIFFTAG_COMPRESSION,COMPRESSION_LZW);
+			TIFFSetField(tiff,TIFFTAG_PLANARCONFIG,PLANARCONFIG_CONTIG);
+			TIFFSetField(tiff,TIFFTAG_PHOTOMETRIC,PHOTOMETRIC_RGB);
+			TIFFSetField(tiff,TIFFTAG_BITSPERSAMPLE,8);
+			TIFFSetField(tiff,TIFFTAG_SAMPLESPERPIXEL,3);
+			for(y=0; y<h; ++y) {
+				for(x=0; x<w; ++x) {
+					m = fr[x+y*w];
+					if(m==0.0f) n = bg[y];
+					else {
+						i = (int)m;
+						n = (int)((m*65536.0f)-(float)(i*65536));
+						if(i<0) i = -i,n = blend24a(fg[(i&0x7fff)|0x8000],fg[((i+1)&0x7fff)|0x8000],n);
+						else n = blend24a(fg[i&0x7fff],fg[(i+1)&0x7fff],n);
+					}
+					row[(x*3)] = (n>>16)&0xff;
+					row[(x*3)+1] = (n>>8)&0xff;
+					row[(x*3)+2] = n&0xff;
+				}
+				if(TIFFWriteScanline(tiff,row,y,w*3)!= 1) {
+					fprintf(stderr,"Could not write image\n");
+					break;
+				}
+			}
+			TIFFClose(tiff);
+		} else fprintf(stderr,"Could not open outgoing image.\n");
+		free(row);
+	}
+}
+#else
+void savePPM(const char *fn,int w,int h,float *fr,uint32_t *bg,uint32_t *fg) {
+fprintf(stderr,"Saving...\n");
+	float m;
+	int x,y,i,n;
+	uint8_t *row = (uint8_t *)malloc(w*3*sizeof(uint8_t));
+	if(!row) perror("");
+	else {
+		FILE *fp = fopen(fn,"wb");
+		if(fp) {
+			const char *comment = "# ";
+			const int mccv = 255;
+			fprintf(fp,"P6\n %s\n %d\n %d\n %d\n",comment,w,h,mccv);
+			for(y=0; y<h; ++y) {
+				for(x=0; x<w; ++x) {
+					m = fr[x+y*w];
+					if(m==0.0f) n = bg[y];
+					else {
+						i = (int)m;
+						n = (int)((m*65536.0f)-(float)(i*65536));
+						if(i<0) i = -i,n = blend24a(fg[(i&0x7fff)|0x8000],fg[((i+1)&0x7fff)|0x8000],n);
+						else n = blend24a(fg[i&0x7fff],fg[(i+1)&0x7fff],n);
+					}
+					row[(x*3)] = (n>>16)&0xff;
+					row[(x*3)+1] = (n>>8)&0xff;
+					row[(x*3)+2] = n&0xff;
+				}
+				fwrite(row,1,w*3,fp);
+			}
+			fclose(fp);
+		} else perror(fn);
+		free(row);
+	}
+}
+#endif
+
+static void render(void *data) {
+fprintf(stderr,"Rendering...\n");
+	int w = width*4,h = height*4;
+	double scale = (double)height/(double)h;
+	Fractal f(w,h,FRACT_FLOAT,&fractal);
+	uint32_t bg[h];
+	uint32_t fg[0xffff];
+	app.lock();
+	cycle[0].write(bg,h,scale);
+	cycle[1].write(fg,0x8000);
+	cycle[2].write(&fg[0x8000],0x8000);
+	app.unlock();
+	render_fractal = &f;
+	f.render(1024);
+	while(f.getPercent()!=100) render_thread.pause(100);
+	render_fractal = 0;
+fprintf(stderr,"Render finished\n");
+	f.flip();
+#ifdef HAVE_TIFF_H
+	saveTIF("fractal.tif",w,h,f.getFloat(),bg,fg);
+#else
+	savePPM("fractal.ppm",w,h,f.getFloat(),bg,fg);
+#endif
 	render_thread.stop();
 }
 
@@ -201,10 +248,53 @@ fprintf(stderr,"key: [sym: 0x%x, mod: 0x%x unicode: %c]\n",sym,mod,unicode);
 		if(mod&(MOD_LSHIFT|MOD_RSHIFT))
 			switch(sym) {
 				case KEY_F1:fractal.setStyle(-1,-1,FE_PLAIN,-1);break;
-				case KEY_F2:fractal.setStyle(-1,-1,FE_CIRCLE,-1);break;
-				case KEY_F3:fractal.setStyle(-1,-1,FE_SQUARE,-1);break;
-				case KEY_F4:fractal.setStyle(-1,-1,FE_STRIP,-1);break;
-				case KEY_F5:fractal.setStyle(-1,-1,FE_HALFPLANE,-1);break;
+				case KEY_F2:fractal.setStyle(-1,-1,FE_LOGN,-1);break;
+				case KEY_F3:fractal.setStyle(-1,-1,FE_ZRINB,-1);break;
+				case KEY_F4:fractal.setStyle(-1,-1,FE_ABSZRB,-1);break;
+				case KEY_F5:fractal.setStyle(-1,-1,FE_ABSZRB2,-1);break;
+				case KEY_F6:fractal.setStyle(-1,-1,FE_ABSZIB,-1);break;
+				case KEY_F7:fractal.setStyle(-1,-1,FE_ABSZIB2,-1);break;
+				case KEY_F8:fractal.setStyle(-1,-1,FE_ABSZRIB,-1);break;
+				case KEY_F9:fractal.setStyle(-1,-1,FE_PLAIN,-1);break;
+				case KEY_F10:fractal.setStyle(-1,-1,FE_PLAIN,-1);break;
+				case KEY_F11:fractal.setStyle(-1,-1,FE_PLAIN,-1);break;
+				case KEY_F12:fractal.setStyle(-1,-1,FE_PLAIN,-1);break;
+			}
+		else if(mod&(MOD_LCTRL|MOD_RCTRL))
+			switch(sym) {
+				case KEY_1:fractal.setPlane(PL_MU);break;
+				case KEY_2:fractal.setPlane(PL_INVMU);break;
+				case KEY_3:fractal.setPlane(PL_INVMU25);break;
+				case KEY_4:fractal.setPlane(PL_LAMBDA);break;
+				case KEY_5:fractal.setPlane(PL_INVLAMBDA);break;
+				case KEY_6:fractal.setPlane(PL_INVLAMBDA1);break;
+				case KEY_7:fractal.setPlane(PL_INVMU14);break;
+				case KEY_8:fractal.setPlane(PL_INVMU2);break;
+				case KEY_9:fractal.setPlane(PL_LAMBDANEG);break;
+				case KEY_0:fractal.setPlane(PL_LAMBDASWAP);break;
+
+				case KEY_s:
+				{
+					int i;
+					FILE *fp = fopen("fractal.txt","wb");
+//					app.lock();
+					fractal.write(fp);
+					for(i=0; i<3; ++i) cycle[i].write(fp);
+//					app.unlock();
+					fclose(fp);
+					break;
+				}
+				case KEY_l:
+				{
+					int i;
+					FILE *fp = fopen("fractal.txt","rb");
+//					app.lock();
+					fractal.read(fp);
+					for(i=0; i<3; ++i) cycle[i].read(fp);
+//					app.unlock();
+					fclose(fp);
+					break;
+				}
 			}
 		else switch(sym) {
 			case KEY_F1:fractal.setStyle(-1,ET_CIRCLE,-1,-1);return;
@@ -218,19 +308,18 @@ fprintf(stderr,"key: [sym: 0x%x, mod: 0x%x unicode: %c]\n",sym,mod,unicode);
 			case KEY_F9:fractal.setStyle(-1,ET_IMAGINARY,-1,-1);return;
 			case KEY_F10:fractal.setStyle(-1,ET_MANHATTAN,-1,-1);return;
 			case KEY_F11:fractal.setStyle(-1,ET_MANR,-1,-1);return;
+			case KEY_F12:fractal.setStyle(-1,ET_CIRCLE,-1,-1);return;
 
 			case KEY_1:fractal.setStyle(-1,-1,-1,DE_PLAIN);break;
 			case KEY_2:fractal.setStyle(-1,-1,-1,DE_STRIPES);break;
 			case KEY_3:fractal.setStyle(-1,-1,-1,DE_BINARY);break;
 			case KEY_4:fractal.setStyle(-1,-1,-1,DE_FEATHERS);break;
-			case KEY_5:fractal.setStyle(-1,-1,-1,DE_4);break;
-			case KEY_6:fractal.setStyle(-1,-1,-1,DE_5);break;
-			case KEY_7:fractal.setStyle(-1,-1,-1,DE_6);break;
-			case KEY_8:fractal.setStyle(-1,-1,-1,DE_7);break;
-			case KEY_9:fractal.setStyle(-1,-1,-1,DE_8);break;
-			case KEY_0:fractal.setStyle(-1,-1,-1,DE_9);break;
-
-//				case KEY_BCKSP:fractal.setStyle(-1,-1,-1,-1,1);break;
+			case KEY_5:fractal.setStyle(-1,-1,-1,DE_1);break;
+			case KEY_6:fractal.setStyle(-1,-1,-1,DE_2);break;
+			case KEY_7:fractal.setStyle(-1,-1,-1,DE_3);break;
+			case KEY_8:fractal.setStyle(-1,-1,-1,DE_4);break;
+			case KEY_9:fractal.setStyle(-1,-1,-1,DE_5);break;
+			case KEY_0:fractal.setStyle(-1,-1,-1,DE_6);break;
 
 			case KEY_GT:
 			case KEY_UP:fractal.increaseRange(100);break;
@@ -245,95 +334,29 @@ fprintf(stderr,"key: [sym: 0x%x, mod: 0x%x unicode: %c]\n",sym,mod,unicode);
 			case KEY_MINUS:
 			case KEY_KPSUB:fractal.zoomOut();break;
 
-			case KEY_RETURN:
-				cycles();
-				fractal.random();
-				break;
-			case KEY_e:edges = !edges;break;
-			case KEY_j:
-				cycles();
-				fractal.random(SET_JULIA);
-				break;
-			case KEY_m:
-				cycles();
-				fractal.random(SET_MANDELBROT);
-				break;
+			case KEY_ESC:fractal.restart();break;
+			case KEY_BCKSP:fractal.resetZoom();break;
+			case KEY_RETURN:fractal.addZoomNode();break;
+			case KEY_j:fractal.setSet(SET_JULIA);break;
+			case KEY_m:fractal.setSet(SET_MANDELBROT);break;
 
 			case KEY_c:cycles();break;
-			case KEY_p:
-				fprintf(stdout,"./fractal ");
-				fractal.print(stdout);
-				for(int i=0; i<3; ++i) {
-					fputc(' ',stdout);
-					fputc(colorSchemeChars[cc[i]],stdout);
-					cycle[i].print(stdout);
-				}
-				fprintf(stdout,"\n");
-				fflush(stdout);
-				break;
 			case KEY_r:
 			{
 				if(!render_thread.isRunning())
 					render_thread.start(render);
 				break;
 			}
+			case KEY_z:fractal.startZoom();break;
 			case KEY_s:
 				cycles();
 				fractal.randomStyle();
 				break;
-			
-			/*{
-fprintf(stderr,"Ctrl-C\n");
-				int l;
-				char str[1024];
-				l = fractal.print(str);
-				for(int i=0; i<3; ++i) {
-					str[l++] = ' ';
-					str[l++] = colorSchemeChars[cc[i]];
-					l += cycle[i].print(&str[l]);
-				}
-				str[l] = '\0';
-				app.setClipboard(str);
-				return;
-			}*/
 			case KEY_t:
 				if(fractal.usingEdgeTracing()) fractal.disableEdgeTracing();
 				else fractal.enableEdgeTracing();
 				fractal.reset();
 				break;
-			/*case KEY_l:
-			{
-fprintf(stderr,"Ctrl-V\n");
-				char *str = app.getClipboard(),*p;
-				double x,y,z;
-				fractal.setStyle(str);
-				if((p=strchr(str,' '))) {
-					x = strtod(p,&p);
-					y = strtod(p,&p);
-					z = strtod(p,&p);
-					fractal.setZoom(x,y,z);
-					if(*p) {
-						int bpp = g.getBytesPerPixel(),i,n;
-						if(bpp==2 || bpp==4) {
-							char *p;
-							const uint32_t *c = bpp==2? colorSchemes16 : colorSchemes32;
-							const int *o = colorSchemeOffset;
-							const int *l = colorSchemeLength;
-							for(i=0; p && *p && i<3; ++i) {
-								for(n=0; n<CC_SCHEMES && colorSchemeChars[n]!=*p; ++n);
-								if(n<CC_SCHEMES) {
-									cc[i] = n;
-if(i==0) fprintf(stderr,"Background: %s\n",colorSchemeNames[n]);
-else fprintf(stderr,"Colour %d: %s\n",i,colorSchemeNames[n]);
-									cycle[i].setScheme(&c[o[n]],l[n],p+1,bpp==2? 16 : 32);
-								}
-								p = strchr(p,' ');
-							}
-						}
-					}
-				}
-				return;
-			}*/
 		}
 	}
 }
@@ -341,49 +364,68 @@ else fprintf(stderr,"Colour %d: %s\n",i,colorSchemeNames[n]);
 static void mouse(uint16_t x,uint16_t y,uint8_t button,uint16_t clicks,bool down) {
 //fprintf(stderr,"mouse: x[%d] y[%d] button[%d] clicks[%d]\n",x,y,button,clicks);
 	if(down && clicks==1 && fractal.getPercent()==100)
-		fractal.zoomIn(x,y,button==1? 0.5 : 2.0);
+		fractal.zoomIn(x,y,button==1? 0.5 : 1.0);
 }
 
 static void motion(uint16_t x,uint16_t y,uint16_t dx,uint16_t dy,bool drag) {}
 
 static void paint(void *data) {
 	uint16_t *fr,f;
-	int pitch,bpp,x,y,w,h,i;
+//	uint8_t *map;
+	int pitch,bpp,x,y,w,h,i,bar;
 	uint8_t *pixels,*p,*c;
 	uint32_t n;
-	uint32_t bg[height*sizeof(uint32_t)];
-	uint32_t fg[ITER_MAX*2*sizeof(uint32_t)];
+	uint32_t bg[height];
+	uint32_t fg[0xffff];
 	rect16_t zoom;
 	while(app.isRunning()) {
 //fprintf(stderr,"paint 1.\n");
 		app.lock();
-		cycle[0].writeColors(bg,height);
-		cycle[1].writeColors(fg,ITER_MAX);
-		cycle[2].writeColors(&fg[ITER_MAX],ITER_MAX);
+		cycle[0].write(bg,height);
+		cycle[1].write(fg,0x8000);
+		cycle[2].write(&fg[0x8000],0x8000);
 //fprintf(stderr,"paint 2.\n");
 //fprintf(stderr,"paint 3.\n");
-		fr = fractal.getFractal();
+		fr = fractal.getIndex();
+//		map = fractal.getMap();
 		g.lock();
 //fprintf(stderr,"paint 4.\n");
 		pixels = (uint8_t *)g.getPixels();
 		pitch = g.getPitch();
 		bpp = g.getBytesPerPixel();
 //fprintf(stderr,"pitch: %d, bpp: %d\n",pitch,bpp);
-		for(y=0; y<height; ++y)
-			for(x=0; x<width; ++x) {
+		if(fractal.getWidth()==width*2 && fractal.getHeight()==height*2) {
+			for(y=0; y<height; ++y)
+				for(x=0; x<width; ++x) {
 //fprintf(stderr,"x: %d, y: %d\n",x,y);
-				p = &pixels[x*bpp+y*pitch];
-				f = fr[x+y*width];
-				if(edges) n = (f&ITER_BG)? bg[y] : (f&ITER_FILL)? 0xffffff : (f&ITER_EDGE)? 0x000000 : fg[f&ITER_ALT];
-				else n = (f&ITER_BG)? bg[y] : fg[f&ITER_ALT];
-				for(i=0,c=(uint8_t *)&n; i<bpp; ++i) p[i] = c[i];
-			}
-
+					p = &pixels[x*bpp+y*pitch];
+					f = fr[(x<<1)+((y*width)<<2)];
+					n = f==0? bg[y] : fg[f];
+					for(i=0,c=(uint8_t *)&n; i<bpp; ++i) p[i] = c[i];
+				}
+		} else {
+			for(y=0; y<height; ++y)
+				for(x=0; x<width; ++x) {
+//fprintf(stderr,"x: %d, y: %d\n",x,y);
+					p = &pixels[x*bpp+y*pitch];
+					/*if(map && (f=map[x+y*width])) n = (f&2)? 0xffffff : (f&4)? 0xff0000 : (f&8)? 0x00ff00 : 0x000000;
+					else */f = fr[x+y*width],n = f==0? bg[y] : fg[f];
+					for(i=0,c=(uint8_t *)&n; i<bpp; ++i) p[i] = c[i];
+				}
+		}
 //fprintf(stderr,"paint 5.\n");
 		fractal.getZoom(x,y,zoom);
 //fprintf(stderr,"paint 6.\n");
 		app.unlock();
-		if(fractal.getPercent()!=100) {
+
+		bar = fractal.getPercent();
+		if(bar<=0 || bar>=100) bar = 0;
+		if(render_fractal) bar = render_fractal->getPercent();
+
+		if(fractal.isZooming()) {
+			g.drawLine(0,y,width,y,0x00ffff);
+			g.drawLine(x,0,x,height,0x00ffff);
+		} else if(fractal.getPercent()!=100) {
 			g.drawLine(0,y,width,y,0x00ffff);
 			g.drawLine(x,0,x,height,0x00ffff);
 			x = zoom.x,y = zoom.y,w = zoom.w,h = zoom.h;
@@ -397,19 +439,244 @@ static void paint(void *data) {
 //		g.drawLine(0,0,width,height,0x00ffff);
 
 		g.unlock();
+
+		if(bar>0 && bar<=100) g.fillRect(0,0,width*bar/100,10,0xff00ff);
+		if(fractal.isZooming()) g.fillRect(0,height-10,width*fractal.getZoomPercent()/100,10,0xff00ff);
+
 		g.flip();
 		app.pauseFPS(10);
 	}
 }
 
+#ifdef HAVE_LIBAVCODEC_H
+void writeFrame(int w,int h,uint16_t *fr,uint32_t *bg,uint32_t *fg,uint8_t *buf) {
+	uint16_t m;
+	int x,y,i,n;
+	for(y=0,i=0; y<h; ++y) {
+		for(x=0; x<w; ++x,i+=3) {
+			m = fr[x+y*w];
+			n = m==0? bg[y] : fg[m];
+			buf[i] = (n>>16)&0xff;
+			buf[i+1] = (n>>8)&0xff;
+			buf[i+2] = n&0xff;
+		}
+	}
+}
+#endif
+
 static void calc(void *data) {
 	do {
-		if(fractal.getPercent()==-1) {
+		if(fractal.isZooming()) {
+			int w = width*2;
+			int h = height*2;
+			uint32_t *bg;
+			uint32_t *fg;
+			Colorcycle c1;
+			Colorcycle c2;
+			Colorcycle c3;
+			char fn[256];
+#ifdef HAVE_LIBAVCODEC_H
+			AVCodec *codec = 0;
+			AVOutputFormat *fmt;
+			AVFormatContext *oc;
+			AVStream *st;
+			AVCodecContext *c;
+			AVFrame *pic_rgb,*pic_yuv;
+			int out,buf_out_sz;
+		//	FILE *fp;
+			uint8_t *buf_rgb,*buf_yuv,*buf_out;
+			AVPacket pkt;
+			SwsContext *img_convert_ctx = sws_getContext(w,h,PIX_FMT_RGB24,width,height,PIX_FMT_YUV420P,SWS_BICUBIC,0,0,0);
+			int i,ret;
+#endif
+			bg = (uint32_t *)malloc(h*sizeof(uint32_t));
+			fg = (uint32_t *)malloc(0xffff*sizeof(uint32_t));
+			app.lock();
+			fractal.setSize(w,h);
+			c1.setScheme(cycle[0]);
+			c2.setScheme(cycle[1]);
+			c3.setScheme(cycle[2]);
+			app.unlock();
+
+#ifdef HAVE_LIBAVCODEC_H
+			strcpy(fn,"fractal.mp4");
+			fmt = av_guess_format(0,fn,0);
+			if(!fmt) {
+				printf("Could not deduce output format from file extension: using MPEG.\n");
+				fmt = av_guess_format("mpeg",0,0);
+			}
+			if(!fmt) {
+				fprintf(stderr,"Could not find suitable output format\n");
+				exit(1);
+			}
+			oc = avformat_alloc_context();
+			if(!oc) {
+				fprintf(stderr,"Memory error\n");
+				exit(1);
+			}
+			oc->oformat = fmt;
+			snprintf(oc->filename,sizeof(oc->filename),"%s",fn);
+
+			/*if(av_set_parameters(oc,0)<0) {
+				fprintf(stderr, "Invalid output format parameters\n");
+				exit(1);
+			}
+			av_dump_format(oc,0,fn,1);*/
+
+//			st = add_video_stream(oc,oc->oformat->video_codec);
+
+			st = avformat_new_stream(oc,0);
+			if(!st) {
+				fprintf(stderr,"Could not alloc stream\n");
+				exit(1);
+			}
+			c = st->codec;
+			if(!c) {
+				fprintf(stderr,"No codec\n");
+				exit(1);
+			}
+			c->codec_id = oc->oformat->video_codec;
+fprintf(stderr,"\n\n\nCodec: %d\n",c->codec_id);
+			c->codec_type = AVMEDIA_TYPE_VIDEO;
+			c->bit_rate = width*height*24;
+			c->width = width;
+			c->height = height;
+			c->time_base.num = 1;
+			c->time_base.den = 25;
+			c->gop_size = 12;
+			c->pix_fmt = PIX_FMT_YUV420P;
+			if(c->codec_id==CODEC_ID_MPEG2VIDEO) c->max_b_frames = 2;
+			if(c->codec_id==CODEC_ID_MPEG1VIDEO) c->mb_decision = 2;
+			if(oc->oformat->flags&AVFMT_GLOBALHEADER) c->flags |= CODEC_FLAG_GLOBAL_HEADER;
+
+/*
+//c->bit_rate_tolerance = 0;
+c->rc_max_rate = 0;
+c->rc_buffer_size = 0;
+c->gop_size = 40;
+c->max_b_frames = 3;
+c->b_frame_strategy = 1;
+c->coder_type = 1;
+c->me_cmp = 1;
+c->me_range = 16;
+c->qmin = 10;
+c->qmax = 51;
+c->scenechange_threshold = 40;
+c->flags |= CODEC_FLAG_LOOP_FILTER;
+//c->me_method = ME_EPZS;
+c->me_subpel_quality = 5;
+c->i_quant_factor = 0.71;
+c->qcompress = 0.6;
+c->max_qdiff = 4;
+//c->directpred = 1;
+c->flags2 |= CODEC_FLAG2_FASTPSKIP;
+*/
+			codec = avcodec_find_encoder(c->codec_id);
+			if(!codec) {
+				fprintf(stderr,"codec not found\n");
+				exit(1);
+			}
+			if(avcodec_open2(c,codec,0)<0) {
+				fprintf(stderr,"could not open codec\n");
+				exit(1);
+			}
+
+			if(!(fmt->flags&AVFMT_NOFILE))
+				if(avio_open(&oc->pb,fn,URL_WRONLY)<0) {
+					fprintf(stderr, "Could not open '%s'\n",fn);
+					exit(1);
+				}
+
+			avformat_write_header(oc,0);
+
+			pic_rgb = avcodec_alloc_frame();
+			buf_rgb = (uint8_t *)av_malloc(avpicture_get_size(PIX_FMT_RGB24,w,h));
+			avpicture_fill((AVPicture*)pic_rgb,buf_rgb,PIX_FMT_RGB24,w,h);
+			pic_yuv = avcodec_alloc_frame();
+			buf_yuv = (uint8_t *)av_malloc(avpicture_get_size(PIX_FMT_YUV420P,width,height));
+			avpicture_fill((AVPicture*)pic_yuv,buf_yuv,PIX_FMT_YUV420P,width,height);
+			buf_out_sz = 0x200000;
+			buf_out = (uint8_t *)av_malloc(buf_out_sz);
+#else
+			if(!a::exists("tmp")) a::mkdir("tmp");
+#endif
+			while(app.isRunning() && fractal.isZooming()) {
+				fractal.renderZoom(1024);
+				app.lock();
+				fractal.flip();
+				app.unlock();
+				c1.write(bg,h,false);
+				c1.advance(10.0/(double)c->time_base.den);
+				c2.write(fg,0x8000,false);
+				c2.advance(10.0/(double)c->time_base.den);
+				c3.write(&fg[0x8000],0x8000,false);
+				c3.advance(10.0/(double)c->time_base.den);
+#ifdef HAVE_LIBAVCODEC_H
+				writeFrame(w,h,fractal.getIndex(),bg,fg,buf_rgb);
+				sws_scale(img_convert_ctx,pic_rgb->data,pic_rgb->linesize,0,h,pic_yuv->data,pic_yuv->linesize);
+				if(oc->oformat->flags&AVFMT_RAWPICTURE) {
+					av_init_packet(&pkt);
+					pkt.flags |= AV_PKT_FLAG_KEY;
+					pkt.stream_index = st->index;
+					pkt.data = (uint8_t *)pic_yuv;
+					pkt.size = sizeof(AVPicture);
+					ret = av_interleaved_write_frame(oc,&pkt);
+				} else {
+					out = avcodec_encode_video(c,buf_out,buf_out_sz,pic_yuv);
+					if(out>0) {
+						av_init_packet(&pkt);
+						if((int)c->coded_frame->pts!=AV_NOPTS_VALUE)
+							pkt.pts = av_rescale_q(c->coded_frame->pts,c->time_base,st->time_base);
+						if(c->coded_frame->key_frame) pkt.flags |= AV_PKT_FLAG_KEY;
+						pkt.stream_index= st->index;
+						pkt.data = buf_out;
+						pkt.size = out;
+						ret = av_interleaved_write_frame(oc,&pkt);
+					} else ret = 0;
+				}
+				if(ret!=0) {
+					fprintf(stderr, "Error while writing video frame\n");
+					exit(1);
+				}
+#else
+#ifdef HAVE_TIFF_H
+				sprintf(fn,"tmp/f%05d.tif",index);
+				saveTIF(fn,width,height,fractal.getIndex(),bg,fg);
+#else
+				sprintf(fn,"tmp/f%05d.ppm",index);
+				savePPM(fn,width,height,fractal.getIndex(),bg,fg);
+#endif
+#endif
+			}
+
+#ifdef HAVE_LIBAVCODEC_H
+			av_write_trailer(oc);
+			av_free(buf_out);
+			av_free(pic_yuv);
+			av_free(buf_yuv);
+			av_free(pic_rgb);
+			av_free(buf_rgb);
+
+			avcodec_close(c);
+
+			for(i=0; i<(int)oc->nb_streams; ++i) {
+				av_freep(&oc->streams[i]->codec);
+				av_freep(&oc->streams[i]);
+			}
+			if(!(fmt->flags&AVFMT_NOFILE)) avio_close(oc->pb);
+			av_free(oc);
+#endif
+			free(bg);
+			free(fg);
+			app.lock();
+			fractal.setSize(width,height);
+			app.unlock();
+fprintf(stderr,"Finished movie.\n");
+		} else if(fractal.getPercent()==-1) {
 			fractal.render();
 			app.lock();
 			fractal.flip();
 			app.unlock();
-			if(!app.isRunning()) app.start(paint);
 		} else app.pause(200);
 	} while(app.isRunning());
 }
@@ -426,36 +693,13 @@ int main(int argc,char *argv[]) {
 	app.setEvents(key,mouse,motion);
 	app.open(argc,argv);
 	app.init(width,height);
+#ifdef HAVE_LIBAVCODEC_H
+	av_register_all();
+	avcodec_register_all();
+#endif
 	fractal.random();
-	if(argc<8) cycles();
-	if(argc>=5) {
-		double x,y,z;
-		fractal.setStyle(argv[1]);
-		x = atof(argv[2]);
-		y = atof(argv[3]);
-		z = atof(argv[4]);
-		fractal.setZoom(x,y,z);
-		if(argc>=8) {
-			int bpp = g.getBytesPerPixel(),i,n;
-			if(bpp==2 || bpp==4) {
-				char *p;
-				const uint32_t *c = bpp==2? colorSchemes16 : colorSchemes32;
-				const int *o = colorSchemeOffset;
-				const int *l = colorSchemeLength;
-				for(i=0; i<3; ++i) {
-					for(n=0,p=argv[5+i]; n<CC_SCHEMES && colorSchemeChars[n]!=*p; ++n);
-					if(n<CC_SCHEMES) {
-						cc[i] = n;
-if(i==0) fprintf(stderr,"Background: %s\n",colorSchemeNames[n]);
-else fprintf(stderr,"Colour %d: %s\n",i,colorSchemeNames[n]);
-						cycle[i].setScheme(&c[o[n]],l[n],p+1,bpp==2? 16 : 32);
-					}
-				}
-			}
-		}
-	}
-//	fractal.calcFractal(0);
-//	app.start(paint);
+	cycles();
+	app.start(paint);
 	thread.start(calc);
 	app.main();
 	app.close();

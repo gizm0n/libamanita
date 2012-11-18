@@ -36,6 +36,9 @@
 #cmakedefine HAVE_SYS_TYPES_H
 #cmakedefine HAVE_UNISTD_H
 
+#cmakedefine HAVE_TIFF_H
+#cmakedefine HAVE_LIBAVCODEC_H
+
 #cmakedefine HAVE_MALLOC
 #cmakedefine HAVE_REALLOC
 

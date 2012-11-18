@@ -190,10 +190,10 @@ enum {
 	HOST,
 };
 
-static void extract_dir(char *dir,const char *str,const char **dirs) {
+static int extract_dir(char *dir,const char *str,const char **dirs) {
 	const char *p;
 	char tag[33];
-	int n;
+	int n = -1;
 	for(p=0; *str; ++str) {
 		if(*str=='[' && !p) p = str+1;
 		else if(*str==']' && p) {
@@ -212,15 +212,16 @@ static void extract_dir(char *dir,const char *str,const char **dirs) {
 			p = 0;
 		} else if(!p) *dir++ = *str;
 	}
-	if(*dir!=*File::dirsep) *dir++ = *File::dirsep;
+	if(*(dir-1)!=*File::dirsep) *dir++ = *File::dirsep;
 	*dir = '\0';
+	return n;
 }
 
 int Main::install(const char *host,const char *files,install_function func,void *obj) {
 	char str[257],*p,from[257],to[257],from_dir[257],to_dir[257];
 	const char *p1,*p2,*dirs[] = { app_home_dir,app_data_dir,app_locale_dir,app_fonts_dir,host };
-	int n,http,cp;
-	for(p1=files,n=0,http=0,cp=0; p1 && *p1; ) {
+	int i,dir,fonts,http,cp;
+	for(p1=files,i=0,dir=-1,fonts=0,http=0,cp=0; p1 && *p1; ) {
 		if(!(p2=strchr(p1,'\n'))) break;
 		if(*p1=='\n') cp = 0;
 		else {
@@ -232,8 +233,8 @@ int Main::install(const char *host,const char *files,install_function func,void 
 			a::trim(str);
 			if(p!=str) a::trim(p);
 			if(cp==0) {
-				extract_dir(from_dir,str,dirs);
-				if(p!=str) extract_dir(to_dir,p,dirs);
+				dir = extract_dir(from_dir,str,dirs);
+				if(p!=str) dir = extract_dir(to_dir,p,dirs);
 				else strcpy(to_dir,from_dir);
 				http = !strncmp(from_dir,"http://",7);
 				cp = (!http && !exists(from_dir)) || !exists(to_dir)? 2 : 1;
@@ -243,13 +244,27 @@ int Main::install(const char *host,const char *files,install_function func,void 
 				} else {
 					sprintf(from,"%s%s",from_dir,str);
 					if(strcmp(from,to) && (!exists(to) ||
-							(modified(from)>modified(to)))) copy(from,to);
+							(modified(from)>modified(to)))) {
+fprintf(stderr,"copy: %s => %s\n",from,to);
+						copy(from,to);
+						++i;
+						if(dir==FONTS) ++fonts;
+					}
 				}
 			}
 		}
 		p1 = p2+1;
 	}
-	return n;
+	if(fonts>0) {
+fprintf(stderr,"update fonts cache\n");
+		FILE *fp = popen(p1="/usr/bin/fc-cache -f","r");
+		if(fp) {
+			while(fgets(str,256,fp)) printf("%s",str);
+			pclose(fp);
+		} else perror(p1);
+//		system("fc-cache -f");
+	}
+	return i;
 }
 
 /*

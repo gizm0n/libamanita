@@ -187,8 +187,10 @@ void applicationdir(char *dir,size_t l) {
 #endif
 }
 
+#include <stdio.h>
+
 void fontsdir(char *dir,size_t l) {
-#ifdef USE_GLIB
+#ifdef USE_LINUX
 	struct passwd *pw = getpwuid(getuid());
 	snprintf(dir,l,"%s/.fonts",pw->pw_dir);
 #endif
@@ -201,8 +203,6 @@ void fontsdir(char *dir,size_t l) {
 	GetWindowsDirectory(dir,l);
 #endif
 	strcat(dir,"\\fonts");
-//#else
-//	strcpy(dir,".");
 #endif
 }
 

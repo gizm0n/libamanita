@@ -45,9 +45,6 @@ Text::~Text() {
 }
 
 void Text::create(Window *wnd,uint32_t st) {
-	char *p = text;
-	text = 0;
-
 	if((style&TEXT_MULTILINE)) {
 #ifdef USE_SCINTILLA
 		if((style&TEXT_SOURCE)==TEXT_SOURCE) type = WIDGET_SCINTILLA;
@@ -106,7 +103,7 @@ debug_output("Text::create(type: %d)\n",type);
 	}
 #endif /* USE_SCINTILLA */
 
-	if(p) setText(p);
+	if(text) setText(text);
 }
 
 void Text::setText(const char *str) {

@@ -232,24 +232,28 @@ static uint32_t cairo_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr
 	}
 	return 0;
 }
-/*
+
 static uint32_t button_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
-fprintf(stderr,"button_events(%s, %d)\n",w->getText(),(int)p1);
+fprintf(stderr,"button_events(%s [%d], %d)\n",w->getText(),w->getID(),(int)p1);
+fflush(stderr);
 	return 0;
 }
 
 static uint32_t choice_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
 fprintf(stderr,"choice_events(%s)\n",((Select *)w)->getItem());
+fflush(stderr);
 	return 0;
 }
 
 static uint32_t list_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
 fprintf(stderr,"list_events(%s)\n",((List *)w)->getColumn(0));
+fflush(stderr);
 	return 0;
 }
-*/
+
 static uint32_t text_events(Widget *w,uint32_t e,intptr_t p1,intptr_t p2,intptr_t p3) {
 fprintf(stderr,"text_events()\n");
+fflush(stderr);
 	return 0;
 }
 
@@ -261,21 +265,21 @@ fflush(stderr);
 
 
 void GuiApp::create() {
-	int /*i,*/n/*,s*/;
-//	char str[1025];
+	int i,n = 0,s;
+	char str[1025];
 	Window *window;
 	Browser *browser;
 	Cairo *cairo;
 	Canvas *canvas;
-/*	Window *dialog;
+	Window *dialog;
 	Container *hbox1;
-	Container *hbox2;*/
+	Container *hbox2;
 	Container *vbox1;
-/*	Container *vbox2;
+	Container *vbox2;
 	Button *button,*group;
 	Label *label;
 	Select *choice;
-	List *list;*/
+	List *list;
 	Text *text;
 	Panel *panel;
 
@@ -286,7 +290,7 @@ void GuiApp::create() {
 		const WindowIcon icons[] = {
 			{ 16,AMANITA_ICON,0,"../icons/16x16/amanita.png" },
 //			{ 32,0,amanita32_xpm },
-			{ 488,AMANITA_ICON,0,"../icons/48x48/amanita.png" },
+			{ 48,AMANITA_ICON,0,"../icons/48x48/amanita.png" },
 		{0}};
 		window->setIcons(icons);
 
@@ -340,7 +344,7 @@ fprintf(stderr,"window->add(notebook);\n");
 	canvas->setStyle(FILL);
 	notebook->openPage("Canvas Tab",canvas);
 
-/*	hbox1 = new Container();
+	hbox1 = new Container();
 	hbox1->setStyle(HORIZONTAL|EXPAND|FILL,0,0,10,5);
 	hbox2 = new Container();
 	hbox2->setStyle(HORIZONTAL|EXPAND|FILL,0,0,0,5);
@@ -417,7 +421,7 @@ fprintf(stderr,"window->add(notebook);\n");
 	dialog->add(hbox1);
 	dialog->open(window);
 
-	button->setFont("Times New Roman",20,FONT_BOLD);*/
+	button->setFont("Times New Roman",20,FONT_BOLD);
 
 	vbox1 = new Container();
 	vbox1->setStyle(VERTICAL|FILL|EXPAND);
@@ -467,6 +471,7 @@ fprintf(stderr,"window->add(notebook);\n");
 		aScintilla sci = text->getScintilla();
 		scintilla_function sci_func = text->getScintillaFunction();
 		sci_func(sci,SCI_STYLECLEARALL,0,0);
+#ifdef SCLEX_MEDIAWIKI
 		sci_func(sci,SCI_SETLEXER,SCLEX_MEDIAWIKI,0);
 		sci_func(sci,SCI_SETKEYWORDS,0,(sptr_t)"int char");
 		sci_func(sci,SCI_STYLESETFORE,SCE_MEDIAWIKI_COMMENT,0x009900);
@@ -490,6 +495,7 @@ fprintf(stderr,"window->add(notebook);\n");
 		sci_func(sci,SCI_STYLESETFORE,SCE_MEDIAWIKI_PARAM,0x003399);
 		sci_func(sci,SCI_STYLESETFORE,SCE_MEDIAWIKI_SEPARATOR,0x6633009);
 		sci_func(sci,SCI_STYLESETBOLD,SCE_MEDIAWIKI_SEPARATOR,1);
+#endif
 		n = sci_func(sci,SCI_TEXTWIDTH,STYLE_LINENUMBER,(sptr_t)"1234");
 		sci_func(sci,SCI_SETMARGINWIDTHN,0,n);
 		sci_func(sci,SCI_SETMARGINWIDTHN,1,0);

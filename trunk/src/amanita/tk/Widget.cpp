@@ -10,7 +10,15 @@
 #include <amanita/tk/Window.h>
 
 
-static uint16_t id_index[27] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+static uint16_t id_index[] = {
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+};
 
 #ifdef USE_WIN32
 #ifndef WINVER
@@ -207,10 +215,10 @@ debug_output("Widget::create(id: %d, window: %p, widget: %p, control: %" PRIts "
 	if(!min_height && wc->min_height) min_height = wc->min_height;
 	SendMessage((HWND)component,WM_SETFONT,(WPARAM)GetStockObject(DEFAULT_GUI_FONT),(LPARAM)1);
 	if(t) tfree(t);
-	if(text) {
+	/*if(text) {
 		free(text);
 		text = 0;
-	}
+	}*/
 #endif
 	addWidget();
 }

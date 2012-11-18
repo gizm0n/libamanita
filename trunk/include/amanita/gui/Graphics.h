@@ -126,10 +126,11 @@ public:
 	void draw(int x,int y,Image &s,rect16_t &src) { draw(x,y,s.surface,&src); }
 	void draw(int x,int y,Surface s,rect16_t *src);
 	void drawLine(int x1,int y1,int x2,int y2,uint32_t c);
+	void drawLine(int x1,int y1,int x2,int y2,uint32_t *c,int o,int l);
 	void drawCircle(int x,int y,int r,uint32_t c) {}
 	void drawEllipse(int x,int y,int w,int h,uint32_t c) {}
 	void drawDottedEllipse(int x,int y,int w,int h,uint32_t *p) {}
-	void drawRect(int x,int y,int w,int h,uint32_t c) {}
+	void drawRect(int x,int y,int w,int h,uint32_t c);
 	void drawDottedRect(int x,int y,int w,int h,uint32_t *p);
 	void fillEllipse(int x,int y,int w,int h,uint32_t c) {}
 	void fillRect(int x,int y,int w,int h,uint32_t c);

@@ -346,8 +346,8 @@ void Graphics::drawLine(int x1,int y1,int x2,int y2,uint32_t c) {
 	}
 }
 #endif
+*/
 
-#ifdef USE_SDL*/
 // Bresenhem's line algorithm
 void Graphics::drawLine(int x1,int y1,int x2,int y2,uint32_t c) {
 	int pitch = getPitch(),bpp = getBytesPerPixel();
@@ -370,7 +370,47 @@ void Graphics::drawLine(int x1,int y1,int x2,int y2,uint32_t c) {
 		x += xinc2;y += yinc2;
 	}
 }
-//#endif
+
+// Bresenhem's line algorithm
+void Graphics::drawLine(int x1,int y1,int x2,int y2,uint32_t *c,int o,int ln) {
+	int pitch = getPitch(),bpp = getBytesPerPixel();
+	uint8_t *pixels = (uint8_t *)getPixels(),*p,*cp;
+	int xinc1,xinc2,yinc1,yinc2,den,num,numadd,npx,cpx;
+	int dx = abs(x2-x1),dy = abs(y2-y1);
+	int i,n,x = x1*bpp,y = y1*pitch;
+	int l = cl.x*bpp,t = cl.y*pitch,r = (cl.x+cl.w)*bpp,b = (cl.y+cl.h)*pitch;
+	if(x2>=x1) xinc1 = xinc2 = bpp;else xinc1 = xinc2 = -bpp;
+	if(y2>=y1) yinc1 = yinc2 = pitch;else yinc1 = yinc2 = -pitch;
+	if(dx>=dy) xinc1 = yinc2 = 0,den = dx,num = dx>>1,numadd = dy,npx = dx;
+	else xinc2 = yinc1 = 0,den = dy,num = dy>>1,numadd = dx,npx = dy;
+	if(o>=ln) o = 0;
+	for(cpx=0,n=o; cpx<=npx; ++cpx,++n) {
+		if(n==ln) n = 0;
+		if(x>=l && x<r && y>=t && y<b) {
+			p = pixels+x+y,cp = (uint8_t *)&c[n];
+			for(i=0; i<bpp; ++i) p[i] = cp[i];
+		}
+		num += numadd;
+		if(num>=den) num -= den,x += xinc1,y += yinc1;
+		x += xinc2;y += yinc2;
+	}
+}
+
+void Graphics::drawRect(int x,int y,int w,int h,uint32_t c) {
+	if(x+w<=cl.x || x>=cl.x+cl.w || y+h<=cl.y || y>=cl.y+cl.h) return;
+	int pitch = getPitch(),bpp = getBytesPerPixel();
+	uint8_t *pixels = (uint8_t *)getPixels(),*cp = (uint8_t *)&c;
+	int i,j,n;
+	uint8_t *pl = pixels+x*bpp,*pt = pixels+y*pitch,*pr = pixels+(x+w-1)*bpp,*pb = pixels+(y+h-1)*pitch;
+	if(x<cl.x) for(i=y,n=y+h; i<n; i++,pl+=pitch)
+		for(j=0; j<bpp; j++) pl[j] = cp[j];
+	if(y<cl.y) for(i=x+1,n=x+w-1; i<n; i++)
+		for(j=0; j<bpp; j++) *pt++ = cp[j];
+	if(x+w<=cl.x+cl.w) for(i=y,n=y+h; i<n; i++,pr+=pitch)
+		for(j=0; j<bpp; j++) pr[j] = cp[j];
+	if(y+h<=cl.y+cl.h) for(i=x+1,n=x+w-1; i<n; i++)
+		for(j=0; j<bpp; j++) *pb++ = cp[j];
+}
 
 void Graphics::drawDottedRect(int x,int y,int w,int h,uint32_t *p) {
 	if(x+w<=cl.x || x>=cl.x+cl.w || y+h<=cl.y || y>=cl.y+cl.h) return;
@@ -388,10 +428,14 @@ void Graphics::drawDottedRect(int x,int y,int w,int h,uint32_t *p) {
 		for(j=0,cp=(uint8_t *)&p[2+(i+p1)%p2]; j<bpp; j++) *pb++ = cp[j];
 }
 
-
-
 void Graphics::fillRect(int x,int y,int w,int h,uint32_t c) {
 #ifdef USE_DD
+	RECT r = { x,y,x+w-1,y+h-1 };
+	DDBLTFX fx;
+	memset(&fx,0,sizeof(fx));
+	fx.dwSize = sizeof(fx);
+	fx.dwFillColor = c;
+	canvas->Blt(&r,0,0,DDBLT_COLORFILL|DDBLT_WAIT,&fx);
 #endif
 #ifdef USE_SDL
 	rect16_t r = (rect16_t){x,y,w,h};

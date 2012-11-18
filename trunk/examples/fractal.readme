@@ -1,0 +1,39 @@
+
+Fractal Zoom Explorer
+
+
+Instructions:
+
+Press left mouse button to zoom in at the spot where the mouse is pointing.
+Press right mouse button to zoom out instead.
+
+F1 - Escape Plain
+F2 - Escape Circle
+F3 - Escape Square
+F4 - Escape Strip
+F5 - Escape Halfplane
+
+Shift-F1 - Filter Plain
+Shift-F2 - Filter Circle
+Shift-F3 - Filter Square
+Shift-F4 - Filter Strip
+Shift-F5 - Filter Halfplane
+
+1 - Pattern Plain
+2 - Pattern Feathered
+3 - Pattern Binary
+4 - Pattern Zebra
+
+UP - Raise number of iterations, increasing sharpness (takes longer time to generate)
+DOWN - Lower number of iterations
+HOME/PGUP - Increase Escape Radius, slight difference in shape depending on styles
+END/PGDN - Decrease Escape Radius
++ - Zoom in at center
+- - Zoom out
+
+Return - Randomly generate a fractal of either set
+J - Randomly generate a fractal of the Julia set
+M - Randomly generate a fractal of the Mandelbrot set
+C - Randomly change colour cycles
+P - Print settings to stdout for current fractal view, including x, y, zoom, style and colours
+R - Render current zoom and settings into a HD PPM-image, which you can edit with GIMP or Photoshop.

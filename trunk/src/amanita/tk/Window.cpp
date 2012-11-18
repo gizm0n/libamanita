@@ -60,9 +60,11 @@ LRESULT CALLBACK AmanitaMainWndProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lpar
 		wnd = (Window *)GetWindowLongPtr(hwnd,GWL_USERDATA);
 		if(wnd) switch(msg) {
 			case WM_COMMAND:
+debug_output("AmanitaMainWndProc(WM_COMMAND)\n");
 				if(Window::handleEvent(wnd,msg,wparam,lparam)) return 0;
 				break;
 			case WM_NOTIFY:
+debug_output("AmanitaMainWndProc(WM_NOTIFY)\n");
 				if(Window::handleEvent(wnd,msg,wparam,lparam)) return 0;
 				break;
 			case WM_DRAWITEM:
@@ -354,13 +356,16 @@ debug_output("Window::createAll(component: %p)\n",component);
 bool Window::handleEvent(Window *wnd,UINT msg,WPARAM wparam,LPARAM lparam) {
 	switch(msg) {
 		case WM_COMMAND:
-//debug_output("WidgetProc(WM_COMMAND)\n");
+//debug_output("Window::handleEvent(WM_COMMAND)\n");
+//fflush(stderr);
 			return wnd->command(wparam,lparam);
 		case WM_NOTIFY:
-//debug_output("WidgetProc(WM_NOTIFY)\n");
+//debug_output("Window::handleEvent(WM_NOTIFY)\n");
+//fflush(stderr);
 			return wnd->notify((LPNMHDR)lparam);
 		case WM_DRAWITEM:
-//debug_output("WidgetProc(WM_DRAWITEM)\n");
+//debug_output("Window::handleEvent(WM_DRAWITEM)\n");
+//fflush(stderr);
 			return wnd->drawItem((LPDRAWITEMSTRUCT)lparam);
 	}
 	return false;
@@ -383,7 +388,7 @@ bool Window::command(WPARAM wparam,LPARAM lparam) {
 		case WIDGET_CHECKBOX:
 		case WIDGET_RADIOBUTTON:
 			if(HIWORD(wparam)==BN_CLICKED) {
-				Button *b = (Button *)getWidget((Component)wparam);
+				Button *b = (Button *)getWidget((uint16_t)LOWORD(wparam));
 				widget_event_handler weh = b->getEventHandler();
 				if(weh) {
 					if(b->isCheckBox() || b->isRadioButton())
@@ -396,7 +401,7 @@ bool Window::command(WPARAM wparam,LPARAM lparam) {
 		case WIDGET_COMBOBOX:
 		case WIDGET_COMBOBOX_ENTRY:
 			if(HIWORD(wparam)==CBN_SELENDOK) {
-				Select *ch = (Select *)getWidget((Component)wparam);
+				Select *ch = (Select *)getWidget((uint16_t)LOWORD(wparam));
 				widget_event_handler weh = ch->getEventHandler();
 				if(weh) {
 					weh(ch,SELECT_CHANGED,0,0,0);
@@ -406,7 +411,7 @@ bool Window::command(WPARAM wparam,LPARAM lparam) {
 			break;
 		case WIDGET_LISTBOX:
 			if(HIWORD(wparam)==LBN_SELCHANGE) {
-				Select *ch = (Select *)getWidget((Component)wparam);
+				Select *ch = (Select *)getWidget((uint16_t)LOWORD(wparam));
 				widget_event_handler weh = ch->getEventHandler();
 				if(weh) {
 					weh(ch,SELECT_CHANGED,0,0,0);
@@ -416,10 +421,9 @@ bool Window::command(WPARAM wparam,LPARAM lparam) {
 			break;
 		case WIDGET_PANEL:
 			if(HIWORD(wparam)==BN_CLICKED) {
-				PanelButton *pb = (PanelButton *)getWidget(LOWORD(wparam));
+				PanelButton *pb = (PanelButton *)getWidget((uint16_t)LOWORD(wparam));
 //				Panel *p = (Panel *)getWidget((Component)lparam);
 //debug_output("Window::command(pb: %p, id: %x, lparam: %p)\n",pb,LOWORD(wparam),lparam);
-//fflush(stderr);
 //				PanelButton *pb = &p->buttons[WIDGET_ID_INDEX(LOWORD(wparam))];
 				if(pb) {
 					widget_event_handler weh = pb->panel->getEventHandler();
@@ -474,7 +478,6 @@ bool Window::notify(LPNMHDR nmhdr) {
 					ttt->lpszText = tooltip_string;
 					ttt->hinst = NULL;
 //debug_output("Window::notify(hwnd: %p, pb: %p, id: %d, lParam: %p)\n",nmhdr->hwndFrom,pb,nmhdr->idFrom,ttt->lParam);
-//fflush(stderr);
 				} else ttt->lpszText = NULL;
 			}
 	}
