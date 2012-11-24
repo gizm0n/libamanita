@@ -52,7 +52,7 @@ Thread::~Thread() {
 
 
 
-void Thread::start(thread_function f,void *d) {
+void Thread::start(thread_function f,void *d,int p) {
 	if(thread) kill();
 	function = f;
 	data = d;
@@ -63,10 +63,22 @@ void Thread::start(thread_function f,void *d) {
 	gettimeofday(&time,0);
 	thread = (pthread_t *)malloc(sizeof(pthread_t));
 	pthread_create(thread,0,Thread_run,this);
+	if(p>=0 && p<=100) {
+		int policy,min,max;
+		struct sched_param param;
+		pthread_getschedparam(*thread,&policy,&param);
+		min = sched_get_priority_max(policy);
+		max = sched_get_priority_max(policy);
+		param.sched_priority = min+((max-min)*p/100);
+		pthread_setschedparam(*thread,policy,&param);
+	}
 #endif
 #ifdef USE_WIN32_THREADS
 	gettimeofday(&time,0);
 	thread = CreateThread(NULL,0,Thread_run,this,0,NULL);
+	if(p>=0 && p<=100)
+		SetThreadPriority(thread,
+			THREAD_PRIORITY_LOWEST+((THREAD_PRIORITY_HIGHEST-THREAD_PRIORITY_LOWEST)*p/100));
 #endif
 }
 

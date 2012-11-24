@@ -51,7 +51,7 @@ const int width = 1024;
 const int height = 768;
 
 
-Fractal fractal(width,height,FRACT_EDGETRACE);
+Fractal fractal(width,height/*,FRACT_EDGETRACE*/);
 Colorcycle cycle[3];
 int cc[] = { 0,0,0 };
 
@@ -337,6 +337,7 @@ fprintf(stderr,"key: [sym: 0x%x, mod: 0x%x unicode: %c]\n",sym,mod,unicode);
 			case KEY_ESC:fractal.restart();break;
 			case KEY_BCKSP:fractal.resetZoom();break;
 			case KEY_RETURN:fractal.addZoomNode();break;
+			case KEY_TAB:fractal.nextZoomNode();break;
 			case KEY_j:fractal.setSet(SET_JULIA);break;
 			case KEY_m:fractal.setSet(SET_MANDELBROT);break;
 
@@ -700,7 +701,7 @@ int main(int argc,char *argv[]) {
 	fractal.random();
 	cycles();
 	app.start(paint);
-	thread.start(calc);
+	thread.start(calc,0,0);
 	app.main();
 	app.close();
 	return 0;

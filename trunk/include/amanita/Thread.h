@@ -62,7 +62,11 @@ public:
 	thread_function getFunction() { return function; }
 	void *getData() { return data; }
 
-	void start(thread_function f,void *d=0);
+	/** Start thread
+	 * @param f Function to be called by thread
+	 * @param d Data to be sent through the function
+	 * @param p Priority of thread, a value of 0-100, where 100 is max, with any other value no priority is set */
+	void start(thread_function f,void *d=0,int p=-1);
 	void stop();
 	void kill();
 	bool isRunning() { return thread!=0; }

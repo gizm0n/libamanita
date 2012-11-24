@@ -835,6 +835,13 @@ void Fractal::addZoomNode() {
 	last->pause += 10;
 }
 
+void Fractal::nextZoomNode() {
+	if(node && node->next) node = node->next;
+	else node = first;
+	setZoom(node->x,node->y,node->z);
+	percent = -1.0;
+}
+
 void Fractal::startZoom() {
 	if(!first) return;
 	node = first;
@@ -934,8 +941,10 @@ void Fractal::read(FILE *fp) {
 	first = last = node = 0;
 	while(fgets(str,1024,fp) && *str && *str!='\n') {
 		if(!strncmp(str,"Fractal:",8)) sscanf(&str[8]," %d %d %d %d %d",&set,&plane,&escape,&fraction,&decomp);
-		else if(!strncmp(str,"Zoom:",5)) sscanf(&str[5]," %lf %lf %lf",&zoom.x,&zoom.y,&zoom.z);
-		else if(!strncmp(str,"Node:",5)) {
+		else if(!strncmp(str,"Zoom:",5)) {
+			sscanf(&str[5]," %lf %lf %lf",&zoom.x,&zoom.y,&zoom.z);
+			setZoom(zoom.x,zoom.y,zoom.z);
+		} else if(!strncmp(str,"Node:",5)) {
 			ZoomNode *n = new ZoomNode(0.0,0.0,0.0);
 			sscanf(&str[5]," %lf %lf %lf %d",&n->x,&n->y,&n->z,&n->pause);
 			if(first) last->next = n,last = n;

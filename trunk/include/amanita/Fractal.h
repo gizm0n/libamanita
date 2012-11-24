@@ -344,6 +344,7 @@ public:
 
 	void resetZoom();
 	void addZoomNode();
+	void nextZoomNode();
 	void startZoom();
 	bool nextZoom();
 	bool renderZoom(int i=0);
