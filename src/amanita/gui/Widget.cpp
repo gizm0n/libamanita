@@ -51,7 +51,7 @@ bool Widget::setKeyFocus(Widget *c) {
 }
 
 Widget::Widget(int x,int y,int w,int h) : Object() {
-	com = (component){ 0ul,0,COM_ENABLED|COM_VISIBLE|COM_LOCKED|COM_OPAQUE,x,y,w,h,0,0,0 };
+	com = (component){ 0,0,COM_ENABLED|COM_VISIBLE|COM_LOCKED|COM_OPAQUE,(short)x,(short)y,(short)w,(short)h,0,0,0 };
 	if(!keyFocus) keyFocus = this;
 	focusListener = 0,keyListener = 0,mouseListener = 0,mouseMotionListener = 0,actionListener = 0;
 }
@@ -151,7 +151,7 @@ void Widget::paintAll(time_t time) {
 	if(!isVisible() || !com.ch) return;
 	Widget *c;
 	if(clipBounds()) {
-		rect16_t r1 = g.getClip(),r2 = { com.x,com.y,com.w,com.h };
+		rect16_t r1 = g.getClip(),r2 = { (int16_t)com.x,(int16_t)com.y,(uint16_t)com.w,(uint16_t)com.h };
 		if(r2.x<r1.x) r2.w -= r1.x-r2.x,r2.x = r1.x;
 		if(r2.x+r2.w>r1.x+r1.w) r2.w = r1.x+r1.w-r2.x;
 		if(r2.y<r1.y) r2.h -= r1.y-r2.y,r2.y = r1.y;

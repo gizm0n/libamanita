@@ -208,12 +208,12 @@ protected:
 
 	/** @name Format
 	 * @{ */
-	size_t formatSections(Vector &lines,size_t ln,int lvl,char *ind,int f);
+	size_t formatLines(Vector &lines,size_t ln,int lvl,char *ind,int f);
 	size_t formatPre(Vector &lines,size_t ln);
 	size_t formatTable(Vector &lines,size_t ln,int lvl,char *ind);
 	void formatTableStyle(String &style,char *line);
-	size_t formatList(Vector &lines,size_t ln,int lvl,char *ind,char *lists);
-	size_t formatListRow(Vector &lines,size_t ln,int lvl,char *ind,char *lists);
+	size_t formatList(Vector &lines,size_t ln,int lvl,char *ind,char *lists,int l=0);
+	size_t formatListRow(Vector &lines,size_t ln,int lvl,char *ind,char *lists,int l);
 	/** @} */
 
 	/** @name Match

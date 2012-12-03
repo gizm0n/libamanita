@@ -34,7 +34,7 @@ void Tooltip::setDefaultSettings(Image *img,Font *f,uint32_t data[13]) {
 		img->getCell(data[0]),img->getCell(data[1]),img->getCell(data[2]),
 		img->getCell(data[3]),img->getCell(data[4]),img->getCell(data[5]),
 		img->getCell(data[6]),img->getCell(data[7]),img->getCell(data[8]),
-		{ data[9],data[10],data[11],data[12] }
+		{ (int16_t)data[9],(int16_t)data[10],(uint16_t)data[11],(uint16_t)data[12] }
 	};
 }
 

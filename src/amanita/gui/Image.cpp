@@ -350,7 +350,7 @@ Image **Image::parseXIM(const char *p,const char *lines[],int &n) {
 // fflush(stdout);
 							d[dn].sz = r,d[dn].r = (rect16_t *)malloc(sizeof(rect16_t)*r);
 							for(y1=y,r=0; y1+rh<=y+h; y1+=rh) for(x1=x; x1+rw<=x+w; x1+=rw)
-								d[dn].r[r++] = (rect16_t){x1,y1,rw,rh};
+								d[dn].r[r++] = (rect16_t){ (int16_t)x1,(int16_t)y1,(uint16_t)rw,(uint16_t)rh };
 							dn++;
 						} else if(v>=4) {
 							dr = d[dn].r = (rect16_t *)malloc(sizeof(rect16_t));
@@ -426,7 +426,7 @@ fflush(stdout);
 				rw = d[f].rw,rh = d[f].rh,r = (w/rw)*(h/rh);
 				d[f].sz = r,d[f].r = (rect16_t *)malloc(sizeof(rect16_t)*r);
 				for(y1=0,r=0; y1+rh<=h; y1+=rh) for(x1=0; x1+rw<=w; x1+=rw)
-					d[f].r[r++] = (rect16_t){x1,y1,rw,rh};
+					d[f].r[r++] = (rect16_t){ (int16_t)x1,(int16_t)y1,(uint16_t)rw,(uint16_t)rh };
 // printf("Image::parseXIM(w=%d,h=%d,rw=%d,rh=%d,d[f].sz=%d,r=%d)\n",w,h,rw,rh,d[f].sz,r);
 // fflush(stdout);
 			}
@@ -437,7 +437,7 @@ fflush(stdout);
 		img->mapSize = 1+dq;
 		img->mapRow = 0;
 		img->map = (rect16_t *)malloc(sizeof(rect16_t)*img->mapSize);
-		img->map[0] = (rect16_t){0,0,w,h};
+		img->map[0] = (rect16_t){ 0,0,(uint16_t)w,(uint16_t)h };
 		for(f=0,v=1; f<dn; f++) {
 			r=0,b=d[f].sz;
 // printf("Image::parseXIM(5,f=%d,v=%d,b=%d)\n",f,v,b);
@@ -565,7 +565,7 @@ inline void Image::draw(rect16_t &src,rect16_t &dst) {
 }
 
 void Image::draw(int x,int y,rect16_t &src) {
-	rect16_t dst = { x,y,0,0 };
+	rect16_t dst = { (int16_t)x,(int16_t)y,0,0 };
 	draw(src,dst);
 }
 

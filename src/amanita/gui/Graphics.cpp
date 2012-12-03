@@ -290,7 +290,7 @@ void Graphics::setClip(rect16_t &r) {
 }
 
 void Graphics::setClip(int x,int y,int w,int h) {
-	cl = (rect16_t){ x,y,w,h };
+	cl = (rect16_t){ (int16_t)x,(int16_t)y,(uint16_t)w,(uint16_t)h };
 #ifdef USE_DD
 #endif
 #ifdef USE_SDL
@@ -318,7 +318,7 @@ void Graphics::draw(int x,int y,Surface s,rect16_t *src) {
 #ifdef USE_DD
 #endif
 #ifdef USE_SDL
-	rect16_t dst = { x,y,0,0 };
+	rect16_t dst = { (int16_t)x,(int16_t)y,0,0 };
 	SDL_BlitSurface(s,(SDL_Rect *)src,canvas,(SDL_Rect *)&dst);
 #endif
 }
@@ -438,7 +438,7 @@ void Graphics::fillRect(int x,int y,int w,int h,uint32_t c) {
 	canvas->Blt(&r,0,0,DDBLT_COLORFILL|DDBLT_WAIT,&fx);
 #endif
 #ifdef USE_SDL
-	rect16_t r = (rect16_t){x,y,w,h};
+	rect16_t r = (rect16_t){ (int16_t)x,(int16_t)y,(uint16_t)w,(uint16_t)h };
 	SDL_FillRect(canvas,(SDL_Rect *)&r,c);
 #endif
 }

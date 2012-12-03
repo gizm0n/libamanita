@@ -15,7 +15,7 @@ Object_Inheritance(Font,Object)
 
 Font::Font(const char *file,int size,int style,long color,int render) : Object() {
 #ifdef USE_SDL
-	SDL_Color fg = { (char)(color>>16),(char)(color>>8),(char)(color),255 };
+	SDL_Color fg = { (Uint8)(color>>16),(Uint8)(color>>8),(Uint8)(color),255 };
 	SDL_Color bg = { 255,255,255,255 };
 
 	metrics.adjx = 0;
@@ -103,7 +103,7 @@ void Font::putchar(int x,int y,unsigned char c) {
 #ifdef USE_SDL
 	if(glyphs[c]) {
 		Glyphmetrics &gl = metrics.glyphs[c];
-		SDL_Rect r = { metrics.adjx+x+gl.minx,metrics.adjy+y-gl.maxy };
+		SDL_Rect r = { (Sint16)(metrics.adjx+x+gl.minx),(Sint16)(metrics.adjy+y-gl.maxy) };
 		SDL_BlitSurface(glyphs[c],0,g.getCanvas(),&r);
 	}
 #endif

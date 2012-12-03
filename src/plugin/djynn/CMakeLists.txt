@@ -160,7 +160,7 @@ if(GEANY_FOUND)
 		target_link_libraries(djynn ipomoea ${GTK2_LIBRARIES} ${GEANY_LIBRARIES})
 	endif()
 
-	install(TARGETS djynn DESTINATION /usr/lib/geany)
+	install(TARGETS djynn DESTINATION "${GEANY_LIBDIR}/geany")
 
 	# CPack installer
 	include(InstallRequiredSystemLibraries)

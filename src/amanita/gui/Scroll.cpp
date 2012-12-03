@@ -39,11 +39,11 @@ Scroll::~Scroll() {}
 void Scroll::setDefaultSettings(Image *img,uint32_t data[22]) {
 	_s = (_settings){
 		img,
-		{ img->getCell(data[0]),data[0],data[1],data[2],data[3] },
-		{ img->getCell(data[4]),data[4],data[5],data[6],data[7] },
-		{ img->getCell(data[8]),data[8],data[9],data[10],data[11] },
-		{ img->getCell(data[12]),data[12],data[13],data[14],data[15] },
-		{ img->getCell(data[16]),data[16],data[17],data[18],data[19] },
+		{ img->getCell(data[0]),(int)data[0],(int)data[1],(int)data[2],(int)data[3] },
+		{ img->getCell(data[4]),(int)data[4],(int)data[5],(int)data[6],(int)data[7] },
+		{ img->getCell(data[8]),(int)data[8],(int)data[9],(int)data[10],(int)data[11] },
+		{ img->getCell(data[12]),(int)data[12],(int)data[13],(int)data[14],(int)data[15] },
+		{ img->getCell(data[16]),(int)data[16],(int)data[17],(int)data[18],(int)data[19] },
 		img->getCell(data[20]),img->getCell(data[21])
 	};
 }

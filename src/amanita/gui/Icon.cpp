@@ -32,12 +32,12 @@ printf("%sIconButton::~Icon()\n",indent);
 void Icon::setDefaultSettings(Image *img,uint32_t data[4]) {
 	_s = (_settings){
 		img,
-		data[0],data[1],data[2],data[3],
+		(short)data[0],(short)data[1],(short)data[2],(short)data[3],
 	};
 }
 
 void Icon::setImage(Image *img,int plain,int active,int down,int disabled) {
-	ib = (iconbutton){ img,plain,active,down,disabled };
+	ib = (iconbutton){ img,(short)plain,(short)active,(short)down,(short)disabled };
 	if(ib.img) {
 		rect16_t *r = ib.img->getCell(ib.plain);
 		setSize(r->w,r->h);

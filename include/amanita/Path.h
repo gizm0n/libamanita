@@ -4,11 +4,12 @@
 /**
  * @file amanita/Path.h  
  * @author Per Löwgren
- * @date Modified: 2012-10-21
+ * @date Modified: 2012-12-03
  * @date Created: 2008-09-07
  */ 
 
 #include <stdio.h>
+#include <stdint.h>
 
 
 /** Amanita Namespace */
@@ -68,14 +69,14 @@ typedef void (*path_move)(Path &,int,int,int &,int &,int);
 /** A class for storing a path-trail, with step coordinates.
  * 
  * @ingroup amanita */
-class aTrail {
+class Trail {
 friend class Path;
 
 protected:
 	struct trailstep {
-		unsigned char x;			//!< X coordinate of step.
-		unsigned char y;			//!< Y coordinate of step.
-		unsigned char dir;		//!< Direction that step is going.
+		int16_t x;					//!< X coordinate of step.
+		int16_t y;					//!< Y coordinate of step.
+		uint8_t dir;				//!< Direction that step is going.
 	};
 	trailstep *trail;				//!< Trail of steps.
 	size_t ind;						//!< Index of step at where the trail is.
@@ -85,9 +86,9 @@ public:
 	/** @name Constructor and Destructor
 	 * @{ */
 	/** Constructor. */
-	aTrail() : trail(0),ind(0),len(0) {}
+	Trail() : trail(0),ind(0),len(0) {}
 	/** Destructor. */
-	~aTrail() { if(trail) free(trail);trail = 0; }
+	~Trail() { if(trail) free(trail);trail = 0; }
 	/** @} */
 
 	/** @name Steps
@@ -119,8 +120,8 @@ class Path {
 protected:
 	struct node {
 		unsigned short key;		//!< Hash key.
-		short x;						//!< X coordinate of node
-		short y;						//!< Y coordinate of node.
+		int16_t x;					//!< X coordinate of node
+		int16_t y;					//!< Y coordinate of node.
 		short s;						//!< s value used in A* algorithm.
 		short g;						//!< g value used in A* algorithm.
 		short h;						//!< h value used in A* algorithm.
@@ -174,7 +175,7 @@ protected:
 	/** @} */
 
 	int getHeuristic(int x1,int y1,int x2,int y2,int n);
-	int getDir(int x1,int y1,int x2,int y2);
+	int getDir(int16_t x1,int16_t y1,int16_t x2,int16_t y2);
 
 	void put(node *n);
 	node *get(unsigned short key);
@@ -193,7 +194,7 @@ public:
 	void setParam(int type,void *param);
 	void *getParam(int type);
 
-	aTrail *search(int x1,int y1,int x2,int y2,int l=0);
+	Trail *search(int x1,int y1,int x2,int y2,int l=0);
 };
 
 }; /* namespace a */

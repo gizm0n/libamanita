@@ -743,10 +743,10 @@ void Wiki::formatSections(String &text) {
 	Vector lines;
 	lines.split(text,"\n");
 	*ind = '\0';
-	formatSections(lines,0,0,ind,FORMAT_ALL);
+	formatLines(lines,0,0,ind,FORMAT_ALL);
 }
 
-size_t Wiki::formatSections(Vector &lines,size_t ln,int lvl,char *ind,int f) {
+size_t Wiki::formatLines(Vector &lines,size_t ln,int lvl,char *ind,int f) {
 	size_t i,n = lines.size(),l;
 	char *line;
 	char c,c1;
@@ -778,7 +778,7 @@ size_t Wiki::formatSections(Vector &lines,size_t ln,int lvl,char *ind,int f) {
 					data->ref << header;
 					header.clear();
 					str.clear();
-//debug_output("formatSections(size: %d, i: %d)\n",(int)data->headers.size(),(int)i);
+//debug_output("formatLines(size: %d, i: %d)\n",(int)data->headers.size(),(int)i);
 					*this << "{^header:" << data->ref.size() << ',' << i << '}';
 				} else if(c=='{' && c1=='|') {
 					ln = formatTable(lines,ln,lvl,ind);
@@ -882,7 +882,7 @@ size_t Wiki::formatTable(Vector &lines,size_t ln,int lvl,char *ind) {
 //						*this << '\n';
 						lines.set(ln,p1);
 						ind[lvl] = '\t',ind[lvl+1] = '\t',ind[lvl+2] = '\0';
-						ln = formatSections(lines,ln,lvl+2,ind,FORMAT_TABLE_CELL);
+						ln = formatLines(lines,ln,lvl+2,ind,FORMAT_TABLE_CELL);
 						ind[lvl] = '\0';
 						if(ln<n) --ln;
 						*this << ind << "\t</" << table[type] << ">\n";
@@ -915,22 +915,22 @@ void Wiki::formatTableStyle(String &style,char *line) {
 }
 
 
-size_t Wiki::formatList(Vector &lines,size_t ln,int lvl,char *ind,char *lists) {
+size_t Wiki::formatList(Vector &lines,size_t ln,int lvl,char *ind,char *lists,int l) {
 	char *line = (char *)lines[ln];
-	char type = line[lvl];
+	char type = line[l];
 	size_t i,n;
 
 	for(i=0; list_chars[i]!=type; ++i)
 		if(list_chars[i]=='\0') return ln;
 
-	lists[lvl] = type,lists[lvl+1] = '\0';
+	lists[l] = type,lists[l+1] = '\0';
 
 	*this << '\n' << ind << '<' << list_types[i] << ">\n";
 
 	for(n=lines.size(); ln<n; ++ln) {
 		line = (char *)lines[ln];
-		if(strlen(line)<=(size_t)lvl || strncmp(lists,line,lvl+1)!=0) break;
-		ln = formatListRow(lines,ln,lvl,ind,lists);
+		if(strlen(line)<=(size_t)l || strncmp(lists,line,l+1)!=0) break;
+		ln = formatListRow(lines,ln,lvl,ind,lists,l);
 	}
 
 	*this << ind << "</" << list_types[i] << ">\n";
@@ -939,9 +939,9 @@ size_t Wiki::formatList(Vector &lines,size_t ln,int lvl,char *ind,char *lists) {
 	return ln;
 }
 
-size_t Wiki::formatListRow(Vector &lines,size_t ln,int lvl,char *ind,char *lists) {
+size_t Wiki::formatListRow(Vector &lines,size_t ln,int lvl,char *ind,char *lists,int l) {
 	char *line = (char *)lines[ln];
-	char type = line[lvl];
+	char type = line[l];
 	int i,r = 0;
 	String s;
 
@@ -950,14 +950,14 @@ size_t Wiki::formatListRow(Vector &lines,size_t ln,int lvl,char *ind,char *lists
 
 	*this << ind << '<' << list_rows[i] << '>';
 	s.clear();
-	s.append(line,lvl+1,0);
+	s.append(line,l+1,0);
 	s.trim();
 	if(s) formatInline(s);
 
 	ind[lvl] = '\t',ind[lvl+1] = '\0';
 	while((line=(char *)lines[ln+1])) {
-		if(strncmp(lists,line,lvl+1)==0 && strchr(list_chars,line[lvl+1])) {
-			ln = formatList(lines,ln+1,lvl+1,ind,lists);
+		if(strncmp(lists,line,l+1)==0 && strchr(list_chars,line[l+1])) {
+			ln = formatList(lines,ln+1,lvl+1,ind,lists,l+1);
 			r = 1;
 		} else break;
 	}
@@ -1056,7 +1056,7 @@ void Wiki::addRef(const char *ref) {
 
 
 void Wiki::storeRefs(String &text) {
-	size_t p1,p2,p3;
+	long p1,p2,p3;
 	String r;
 	for(p1=0,p2=0,p3=0; (p2=text.find("{^",p2,0,2))!=-1; ) {
 		if((p3=text.find('}',p2+2))==-1) break;
@@ -1066,14 +1066,14 @@ void Wiki::storeRefs(String &text) {
 		r.encodeHTML();
 		addRef(r);
 	}
-	if(p1<text.length()) append(text,p1,0);
+	if(p1<(long)text.length()) append(text,p1,0);
 	// Replace urls with refs.
 	if(flags&WIKI_LINKS) replace(protocols);
 //debug_output("storeRefs(%s)\n",toCharArray());
 }
 
 void Wiki::injectRefs(String &text) {
-	size_t p1,p2,p3,len = text.length();
+	long p1,p2,p3,len = text.length();
 	char tag[65],*t1,*t2;
 	char *ref,*p;
 	long id,value;
