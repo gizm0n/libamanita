@@ -45,7 +45,7 @@ void Window::setDefaultSettings(Image *img,Image *bgimg,Font *f,uint32_t data[21
 			img->getCell(data[2]),img->getCell(data[4]),img->getCell(data[6]),img->getCell(data[7]),
 			img->getCell(data[8]),img->getCell(data[10]),img->getCell(data[12]),img->getCell(data[14])
 		},
-		{ data[15],data[16],data[17],data[18],data[19],data[20] }
+		{ (int)data[15],(int)data[16],(int)data[17],(int)data[18],(int)data[19],(int)data[20] }
 	};
 }
 

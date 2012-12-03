@@ -546,7 +546,7 @@ PRINTF("Block: %s\n",&exp[p]);
 struct blockstack {
 	REBlock *bl;
 	uint32_t p;
-	int i,l,a,loops,s;
+	uint32_t i,l,a,loops,s;
 };
 
 blockstack *resizeStack(blockstack *st,uint32_t &stsz,uint32_t size) {

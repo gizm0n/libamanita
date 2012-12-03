@@ -57,7 +57,7 @@ void Textbox::hideMessage(Textbox *m,int id) {
 	m->hide();
 	Display::getActiveDisplay()->remove(m);
 	if(m->actionListener) {
-		ActionEvent ae = { m,id };
+		ActionEvent ae = { m,(uint32_t)id };
 		m->actionListener->actionPerformed(ae);
 	}
 	delete m;

@@ -32,12 +32,12 @@ void Notebook::setDefaultSettings(Image *img,Font *f1,Font *f2,uint32_t data[26]
 			img->getCell(data[0]),img->getCell(data[1]),img->getCell(data[2]),
 			img->getCell(data[3]),img->getCell(data[4]),img->getCell(data[5]),
 			img->getCell(data[6]),img->getCell(data[7]),img->getCell(data[8]),
-			{ data[9],data[10],data[11],data[12], }
+			{ (int16_t)data[9],(int16_t)data[10],(uint16_t)data[11],(uint16_t)data[12], }
 		},{
 			img->getCell(data[13]),img->getCell(data[14]),img->getCell(data[15]),
 			img->getCell(data[16]),img->getCell(data[17]),img->getCell(data[18]),
 			img->getCell(data[19]),img->getCell(data[20]),img->getCell(data[21]),
-			{ data[22],data[23],data[24],data[25], }
+			{ (int16_t)data[22],(int16_t)data[23],(uint16_t)data[24],(uint16_t)data[25], }
 		}
 	};
 }

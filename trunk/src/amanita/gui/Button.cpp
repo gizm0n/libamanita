@@ -89,7 +89,7 @@ void Button::setTextAlign(int align) {
 }
 
 void Button::setInsets(int l,int t,int r,int b) {
-	bt.ins = (rect16_t){ l,t,r,b };
+	bt.ins = (rect16_t){ (int16_t)l,(int16_t)t,(uint16_t)r,(uint16_t)b };
 	setTextAlign(bt.align);
 }
 

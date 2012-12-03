@@ -39,9 +39,9 @@ Path::~Path() {
 #define coutput(c) //{putc(c,stderr);fflush(stderr);}
 #define soutput(s,d) //{fprintf(stderr,s,d);fflush(stderr);}
 
-aTrail *Path::search(int x1,int y1,int x2,int y2,int l) {
+Trail *Path::search(int x1,int y1,int x2,int y2,int l) {
 debug_output("Path::search(x1=%d,y1=%d,x2=%d,y2=%d)\n",x1,y1,x2,y2);
-	aTrail *t = 0;
+	Trail *t = 0;
 	int cost = 0;
 	if(cb_area_compare) while(cb_area_compare(x1,y1,x2,y2,map)!=0) {
 //debug_output("Path::search(x1=%d,y1=%d,x2=%d,y2=%d)\n",x1,y1,x2,y2);
@@ -95,18 +95,18 @@ debug_output("Path::search(x1=%d,y1=%d,x2=%d,y2=%d)\n",x1,y1,x2,y2);
 //for(int y=0; y<height; y++) for(int x=0; x<width; x++) if(get((x<<8)|y)) mem[y][x] = '+';
 
 	if(p1 && p1->g) {
-		t = new aTrail();
+		t = new Trail();
 //debug_output("Path::search(p.x=%d,p.y=%d,p.g=%d)\n",p1->x,p1->y,p1->g);
 		for(t->len=1,p1->open=0; p1->parent && p1->parent!=p1; t->len++,p1=p1->parent)
 			p1->parent->open = p1;
 //debug_output("Path::search(trail.lenght=%d)\n",t->len);
 		if(t->len>1) {
-			t->trail = (aTrail::trailstep *)malloc(sizeof(aTrail::trailstep)*t->len);
+			t->trail = (Trail::trailstep *)malloc(sizeof(Trail::trailstep)*t->len);
 			for(i=0,c='a'; p1; i++,p1=p2) {
 				p2 = p1->open;
 //debug_output("key=%04x\tx1=%d\ty1=%d\tx2=%d\ty2=%d\tdir=%d\n",
 //p1->key,p1->x,p1->y,p2? p2->x : -1,p2? p2->y : -1,p2? getDir(p1->x,p1->y,p2->x,p2->y) : 5);
-				t->trail[i] = (aTrail::trailstep){ p1->x,p1->y,p2? getDir(p1->x,p1->y,p2->x,p2->y) : 5 };
+				t->trail[i] = (Trail::trailstep){ p1->x,p1->y,(uint8_t)(p2? getDir(p1->x,p1->y,p2->x,p2->y) : 5) };
 //				mem[p1->y][p1->x] = (char)c++;
 //				if(c=='z'+1) c = 'A';
 //				else if(c=='Z'+1) c = 'a';
@@ -245,7 +245,7 @@ int Path::getHeuristic(int x1,int y1,int x2,int y2,int n) {
 	else if(n==2) return x1+y1;
 	else return (x1>y1? x1 : y1);
 }
-int Path::getDir(int x1,int y1,int x2,int y2) {
+int Path::getDir(int16_t x1,int16_t y1,int16_t x2,int16_t y2) {
 	if(style&PATH_HWRAP) { if(x1+width-x2<x2-x1) x1 += width;else if(x2+width-x1<x1-x2) x2 += width; }
 	if(style&PATH_VWRAP) { if(y1+height-y2<y2-y1) y1 += height;else if(y2+height-y1<y1-y2) y2 += height; }
 	//if(abs(x1-x2)<=1 && abs(y1-y2)<=1)

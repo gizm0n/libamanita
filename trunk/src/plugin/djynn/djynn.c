@@ -11,7 +11,7 @@ GeanyPlugin *geany_plugin;
 GeanyData *geany_data;
 GeanyFunctions *geany_functions;
 
-PLUGIN_VERSION_CHECK(147)
+PLUGIN_VERSION_CHECK(GEANY_API_VERSION)
 
 PLUGIN_SET_INFO(_("Djynn"),
 	_("A small project manager, with some additional functionality, commenting and sorting."),
@@ -167,6 +167,7 @@ void plugin_init(GeanyData *data) {
 	djynn_keybind *kb;
 	djynn_menu_item *m;
 
+printf("plugin_init()\n");
 	djynn.config_dir = g_strconcat(geany->app->configdir,G_DIR_SEPARATOR_S,"plugins",G_DIR_SEPARATOR_S,
 			djynn.str.djynn,G_DIR_SEPARATOR_S,NULL);
 	if(g_file_test(djynn.config_dir,G_FILE_TEST_EXISTS)==FALSE) g_mkdir(djynn.config_dir,0700);
@@ -236,10 +237,12 @@ void plugin_cleanup(void) {
 	djynn_comment_cleanup();
 	djynn_sort_cleanup();
 	gtk_widget_destroy(djynn.tools_menu_item);
-	fclose(djynn.log);
 	g_free(djynn.config_dir);
 	g_free(djynn.config_filename);
 	g_free(djynn.workspace);
+fprintf(djynn.log,"plugin_cleanup()\n");
+	fclose(djynn.log);
+printf("plugin_cleanup()\n");
 }
 
 

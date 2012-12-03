@@ -197,7 +197,7 @@ void Http::setFormFile(const char *key,const char *file,const char *content,bool
 		if(!data || len<=0) free(p);
 		else {
 			multipart++;
-			*p = (packet){ strdup(file),strdup(content),loaded,binary,data,len };
+			*p = (packet){ strdup(file),strdup(content),loaded,binary,data,(long)len };
 			form.put(key,(void *)p);
 		}
 	}
