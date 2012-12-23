@@ -14,10 +14,9 @@ typedef struct string {
 
 
 
-#define is_word(c) ((c>='0' && c<='9') || (c>='a' && c<='z') || (c>='A' && c<='Z') || c=='_')
-#define is_space(c) (c==' ' || c=='\t' || c=='\n' || c=='\r' || c=='\f' || c=='\v')
-
-
+int is_word(char c);
+int is_space(char c);
+int xtoi(char c);
 char upper_case(char c);
 char *upper_case_string(char *s);
 char lower_case(char c);
