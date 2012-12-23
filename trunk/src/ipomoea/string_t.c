@@ -14,6 +14,17 @@ typedef struct string {
 
 
 
+int is_word(char c) {
+	return (c>='0' && c<='9') || (c>='a' && c<='z') || (c>='A' && c<='Z') || c=='_';
+}
+
+int is_space(char c) {
+	return c==' ' || c=='\t' || c=='\n' || c=='\r' || c=='\f' || c=='\v';
+}
+
+int xtoi(char c) {
+	return c>='0' && c<='9'? c-'0' : (c>='a' && c<='f'? c-87 : (c>='A' && c<='F'? c-55 : 0));
+}
 
 char upper_case(char c) {
 	return (c>='a' && c<='z')? c-32 : c;

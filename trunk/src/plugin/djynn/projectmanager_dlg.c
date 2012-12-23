@@ -6,280 +6,362 @@
 #include "djynn.h"
 
 
+static const char *project_manager_title = "Project Manager";
 
 
 static gboolean delete_event_cb(GtkWidget *widget,GtkWidget *event,gpointer data) {
-	GtkWidget *window = (GtkWidget *)data;
-	gtk_widget_destroy(window);
+	GtkWidget *dlg = (GtkWidget *)data;
+	gtk_widget_destroy(dlg);
 	return FALSE;
 }
 
-static void cancel_clicked_cb(GtkWidget *widget,gpointer data) {
-	GtkWidget *window = (GtkWidget *)data;
-	gtk_widget_destroy(window);
-}
-
-
-struct {
-	GtkWidget *window;
-	GtkWidget *name;
-	GtkWidget *ok;
-	GtkWidget *cancel;
-} workspace_dlg;
-
-
-static void create_workspace_cb(GtkWidget *widget,gpointer data) {
-	djynn_projectmanager_save_workspace();
-	djynn_projectmanager_load_workspace();
-	gtk_widget_destroy(workspace_dlg.window);
-}
-
-
-void djynn_projectmanager_open_new_workspace_dlg() {
-	GtkWidget *table;
-	GtkWidget *hbox;
-	GtkWidget *label;
-
-	workspace_dlg.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(workspace_dlg.window),"Project Manager");
-	gtk_window_set_modal(GTK_WINDOW(workspace_dlg.window),TRUE);
-	gtk_window_set_resizable(GTK_WINDOW(workspace_dlg.window),FALSE);
-	gtk_window_set_position(GTK_WINDOW(workspace_dlg.window),GTK_WIN_POS_CENTER);
-	gtk_container_set_border_width(GTK_CONTAINER(workspace_dlg.window),5);
-
-	table = gtk_table_new(1,4,FALSE);
-
-	label = gtk_label_new("Workspace Name:");
-	gtk_misc_set_alignment(GTK_MISC(label),0,0.5);
-	gtk_table_attach(GTK_TABLE(table),label,0,1,0,1,
-		(GtkAttachOptions)(GTK_FILL|GTK_EXPAND),(GtkAttachOptions)(GTK_FILL|GTK_SHRINK),2,2);
-	workspace_dlg.name = gtk_entry_new();
-	gtk_table_attach(GTK_TABLE(table),workspace_dlg.name,0,1,1,2,
-		(GtkAttachOptions)(GTK_FILL|GTK_EXPAND),(GtkAttachOptions)(GTK_FILL|GTK_SHRINK),2,2);
-
-	hbox = gtk_hbox_new(FALSE,5);
-	workspace_dlg.ok = gtk_button_new_from_stock(GTK_STOCK_OK);
-	g_signal_connect(G_OBJECT(workspace_dlg.ok),"clicked",G_CALLBACK(create_workspace_cb),NULL);
-	gtk_widget_set_size_request(workspace_dlg.ok,120,-1);
-	gtk_box_pack_start(GTK_BOX(hbox),workspace_dlg.ok,FALSE,FALSE,0);
-	workspace_dlg.cancel = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
-	g_signal_connect(G_OBJECT(workspace_dlg.cancel),"clicked",G_CALLBACK(cancel_clicked_cb),workspace_dlg.window);
-	gtk_widget_set_size_request(workspace_dlg.cancel,120,-1);
-	gtk_box_pack_start(GTK_BOX(hbox),workspace_dlg.cancel,FALSE,FALSE,0);
-	gtk_table_attach(GTK_TABLE(table),hbox,0,1,2,3,
-		(GtkAttachOptions)(GTK_SHRINK),(GtkAttachOptions)(GTK_FILL|GTK_EXPAND),5,5);
-
-	gtk_container_add(GTK_CONTAINER(workspace_dlg.window),table);
-
-	gtk_widget_show_all(workspace_dlg.window);
-	g_signal_connect(G_OBJECT(workspace_dlg.window),"delete_event",G_CALLBACK(delete_event_cb),workspace_dlg.window);
-}
-
-
-struct {
-	GtkWidget *window;
-	GtkWidget *name;
-	GtkWidget *directory;
-	GtkWidget *description;
-	GtkWidget *create;
-	GtkWidget *cancel;
-} project_dlg;
-
-
-static void browse_clicked_cb(GtkWidget *widget,gpointer data) {
+static void browse_select_folder_cb(GtkWidget *widget,gpointer data) {
+	GtkWidget *file_chooser;
+	GtkWidget *directory = (GtkWidget *)data;
 	const gchar *dir;
-	GtkWidget *dlg;
 	gint r;
-
-	dlg = gtk_file_chooser_dialog_new("Select Folder",GTK_WINDOW(project_dlg.window),
+	file_chooser = gtk_file_chooser_dialog_new("Select Folder",GTK_WINDOW(geany_data->main_widgets->window),
 		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 		GTK_STOCK_OK,GTK_RESPONSE_OK,
 		GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 		NULL);
-	dir = gtk_entry_get_text(GTK_ENTRY(project_dlg.directory));
-	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg),dir);
-	r = gtk_dialog_run(GTK_DIALOG(dlg));
-	gtk_widget_hide(dlg);
+	dir = gtk_entry_get_text(GTK_ENTRY(directory));
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(file_chooser),dir);
+	gtk_file_chooser_set_show_hidden(GTK_FILE_CHOOSER(file_chooser),TRUE);
+	gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(file_chooser),TRUE);
+	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_chooser),FALSE);
+	gtk_file_chooser_set_create_folders(GTK_FILE_CHOOSER(file_chooser),TRUE);
+	r = gtk_dialog_run(GTK_DIALOG(file_chooser));
+	gtk_widget_hide(file_chooser);
 	if(r==GTK_RESPONSE_OK) {
-		dir = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
-		gtk_entry_set_text(GTK_ENTRY(project_dlg.directory),dir);
+		dir = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
+		gtk_entry_set_text(GTK_ENTRY(directory),dir);
 	}
-	gtk_widget_destroy(dlg);
+	gtk_widget_destroy(file_chooser);
 }
 
-static void create_project_clicked_cb(GtkWidget *widget,gpointer data) {
+static GtkWidget *projectmanager_dlg(GtkWidget *vbox,int w,int h) {
+	GtkWidget *dialog;
+	GtkWidget *area;
+	GtkWidget *hbox;
+	dialog = gtk_dialog_new_with_buttons(project_manager_title,
+			GTK_WINDOW(geany_data->main_widgets->window),
+			GTK_DIALOG_MODAL|GTK_DIALOG_NO_SEPARATOR,
+			GTK_STOCK_OK,GTK_RESPONSE_OK,GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,NULL);
+	gtk_window_set_default_size(GTK_WINDOW(dialog),320,-1);
+	gtk_window_set_position(GTK_WINDOW(dialog),GTK_WIN_POS_CENTER);
+	gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+	area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+	hbox = gtk_hbox_new(FALSE,5);
+	gtk_box_pack_start(GTK_BOX(hbox),vbox,TRUE,TRUE,5);
+	gtk_box_pack_start(GTK_BOX(area),hbox,FALSE,FALSE,0);
+	gtk_dialog_set_default_response(GTK_DIALOG(dialog),GTK_RESPONSE_OK);
+	g_signal_connect(G_OBJECT(dialog),"delete_event",G_CALLBACK(delete_event_cb),dialog);
+	gtk_widget_show_all(dialog);
+	return dialog;
+}
+
+void djynn_pm_ws_dlg(gboolean create) {
+	GtkWidget *dialog;
+	GtkWidget *vbox;
+	GtkWidget *vbox2;
+	GtkWidget *label;
+	GtkWidget *name;
+	gint r;
+
+	vbox = gtk_vbox_new(FALSE,0);
+	vbox2 = gtk_vbox_new(FALSE,2);
+	label = gtk_label_new("Workspace Name:");
+	gtk_misc_set_alignment(GTK_MISC(label),0,0.5);
+	gtk_box_pack_start(GTK_BOX(vbox),label,FALSE,FALSE,0);
+	name = gtk_entry_new();
+	gtk_entry_set_activates_default(GTK_ENTRY(name),TRUE);
+	if(!create) gtk_entry_set_text(GTK_ENTRY(name),djynn.workspace);
+	gtk_box_pack_start(GTK_BOX(vbox2),name,FALSE,FALSE,0);
+	gtk_box_pack_start(GTK_BOX(vbox),vbox2,FALSE,FALSE,7);
+
+	dialog = projectmanager_dlg(vbox,320,-1);
+	while(1) {
+		r = gtk_dialog_run(GTK_DIALOG(dialog));
+		if(r==GTK_RESPONSE_OK) {
+			const gchar *nm = gtk_entry_get_text(GTK_ENTRY(name));
+			if(nm==NULL || *nm=='\0') djynn_msgbox_warn(project_manager_title,"Select a name for your workspace!",NULL);
+			else if(create) {
+				int id,n;
+				char ws[5],key[64],str[257];
+				djynn_pm_ws_save();
+				djynn_cfg_open();
+				id = djynn_cfg_get_int(djynn.str.workspace,djynn.str.workspace_id)+1;
+				sprintf(ws,"%04d",id);
+				djynn_cfg_set_int(djynn.str.workspace,djynn.str.workspace_id,id);
+				n = djynn_cfg_get_int(djynn.str.workspace,djynn.str.workspace_n)+1;
+				sprintf(key,djynn.str.workspace_d,n);
+				sprintf(str,"%s:%s",ws,nm);
+				djynn_cfg_set_str(djynn.str.workspace,key,str);
+				djynn_cfg_set_int(djynn.str.workspace,djynn.str.workspace_n,n);
+				sprintf(str,"%s_%s",djynn.str.workspace,ws);
+				djynn_cfg_set_int(str,djynn.str.project_n,0);
+				djynn_cfg_save();
+				djynn_cfg_close();
+				djynn_pm_ws_list_add(nm);
+				djynn_pm_ws_list_select(n);
+				break;
+			} else {
+				if(strcmp(djynn.workspace,nm)!=0) {
+					char key[64],str[257];
+					int n;
+					djynn_cfg_open();
+					n = djynn_cfg_get_int(djynn.str.djynn,djynn.str.workspace);
+					sprintf(key,djynn.str.workspace_d,n);
+					sprintf(str,"%s:%s",strchr(djynn.workspace_key,'_')+1,nm);
+					djynn_cfg_set_str(djynn.str.workspace,key,str);
+					djynn_cfg_save();
+					djynn_cfg_close();
+					djynn_pm_ws_list_set(n,nm);
+				}
+				break;
+			}
+		} else break;
+	}
+	gtk_widget_destroy(dialog);
+}
+
+void djynn_pm_sess_dlg(gboolean create) {
+	GtkWidget *dialog;
+	GtkWidget *vbox;
+	GtkWidget *vbox2;
+	GtkWidget *label;
+	GtkWidget *name;
+	gint r;
 	int n;
-	char key[64],prj1[257],prj2[257];
-	const gchar *name,*dir,*descr;
-	FILE *fp;
+	char sess[5],key[64],str[257],*p1,*p2;
 
-	name = gtk_entry_get_text(GTK_ENTRY(project_dlg.name));
-	dir = gtk_entry_get_text(GTK_ENTRY(project_dlg.directory));
-	descr = gtk_entry_get_text(GTK_ENTRY(project_dlg.description));
+	djynn_cfg_open();
+	n = djynn_cfg_get_int(djynn.str.djynn,djynn.str.session);
+	sprintf(key,djynn.str.session_d,n);
+	p1 = djynn_cfg_get_str(djynn.str.session,key);
+	p2 = strchr(p1,':'),*p2 = '\0',++p2;
+	strcpy(sess,p1);
+	strcpy(str,p2);
+	g_free(p1);
 
-	djynn_open_config();
-	n = djynn_config_get_int(djynn.workspace,djynn.str.project_n);
-	n++;
-	djynn_config_set_int(djynn.workspace,djynn.str.project_n,n);
-	sprintf(key,djynn.str.project_d,n);
-	sprintf(prj1,"%s%s.project",djynn.config_dir,name);
-	sprintf(prj2,"%s%s.geany",djynn.config_dir,name);
-fprintf(djynn.log,"create_project_clicked_cb(workspace=%s,key=%s,prj1=%s)\n",djynn.workspace,key,prj1);
-fflush(djynn.log);
-	djynn_config_set_str(djynn.workspace,key,prj1);
+	vbox = gtk_vbox_new(FALSE,0);
+	vbox2 = gtk_vbox_new(FALSE,2);
+	label = gtk_label_new("Session Name:");
+	gtk_misc_set_alignment(GTK_MISC(label),0,0.5);
+	gtk_box_pack_start(GTK_BOX(vbox),label,FALSE,FALSE,0);
+	name = gtk_entry_new();
+	gtk_entry_set_activates_default(GTK_ENTRY(name),TRUE);
+	if(!create) gtk_entry_set_text(GTK_ENTRY(name),str);
+	gtk_box_pack_start(GTK_BOX(vbox2),name,FALSE,FALSE,0);
+	gtk_box_pack_start(GTK_BOX(vbox),vbox2,FALSE,FALSE,7);
 
-	djynn_save_config();
-	djynn_close_config();
-
-	if((fp=fopen(prj1,"wb"))) {
-		fprintf(fp,"+%s\n"
-			"%s\n"
-			"%s\n"
-			"-src\n",
-			name,dir,prj2);
-		fclose(fp);
-	} else perror(prj1);
-	if((fp=fopen(prj2,"wb"))) {
-		fprintf(fp,"\n"
-				"[indentation]\n"
-				"indent_width=3\n"
-				"indent_type=1\n"
-				"indent_hard_tab_width=8\n"
-				"detect_indent=false\n"
-				"indent_mode=2\n"
-				"\n[project]\n"
-				"name=%s\n"
-				"base_path=%s\n"
-				"make_in_base_path=false\n"
-				"description=%s\n"
-				"run_cmd=%s\n",
-				name,dir,descr,name);
-		fclose(fp);
-	} else perror(prj2);
-
-	djynn_projectmanager_save_workspace();
-	djynn_projectmanager_load_workspace();
-	gtk_widget_destroy(project_dlg.window);
+	dialog = projectmanager_dlg(vbox,320,-1);
+	while(1) {
+		r = gtk_dialog_run(GTK_DIALOG(dialog));
+		if(r==GTK_RESPONSE_OK) {
+			const gchar *nm = gtk_entry_get_text(GTK_ENTRY(name));
+			if(nm==NULL || *nm=='\0') djynn_msgbox_warn(project_manager_title,"Select a name for your session!",NULL);
+			else {
+				if(create) {
+					int id = djynn_cfg_get_int(djynn.str.session,djynn.str.session_id)+1;
+					sprintf(sess,"%04d",id);
+					djynn_cfg_set_int(djynn.str.session,djynn.str.session_id,id);
+					n = djynn_cfg_get_int(djynn.str.session,djynn.str.session_n)+1;
+					sprintf(key,djynn.str.session_d,n);
+					sprintf(str,"%s:%s",sess,nm);
+					djynn_cfg_set_str(djynn.str.session,key,str);
+					djynn_cfg_set_int(djynn.str.session,djynn.str.session_n,n);
+					djynn_cfg_save();
+					djynn_pm_sess_list_add(nm);
+					djynn_pm_sess_list_select(n);
+					break;
+				} else if(strcmp(str,nm)!=0) {
+					sprintf(str,"%s:%s",sess,nm);
+					djynn_cfg_set_str(djynn.str.session,key,str);
+					djynn_cfg_save();
+					djynn_pm_sess_list_set(n,nm);
+				}
+				break;
+			}
+		} else break;
+	}
+	djynn_cfg_close();
+	gtk_widget_destroy(dialog);
 }
 
-
-void djynn_projectmanager_open_new_project_dlg() {
-	GtkWidget *table;
+void djynn_pm_prj_dlg(djynn_project_file *f) {
+	GtkWidget *dialog;
+	GtkWidget *vbox;
+	GtkWidget *vbox2;
 	GtkWidget *hbox;
 	GtkWidget *label;
+	GtkWidget *name;
+	GtkWidget *directory;
+	GtkWidget *description;
 	GtkWidget *button;
+	gint r;
 
-	project_dlg.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(project_dlg.window),"Project Manager");
-	gtk_window_set_modal(GTK_WINDOW(project_dlg.window),TRUE);
-	gtk_window_set_resizable(GTK_WINDOW(project_dlg.window),FALSE);
-	gtk_window_set_position(GTK_WINDOW(project_dlg.window),GTK_WIN_POS_CENTER);
-	gtk_container_set_border_width(GTK_CONTAINER(project_dlg.window),0);
-
-	table = gtk_table_new(1,7,FALSE);
-
+	vbox = gtk_vbox_new(FALSE,0);
+	vbox2 = gtk_vbox_new(FALSE,2);
 	label = gtk_label_new("Name:");
 	gtk_misc_set_alignment(GTK_MISC(label),0,0.5);
-	gtk_table_attach(GTK_TABLE(table),label,0,1,0,1,
-		(GtkAttachOptions)(GTK_FILL|GTK_EXPAND),(GtkAttachOptions)(GTK_FILL|GTK_SHRINK),2,2);
-	project_dlg.name = gtk_entry_new();
-	gtk_table_attach(GTK_TABLE(table),project_dlg.name,0,1,1,2,
-		(GtkAttachOptions)(GTK_FILL|GTK_EXPAND),(GtkAttachOptions)(GTK_FILL|GTK_SHRINK),2,2);
+	gtk_box_pack_start(GTK_BOX(vbox2),label,FALSE,FALSE,0);
+	name = gtk_entry_new();
+	gtk_entry_set_activates_default(GTK_ENTRY(name),TRUE);
+	gtk_box_pack_start(GTK_BOX(vbox2),name,FALSE,FALSE,0);
 
 	label = gtk_label_new("Base Path:");
 	gtk_misc_set_alignment(GTK_MISC(label),0,0.5);
-	gtk_table_attach(GTK_TABLE(table),label,0,1,2,3,
-		(GtkAttachOptions)(GTK_FILL|GTK_EXPAND),(GtkAttachOptions)(GTK_FILL|GTK_SHRINK),2,2);
+	gtk_box_pack_start(GTK_BOX(vbox2),label,FALSE,FALSE,0);
 	hbox = gtk_hbox_new(FALSE,5);
-	project_dlg.directory = gtk_entry_new();
-	gtk_entry_set_text(GTK_ENTRY(project_dlg.directory),g_get_home_dir());
-	gtk_box_pack_start(GTK_BOX(hbox),project_dlg.directory,TRUE,TRUE,0);
-	button = gtk_button_new_from_stock(GTK_STOCK_OPEN);
-	g_signal_connect(G_OBJECT(button),"clicked",G_CALLBACK(browse_clicked_cb),NULL);
+	directory = gtk_entry_new();
+	gtk_entry_set_activates_default(GTK_ENTRY(directory),TRUE);
+	gtk_entry_set_text(GTK_ENTRY(directory),g_get_home_dir());
+	gtk_box_pack_start(GTK_BOX(hbox),directory,TRUE,TRUE,0);
+	button = gtk_button_new_with_label("Browse...");
+	g_signal_connect(G_OBJECT(button),"clicked",G_CALLBACK(browse_select_folder_cb),directory);
 	gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
-	gtk_table_attach(GTK_TABLE(table),hbox,0,1,3,4,
-		(GtkAttachOptions)(GTK_FILL|GTK_EXPAND),(GtkAttachOptions)(GTK_FILL|GTK_SHRINK),2,2);
+	gtk_box_pack_start(GTK_BOX(vbox2),hbox,FALSE,FALSE,0);
 
 	label = gtk_label_new("Description:");
 	gtk_misc_set_alignment(GTK_MISC(label),0,0.5);
-	gtk_table_attach(GTK_TABLE(table),label,0,1,4,5,
-		(GtkAttachOptions)(GTK_FILL|GTK_EXPAND),(GtkAttachOptions)(GTK_FILL|GTK_SHRINK),2,2);
-	project_dlg.description = gtk_entry_new();
-	gtk_table_attach(GTK_TABLE(table),project_dlg.description,0,1,5,6,
-		(GtkAttachOptions)(GTK_FILL|GTK_EXPAND),(GtkAttachOptions)(GTK_FILL|GTK_SHRINK),2,2);
+	gtk_box_pack_start(GTK_BOX(vbox2),label,FALSE,FALSE,0);
+	description = gtk_entry_new();
+	gtk_entry_set_activates_default(GTK_ENTRY(description),TRUE);
+	gtk_box_pack_start(GTK_BOX(vbox2),description,FALSE,FALSE,0);
+	gtk_box_pack_start(GTK_BOX(vbox),vbox2,FALSE,FALSE,7);
 
-	hbox = gtk_hbox_new(FALSE,5);
-	project_dlg.create = gtk_button_new_with_label("Create Project");
-	g_signal_connect(G_OBJECT(project_dlg.create),"clicked",G_CALLBACK(create_project_clicked_cb),NULL);
-	gtk_widget_set_size_request(project_dlg.create,120,-1);
-	gtk_box_pack_start(GTK_BOX(hbox),project_dlg.create,FALSE,FALSE,0);
-	project_dlg.cancel = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
-	g_signal_connect(G_OBJECT(project_dlg.cancel),"clicked",G_CALLBACK(cancel_clicked_cb),project_dlg.window);
-	gtk_widget_set_size_request(project_dlg.cancel,120,-1);
-	gtk_box_pack_start(GTK_BOX(hbox),project_dlg.cancel,FALSE,FALSE,0);
-	gtk_table_attach(GTK_TABLE(table),hbox,0,1,6,7,
-		(GtkAttachOptions)(GTK_SHRINK),(GtkAttachOptions)(GTK_FILL|GTK_EXPAND),7,7);
-
-	gtk_container_add(GTK_CONTAINER(project_dlg.window),table);
-
-	gtk_widget_show_all(project_dlg.window);
-	g_signal_connect(G_OBJECT(project_dlg.window),"delete_event",G_CALLBACK(delete_event_cb),project_dlg.window);
+	dialog = projectmanager_dlg(vbox,320,-1);
+	while(1) {
+		r = gtk_dialog_run(GTK_DIALOG(dialog));
+		if(r==GTK_RESPONSE_OK) {
+			const gchar *nm = gtk_entry_get_text(GTK_ENTRY(name));
+			if(nm==NULL || *nm=='\0') djynn_msgbox_warn(project_manager_title,"Select a name for your project!",NULL);
+			else {
+				int n;
+				char key[64],prj1[257],prj2[257];
+				sprintf(prj1,"%s%s.project",djynn.config_dir,nm);
+				sprintf(prj2,"%s%s." GEANY_PROJECT_EXT,djynn.config_dir,nm);
+				djynn_cfg_open();
+				n = djynn_cfg_get_int(djynn.workspace_key,djynn.str.project_n)+1;
+				djynn_cfg_set_int(djynn.workspace_key,djynn.str.project_n,n);
+				sprintf(key,djynn.str.project_d,n);
+fprintf(djynn.log,"create_project_clicked_cb(workspace=%s,key=%s,prj1=%s)\n",djynn.workspace,key,prj1);
+fflush(djynn.log);
+				djynn_cfg_set_str(djynn.workspace_key,key,prj1);
+				if(!g_file_test(prj1,G_FILE_TEST_EXISTS)) {
+					const gchar *dir,*descr;
+					FILE *fp;
+					dir = gtk_entry_get_text(GTK_ENTRY(directory));
+					descr = gtk_entry_get_text(GTK_ENTRY(description));
+					if((fp=fopen(prj1,"w"))) {
+						fprintf(fp,"+%s\n"
+							"%s\n"
+							"%s\n"
+							"-src\n",
+							nm,dir,prj2);
+						fclose(fp);
+					} else perror(prj1);
+					if((fp=fopen(prj2,"w"))) {
+						fprintf(fp,"\n"
+							"[indentation]\n"
+							"indent_width=3\n"
+							"indent_type=1\n"
+							"indent_hard_tab_width=8\n"
+							"detect_indent=false\n"
+							"indent_mode=2\n"
+							"\n[project]\n"
+							"name=%s\n"
+							"base_path=%s\n"
+							"make_in_base_path=false\n"
+							"description=%s\n"
+							"run_cmd=%s\n",
+							nm,dir,descr,nm);
+						fclose(fp);
+					} else perror(prj2);
+				}
+				djynn_cfg_save();
+				djynn_cfg_close();
+				djynn_pm_ws_save();
+				djynn_pm_ws_load();
+				project_close(FALSE);
+				project_load_file(prj2);
+				break;
+			}
+		} else break;
+	}
+	gtk_widget_destroy(dialog);
 }
 
+void djynn_pm_folder_dlg(djynn_project_file *f) {
+	if(f==NULL) djynn_msgbox_warn(project_manager_title,"No project, folder or file selected!",NULL);
+	else {
+		GtkWidget *dialog;
+		GtkWidget *vbox;
+		GtkWidget *vbox2;
+		GtkWidget *hbox;
+		GtkWidget *label;
+		GtkWidget *name;
+		GtkWidget *add_files;
+		GtkWidget *add_folders;
+		GtkWidget *directory;
+		GtkWidget *button;
+		char dir[1024] = "",*p;
+		gint r;
+		if(f->type==DJYNN_PM_FILE) {
+			strcpy(dir,f->path);
+			p = strrchr(dir,G_DIR_SEPARATOR);
+			if(p!=NULL) *p = '\0';
+		} else {
+			djynn_project_file *f1 = f;
+			while(f1->parent!=NULL && f1->type!=DJYNN_PM_PROJECT) f1 = f1->parent;
+			if(f1!=NULL) strcpy(dir,f1->path);
+		}
 
-struct {
-	GtkWidget *window;
-	GtkWidget *name;
-	GtkWidget *ok;
-	GtkWidget *cancel;
-} folder_dlg;
+		vbox = gtk_vbox_new(FALSE,0);
+		vbox2 = gtk_vbox_new(FALSE,2);
+		label = gtk_label_new("Folder Name:");
+		gtk_misc_set_alignment(GTK_MISC(label),0,0.5);
+		gtk_box_pack_start(GTK_BOX(vbox2),label,FALSE,FALSE,0);
+		name = gtk_entry_new();
+		gtk_entry_set_activates_default(GTK_ENTRY(name),TRUE);
+		gtk_box_pack_start(GTK_BOX(vbox2),name,FALSE,FALSE,0);
+		gtk_box_pack_start(GTK_BOX(vbox),vbox2,FALSE,FALSE,7);
 
+		vbox2 = gtk_vbox_new(FALSE,2);
+		add_files = gtk_check_button_new_with_label("Add files in folder");
+		gtk_box_pack_start(GTK_BOX(vbox2),add_files,FALSE,FALSE,0);
+		add_folders = gtk_check_button_new_with_label("Recurse in subfolders");
+		gtk_box_pack_start(GTK_BOX(vbox2),add_folders,FALSE,FALSE,0);
+		hbox = gtk_hbox_new(FALSE,5);
+		directory = gtk_entry_new();
+		gtk_entry_set_activates_default(GTK_ENTRY(directory),TRUE);
+		gtk_entry_set_text(GTK_ENTRY(directory),dir);
+		gtk_box_pack_start(GTK_BOX(hbox),directory,TRUE,TRUE,0);
+		button = gtk_button_new_with_label("Browse...");
+		g_signal_connect(G_OBJECT(button),"clicked",G_CALLBACK(browse_select_folder_cb),directory);
+		gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
+		gtk_box_pack_start(GTK_BOX(vbox2),hbox,FALSE,FALSE,0);
+		gtk_box_pack_start(GTK_BOX(vbox),vbox2,FALSE,FALSE,7);
 
-static void create_project_folder_cb(GtkWidget *widget,gpointer data) {
-	const gchar *name = gtk_entry_get_text(GTK_ENTRY(folder_dlg.name));
-	djynn_projectmanager_add_folder(name);
-	gtk_widget_destroy(folder_dlg.window);
-}
-
-
-void djynn_projectmanager_open_new_folder_dlg() {
-	GtkWidget *table;
-	GtkWidget *hbox;
-	GtkWidget *label;
-
-	folder_dlg.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(folder_dlg.window),"Project Manager");
-	gtk_window_set_modal(GTK_WINDOW(folder_dlg.window),TRUE);
-	gtk_window_set_resizable(GTK_WINDOW(folder_dlg.window),FALSE);
-	gtk_window_set_position(GTK_WINDOW(folder_dlg.window),GTK_WIN_POS_CENTER);
-	gtk_container_set_border_width(GTK_CONTAINER(folder_dlg.window),5);
-
-	table = gtk_table_new(1,4,FALSE);
-
-	label = gtk_label_new("Folder Name:");
-	gtk_misc_set_alignment(GTK_MISC(label),0,0.5);
-	gtk_table_attach(GTK_TABLE(table),label,0,1,0,1,
-		(GtkAttachOptions)(GTK_FILL|GTK_EXPAND),(GtkAttachOptions)(GTK_FILL|GTK_SHRINK),2,2);
-	folder_dlg.name = gtk_entry_new();
-	gtk_table_attach(GTK_TABLE(table),folder_dlg.name,0,1,1,2,
-		(GtkAttachOptions)(GTK_FILL|GTK_EXPAND),(GtkAttachOptions)(GTK_FILL|GTK_SHRINK),2,2);
-
-	hbox = gtk_hbox_new(FALSE,5);
-	folder_dlg.ok = gtk_button_new_from_stock(GTK_STOCK_OK);
-	g_signal_connect(G_OBJECT(folder_dlg.ok),"clicked",G_CALLBACK(create_project_folder_cb),NULL);
-	gtk_widget_set_size_request(folder_dlg.ok,120,-1);
-	gtk_box_pack_start(GTK_BOX(hbox),folder_dlg.ok,FALSE,FALSE,0);
-	folder_dlg.cancel = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
-	g_signal_connect(G_OBJECT(folder_dlg.cancel),"clicked",G_CALLBACK(cancel_clicked_cb),folder_dlg.window);
-	gtk_widget_set_size_request(folder_dlg.cancel,120,-1);
-	gtk_box_pack_start(GTK_BOX(hbox),folder_dlg.cancel,FALSE,FALSE,0);
-	gtk_table_attach(GTK_TABLE(table),hbox,0,1,2,3,
-		(GtkAttachOptions)(GTK_SHRINK),(GtkAttachOptions)(GTK_FILL|GTK_EXPAND),5,5);
-
-	gtk_container_add(GTK_CONTAINER(folder_dlg.window),table);
-
-	gtk_widget_show_all(folder_dlg.window);
-	g_signal_connect(G_OBJECT(folder_dlg.window),"delete_event",G_CALLBACK(delete_event_cb),folder_dlg.window);
+		dialog = projectmanager_dlg(vbox,320,-1);
+		while(1) {
+			r = gtk_dialog_run(GTK_DIALOG(dialog));
+			if(r==GTK_RESPONSE_OK) {
+				const gchar *nm = gtk_entry_get_text(GTK_ENTRY(name));
+				if(nm==NULL || *nm=='\0') djynn_msgbox_warn(project_manager_title,"Select a name for the folder!",NULL);
+				else {
+					const gchar *dir = gtk_entry_get_text(GTK_ENTRY(directory));
+					djynn_pm_folder_add(f,dir,nm,
+						gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(add_files)),
+						gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(add_folders)));
+					break;
+				}
+			} else break;
+		}
+		gtk_widget_destroy(dialog);
+	}
 }
 
 

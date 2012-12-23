@@ -37,11 +37,11 @@ void djynn_base64_action(int id) {
 			if(id==DJYNN_BASE64_DECODE) {
 				i = base64_decoded_size(l);
 				s = malloc(i+1);
-				base64_decode(s,text);
+				base64_decode((unsigned char *)s,(unsigned char *)text);
 			} else {
 				i = base64_encoded_size(l);
 				s = malloc(i+1);
-				base64_encode(s,text,l);
+				base64_encode((unsigned char *)s,(unsigned char *)text,l);
 			}
 			if(sel) sci_replace_sel(sci,(const gchar *)s);
 			else sci_set_text(sci,(const gchar *)s);
