@@ -10,3 +10,32 @@ Djynn also sorts lines in various ways, ascending, descending and reverse line o
 The project manager inserts a tree for the project files, and a sorted list of open files for quick access if you have many open files. Files are added manually in each project, there can be any number of files, they can be ordered in any way you like, and can be read from a directory including subdirectories (only source files are read, and non-project directories such as '.svn' excluded).
 
 http://img35.imageshack.us/img35/7964/geanydjynn.png
+
+In the project manager you can have any number of workspaces, and each workspace can contain any number of projects. Each project is stored in a separate config-file, and if two workspaces creates two projects of the same name the same project is shared between workspaces. Projects also integrates with the built in Geany projects, and for every Djynn project a Geany project is created also.
+
+To make it easier working with many projects, a session handler has been added to Djynn, and you can easily add more sessions from the menu. Each session maintains its open documents, of course including position. When switching between sessions, all previous documents are closed, and all documents of the session opened. This way, you can work with one project, then another, then switch back, in the time it takes to close and open the documents.
+
+http://img15.imageshack.us/img15/495/geanydjynnwssess.png
+
+Create new Workspaces and Sessions in the Djynn menu:
+
+http://img841.imageshack.us/img841/1903/geanydjynnmenu.png
+
+==Installing Djynn==
+Djynn uses CMake, so you will need to install this, and you will of course need to install GTK+ 2.6. To build and install Djynn, open a terminal and enter the following commands:
+
+{{{
+svn checkout http://libamanita.googlecode.com/svn/trunk/ libamanita
+cd libamanita/src/plugin/djynn
+cmake .
+make
+sudo make install
+}}}
+
+Restart Geany and you should be able to see Djynn in your Plugin Manager (see Tools menu).
+
+http://img11.imageshack.us/img11/9071/geanydjynnconfig.png
+
+Please, report any bugs!
+
+Suggestions on improvements are much welcome.
