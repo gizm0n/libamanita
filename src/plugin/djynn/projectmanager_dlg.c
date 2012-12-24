@@ -6,7 +6,7 @@
 #include "djynn.h"
 
 
-static const char *project_manager_title = "Project Manager";
+static const gchar *project_manager_title = _("Project Manager");
 
 
 static gboolean delete_event_cb(GtkWidget *widget,GtkWidget *event,gpointer data) {
@@ -20,7 +20,7 @@ static void browse_select_folder_cb(GtkWidget *widget,gpointer data) {
 	GtkWidget *directory = (GtkWidget *)data;
 	const gchar *dir;
 	gint r;
-	file_chooser = gtk_file_chooser_dialog_new("Select Folder",GTK_WINDOW(geany_data->main_widgets->window),
+	file_chooser = gtk_file_chooser_dialog_new(_("Select Folder"),GTK_WINDOW(geany_data->main_widgets->window),
 		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 		GTK_STOCK_OK,GTK_RESPONSE_OK,
 		GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
@@ -40,7 +40,7 @@ static void browse_select_folder_cb(GtkWidget *widget,gpointer data) {
 	gtk_widget_destroy(file_chooser);
 }
 
-static GtkWidget *projectmanager_dlg(GtkWidget *vbox,int w,int h) {
+static GtkWidget *projectmanager_dlg(GtkWidget *vbox,gint w,gint h) {
 	GtkWidget *dialog;
 	GtkWidget *area;
 	GtkWidget *hbox;
@@ -71,7 +71,7 @@ void djynn_pm_ws_dlg(gboolean create) {
 
 	vbox = gtk_vbox_new(FALSE,0);
 	vbox2 = gtk_vbox_new(FALSE,2);
-	label = gtk_label_new("Workspace Name:");
+	label = gtk_label_new(_("Workspace Name:"));
 	gtk_misc_set_alignment(GTK_MISC(label),0,0.5);
 	gtk_box_pack_start(GTK_BOX(vbox),label,FALSE,FALSE,0);
 	name = gtk_entry_new();
@@ -85,10 +85,10 @@ void djynn_pm_ws_dlg(gboolean create) {
 		r = gtk_dialog_run(GTK_DIALOG(dialog));
 		if(r==GTK_RESPONSE_OK) {
 			const gchar *nm = gtk_entry_get_text(GTK_ENTRY(name));
-			if(nm==NULL || *nm=='\0') djynn_msgbox_warn(project_manager_title,"Select a name for your workspace!",NULL);
+			if(nm==NULL || *nm=='\0') djynn_msgbox_warn(project_manager_title,_("Select a name for your workspace!"),NULL);
 			else if(create) {
-				int id,n;
-				char ws[5],key[64],str[257];
+				gint id,n;
+				gchar ws[5],key[64],str[257];
 				djynn_pm_ws_save();
 				djynn_cfg_open();
 				id = djynn_cfg_get_int(djynn.str.workspace,djynn.str.workspace_id)+1;
@@ -108,8 +108,8 @@ void djynn_pm_ws_dlg(gboolean create) {
 				break;
 			} else {
 				if(strcmp(djynn.workspace,nm)!=0) {
-					char key[64],str[257];
-					int n;
+					gchar key[64],str[257];
+					gint n;
 					djynn_cfg_open();
 					n = djynn_cfg_get_int(djynn.str.djynn,djynn.str.workspace);
 					sprintf(key,djynn.str.workspace_d,n);
@@ -133,8 +133,8 @@ void djynn_pm_sess_dlg(gboolean create) {
 	GtkWidget *label;
 	GtkWidget *name;
 	gint r;
-	int n;
-	char sess[5],key[64],str[257],*p1,*p2;
+	gint n;
+	gchar sess[5],key[64],str[257],*p1,*p2;
 
 	djynn_cfg_open();
 	n = djynn_cfg_get_int(djynn.str.djynn,djynn.str.session);
@@ -147,7 +147,7 @@ void djynn_pm_sess_dlg(gboolean create) {
 
 	vbox = gtk_vbox_new(FALSE,0);
 	vbox2 = gtk_vbox_new(FALSE,2);
-	label = gtk_label_new("Session Name:");
+	label = gtk_label_new(_("Session Name:"));
 	gtk_misc_set_alignment(GTK_MISC(label),0,0.5);
 	gtk_box_pack_start(GTK_BOX(vbox),label,FALSE,FALSE,0);
 	name = gtk_entry_new();
@@ -161,10 +161,10 @@ void djynn_pm_sess_dlg(gboolean create) {
 		r = gtk_dialog_run(GTK_DIALOG(dialog));
 		if(r==GTK_RESPONSE_OK) {
 			const gchar *nm = gtk_entry_get_text(GTK_ENTRY(name));
-			if(nm==NULL || *nm=='\0') djynn_msgbox_warn(project_manager_title,"Select a name for your session!",NULL);
+			if(nm==NULL || *nm=='\0') djynn_msgbox_warn(project_manager_title,_("Select a name for your session!"),NULL);
 			else {
 				if(create) {
-					int id = djynn_cfg_get_int(djynn.str.session,djynn.str.session_id)+1;
+					gint id = djynn_cfg_get_int(djynn.str.session,djynn.str.session_id)+1;
 					sprintf(sess,"%04d",id);
 					djynn_cfg_set_int(djynn.str.session,djynn.str.session_id,id);
 					n = djynn_cfg_get_int(djynn.str.session,djynn.str.session_n)+1;
@@ -204,14 +204,14 @@ void djynn_pm_prj_dlg(djynn_project_file *f) {
 
 	vbox = gtk_vbox_new(FALSE,0);
 	vbox2 = gtk_vbox_new(FALSE,2);
-	label = gtk_label_new("Name:");
+	label = gtk_label_new(_("Name:"));
 	gtk_misc_set_alignment(GTK_MISC(label),0,0.5);
 	gtk_box_pack_start(GTK_BOX(vbox2),label,FALSE,FALSE,0);
 	name = gtk_entry_new();
 	gtk_entry_set_activates_default(GTK_ENTRY(name),TRUE);
 	gtk_box_pack_start(GTK_BOX(vbox2),name,FALSE,FALSE,0);
 
-	label = gtk_label_new("Base Path:");
+	label = gtk_label_new(_("Base Path:"));
 	gtk_misc_set_alignment(GTK_MISC(label),0,0.5);
 	gtk_box_pack_start(GTK_BOX(vbox2),label,FALSE,FALSE,0);
 	hbox = gtk_hbox_new(FALSE,5);
@@ -219,12 +219,12 @@ void djynn_pm_prj_dlg(djynn_project_file *f) {
 	gtk_entry_set_activates_default(GTK_ENTRY(directory),TRUE);
 	gtk_entry_set_text(GTK_ENTRY(directory),g_get_home_dir());
 	gtk_box_pack_start(GTK_BOX(hbox),directory,TRUE,TRUE,0);
-	button = gtk_button_new_with_label("Browse...");
+	button = gtk_button_new_with_label(_("Browse..."));
 	g_signal_connect(G_OBJECT(button),"clicked",G_CALLBACK(browse_select_folder_cb),directory);
 	gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
 	gtk_box_pack_start(GTK_BOX(vbox2),hbox,FALSE,FALSE,0);
 
-	label = gtk_label_new("Description:");
+	label = gtk_label_new(_("Description:"));
 	gtk_misc_set_alignment(GTK_MISC(label),0,0.5);
 	gtk_box_pack_start(GTK_BOX(vbox2),label,FALSE,FALSE,0);
 	description = gtk_entry_new();
@@ -237,10 +237,10 @@ void djynn_pm_prj_dlg(djynn_project_file *f) {
 		r = gtk_dialog_run(GTK_DIALOG(dialog));
 		if(r==GTK_RESPONSE_OK) {
 			const gchar *nm = gtk_entry_get_text(GTK_ENTRY(name));
-			if(nm==NULL || *nm=='\0') djynn_msgbox_warn(project_manager_title,"Select a name for your project!",NULL);
+			if(nm==NULL || *nm=='\0') djynn_msgbox_warn(project_manager_title,_("Select a name for your project!"),NULL);
 			else {
-				int n;
-				char key[64],prj1[257],prj2[257];
+				gint n;
+				gchar key[64],prj1[257],prj2[257];
 				sprintf(prj1,"%s%s.project",djynn.config_dir,nm);
 				sprintf(prj2,"%s%s." GEANY_PROJECT_EXT,djynn.config_dir,nm);
 				djynn_cfg_open();
@@ -264,11 +264,12 @@ fflush(djynn.log);
 						fclose(fp);
 					} else perror(prj1);
 					if((fp=fopen(prj2,"w"))) {
+						const GeanyIndentPrefs *ind = editor_get_indent_prefs(NULL);
 						fprintf(fp,"\n"
 							"[indentation]\n"
-							"indent_width=3\n"
-							"indent_type=1\n"
-							"indent_hard_tab_width=8\n"
+							"indent_width=%d\n"
+							"indent_type=%d\n"
+							"indent_hard_tab_width=%d\n"
 							"detect_indent=false\n"
 							"indent_mode=2\n"
 							"\n[project]\n"
@@ -277,7 +278,14 @@ fflush(djynn.log);
 							"make_in_base_path=false\n"
 							"description=%s\n"
 							"run_cmd=%s\n",
-							nm,dir,descr,nm);
+							ind->width,
+							ind->type,
+							ind->hard_tab_width,
+							nm,
+							dir,
+							descr,
+							nm
+						);
 						fclose(fp);
 					} else perror(prj2);
 				}
@@ -295,7 +303,7 @@ fflush(djynn.log);
 }
 
 void djynn_pm_folder_dlg(djynn_project_file *f) {
-	if(f==NULL) djynn_msgbox_warn(project_manager_title,"No project, folder or file selected!",NULL);
+	if(f==NULL) djynn_msgbox_warn(project_manager_title,_("No project, folder or file selected!"),NULL);
 	else {
 		GtkWidget *dialog;
 		GtkWidget *vbox;
@@ -307,7 +315,7 @@ void djynn_pm_folder_dlg(djynn_project_file *f) {
 		GtkWidget *add_folders;
 		GtkWidget *directory;
 		GtkWidget *button;
-		char dir[1024] = "",*p;
+		gchar dir[1024] = "",*p;
 		gint r;
 		if(f->type==DJYNN_PM_FILE) {
 			strcpy(dir,f->path);
@@ -321,7 +329,7 @@ void djynn_pm_folder_dlg(djynn_project_file *f) {
 
 		vbox = gtk_vbox_new(FALSE,0);
 		vbox2 = gtk_vbox_new(FALSE,2);
-		label = gtk_label_new("Folder Name:");
+		label = gtk_label_new(_("Folder Name:"));
 		gtk_misc_set_alignment(GTK_MISC(label),0,0.5);
 		gtk_box_pack_start(GTK_BOX(vbox2),label,FALSE,FALSE,0);
 		name = gtk_entry_new();
@@ -330,16 +338,16 @@ void djynn_pm_folder_dlg(djynn_project_file *f) {
 		gtk_box_pack_start(GTK_BOX(vbox),vbox2,FALSE,FALSE,7);
 
 		vbox2 = gtk_vbox_new(FALSE,2);
-		add_files = gtk_check_button_new_with_label("Add files in folder");
+		add_files = gtk_check_button_new_with_label(_("Add files in folder"));
 		gtk_box_pack_start(GTK_BOX(vbox2),add_files,FALSE,FALSE,0);
-		add_folders = gtk_check_button_new_with_label("Recurse in subfolders");
+		add_folders = gtk_check_button_new_with_label(_("Recurse in subfolders"));
 		gtk_box_pack_start(GTK_BOX(vbox2),add_folders,FALSE,FALSE,0);
 		hbox = gtk_hbox_new(FALSE,5);
 		directory = gtk_entry_new();
 		gtk_entry_set_activates_default(GTK_ENTRY(directory),TRUE);
 		gtk_entry_set_text(GTK_ENTRY(directory),dir);
 		gtk_box_pack_start(GTK_BOX(hbox),directory,TRUE,TRUE,0);
-		button = gtk_button_new_with_label("Browse...");
+		button = gtk_button_new_with_label(_("Browse..."));
 		g_signal_connect(G_OBJECT(button),"clicked",G_CALLBACK(browse_select_folder_cb),directory);
 		gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
 		gtk_box_pack_start(GTK_BOX(vbox2),hbox,FALSE,FALSE,0);
@@ -350,7 +358,7 @@ void djynn_pm_folder_dlg(djynn_project_file *f) {
 			r = gtk_dialog_run(GTK_DIALOG(dialog));
 			if(r==GTK_RESPONSE_OK) {
 				const gchar *nm = gtk_entry_get_text(GTK_ENTRY(name));
-				if(nm==NULL || *nm=='\0') djynn_msgbox_warn(project_manager_title,"Select a name for the folder!",NULL);
+				if(nm==NULL || *nm=='\0') djynn_msgbox_warn(project_manager_title,_("Select a name for the folder!"),NULL);
 				else {
 					const gchar *dir = gtk_entry_get_text(GTK_ENTRY(directory));
 					djynn_pm_folder_add(f,dir,nm,

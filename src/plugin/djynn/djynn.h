@@ -14,6 +14,8 @@ enum {
 	DJYNN_PM_NEW_SESSION,
 	DJYNN_PM_RENAME_SESSION,
 	DJYNN_PM_DELETE_SESSION,
+	DJYNN_PM_OPEN_EXTERNALLY,
+	DJYNN_PM_OPEN_TERMINAL,
 	DJYNN_PM_NEW_PROJECT,
 	DJYNN_PM_NEW_FOLDER,
 	DJYNN_PM_ADD_FILE,
@@ -36,21 +38,6 @@ enum {
 };
 
 enum {
-	DJYNN_KB_PM_NEW_WORKSPACE,
-	DJYNN_KB_PM_RENAME_WORKSPACE,
-	DJYNN_KB_PM_DELETE_WORKSPACE,
-	DJYNN_KB_PM_RELOAD_WORKSPACE,
-	DJYNN_KB_PM_NEW_SESSION,
-	DJYNN_KB_PM_RENAME_SESSION,
-	DJYNN_KB_PM_DELETE_SESSION,
-	DJYNN_KB_PM_NEW_PROJECT,
-	DJYNN_KB_PM_NEW_FOLDER,
-	DJYNN_KB_PM_ADD_FILE,
-	DJYNN_KB_PM_ADD_OPEN_FILES,
-	DJYNN_KB_PM_DELETE,
-	DJYNN_KB_PM_SORT_FILES,
-	DJYNN_KB_PM_MOVE_UP,
-	DJYNN_KB_PM_MOVE_DOWN,
 	DJYNN_KB_BASE64_ENCODE,
 	DJYNN_KB_BASE64_DECODE,
 	DJYNN_KB_TOGGLE_COMMENT,
@@ -76,8 +63,8 @@ enum {
 
 /* Use built in "Show Document List" instead.
 typedef struct djynn_open_document {
-	char *path;
-	char *name;
+	gchar *path;
+	gchar *name;
 	GtkTreeIter iter;
 	GeanyDocument *doc;
 	struct djynn_open_document *next;
@@ -85,11 +72,11 @@ typedef struct djynn_open_document {
 */
 
 typedef struct djynn_project_file {
-	char *path;
-	char *name;
-	int type;
-	int depth;
-	int status;
+	gchar *path;
+	gchar *name;
+	gint type;
+	gint depth;
+	gint status;
 	GtkTreePath *tree_path;
 	struct djynn_project_file *parent;
 	struct djynn_project_file *files;
@@ -97,28 +84,28 @@ typedef struct djynn_project_file {
 } djynn_project_file;
 
 typedef struct djynn_project {
-	char *path;
-	char *name;
-	int type;
-	int depth;
-	int status;
+	gchar *path;
+	gchar *name;
+	gint type;
+	gint depth;
+	gint status;
 	GtkTreePath *tree_path;
 	struct djynn_project_file *parent;
 	struct djynn_project_file *files;
 	struct djynn_project *next;
-	int index;
-	char *config_filename;
-	char *geany_project_filename;
+	gint index;
+	gchar *config_filename;
+	gchar *geany_project_filename;
 } djynn_project;
 
 
 typedef struct djynn_projectmanager {
-	int page_number;
+	gint page_number;
 /* Use built in "Show Document List" instead.
 	djynn_open_document *docs;
 	hashtable_t *docs_table;
 */
-	int nprj;
+	gint nprj;
 	djynn_project *prj;
 	hashtable_t *prj_files_table;
 } djynn_projectmanager;
@@ -129,42 +116,64 @@ typedef struct djynn_menu_item {
 	gchar *label;
 	const gchar *menu_stock;
 	GtkWidget *menu_item;
-	void (*activate)(int);
+	void (*activate)(gint);
 } djynn_menu_item;
 
 typedef struct djynn_keybind {
 	gchar *name;
-	int menu_item_index;
+	gint menu_item_index;
 } djynn_keybind;
 
 typedef struct djynn_data {
 	FILE *log;
-	char *config_dir;
-	char *config_filename;
+	gchar *config_dir;
+	gchar *config_filename;
 	GKeyFile *config_file;
-	int config_file_ref;
+	gint config_file_ref;
 	djynn_menu_item *menu_items;
 	djynn_keybind *keybinds;
 	GtkWidget *tools_menu_item;
 	GtkWidget *tools_menu;
-	char *workspace;
-	char *workspace_key;
+	gchar *workspace;
+	gchar *workspace_key;
 	djynn_projectmanager pm;
 
 	struct {
-		const char *djynn;
-		const char *workspace;
-		const char *workspace_id;
-		const char *workspace_n;
-		const char *workspace_d;
-		const char *session;
-		const char *session_id;
-		const char *session_n;
-		const char *session_d;
-		const char *projectmanager;
-		const char *project;
-		const char *project_n;
-		const char *project_d;
+		gchar *ext_open_cmd;
+		gint ws_list;
+		gint sess_list;
+		gint show_icons;
+		gboolean show_tree_lines;
+		gboolean single_click_open;
+		gboolean double_click_ext;
+		gboolean activate_prj;
+		gboolean activate_sidebar;
+	} conf;
+
+	struct {
+		const gchar *djynn;
+		const gchar *workspace;
+		const gchar *workspace_id;
+		const gchar *workspace_n;
+		const gchar *workspace_d;
+		const gchar *session;
+		const gchar *session_id;
+		const gchar *session_n;
+		const gchar *session_d;
+		const gchar *projectmanager;
+		const gchar *project;
+		const gchar *project_n;
+		const gchar *project_d;
+
+		const gchar *ext_open_cmd;
+		const gchar *ws_list;
+		const gchar *sess_list;
+		const gchar *show_icons;
+		const gchar *show_tree_lines;
+		const gchar *single_click_open;
+		const gchar *double_click_ext;
+		const gchar *activate_prj;
+		const gchar *activate_sidebar;
 	} str;
 } djynn_data;
 
@@ -178,51 +187,52 @@ extern GeanyFunctions *geany_functions;
 void djynn_cfg_open();
 void djynn_cfg_save();
 void djynn_cfg_close();
-gboolean djynn_cfg_has_group(const char *group);
-void djynn_cfg_remove_group(const char *group);
-void djynn_cfg_remove(const char *group,const char *key);
-void djynn_cfg_remove_from_list(const char *group,const char *key,int index);
-int djynn_cfg_get_int(const char *group,const char *key);
-void djynn_cfg_set_int(const char *group,const char *key,int n);
-char *djynn_cfg_get_str(const char *group,const char *key);
-void djynn_cfg_set_str(const char *group,const char *key,const char *str);
-char *djynn_cfg_get_workspace_key(const char *name);
+gboolean djynn_cfg_has_group(const gchar *group);
+void djynn_cfg_remove_group(const gchar *group);
+void djynn_cfg_remove(const gchar *group,const gchar *key);
+void djynn_cfg_remove_from_list(const gchar *group,const gchar *key,gint index);
+gint djynn_cfg_get_int(const gchar *group,const gchar *key);
+void djynn_cfg_set_int(const gchar *group,const gchar *key,gint n);
+gchar *djynn_cfg_get_str(const gchar *group,const gchar *key);
+void djynn_cfg_set_str(const gchar *group,const gchar *key,const gchar *str);
+gchar *djynn_cfg_get_workspace_key(const gchar *name);
 
-int djynn_msgbox_ask(const char *title,const char *msg,const char *item);
-void djynn_msgbox_warn(const char *title,const char *msg,const char *item);
+gint djynn_msgbox_ask(const gchar *title,const gchar *msg,const gchar *item);
+void djynn_msgbox_warn(const gchar *title,const gchar *msg,const gchar *item);
 
-void djynn_pm_init(GeanyData *data,int *menu_index);
+void djynn_pm_configure();
+void djynn_pm_init(GeanyData *data,gint *menu_index);
 void djynn_pm_cleanup();
-void djynn_pm_action(int id);
+void djynn_pm_action(gint id);
 void djynn_pm_ws_dlg(gboolean create);
 void djynn_pm_ws_save();
 void djynn_pm_ws_load();
-void djynn_pm_ws_set(int index);
-void djynn_pm_ws_list_select(int index);
-void djynn_pm_ws_list_remove(int index);
-void djynn_pm_ws_list_add(const char *name);
-void djynn_pm_ws_list_set(int index,const char *name);
+void djynn_pm_ws_set(gint index);
+void djynn_pm_ws_list_select(gint index);
+void djynn_pm_ws_list_remove(gint index);
+void djynn_pm_ws_list_add(const gchar *name);
+void djynn_pm_ws_list_set(gint index,const gchar *name);
 void djynn_pm_sess_dlg(gboolean create);
-void djynn_pm_sess_set(int index);
-void djynn_pm_sess_list_select(int index);
-void djynn_pm_sess_list_remove(int index);
-void djynn_pm_sess_list_add(const char *name);
-void djynn_pm_sess_list_set(int index,const char *name);
+void djynn_pm_sess_set(gint index);
+void djynn_pm_sess_list_select(gint index);
+void djynn_pm_sess_list_remove(gint index);
+void djynn_pm_sess_list_add(const gchar *name);
+void djynn_pm_sess_list_set(gint index,const gchar *name);
 void djynn_pm_prj_dlg();
 void djynn_pm_folder_dlg();
 void djynn_pm_folder_add(djynn_project_file *f,const gchar *path,const gchar *name,gboolean files,gboolean folders);
 
-void djynn_base64_init(GeanyData *data,int *menu_index);
+void djynn_base64_init(GeanyData *data,gint *menu_index);
 void djynn_base64_cleanup();
-void djynn_base64_action(int id);
+void djynn_base64_action(gint id);
 
-void djynn_comment_init(GeanyData *data,int *menu_index);
+void djynn_comment_init(GeanyData *data,gint *menu_index);
 void djynn_comment_cleanup();
-void djynn_comment_action(int id);
+void djynn_comment_action(gint id);
 
-void djynn_sort_init(GeanyData *data,int *menu_index);
+void djynn_sort_init(GeanyData *data,gint *menu_index);
 void djynn_sort_cleanup();
-void djynn_sort_action(int id);
+void djynn_sort_action(gint id);
 
 
 #endif /* _DJYNN_H */

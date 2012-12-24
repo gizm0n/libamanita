@@ -1,0 +1,81 @@
+.. |(version)| replace:: 0.10
+
+TreeBrowser plugin
+==================
+
+.. image:: http://img35.imageshack.us/img35/7964/geanydjynn.png
+   :width: 782
+   :alt: djynn plugin
+   :align: right
+   :target: http://img35.imageshack.us/img35/7964/geanydjynn.png
+
+.. contents::
+
+
+About
+=====
+
+Djynn is a plugin for the Geany IDE and adds sorting and commenting
+functionality as well as a simple projectmanager that integrates with
+the built in project handler of Geany.
+
+
+Features
+========
+
+* Project manager
+* Workspaces
+* Session handling
+* Sorting lines
+* Commenting
+* Formatting, encoding/decoding, etc.
+
+
+Requirements
+============
+* GTK >= 2.6.0
+* GIO >= 2.0 (optional)
+* Geany >= 1.22
+
+
+Usage
+=====
+
+After compiling and installing Djynn, start Geany and go to menu
+Tools->Plugin Manager and set checkbox at Djynn plugin
+
+
+FAQ
+===
+
+
+Download Source
+===============
+
+Source checkout:
+svn checkout http://libamanita.googlecode.com/svn/trunk/ libamanita
+
+
+Installation
+============
+
+cd libamanita/src/plugin/djynn
+cmake .
+make
+sudo make install
+
+
+License
+=======
+
+GNU GPL v2
+
+
+Ideas, questions, patches and bug reports
+=========================================
+
+http://code.google.com/p/libamanita/issues/list
+
+--
+2012 Per Löwgren
+per.lowgren@gmail.com

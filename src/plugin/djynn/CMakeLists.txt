@@ -61,6 +61,18 @@ CHECK_FUNCTION_EXISTS(strpbrk HAVE_STRPBRK)
 CHECK_FUNCTION_EXISTS(strstr HAVE_STRSTR)
 CHECK_FUNCTION_EXISTS(vprintf HAVE_VPRINTF)
 
+find_package(GTK2 2.6 REQUIRED gtk)
+if(GTK2_FOUND)
+	include_directories(${GTK2_INCLUDE_DIRS})
+	add_definitions(-DGTK)
+endif()
+PKG_CHECK_MODULES(GIO "gio-2.0 >= 2.26.0")
+if(GIO_FOUND)
+	include_directories(${GIO_INCLUDE_DIRS})
+	link_directories(${GIO_LIBRARY_DIRS})
+	add_definitions(-DHAVE_GIO)
+endif()
+
 include_directories(
 	"${PROJECT_SOURCE_DIR}/../../../include"
 	"${PROJECT_BINARY_DIR}/include"
