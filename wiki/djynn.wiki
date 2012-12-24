@@ -7,7 +7,7 @@ At present time, Djynn adds adds functions for commenting, which Geany already h
 
 Djynn also sorts lines in various ways, ascending, descending and reverse line order.
 
-The project manager inserts a tree for the project files, and a sorted list of open files for quick access if you have many open files. Files are added manually in each project, there can be any number of files, they can be ordered in any way you like, and can be read from a directory including subdirectories (only source files are read, and non-project directories such as '.svn' excluded).
+The project manager inserts a tree for the project files, and a sorted list of open files for quick access if you have many open files. Files are added manually in each project, there can be any number of files, order in any way you like, and it's also possible to read and insert files from a directory including subdirectories (only source files are read, and non-project directories such as '.svn' excluded).
 
 http://img35.imageshack.us/img35/7964/geanydjynn.png
 
