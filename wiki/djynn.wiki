@@ -27,7 +27,9 @@ Djynn uses CMake, so you will need to install this, and you will of course need 
 {{{
 svn checkout http://libamanita.googlecode.com/svn/trunk/ libamanita
 cd libamanita/src/plugin/djynn
-cmake .
+mkdir build
+cd build
+cmake ..
 make
 sudo make install
 }}}
