@@ -4,7 +4,9 @@
 
 == Introduction ==
 
-Like everyone else, more or less I suppose, I tried using every other editor available for Linux. None except Geany worked the way I wanted, and with Geany everything was perfect — I even liked the name — everything except the project manager. I couldn't get any of the project-manager-plugins to do what I wanted, and I had something similar to Notepad++, Dev-C++, or CodeBlocks in mind. So I decided to see if I could make a plugin of my own. The TreeBrowser plugin was a good starting point. It went well, even better than expected and it was so much fun I decided to add more functionality, and so when I needed sorting that was added, and after that was added commenting with a slightly different behaviour of the built in commenting.
+Like everyone else, more or less I suppose, I tried using every other editor available for Linux. None except Geany worked the way I wanted, and with Geany everything was perfect — I even liked the name — everything except the project manager. I couldn't get any of the project-manager-plugins to do what I wanted, and I had something similar to Notepad++, Dev-C++, or CodeBlocks in mind. So I decided to see if I could make a plugin of my own.
+
+The TreeBrowser-plugin was a good starting point. It went well, even better than expected and it was so much fun I decided to add more functionality; so when I needed sorting — that was added, and after that was added commenting — with a slightly different behaviour of the built-in commenting.
 
 The name Djynn is of course a play on words, like the name Geany, both being oriental spirits, but with a 'y' instead of 'ie'/'i'. Having added more functionality than a simple project manager, I couldn't just name the plugin "Project Manager" or similar, and so I thought of the name Geany, and obviously it refers to the three-wish-fulfilling flask-dwelling spirit "Genie" with a modified spelling, and I came to think of the other oriental spirit "Djinn", of which I suppose the name Genie comes, and thought "hey, that could be a good name!".
 
@@ -12,11 +14,11 @@ The name Djynn is of course a play on words, like the name Geany, both being ori
 
 Djynn is a plugin for the Geany IDE and adds sorting and commenting functionality as well as a simple projectmanager that integrates with the built in project handler of Geany.
 
-Lines can be sorted in various ways, ascending, descending and reverse line order. If there is a selection, only the selected lines are sortered, otherwise the entire document is sorted.
+Lines can be sorted in various ways, ascending, descending and reverse line order. If there is a selection, only the selected lines are sorted, otherwise the entire document is sorted.
 
-The commenting differs slightly from the built in commenting of Geany. It's of course a matter of taste and personal programming style, better to have a few options to choose from. It toggles line- and block-commenting, and add doxygen comments.
+The commenting differs slightly from the built in Geany commenting. It's of course a matter of taste and personal programming style, better to have a few options to choose from. It toggles line- and block-commenting, and adds doxygen comments.
 
-The project manager inserts a tree for the project files. Files are added manually in each project, there can be any number of files, order in any way you like, and it's also possible to read and insert files from a directory including subdirectories (only source files are read, and non-project directories such as '.svn' excluded).
+The project manager inserts a tree for the project files. Files and folders are added manually in each project, there can be any number of files, order in any way you like, and it's also possible to read and insert files from a directory including subdirectories (only source files are read, and non-project directories such as '.svn' are excluded).
 
 http://img35.imageshack.us/img35/7964/geanydjynn.png
 
