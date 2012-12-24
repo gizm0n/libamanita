@@ -22,7 +22,7 @@ The project manager inserts a tree for the project files. Files and folders are 
 
 http://img35.imageshack.us/img35/7964/geanydjynn.png
 
-In the project manager you can have any number of workspaces, and each workspace can contain any number of projects. Each project is stored in a separate config-file, and if two workspaces creates two projects of the same name the same project is shared between workspaces. Projects also integrates with the built in Geany projects, and for every Djynn project a Geany project is created also.
+In the project manager you can have any number of workspaces, and each workspace can contain any number of projects. Each project is stored in a separate config-file, and if two workspaces creates two projects with the same name, the project is shared between workspaces. Projects also integrates with the built in Geany projects, and for every Djynn project a Geany project is created also.
 
 http://img15.imageshack.us/img15/495/geanydjynnwssess.png
 
