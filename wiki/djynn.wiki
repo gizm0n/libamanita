@@ -3,8 +3,10 @@
 = Introduction =
 Djynn is a plugin for the Geany IDE and adds sorting and commenting functionality as well as a simple projectmanager. It is designed entirely to fulfill my own needs, and is supplied as is.
 
-At present time, Djynn adds adds functions for commenting, which Geany already has, but I found Geany's behaviour different to my liking, and so made my own routines. It will toggle line- and block-commenting, and add doxygen comments, and shortcuts can be made for quick access. Djynn also can sort lines in various ways, ascending, descending and reverse line order.
+At present time, Djynn adds adds functions for commenting, which Geany already has, but I found Geany's behaviour different to my liking, and so made my own routines. It toggles line- and block-commenting, and add doxygen comments, and shortcuts can of course be set for quick access.
 
-Djynn's Project manager inserts a tree for the project files, and a sorted list of open files for quick access if you have many open files.
+Djynn also sorts lines in various ways, ascending, descending and reverse line order.
 
-http://img259.imageshack.us/img259/111/djynn.png
+The project manager inserts a tree for the project files, and a sorted list of open files for quick access if you have many open files. Files are added manually in each project, there can be any number of files, they can be ordered in any way you like, and can be read from a directory including subdirectories (only source files are read, and non-project directories such as '.svn' excluded).
+
+http://img35.imageshack.us/img35/7964/geanydjynn.png
