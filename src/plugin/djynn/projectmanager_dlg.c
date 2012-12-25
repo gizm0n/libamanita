@@ -259,8 +259,7 @@ fflush(djynn.log);
 					if((fp=fopen(prj1,"w"))) {
 						fprintf(fp,"+%s\n"
 							"%s\n"
-							"%s\n"
-							"-src\n",
+							"%s\n",
 							nm,dir,prj2);
 						fclose(fp);
 					} else perror(prj1);
