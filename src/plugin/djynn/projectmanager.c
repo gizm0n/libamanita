@@ -237,9 +237,11 @@ void sess_open(const gchar *fn) {
 			if((p2=strchr(p1,'\r'))!=NULL) *p2 = '\0';
 fprintf(djynn.log,"sess_open(pos=%d,sel=%d,path=%s)\n",pos,sel,p1);
 fflush(djynn.log);
-			doc = document_open_file(p1,FALSE,NULL,NULL);
-			sci_set_current_position(doc->editor->sci,pos,TRUE);
-			if(sel) strcpy(open,p1);
+			if(g_file_test(p1,G_FILE_TEST_EXISTS)) {
+				doc = document_open_file(p1,FALSE,NULL,NULL);
+				sci_set_current_position(doc->editor->sci,pos,TRUE);
+				if(sel) strcpy(open,p1);
+			} else djynn_msgbox_warn("Open Session",_("The file \"%s\" no longer exists."),p1);
 		}
 		fclose(fp);
 		if(*open!='\0') document_open_file(open,FALSE,NULL,NULL);
@@ -825,9 +827,33 @@ void djynn_pm_ws_load() {
 	prj_expand_tree();
 }
 
-void djynn_pm_sess_set(gint index) {
+void djynn_pm_sess_save() {
+	sess_write();
+}
+
+void djynn_pm_sess_load() {
 	gint n;
 	gchar key[64],*s,*p,*fn;
+	djynn_cfg_open();
+	n = djynn_cfg_get_int(djynn.str.djynn,djynn.str.session);
+fprintf(djynn.log,"djynn_pm_sess_load(n=%d)\n",n);
+fflush(djynn.log);
+	sprintf(key,djynn.str.session_d,n);
+	s = djynn_cfg_get_str(djynn.str.session,key);
+	p = strchr(s,':'),*p = '\0',++p;
+	fn = g_strconcat(geany->app->configdir,G_DIR_SEPARATOR_S,"plugins",G_DIR_SEPARATOR_S,
+			djynn.str.djynn,G_DIR_SEPARATOR_S,"session",s,".txt",NULL);
+fprintf(djynn.log,"djynn_pm_sess_set(s=%s,p=%s,fn=%s)\n",s,p,fn);
+fflush(djynn.log);
+	g_free(s);
+	if(g_file_test(fn,G_FILE_TEST_EXISTS)) sess_open(fn);
+	g_free(fn);
+	djynn_cfg_close();
+}
+
+void djynn_pm_sess_set(gint index) {
+	gint n;
+//	gchar key[64],*s,*p,*fn;
 	djynn_cfg_open();
 	n = djynn_cfg_get_int(djynn.str.session,djynn.str.session_n);
 	if(index>=1 && index<=n) {
@@ -837,8 +863,8 @@ fprintf(djynn.log,"djynn_pm_sess_set(n=%d)\n",index);
 fflush(djynn.log);
 			djynn_cfg_set_int(djynn.str.djynn,djynn.str.session,index);
 			djynn_cfg_save();
-
-			sprintf(key,djynn.str.session_d,index);
+			djynn_pm_sess_load();
+/*			sprintf(key,djynn.str.session_d,index);
 			s = djynn_cfg_get_str(djynn.str.session,key);
 			p = strchr(s,':'),*p = '\0',++p;
 			fn = g_strconcat(geany->app->configdir,G_DIR_SEPARATOR_S,"plugins",G_DIR_SEPARATOR_S,
@@ -847,7 +873,7 @@ fprintf(djynn.log,"djynn_pm_sess_set(s=%s,p=%s,fn=%s)\n",s,p,fn);
 fflush(djynn.log);
 			g_free(s);
 			sess_open(fn);
-			g_free(fn);
+			g_free(fn);*/
 		}
 	}
 	djynn_cfg_close();
@@ -1240,10 +1266,12 @@ void djynn_pm_action(gint id) {
 	switch(id) {
 		case DJYNN_PM_NEW_WORKSPACE:djynn_pm_ws_dlg(TRUE);break;
 		case DJYNN_PM_RENAME_WORKSPACE:djynn_pm_ws_dlg(FALSE);break;
-		case DJYNN_PM_DELETE_WORKSPACE:djynn_pm_ws_delete();break;
 		case DJYNN_PM_RELOAD_WORKSPACE:djynn_pm_ws_load();break;
+		case DJYNN_PM_DELETE_WORKSPACE:djynn_pm_ws_delete();break;
 		case DJYNN_PM_NEW_SESSION:djynn_pm_sess_dlg(TRUE);break;
 		case DJYNN_PM_RENAME_SESSION:djynn_pm_sess_dlg(FALSE);break;
+		case DJYNN_PM_SAVE_SESSION:djynn_pm_sess_save();break;
+		case DJYNN_PM_RELOAD_SESSION:djynn_pm_sess_load();break;
 		case DJYNN_PM_DELETE_SESSION:djynn_pm_sess_delete();break;
 		case DJYNN_PM_OPEN_EXTERNALLY:djynn_pm_open_externally(f);break;
 		case DJYNN_PM_OPEN_TERMINAL:djynn_pm_open_terminal(f);break;
@@ -1275,10 +1303,13 @@ void djynn_pm_init(GeanyData *data,gint *menu_index) {
 	const gint menu_items[] = {
 		DJYNN_PM_NEW_WORKSPACE,
 		DJYNN_PM_RENAME_WORKSPACE,
+		DJYNN_PM_RELOAD_WORKSPACE,
 		DJYNN_PM_DELETE_WORKSPACE,
 		-1,
 		DJYNN_PM_NEW_SESSION,
+		DJYNN_PM_SAVE_SESSION,
 		DJYNN_PM_RENAME_SESSION,
+		DJYNN_PM_RELOAD_SESSION,
 		DJYNN_PM_DELETE_SESSION,
 		-1,
 		DJYNN_PM_NEW_PROJECT,

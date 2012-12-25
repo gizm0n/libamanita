@@ -175,6 +175,7 @@ void djynn_pm_sess_dlg(gboolean create) {
 					djynn_cfg_save();
 					djynn_pm_sess_list_add(nm);
 					djynn_pm_sess_list_select(n);
+					djynn_pm_sess_save();
 					break;
 				} else if(strcmp(str,nm)!=0) {
 					sprintf(str,"%s:%s",sess,nm);
@@ -272,12 +273,14 @@ fflush(djynn.log);
 							"indent_hard_tab_width=%d\n"
 							"detect_indent=false\n"
 							"indent_mode=2\n"
-							"\n[project]\n"
+							"\n"
+							"[project]\n"
 							"name=%s\n"
 							"base_path=%s\n"
-							"make_in_base_path=false\n"
+							"make_in_base_path=true\n"
 							"description=%s\n"
-							"run_cmd=%s\n",
+							"run_cmd=%s\n"
+							"file_patterns=*.c;*.cc;*.cfg;*.conf;*.cpp;*.css;*.cxx;*.h;*.hh;*.hpp;*.html;*.hxx;*.ini;*.java;*.js;*.lua;*.pas;*.perl;*.php;*.pl;*.po;*.py;*.rc;*.sh;*.txt;*.vala;*.xhtml;*.xml;\n",
 							ind->width,
 							ind->type,
 							ind->hard_tab_width,
