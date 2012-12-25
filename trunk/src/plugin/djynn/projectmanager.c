@@ -203,14 +203,16 @@ fflush(djynn.log);
 	fp = fopen(fn,"w");
 	if(fp!=NULL) {
 		GeanyDocument *doc = document_get_current();
-		gint c = doc->index;
-		for(n=0; 1; ++n) {
-			doc = document_get_from_page(n);
-			if(doc==NULL) break;
-			if(doc->file_name!=NULL && g_path_is_absolute(doc->file_name)) {
-				fprintf(fp,"%d;%d;%s\n",sci_get_current_position(doc->editor->sci),doc->index==c,doc->file_name);
+		if(doc!=NULL) {
+			gint c = doc->index;
+			for(n=0; 1; ++n) {
+				doc = document_get_from_page(n);
+				if(doc==NULL) break;
+				if(doc->file_name!=NULL && g_path_is_absolute(doc->file_name)) {
+					fprintf(fp,"%d;%d;%s\n",sci_get_current_position(doc->editor->sci),doc->index==c,doc->file_name);
 fprintf(djynn.log,"sess_write(file=%s)\n",doc->file_name);
 fflush(djynn.log);
+				}
 			}
 		}
 		fclose(fp);
