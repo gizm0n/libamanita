@@ -9,10 +9,12 @@
 enum {
 	DJYNN_PM_NEW_WORKSPACE,
 	DJYNN_PM_RENAME_WORKSPACE,
-	DJYNN_PM_DELETE_WORKSPACE,
 	DJYNN_PM_RELOAD_WORKSPACE,
+	DJYNN_PM_DELETE_WORKSPACE,
 	DJYNN_PM_NEW_SESSION,
+	DJYNN_PM_SAVE_SESSION,
 	DJYNN_PM_RENAME_SESSION,
+	DJYNN_PM_RELOAD_SESSION,
 	DJYNN_PM_DELETE_SESSION,
 	DJYNN_PM_OPEN_EXTERNALLY,
 	DJYNN_PM_OPEN_TERMINAL,
@@ -214,6 +216,7 @@ void djynn_pm_ws_list_add(const gchar *name);
 void djynn_pm_ws_list_set(gint index,const gchar *name);
 void djynn_pm_sess_dlg(gboolean create);
 void djynn_pm_sess_set(gint index);
+void djynn_pm_sess_save();
 void djynn_pm_sess_list_select(gint index);
 void djynn_pm_sess_list_remove(gint index);
 void djynn_pm_sess_list_add(const gchar *name);

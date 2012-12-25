@@ -24,11 +24,13 @@ PLUGIN_KEY_GROUP(djynn,DJYNN_KB_COUNT)
 
 static djynn_menu_item djynn_menu_items[] = {
 	{ _("New Workspace"),					GTK_STOCK_NEW,					NULL,		djynn_pm_action },
-	{ _("Rename Workspace"),				NULL,								NULL,		djynn_pm_action },
-	{ _("Delete Workspace"),				GTK_STOCK_DELETE,				NULL,		djynn_pm_action },
+	{ _("Rename Workspace"),				GTK_STOCK_SAVE_AS,			NULL,		djynn_pm_action },
 	{ _("Reload Workspace"),				GTK_STOCK_REFRESH,			NULL,		djynn_pm_action },
+	{ _("Delete Workspace"),				GTK_STOCK_DELETE,				NULL,		djynn_pm_action },
 	{ _("New Session"),						GTK_STOCK_NEW,					NULL,		djynn_pm_action },
-	{ _("Rename Session"),					NULL,								NULL,		djynn_pm_action },
+	{ _("Save Session"),						GTK_STOCK_SAVE,				NULL,		djynn_pm_action },
+	{ _("Rename Session"),					GTK_STOCK_SAVE_AS,			NULL,		djynn_pm_action },
+	{ _("Reload Session"),					GTK_STOCK_REFRESH,			NULL,		djynn_pm_action },
 	{ _("Delete Session"),					GTK_STOCK_DELETE,				NULL,		djynn_pm_action },
 	{ _("Open Directory"),					GTK_STOCK_OPEN,				NULL,		djynn_pm_action },
 	{ _("Open Terminal"),					GTK_STOCK_OPEN,				NULL,		djynn_pm_action },
