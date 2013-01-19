@@ -3,18 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <amanita/tk/List.h>
+
 #ifdef USE_WIN32
-#ifndef WINVER
-#define WINVER 0x0501
-#endif
-#define _WIN32_IE	0x0501
-#ifdef WIN32_LEAN_AND_MEAN
-#undef WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
 #include <commctrl.h>
 #endif
-#include <amanita/tk/List.h>
 
 
 
@@ -156,7 +149,7 @@ void List::addRow(const char *cols,char sep) {
 			char *p1,*p2,*c = strdup(cols);
 			int n;
 #ifdef USE_GTK
-			GValue val = G_VALUE_INIT;
+			GValue val = { 0 };
 			gtk_list_store_append(store,&iter);
 #endif
 #ifdef USE_WIN32

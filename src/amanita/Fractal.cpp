@@ -387,12 +387,16 @@ void Fractal::render(int i) {
 	int n,sz = sw*sh,x,y,t;
 	timeval tv;
 
+fprintf(stderr,"Fractal::render(1)\n");
+fflush(stderr);
 	if(i>0) formula.max = i;
 	else {
 		i = formula.min+range;
 		formula.max = i>ITER_MAX? ITER_MAX : i;
 	}
 
+fprintf(stderr,"Fractal::render(2)\n");
+fflush(stderr);
 	formula.b = radius;
 	formula.b2 = formula.b*formula.b;
 	formula.min = ITER_MAX;
@@ -400,6 +404,8 @@ void Fractal::render(int i) {
 	formula.pw = zoom.width/width;
 	formula.ph = zoom.height/height;
 
+fprintf(stderr,"Fractal::render(3)\n");
+fflush(stderr);
 	switch(set) {
 		case SET_JULIA:
 			formula.z = 1.0/zoom.z;
@@ -411,6 +417,8 @@ void Fractal::render(int i) {
 			break;
 	}
 
+fprintf(stderr,"Fractal::render(4)\n");
+fflush(stderr);
 	if(params&FRACT_FLOAT)
 		for(n=0; n<sz; ++n) float1[n] = 0.0f;
 	else if(params&FRACT_EDGETRACE) {
@@ -418,11 +426,15 @@ void Fractal::render(int i) {
 		memset(map,0,sw*sh*sizeof(uint8_t));
 	}
 
+fprintf(stderr,"Fractal::render(5)\n");
+fflush(stderr);
 	thfin = 0;
 	percent = 0.0;
 	gettimeofday(&tv,0);
 	time = tv.tv_sec*1000000+tv.tv_usec;
 
+fprintf(stderr,"Fractal::render(6)\n");
+fflush(stderr);
 	if(params&FRACT_THREADED) {
 		nthreads = 4;
 		if(!threads) threads = new Thread[nthreads];
@@ -461,6 +473,7 @@ void Fractal::calculate(Formula &form,int n,int l,int t,int r,int b,formula_func
 	int x,y,yw;
 	double yp = 100.0/(double)(nthreads*(b-t));
 fprintf(stderr,"Fractal::calculate:  n: %d, l: %d, t: %d, r: %d, b: %d\n",n,l,t,r,b);
+fflush(stderr);
 //fprintf(stderr,"sw: %d, sh: %d\n",sw,sh);
 
 //nmin = 1024;
@@ -468,6 +481,8 @@ fprintf(stderr,"Fractal::calculate:  n: %d, l: %d, t: %d, r: %d, b: %d\n",n,l,t,
 //navg = 0.0;
 
 	if(params&FRACT_FLOAT) {
+fprintf(stderr,"Fractal::calculate: float %p\n",float1);
+fflush(stderr);
 		for(y=t,yw=t*sw; y<b; ++y,yw+=sw) {
 			for(x=l; x<r; ++x) {
 				(form.*f)(x,y);

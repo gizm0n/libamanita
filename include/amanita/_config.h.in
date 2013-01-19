@@ -36,6 +36,7 @@
 #cmakedefine HAVE_SYS_TYPES_H
 #cmakedefine HAVE_UNISTD_H
 
+#cmakedefine HAVE_SQLITE3_H
 #cmakedefine HAVE_TIFF_H
 #cmakedefine HAVE_LIBAVCODEC_H
 
@@ -48,6 +49,7 @@
 #cmakedefine HAVE_LOG
 #cmakedefine HAVE_SQRT
 #cmakedefine HAVE_MEMSET
+#cmakedefine HAVE_OPEN_MEMSTREAM
 #cmakedefine HAVE_STRCHR
 #cmakedefine HAVE_STRDUP
 #cmakedefine HAVE_STRNICMP

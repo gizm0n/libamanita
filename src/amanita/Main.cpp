@@ -24,28 +24,6 @@
 //#include <amanita/net/Http.h>
 
 
-
-#ifdef USE_WIN32
-HINSTANCE hMainInstance;
-
-int WINAPI WinMain(HINSTANCE hi,HINSTANCE hp,LPSTR cmd,int show) {
-	int i,argc;
-	LPWSTR *args = CommandLineToArgvW(GetCommandLineW(),&argc);
-	char *argv[argc];
-	for(i=0; i<argc; i++) {
-		argv[i] = w2char(args[i]);
-		fprintf(stderr,"Cmd[%d]: %s\n",i,argv[i]);
-	}
-	LocalFree(args);
-	hMainInstance = hi;
-//debug_output("hMainInstance: %x\n",hMainInstance);
-	i = main(argc,argv);
-	while(--argc>=0) free(argv[argc]);
-	return i;
-}
-#endif
-
-
 namespace a {
 
 //#define _QUOTE_MACRO(x) #x
@@ -73,7 +51,7 @@ Main::Main(uint32_t p,const char *prj,const char *nm) : app_thread() {
 
 	if((app_params&APP_DIRECTORIES)) {
 		homedir(str,256);
-#if defined USE_GTK
+#if defined USE_LINUX
 		sprintf(home,"%s/.%s/",str,app_project);
 #elif defined USE_WIN32
 		sprintf(home,"%s\\",str);
@@ -81,7 +59,7 @@ Main::Main(uint32_t p,const char *prj,const char *nm) : app_thread() {
 //	setProperty(property_key[APP_DIR_HOME],home);
 		if(!exists(home)) mkdir(home);
 
-#if defined USE_GTK
+#if defined USE_LINUX
 		snprintf(data,256,"/usr/share/%s/",app_project);
 		if(!exists(data)) {
 			snprintf(data,256,"/usr/local/share/%s/",app_project);

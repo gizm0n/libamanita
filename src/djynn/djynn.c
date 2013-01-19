@@ -42,6 +42,8 @@ static djynn_menu_item djynn_menu_items[] = {
 	{ _("Sort Files"),						GTK_STOCK_SORT_ASCENDING,	NULL,		djynn_pm_action },
 	{ _("Move Up"),							GTK_STOCK_GO_UP,				NULL,		djynn_pm_action },
 	{ _("Move Down"),							GTK_STOCK_GO_DOWN,			NULL,		djynn_pm_action },
+	{ _("Encode ASCII"),						NULL,								NULL,		djynn_ascii_action },
+	{ _("Decode ASCII"),						NULL,								NULL,		djynn_ascii_action },
 	{ _("Encode Base64"),					NULL,								NULL,		djynn_base64_action },
 	{ _("Decode Base64"),					NULL,								NULL,		djynn_base64_action },
 	{ _("Toggle Comment"),					NULL,								NULL,		djynn_comment_action },
@@ -462,6 +464,7 @@ void plugin_init(GeanyData *data) {
 
 	i = 0;
 	djynn_pm_init(data,&i);
+	djynn_ascii_init(data,&i);
 	djynn_base64_init(data,&i);
 	djynn_comment_init(data,&i);
 	djynn_sort_init(data,&i);
@@ -483,6 +486,7 @@ void plugin_init(GeanyData *data) {
 
 void plugin_cleanup(void) {
 	djynn_pm_cleanup();
+	djynn_ascii_cleanup();
 	djynn_base64_cleanup();
 	djynn_comment_cleanup();
 	djynn_sort_cleanup();

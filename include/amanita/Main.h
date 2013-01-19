@@ -16,18 +16,6 @@
 #include <amanita/Thread.h>
 //#include <amanita/tk/Window.h>
 
-/** @cond */
-#ifdef USE_WIN32
-#ifdef main
-#undef main
-#endif
-/* Define main as amanita_main to force the use of WinMain. */
-#define main amanita_main
-extern int main(int, char *[]);
-extern HINSTANCE hMainInstance;
-#endif
-/** @endcond */
-
 
 /** Amanita Namespace */
 namespace a {
