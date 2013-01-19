@@ -26,7 +26,7 @@ uint32_t Server::id_index = 0xffff;
 Server::Server(socket_event_handler seh) : Socket(seh),_sockets(),_clients(),_main("main"),_channels() {
 /*#ifdef USE_SDL
 	setsz = 0;
-#elif defined(USE_GTK) || defined(USE_WIN32)*/
+#elif defined(USE_LINUX) || defined(USE_WIN32)*/
 	sockets_n = sockets_cap = 0,sockets = 0;
 //#endif
 	_channels.put(_main.getName(),&_main);
@@ -34,7 +34,7 @@ Server::Server(socket_event_handler seh) : Socket(seh),_sockets(),_clients(),_ma
 
 Server::~Server() {
 /*#ifdef USE_SDL
-#elif defined(USE_GTK) || defined(USE_WIN32)*/
+#elif defined(USE_LINUX) || defined(USE_WIN32)*/
 	if(sockets) free(sockets);
 	sockets_n = sockets_cap = 0,sockets = 0;
 //#endif
@@ -73,8 +73,8 @@ bool Server::start(uint16_t p) {
 		}
 	}
 
-#elif defined(USE_GTK) || defined(USE_WIN32)*/
-#ifdef USE_GTK
+#elif defined(USE_LINUX) || defined(USE_WIN32)*/
+#ifdef USE_LINUX
 	if((sock=socket(AF_INET,SOCK_STREAM,0))==-1)
 #endif
 #ifdef USE_WIN32
@@ -85,7 +85,7 @@ bool Server::start(uint16_t p) {
 		address.sin_family = AF_INET;
 		address.sin_addr.s_addr = swap_be_32(INADDR_ANY);
 		address.sin_port = swap_be_16(p);
-#ifdef USE_GTK
+#ifdef USE_LINUX
 		int y = 1;
 		if(setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,(const char *)&y,sizeof(int))==-1 ||
 				bind(sock,(sockaddr *)&address,sizeof(address))==-1)
@@ -96,7 +96,7 @@ bool Server::start(uint16_t p) {
 				bind(sock,(SOCKADDR *)&address,sizeof(address))==SOCKET_ERROR)
 #endif
 			stateChanged(SM_ERR_BIND,(intptr_t)&address,(intptr_t)getError(),0);
-#ifdef USE_GTK
+#ifdef USE_LINUX
 		else if(listen(sock,SOMAXCONN)==-1)
 #endif
 #ifdef USE_WIN32
@@ -135,7 +135,7 @@ debug_output("Server::stop(tcp_close)\n");
 }
 
 //#ifdef USE_SDL
-//#elif defined(USE_GTK) || defined(USE_WIN32)
+//#elif defined(USE_LINUX) || defined(USE_WIN32)
 void Server::addSocket(tcp_socket_t s) {
 	if(!sockets) sockets_cap = 8,sockets = (tcp_socket_t *)malloc(sizeof(tcp_socket_t)*sockets_cap);
 	else if(sockets_n+1==sockets_cap) sockets_cap <<= 1,sockets = (tcp_socket_t *)realloc(sockets,sockets_cap);
@@ -164,7 +164,7 @@ void Server::run() {
 /*#ifdef USE_SDL
 	int i,n;
 	createSocketSet(16);
-#elif defined(USE_GTK) || defined(USE_WIN32)*/
+#elif defined(USE_LINUX) || defined(USE_WIN32)*/
 	size_t i;
 	int n;
 	fd_set test;
@@ -212,7 +212,7 @@ debug_output("Server::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),c->sock);
 			}
 		}
 
-#elif defined(USE_GTK) || defined(USE_WIN32)*/
+#elif defined(USE_LINUX) || defined(USE_WIN32)*/
 		test = set;
 		n = select(FD_SETSIZE,&test,0,0,&timeout);
 		if(n==-1) {
@@ -348,7 +348,7 @@ debug_output("Server::killClient(id=%" PRIu32 ")\n",c->id);
 /*#ifdef USE_SDL
 	SDLNet_TCP_DelSocket(set,c->sock);
 	tcp_close(c->sock);
-#elif defined(USE_GTK) || defined(USE_WIN32)*/
+#elif defined(USE_LINUX) || defined(USE_WIN32)*/
 	removeSocket(c->sock);
 //#endif
 	stateChanged(SM_KILL_CLIENT,(intptr_t)c,0,0);

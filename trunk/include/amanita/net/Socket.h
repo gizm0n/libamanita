@@ -13,7 +13,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
-#ifdef USE_GTK
+#ifdef USE_LINUX
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -77,7 +77,7 @@ namespace a {
 typedef TCPsocket tcp_socket_t;
 #endif*/
 
-#ifdef USE_GTK
+#ifdef USE_LINUX
 #define tcp_close(s) ::close(s)
 #define tcp_send(s,d,l) ::send((s),(d),(l),0)
 #define tcp_recv(s,d,l) ::recv((s),(d),(l),0)
@@ -337,10 +337,10 @@ protected:
 /*#ifdef USE_SDL
 	IPaddress address;
 	SDLNet_SocketSet set;
-#elif defined(USE_GTK) || defined(USE_WIN32)*/
+#elif defined(USE_LINUX) || defined(USE_WIN32)*/
 	fd_set set;
 	hostent *hostinfo;
-#ifdef USE_GTK
+#ifdef USE_LINUX
 	sockaddr_in address;
 #endif
 #ifdef USE_WIN32
@@ -359,7 +359,7 @@ protected:
 
 //#ifdef USE_SDL
 //	const char *getError() { return SDL_GetError(); }
-#ifdef USE_GTK
+#ifdef USE_LINUX
 	const char *getError() { return strerror(errno); }
 #endif
 #ifdef USE_WIN32

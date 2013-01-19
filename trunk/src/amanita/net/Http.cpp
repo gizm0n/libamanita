@@ -19,7 +19,7 @@ typedef TCPsocket http_socket_t;
 typedef int http_clock_t;
 #endif*/
 
-#ifdef USE_GTK
+#ifdef USE_LINUX
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -335,17 +335,17 @@ debug_output("Http::request(host=%s,url=%s)\n",host,url);
 		else if(SDLNet_TCP_AddSocket(set,sock)==-1) error = 4;
 		else {
 
-#elif defined(USE_GTK) || defined(USE_WIN32)*/
+#elif defined(USE_LINUX) || defined(USE_WIN32)*/
 	http_socket_t sock;
 	hostent *hostinfo;
-#ifdef USE_GTK
+#ifdef USE_LINUX
 	sockaddr_in address;
 #endif
 #ifdef USE_WIN32
 	SOCKADDR_IN address;
 #endif
 	fd_set set,test;
-#ifdef USE_GTK
+#ifdef USE_LINUX
 	if((sock=socket(AF_INET,SOCK_STREAM,0))==-1) error = 1;
 #endif
 #ifdef USE_WIN32
@@ -357,7 +357,7 @@ debug_output("Http::request(host=%s,url=%s)\n",host,url);
 		address.sin_family = AF_INET;
 		address.sin_port = htons(80);
 
-#ifdef USE_GTK
+#ifdef USE_LINUX
 		if(connect(sock,(sockaddr *)&address,sizeof(address))<0) error = 3;
 #endif
 #ifdef USE_WIN32
@@ -396,7 +396,7 @@ debug_output("Http::request(data=\"%s\",len=%lu)\n",data,(unsigned long)len);
 			if(SDLNet_CheckSockets(set,(uint32_t)-1)<=0) error = 5;
 			else {
 
-#elif defined(USE_GTK) || defined(USE_WIN32)*/
+#elif defined(USE_LINUX) || defined(USE_WIN32)*/
 			test = set;
 			select(FD_SETSIZE,&test,0,0,0);
 			if(!FD_ISSET(sock,&test)) error = 5;
@@ -549,7 +549,7 @@ debug_output("Http::request(r=%d)\n",r);
 		body.clear();
 /*#ifdef USE_SDL
 		fprintf(stderr,"HTTP Error %d: %s\n",error,SDLNet_GetError());*/
-#ifdef USE_GTK
+#ifdef USE_LINUX
 		perror("HTTP Error");
 #endif
 #ifdef USE_WIN32

@@ -61,8 +61,8 @@ debug_output("start(\"%s\",%d)\n",h,p);
 		else {
 			ip = swap_be_32(address.host);
 
-#elif defined(USE_GTK) || defined(USE_WIN32)*/
-#ifdef USE_GTK
+#elif defined(USE_LINUX) || defined(USE_WIN32)*/
+#ifdef USE_LINUX
 	if((sock=socket(AF_INET,SOCK_STREAM,0))==-1)
 #endif
 #ifdef USE_WIN32
@@ -75,7 +75,7 @@ debug_output("start(\"%s\",%d)\n",h,p);
 		address.sin_addr = *(in_addr *)*hostinfo->h_addr_list;
 		address.sin_family = AF_INET;
 		address.sin_port = swap_be_16(p);
-#ifdef USE_GTK
+#ifdef USE_LINUX
 		if(connect(sock,(sockaddr *)&address,sizeof(address))<0)
 #endif
 #ifdef USE_WIN32
@@ -126,7 +126,7 @@ void Client::stop(bool kill) {
 void Client::run() {
 	int n;
 //#ifdef USE_SDL
-//#elif defined(USE_GTK) || defined (USE_WIN32)
+//#elif defined(USE_LINUX) || defined (USE_WIN32)
 	fd_set test;
 	timeval timeout = { 0,LIBAMANITA_SELECT_TIMEOUT };
 //#endif
@@ -143,7 +143,7 @@ debug_output("Client::run(n=%d)\n",n);
 		}
 		if(n && SDLNet_SocketReady(sock)) {
 
-#elif defined(USE_GTK) || defined(USE_WIN32)*/
+#elif defined(USE_LINUX) || defined(USE_WIN32)*/
 		test = set;
 		n = select(FD_SETSIZE,&test,0,0,&timeout);
 		if(n==-1) {

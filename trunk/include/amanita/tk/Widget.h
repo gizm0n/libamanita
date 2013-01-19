@@ -9,6 +9,11 @@
  */ 
 
 #include <amanita/Config.h>
+#ifdef USE_GTK
+#ifdef USE_WIN32
+#undef USE_WIN32
+#endif
+#endif
 
 #include <stdint.h>
 #ifdef USE_GTK

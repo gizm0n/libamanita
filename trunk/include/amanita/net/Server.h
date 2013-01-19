@@ -173,7 +173,7 @@ private:
 
 /*#ifdef USE_SDL
 	size_t setsz;					//!< SDL_SocketSet set, allocated size.
-#elif defined(USE_GTK) || defined(USE_WIN32)*/
+#elif defined(USE_LINUX) || defined(USE_WIN32)*/
 	size_t sockets_n,sockets_cap;
 	tcp_socket_t *sockets;
 //#endif
@@ -191,7 +191,7 @@ private:
 	Connection addClient(tcp_socket_t s,uint8_t *d,size_t l);
 /*#ifdef USE_SDL
 	void createSocketSet(int n=0);
-#elif defined(USE_GTK) || defined(USE_WIN32)*/
+#elif defined(USE_LINUX) || defined(USE_WIN32)*/
 	void addSocket(tcp_socket_t s);
 	void removeSocket(tcp_socket_t s);
 //#endif

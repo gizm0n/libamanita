@@ -5,8 +5,27 @@
 cmake_minimum_required(VERSION 2.8)
 project(djynn) 
 
-message("CMAKE_ROOT: ${CMAKE_ROOT}")
-message("CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+set(PACKAGE "djynn")
+set(PACKAGE_NAME "Djynn Geany Plugin")
+set(PACKAGE_VERSION_MAJOR 1)
+set(PACKAGE_VERSION_MINOR 1)
+set(PACKAGE_VERSION "${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR}.0")
+set(PACKAGE_BUGREPORT "per.lowgren@gmail.com")
+set(PACKAGE_URL "http://code.google.com/p/libamanita/")
+set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
+set(PACKAGE_TARNAME "${PACKAGE}")
+
+string(ASCII 27 _escape)
+set(CYAN "${_escape}[0;36m")
+set(BLUE "${_escape}[0;34m")
+set(RED "${_escape}[1;31m")
+set(GREEN "${_escape}[0;32m")
+set(BROWN "${_escape}[0;33m")
+set(YELLOW "${_escape}[1;33m")
+set(NONE "${_escape}[0m")
+
+message(STATUS "${BROWN}CMAKE_ROOT: ${CMAKE_ROOT}${NONE}")
+message(STATUS "${BROWN}CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}${NONE}")
 
 include(${CMAKE_ROOT}/Modules/CheckIncludeFile.cmake)
 include(${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
@@ -22,16 +41,6 @@ else()
 endif()
 
 find_package(Gettext REQUIRED)
-
-set(PACKAGE "djynn")
-set(PACKAGE_NAME "Djynn Geany Plugin")
-set(PACKAGE_VERSION_MAJOR 1)
-set(PACKAGE_VERSION_MINOR 1)
-set(PACKAGE_VERSION "${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR}.0")
-set(PACKAGE_BUGREPORT "per.lowgren@gmail.com")
-set(PACKAGE_URL "http://code.google.com/p/libamanita/")
-set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
-set(PACKAGE_TARNAME "${PACKAGE}")
 
 
 CHECK_INCLUDE_FILE("dlfcn.h" HAVE_DLFCN_H)
@@ -61,11 +70,17 @@ CHECK_FUNCTION_EXISTS(strpbrk HAVE_STRPBRK)
 CHECK_FUNCTION_EXISTS(strstr HAVE_STRSTR)
 CHECK_FUNCTION_EXISTS(vprintf HAVE_VPRINTF)
 
-find_package(GTK2 2.6 REQUIRED gtk)
+find_package(GTK2 2.6)
 if(GTK2_FOUND)
 	include_directories(${GTK2_INCLUDE_DIRS})
 	add_definitions(-DGTK)
+else()
+	if(MINGW)
+		message("\n${RED}Download GTK+ at: ${BLUE}http://www.gtk.org/download/win32.php${NONE}\n")
+	endif()
+	message(FATAL_ERROR "${RED}GTK+ 2.6 Required!${NONE}")
 endif()
+
 PKG_CHECK_MODULES(GIO "gio-2.0 >= 2.26.0")
 if(GIO_FOUND)
 	include_directories(${GIO_INCLUDE_DIRS})
@@ -95,13 +110,13 @@ endif()
 if(UNIX)
 	set(USE_UNIX 1)
 	if(APPLE)
-		message("Apple")
+		message(STATUS "${BROWN}Apple${NONE}")
 		set(GUI "Cocoa")
 		set(GUI_COCOA 1)
 		set(USE_COCOA 1)
 		set(USE_APPLE 1)
 	else()
-		message("Unix or Linux")
+		message(STATUS "${BROWN}Unix or Linux${NONE}")
 		set(GUI "GTK+")
 		set(GUI_GTK 1)
 		set(USE_GTK 1)
@@ -110,7 +125,7 @@ if(UNIX)
 	link_libraries(${CMAKE_THREAD_LIBS} ${CMAKE_DL_LIBS})
 else()
 	if(WIN32)
-		message("Windows")
+		message(STATUS "${BROWN}Windows${NONE}")
 		set(GUI "Win32")
 		set(UNICODE 1)
 		set(USE_WCHAR 1)
@@ -134,13 +149,13 @@ else()
 			set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_C_FLAGS} -static-libgcc -s")
 		endif()
 	else()
-		message("Unknown")
+		message(STATUS "${BROWN}Unknown OS${NONE}")
 		set(GUI "Unknown")
 	endif()
 endif()
 
 
-message("GUI system is ${GUI}")
+message(STATUS "${BROWN}GUI system is ${GUI}${NONE}")
 
 
 
@@ -154,7 +169,7 @@ if(GEANY_FOUND)
 		../../ipomoea/vector_t.c
 	)
 
-	message("Has Geany installed")
+	message(STATUS "${BROWN}Has Geany installed${NONE}")
 	include_directories(${GEANY_INCLUDE_DIRS})
 	link_directories(${GEANY_LIBRARY_DIRS})
 	add_definitions(${GEANY_CFLAGS_OTHER})
@@ -162,6 +177,7 @@ if(GEANY_FOUND)
 	set(djynn_src
 		./projectmanager_dlg.c
 		./projectmanager.c
+		./ascii.c
 		./base64.c
 		./comment.c
 		./sort.c
@@ -171,13 +187,13 @@ if(GEANY_FOUND)
 	set_target_properties(djynn PROPERTIES PREFIX "")
 
 	if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
-		message("Build Djynn with -fPIC flag")
+		message(STATUS "${BROWN}Build Djynn with -fPIC flag${NONE}")
 		add_library(ipomoea_djynn_pic STATIC ${ipomoea_src})
 		set_target_properties(ipomoea_djynn_pic PROPERTIES COMPILE_FLAGS -fpic)
 		set_target_properties(djynn PROPERTIES COMPILE_FLAGS -fpic)
 		target_link_libraries(djynn ipomoea_djynn_pic ${GTK_LIBRARIES} ${GEANY_LIBRARIES})
 	else()
-		message("Build Djynn")
+		message(STATUS "${BROWN}Build Djynn${NONE}")
 		target_link_libraries(djynn ipomoea ${GTK2_LIBRARIES} ${GEANY_LIBRARIES})
 	endif()
 
@@ -192,7 +208,7 @@ if(GEANY_FOUND)
 	set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Per Löwgren")
 	include(CPack)
 else()
-	message("Does not have Geany installed")
+	message(FATAL_ERROR "${RED}Does not have Geany installed${NONE}")
 endif()
 
 

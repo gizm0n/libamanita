@@ -76,9 +76,9 @@ void Menu::create(Window *wnd,uint32_t st) {
 	char str[257];
 #ifdef USE_WIN32
 	char buf[5];
-#endif
 #ifdef USE_WCHAR
 	wchar_t wstr[257];
+#endif
 #endif
 	MenuItem *m;
 #ifdef USE_GTK

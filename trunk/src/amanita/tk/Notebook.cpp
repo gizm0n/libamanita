@@ -142,7 +142,7 @@ debug_output("Notebook::openPage(page->create(%s))\n",np->page->getInstance().ge
 #ifdef USE_GTK
 	GtkWidget *t;
 	if((style&NOTEBOOK_CLOSE_BUTTON)) {
-		GValue val = G_VALUE_INIT;
+		GValue val = { 0 };
 		int w,h;
 		GtkWidget *bt,*im,*l;
 

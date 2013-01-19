@@ -17,8 +17,8 @@
 //#endif
 extern "C" {
 //#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
-#include "libswscale/swscale.h"
+#include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
 #include <libavutil/mathematics.h>
 }
 #endif
@@ -47,8 +47,8 @@ Application app(APP_SDL,"Fractal","Amanita Fractal Explorer");
 
 
 
-const int width = 1024;
-const int height = 768;
+const int width = 800;
+const int height = 600;
 
 
 Fractal fractal(width,height/*,FRACT_EDGETRACE*/);
@@ -72,7 +72,6 @@ fprintf(stderr,"Colour %d: %s\n",i,cycle[i].getSchemeName());
 		}
 	}
 }
-
 
 #ifdef HAVE_TIFF_H
 void saveTIF(const char *fn,int w,int h,uint16_t *fr,uint32_t *bg,uint32_t *fg) {
@@ -218,18 +217,29 @@ fprintf(stderr,"Saving...\n");
 
 static void render(void *data) {
 fprintf(stderr,"Rendering...\n");
+fflush(stderr);
 	int w = width*4,h = height*4;
 	double scale = (double)height/(double)h;
 	Fractal f(w,h,FRACT_FLOAT,&fractal);
+fprintf(stderr,"Rendering... 1\n");
+fflush(stderr);
 	uint32_t bg[h];
 	uint32_t fg[0xffff];
 	app.lock();
+fprintf(stderr,"Rendering... 2\n");
+fflush(stderr);
 	cycle[0].write(bg,h,scale);
 	cycle[1].write(fg,0x8000);
 	cycle[2].write(&fg[0x8000],0x8000);
-	app.unlock();
 	render_fractal = &f;
+fprintf(stderr,"Rendering... 3\n");
+fflush(stderr);
+	app.unlock();
+fprintf(stderr,"Rendering... 4\n");
+fflush(stderr);
 	f.render(1024);
+fprintf(stderr,"Rendering... 5\n");
+fflush(stderr);
 	while(f.getPercent()!=100) render_thread.pause(100);
 	render_fractal = 0;
 fprintf(stderr,"Render finished\n");
@@ -583,7 +593,7 @@ c->flags2 |= CODEC_FLAG2_FASTPSKIP;
 			}
 
 			if(!(fmt->flags&AVFMT_NOFILE))
-				if(avio_open(&oc->pb,fn,URL_WRONLY)<0) {
+				if(avio_open(&oc->pb,fn,AVIO_FLAG_WRITE)<0) {
 					fprintf(stderr, "Could not open '%s'\n",fn);
 					exit(1);
 				}
@@ -623,6 +633,17 @@ c->flags2 |= CODEC_FLAG2_FASTPSKIP;
 					pkt.size = sizeof(AVPicture);
 					ret = av_interleaved_write_frame(oc,&pkt);
 				} else {
+#if LIBAVCODEC_VERSION_MAJOR >= 54
+					av_init_packet(&pkt);
+					pkt.data = NULL;
+					pkt.size = 0;
+					out = avcodec_encode_video2(c,&pkt,pic_yuv,&ret);
+					if(out>0) {
+						if(c->coded_frame->key_frame) pkt.flags |= AV_PKT_FLAG_KEY;
+						pkt.stream_index = st->index;
+						ret = av_interleaved_write_frame(oc,&pkt);
+					} else ret = 0;
+#else
 					out = avcodec_encode_video(c,buf_out,buf_out_sz,pic_yuv);
 					if(out>0) {
 						av_init_packet(&pkt);
@@ -634,6 +655,7 @@ c->flags2 |= CODEC_FLAG2_FASTPSKIP;
 						pkt.size = out;
 						ret = av_interleaved_write_frame(oc,&pkt);
 					} else ret = 0;
+#endif
 				}
 				if(ret!=0) {
 					fprintf(stderr, "Error while writing video frame\n");

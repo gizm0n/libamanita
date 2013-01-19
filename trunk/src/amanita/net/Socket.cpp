@@ -66,7 +66,7 @@ Socket::Socket(socket_event_handler seh) : event_handler(seh) {
 /*#ifdef USE_SDL
 	address = (IPaddress){0,0};
 	set = 0;
-#elif defined(USE_GTK) || defined(USE_WIN32)*/
+#elif defined(USE_LINUX) || defined(USE_WIN32)*/
 	hostinfo = 0;
 //#endif
 	buf = 0;

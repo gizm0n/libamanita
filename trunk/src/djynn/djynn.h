@@ -26,6 +26,8 @@ enum {
 	DJYNN_PM_SORT_FILES,
 	DJYNN_PM_MOVE_UP,
 	DJYNN_PM_MOVE_DOWN,
+	DJYNN_ASCII_ENCODE,
+	DJYNN_ASCII_DECODE,
 	DJYNN_BASE64_ENCODE,
 	DJYNN_BASE64_DECODE,
 	DJYNN_TOGGLE_COMMENT,
@@ -224,6 +226,10 @@ void djynn_pm_sess_list_set(gint index,const gchar *name);
 void djynn_pm_prj_dlg();
 void djynn_pm_folder_dlg();
 void djynn_pm_folder_add(djynn_project_file *f,const gchar *path,const gchar *name,gboolean files,gboolean folders);
+
+void djynn_ascii_init(GeanyData *data,gint *menu_index);
+void djynn_ascii_cleanup();
+void djynn_ascii_action(gint id);
 
 void djynn_base64_init(GeanyData *data,gint *menu_index);
 void djynn_base64_cleanup();

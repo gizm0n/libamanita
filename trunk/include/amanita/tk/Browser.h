@@ -8,7 +8,6 @@
  * @date Created: 2012-01-28
  */ 
 
-#include <stdint.h>
 #include <amanita/tk/Widget.h>
 
 

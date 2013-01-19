@@ -1,0 +1,6 @@
+#!/bin/bash
+
+MINGW_ROOT=/usr/i686-w64-mingw32
+export PKG_CONFIG_LIBDIR=${MINGW_ROOT}/lib/pkgconfig
+export PKG_CONFIG_PATH=${MINGW_ROOT}/share/pkgconfig
+pkg-config --define-variable=prefix=${MINGW_ROOT} $@
