@@ -7,14 +7,14 @@
 #include "djynn.h"
 
 
-static char *eol;
-static int eol_len = 0;
+static gchar *eol;
+static gint eol_len = 0;
 
 static void item_activate_cb(GtkMenuItem *menuitem, gpointer gdata) {
-	djynn_base64_action((int)((intptr_t)gdata));
+	djynn_base64_action((gint)((intptr_t)gdata));
 }
 
-void djynn_base64_action(int id) {
+void djynn_base64_action(gint id) {
 	GeanyDocument *doc = document_get_current();
 	if(doc==NULL) return;
 	else {
@@ -23,7 +23,7 @@ void djynn_base64_action(int id) {
 		gint start = sci_get_selection_start(sci);
 		gint end = sci_get_selection_end(sci);
 		gchar *text;
-		int i = scintilla_send_message(sci,SCI_GETEOLMODE,0,0);
+		gint i = scintilla_send_message(sci,SCI_GETEOLMODE,0,0);
 		switch(i) {
 			case SC_EOL_CRLF:eol = "\r\n",eol_len = 2;break;
 			case SC_EOL_CR:eol = "\r",eol_len = 1;break;
@@ -32,27 +32,27 @@ void djynn_base64_action(int id) {
 		if(sel) text = sci_get_contents_range(sci,start,end);
 		else text = sci_get_contents(sci,sci_get_length(sci)+1);
 		if(text!=NULL) {
-			int l = strlen(text);
-			char *s;
+			gint l = strlen(text);
+			gchar *s;
 			if(id==DJYNN_BASE64_DECODE) {
 				i = base64_decoded_size(l);
-				s = malloc(i+1);
+				s = g_malloc(i+1);
 				base64_decode((unsigned char *)s,(unsigned char *)text);
 			} else {
 				i = base64_encoded_size(l);
-				s = malloc(i+1);
+				s = g_malloc(i+1);
 				base64_encode((unsigned char *)s,(unsigned char *)text,l);
 			}
 			if(sel) sci_replace_sel(sci,(const gchar *)s);
 			else sci_set_text(sci,(const gchar *)s);
-			free(s);
+			g_free(s);
 			g_free(text);
 		}
 	}
 }
 
-void djynn_base64_init(GeanyData *data,int *menu_index) {
-	int i;
+void djynn_base64_init(GeanyData *data,gint *menu_index) {
+	gint i;
 	djynn_menu_item *m;
 
 	if(*menu_index>0) {

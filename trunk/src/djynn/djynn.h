@@ -30,6 +30,7 @@ enum {
 	DJYNN_ASCII_DECODE,
 	DJYNN_BASE64_ENCODE,
 	DJYNN_BASE64_DECODE,
+	DJYNN_BF_EXEC,
 	DJYNN_TOGGLE_COMMENT,
 	DJYNN_TOGGLE_BLOCK,
 	DJYNN_INSERT_DOXYGEN_COMMENT,
@@ -44,6 +45,7 @@ enum {
 enum {
 	DJYNN_KB_BASE64_ENCODE,
 	DJYNN_KB_BASE64_DECODE,
+	DJYNN_KB_BF_EXEC,
 	DJYNN_KB_TOGGLE_COMMENT,
 	DJYNN_KB_TOGGLE_BLOCK,
 	DJYNN_KB_INSERT_DOXYGEN_COMMENT,
@@ -234,6 +236,10 @@ void djynn_ascii_action(gint id);
 void djynn_base64_init(GeanyData *data,gint *menu_index);
 void djynn_base64_cleanup();
 void djynn_base64_action(gint id);
+
+void djynn_bf_init(GeanyData *data,gint *menu_index);
+void djynn_bf_cleanup();
+void djynn_bf_action(gint id);
 
 void djynn_comment_init(GeanyData *data,gint *menu_index);
 void djynn_comment_cleanup();

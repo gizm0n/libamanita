@@ -1,0 +1,147 @@
+#ifndef _AMANITA_SIM_PLANET_H
+#define _AMANITA_SIM_PLANET_H
+
+/**
+ * @file amanita/sim/Planet.h  
+ * @author Per Löwgren
+ * @date Modified: 2013-01-20
+ * @date Created: 2013-01-20
+ */ 
+
+
+/** Amanita Namespace */
+namespace a {
+
+
+enum WRAP {
+	PLANET_WRAP_NONE			= 0,
+	PLANET_WRAP_HORIZ			= 1,
+	PLANET_WRAP_VERT			= 2,
+	PLANET_WRAP_BOTH			= 3
+};
+
+enum {
+	PLANET_ERA_COOL			= 1,
+	PLANET_ERA_OCEAN,
+	PLANET_ERA_LIFE,
+	PLANET_ERA_VEGETATION,
+	PLANET_ERA_POPULATION,
+	PLANET_ERAS,
+};
+
+enum {
+	PLANET_TEMPERATURE		= 0,
+	PLANET_ALTITUDE			= 4,
+	PLANET_SEA					= 8,
+	PLANET_ENVIRONMENT		= 12,
+	PLANET_VEGETATION			= 16,
+	PLANET_LIFE					= 20,
+	PLANET_POPULATION			= 24,
+	PLANET_CULTURE				= 28,
+	PLANET_INLAND				= 30
+};
+
+struct RGBA_Color {
+	uint8_t b,g,r,a;
+};
+
+
+inline RGBA_Color environmentColor(float c) { return c>=0.99f? (RGBA_Color){0xff,0xff,0xff} : (RGBA_Color){0xff,(uint8_t)(221.0f*c),0}; }
+inline RGBA_Color magmaColor(float c) { return (RGBA_Color){0xff,(uint8_t)(221.0f*c),0}; }
+inline RGBA_Color glacierColor(float c) { return (RGBA_Color){(uint8_t)(0xff-(int)(153.0f*c)),(uint8_t)(0xff-(int)(102.0f*c)),0xff}; }
+inline RGBA_Color mountainColor(float c) { return (RGBA_Color){(uint8_t)(255.0f*c),(uint8_t)(221.0f*c),(uint8_t)(187.0f*c)}; }
+inline RGBA_Color oceanColor(float c) { return (RGBA_Color){0,(uint8_t)(0xcc-(int)(204.0f*c)),(uint8_t)(0xff-(int)(204.0f*c))}; }
+inline RGBA_Color desertColor(float c) { return (RGBA_Color){(uint8_t)(0xcc+(int)(51.0f*c)),(uint8_t)(0xcc+(int)(51.0f*c)),(uint8_t)(0x33+(int)(153.0f*c))}; }
+inline RGBA_Color planctonColor(float c) { return (RGBA_Color){0,(uint8_t)(0xff-(int)(204.0f*c)),(uint8_t)(0xcc-(int)(204.0f*c))}; }
+inline RGBA_Color vegetationColor(float c) { return (RGBA_Color){(uint8_t)(0x33-(int)(51.0f*c)),(uint8_t)(0xcc-(int)(102.0f*c)),(uint8_t)(0x33-(int)(51.0f*c))}; }
+inline RGBA_Color cityColor(float c) { return (RGBA_Color){(uint8_t)(0x99+(int)(102.0f*c)),0,0}; }
+inline RGBA_Color irColor(float value) { return value<1.0f? glacierColor(value) : (value>1.6f? magmaColor(value-1.6f) : vegetationColor(1.0f-(value-1.0f)*(1.0f/.6f))); }
+
+struct PlanetCreationInfo {
+	int continents;
+	float landmass;
+	float mountains;
+	float islands;
+	float forest;
+	float cities;
+	float technology;
+};
+
+struct PlanetPoint {
+	float temperature;
+	float altitude;
+	float sea;
+	float environment;
+	float vegetation;
+	float life;
+	float population;
+	unsigned short culture;
+	unsigned char inland;
+};
+
+class Planet {
+private:
+
+	size_t width;								//!< Map width - Number of points
+	size_t height;								//!< Map height - Number of points
+	size_t size;								//!< Map width*height - Number of points
+	int wrap;									//!< Wrapping of the planet - Default horizontal wrapping, not at the poles
+
+	float seaLevel;
+	float seaLevelMultiply;
+	float equator;
+
+	int time;
+	int cycle;
+	int cycles;
+	int era;
+	bool completed;
+
+	PlanetCreationInfo ci;
+	PlanetCreationInfo result;
+	PlanetPoint *surface;
+
+	void nextEra();
+
+	void impact(int x,int y,int member,float radius,float value,bool add);
+	void erosion(int i,int member,float change);
+	void cool();
+	void ocean();
+	void climate(float change);
+	int biology(float change);
+	void populate();
+
+	float adjustValue(float value) { return value<0.0f? 0.0f : (value>1.0f? 1.0f : value); }
+	float belowSeaLevel(float value) { return seaLevel-value; }
+	float aboveSeaLevel(float value) { return value-seaLevel; }
+
+	double chanceOfEvolution() { return 0.0000001*rnd.real64()*rnd.real64()*rnd.real64(); }
+
+	void **getArea(int x,int y,int radius,void *map,int sz);
+
+public:
+	Planet();
+	~Planet();
+
+	void clear();
+	void create(int w,int h,int con,int lnd,int mnt,int isl,int fst,int ppl,int tec);
+	void run();
+
+	int getTime() { return time; }
+	int getCycle() { return cycle; }
+	int getEra() { return era; }
+	int getEraDescription(int e=-1);
+	const PlanetCreationInfo &getResult() { return result; }
+	bool isCompleted() { return completed; }
+
+	RGBA_Color getColor(int x,int y,int filter) { return getColor(x+y*width,filter); }
+	RGBA_Color getColor(int i,int filter);
+};
+
+
+
+}; /* namespace a */
+
+
+#endif /* _AMANITA_COLLECTION_H */
+

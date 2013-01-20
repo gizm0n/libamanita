@@ -1,10 +1,10 @@
-#ifndef _AMANITA_PATH_H
-#define _AMANITA_PATH_H
+#ifndef _AMANITA_AI_PATH_H
+#define _AMANITA_AI_PATH_H
 
 /**
- * @file amanita/Path.h  
+ * @file amanita/ai/Path.h  
  * @author Per Löwgren
- * @date Modified: 2012-12-03
+ * @date Modified: 2013-01-20
  * @date Created: 2008-09-07
  */ 
 
@@ -201,5 +201,5 @@ public:
 
 
 
-#endif /* _AMANITA_PATH_H */
+#endif /* _AMANITA_AI_PATH_H */
 

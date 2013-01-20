@@ -1,8 +1,8 @@
-#ifndef _AMANITA_FRACTAL_H
-#define _AMANITA_FRACTAL_H
+#ifndef _AMANITA_SET_FRACTAL_H
+#define _AMANITA_SET_FRACTAL_H
 
 /**
- * @file amanita/Fractal.h  
+ * @file amanita/set/Fractal.h  
  * @author Per Löwgren
  * @date Modified: 2012-11-02
  * @date Created: 2004-03-07
@@ -369,5 +369,5 @@ public:
 
 
 
-#endif /* _AMANITA_GFX_FRACTAL_H */
+#endif /* _AMANITA_SET_FRACTAL_H */
 

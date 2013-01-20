@@ -46,6 +46,7 @@ static djynn_menu_item djynn_menu_items[] = {
 	{ _("Decode ASCII"),						NULL,								NULL,		djynn_ascii_action },
 	{ _("Encode Base64"),					NULL,								NULL,		djynn_base64_action },
 	{ _("Decode Base64"),					NULL,								NULL,		djynn_base64_action },
+	{ _("Run Brainfuck Script"),			NULL,								NULL,		djynn_bf_action },
 	{ _("Toggle Comment"),					NULL,								NULL,		djynn_comment_action },
 	{ _("Toggle Block Comment"),			NULL,								NULL,		djynn_comment_action },
 	{ _("Insert Doxygen Comment"),		NULL,								NULL,		djynn_comment_action },
@@ -59,6 +60,7 @@ static djynn_menu_item djynn_menu_items[] = {
 static djynn_keybind djynn_keybinds[] = {
 	{ "b64encode",					DJYNN_BASE64_ENCODE },
 	{ "b64decode",					DJYNN_BASE64_DECODE },
+	{ "bfexec",						DJYNN_BF_EXEC },
 	{ "comment",					DJYNN_TOGGLE_COMMENT },
 	{ "block_comment",			DJYNN_TOGGLE_BLOCK },
 	{ "doxygen_comment",			DJYNN_INSERT_DOXYGEN_COMMENT },
@@ -466,6 +468,7 @@ void plugin_init(GeanyData *data) {
 	djynn_pm_init(data,&i);
 	djynn_ascii_init(data,&i);
 	djynn_base64_init(data,&i);
+	djynn_bf_init(data,&i);
 	djynn_comment_init(data,&i);
 	djynn_sort_init(data,&i);
 
@@ -488,6 +491,7 @@ void plugin_cleanup(void) {
 	djynn_pm_cleanup();
 	djynn_ascii_cleanup();
 	djynn_base64_cleanup();
+	djynn_bf_cleanup();
 	djynn_comment_cleanup();
 	djynn_sort_cleanup();
 	gtk_widget_destroy(djynn.tools_menu_item);
