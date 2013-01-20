@@ -26,7 +26,7 @@ extern "C" {
 #include <amanita/Random.h>
 #include <amanita/Thread.h>
 #include <amanita/Colorcycle.h>
-#include <amanita/Fractal.h>
+#include <amanita/set/Fractal.h>
 #include <amanita/gui/Application.h>
 #include <amanita/gui/Graphics.h>
 

@@ -393,7 +393,6 @@ if(AMANITA_LIBS)
 		src/amanita/Main.cpp
 		src/amanita/Math.cpp
 		src/amanita/Object.cpp
-		src/amanita/Path.cpp
 		src/amanita/Properties.cpp
 		src/amanita/Random.cpp
 		src/amanita/Regex.cpp
@@ -401,7 +400,8 @@ if(AMANITA_LIBS)
 		src/amanita/Thread.cpp
 		src/amanita/Vector.cpp
 		src/amanita/Wiki.cpp
-		src/amanita/Word.cpp
+		src/amanita/ai/Path.cpp
+		src/amanita/ai/Word.cpp
 		src/amanita/db/Database.cpp
 		src/amanita/db/Record.cpp
 		src/amanita/db/Result.cpp
@@ -424,6 +424,8 @@ if(AMANITA_LIBS)
 		src/amanita/net/Http.cpp
 		src/amanita/net/Server.cpp
 		src/amanita/net/Socket.cpp
+		src/amanita/set/Fractal.cpp
+		src/amanita/sim/Planet.cpp
 		src/amanita/tk/Application.cpp
 		src/amanita/tk/Browser.cpp
 		src/amanita/tk/Button.cpp
@@ -489,7 +491,7 @@ if(AMANITA_LIBS)
 		include/amanita/File.h
 		include/amanita/Flood.h
 		include/amanita/Fontmetrics.h
-		include/amanita/Fractal.h
+		include/amanita/Geometry.h
 		include/amanita/Hashtable.h
 		include/amanita/Integer.h
 		include/amanita/Main.h
@@ -506,6 +508,12 @@ if(AMANITA_LIBS)
 		include/amanita/Wiki.h
 		include/amanita/Word.h
 		DESTINATION include/amanita
+	)
+
+	install(FILES
+		include/amanita/ai/Path.h
+		include/amanita/ai/Word.h
+		DESTINATION include/amanita/ai
 	)
 
 	install(FILES
@@ -544,6 +552,16 @@ if(AMANITA_LIBS)
 	)
 
 	install(FILES
+		include/amanita/set/Fractal.h
+		DESTINATION include/amanita/set
+	)
+
+	install(FILES
+		include/amanita/sim/Planet.h
+		DESTINATION include/amanita/sim
+	)
+
+	install(FILES
 		include/amanita/tk/Application.h
 		include/amanita/tk/Browser.h
 		include/amanita/tk/Button.h
@@ -565,6 +583,7 @@ if(AMANITA_LIBS)
 
 	install(FILES
 		include/ipomoea/base64.h
+		include/ipomoea/bf.h
 		include/ipomoea/hashtable_t.h
 		include/ipomoea/rle.h
 		include/ipomoea/string_t.h
@@ -683,6 +702,14 @@ if(AMANITA_EXAMPLES)
 	elseif(HAVE_SDL)
 		add_executable(mandala examples/mandala.cpp)
 		target_link_libraries(mandala amanita ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLTTF_LIBRARY})
+	endif()
+
+	if(HAVE_DD)
+		add_executable(planet WIN32 examples/planet.cpp ${RC_FILE})
+		target_link_libraries(planet amanita ${AVCODEC_LIBS} ddraw dxguid uuid olepro32 ole32)
+	elseif(HAVE_SDL)
+		add_executable(planet examples/planet.cpp)
+		target_link_libraries(planet amanita ${AVCODEC_LIBS} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLTTF_LIBRARY})
 	endif()
 
 	add_executable(properties examples/properties.cpp)

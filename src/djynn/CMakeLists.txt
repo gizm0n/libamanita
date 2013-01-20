@@ -163,6 +163,7 @@ PKG_CHECK_MODULES(GEANY geany)
 if(GEANY_FOUND)
 	set(ipomoea_src
 		../../ipomoea/base64.c
+		../../ipomoea/bf.c
 		../../ipomoea/hashtable_t.c
 		../../ipomoea/rle.c
 		../../ipomoea/string_t.c
@@ -179,6 +180,7 @@ if(GEANY_FOUND)
 		./projectmanager.c
 		./ascii.c
 		./base64.c
+		./bf.c
 		./comment.c
 		./sort.c
 		./djynn.c

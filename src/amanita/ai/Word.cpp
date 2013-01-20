@@ -2,9 +2,9 @@
 #include "_config.h"
 #include <stdlib.h>
 #include <string.h>
-#include <amanita/Word.h>
 #include <amanita/Random.h>
 #include <amanita/String.h>
+#include <amanita/ai/Word.h>
 
 
 static const char *vowels = "aaaaaeeeeeiiiiooouuuyy";

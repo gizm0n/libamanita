@@ -1,10 +1,10 @@
-#ifndef _AMANITA_WORD_H
-#define _AMANITA_WORD_H
+#ifndef _AMANITA_AI_WORD_H
+#define _AMANITA_AI_WORD_H
 
 /**
- * @file amanita/Word.h  
+ * @file amanita/ai/Word.h  
  * @author Per Löwgren
- * @date Modified: 2012-10-21
+ * @date Modified: 2013-01-20
  * @date Created: 2008-09-07
  */ 
 
@@ -58,4 +58,4 @@ public:
 }; /* namespace a */
 
 
-#endif /* _AMANITA_WORD_H */
+#endif /* _AMANITA_AI_WORD_H */
