@@ -38,6 +38,8 @@
 #endif
 #endif
 
+#cmakedefine HAVE_AVCODEC
+
 #cmakedefine HAVE_DD
 
 #cmakedefine HAVE_SDL

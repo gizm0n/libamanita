@@ -1,5 +1,5 @@
 
-#include "_config.h"
+#include "../_config.h"
 #include <stdlib.h>
 #include <string.h>
 #include <amanita/Random.h>

@@ -134,6 +134,7 @@ endif()
 
 check_include_file("libavcodec/avcodec.h" HAVE_LIBAVCODEC_H)
 if(HAVE_LIBAVCODEC_H)
+	set(HAVE_AVCODEC 1)
 	set(AVCODEC_LIBS avcodec avformat swscale avutil)
 else()
 	if(LINUX)
@@ -387,7 +388,6 @@ if(AMANITA_LIBS)
 		src/amanita/Dictionary.cpp
 		src/amanita/File.cpp
 		src/amanita/Flood.cpp
-		src/amanita/Fractal.cpp
 		src/amanita/Hashtable.cpp
 		src/amanita/Integer.cpp
 		src/amanita/Main.cpp
@@ -420,6 +420,7 @@ if(AMANITA_LIBS)
 		src/amanita/gui/Tooltip.cpp
 		src/amanita/gui/Widget.cpp
 		src/amanita/gui/Window.cpp
+		src/amanita/media/Video.cpp
 		src/amanita/net/Client.cpp
 		src/amanita/net/Http.cpp
 		src/amanita/net/Server.cpp
@@ -497,7 +498,6 @@ if(AMANITA_LIBS)
 		include/amanita/Main.h
 		include/amanita/Math.h
 		include/amanita/Object.h
-		include/amanita/Path.h
 		include/amanita/Properties.h
 		include/amanita/Random.h
 		include/amanita/Regex.h
@@ -506,7 +506,6 @@ if(AMANITA_LIBS)
 		include/amanita/Thread.h
 		include/amanita/Vector.h
 		include/amanita/Wiki.h
-		include/amanita/Word.h
 		DESTINATION include/amanita
 	)
 
@@ -541,6 +540,11 @@ if(AMANITA_LIBS)
 		include/amanita/gui/Widget.h
 		include/amanita/gui/Window.h
 		DESTINATION include/amanita/gui
+	)
+
+	install(FILES
+		include/amanita/media/Video.h
+		DESTINATION include/amanita/media
 	)
 
 	install(FILES
