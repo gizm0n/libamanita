@@ -6,11 +6,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
-#include <amanita/Fractal.h>
 #include <amanita/Math.h>
 #include <amanita/Random.h>
 #include <amanita/String.h>
 #include <amanita/Thread.h>
+#include <amanita/set/Fractal.h>
 
 
 #define MYERBERG 1.401155189

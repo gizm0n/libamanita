@@ -21,28 +21,27 @@ enum WRAP {
 };
 
 enum {
-	PLANET_ERA_COOL			= 1,
-	PLANET_ERA_OCEAN,
-	PLANET_ERA_LIFE,
+	PLANET_ERA_NEW,
+	PLANET_ERA_COOL,
+	PLANET_ERA_CLIMATE,
 	PLANET_ERA_VEGETATION,
-	PLANET_ERA_POPULATION,
-	PLANET_ERAS,
+	PLANET_ERA_CIVILISATION,
+	PLANET_ERA_COMPLETED,
 };
 
 enum {
-	PLANET_TEMPERATURE		= 0,
-	PLANET_ALTITUDE			= 4,
-	PLANET_SEA					= 8,
-	PLANET_ENVIRONMENT		= 12,
-	PLANET_VEGETATION			= 16,
-	PLANET_LIFE					= 20,
-	PLANET_POPULATION			= 24,
-	PLANET_CULTURE				= 28,
-	PLANET_INLAND				= 30
+	PLANET_TEMPERATURE,
+	PLANET_ALTITUDE,
+	PLANET_SEA,
+	PLANET_ENVIRONMENT,
+	PLANET_VEGETATION,
+	PLANET_POPULATION,
+	PLANET_CULTURE,
+	PLANET_INLAND,
 };
 
 struct RGBA_Color {
-	uint8_t b,g,r,a;
+	uint8_t r,g,b,a;
 };
 
 
@@ -73,22 +72,21 @@ struct PlanetPoint {
 	float sea;
 	float environment;
 	float vegetation;
-	float life;
 	float population;
 	unsigned short culture;
 	unsigned char inland;
+	PlanetPoint *area[21];
 };
 
 class Planet {
 private:
 
-	size_t width;								//!< Map width - Number of points
-	size_t height;								//!< Map height - Number of points
-	size_t size;								//!< Map width*height - Number of points
+	int width;									//!< Map width - Number of points
+	int height;									//!< Map height - Number of points
+	int size;									//!< Map width*height - Number of points
 	int wrap;									//!< Wrapping of the planet - Default horizontal wrapping, not at the poles
 
-	float seaLevel;
-	float seaLevelMultiply;
+	float sea;
 	float equator;
 
 	int time;
@@ -97,27 +95,30 @@ private:
 	int era;
 	bool completed;
 
+	random_t seed;
+	Random chaos;
+
 	PlanetCreationInfo ci;
 	PlanetCreationInfo result;
 	PlanetPoint *surface;
 
 	void nextEra();
 
-	void impact(int x,int y,int member,float radius,float value,bool add);
+	int cool(float change);
+	int climate(float change);
+	int vegetation(float change);
+	int civilisation(float change);
+
+	void environment();
 	void erosion(int i,int member,float change);
-	void cool();
-	void ocean();
-	void climate(float change);
-	int biology(float change);
-	void populate();
 
-	float adjustValue(float value) { return value<0.0f? 0.0f : (value>1.0f? 1.0f : value); }
-	float belowSeaLevel(float value) { return seaLevel-value; }
-	float aboveSeaLevel(float value) { return value-seaLevel; }
+	void crater(int x,int y,float radius,float *map,float value,bool add);
+	void plateu(int x,int y,float radius,float *map,float value,bool add);
+	void segment(int x,int y,int w,int h,float *map,float value,bool add);
 
-	double chanceOfEvolution() { return 0.0000001*rnd.real64()*rnd.real64()*rnd.real64(); }
+	float sparkle();
 
-	void **getArea(int x,int y,int radius,void *map,int sz);
+	float chanceOfMutation();
 
 public:
 	Planet();
@@ -130,12 +131,15 @@ public:
 	int getTime() { return time; }
 	int getCycle() { return cycle; }
 	int getEra() { return era; }
-	int getEraDescription(int e=-1);
+	const char *getEraDescription(int e=-1);
 	const PlanetCreationInfo &getResult() { return result; }
 	bool isCompleted() { return completed; }
 
 	RGBA_Color getColor(int x,int y,int filter) { return getColor(x+y*width,filter); }
 	RGBA_Color getColor(int i,int filter);
+
+	const PlanetPoint &getPoint(int x,int y) { return surface[x+y*width]; }
+	void getArea(int x,int y,int radius,PlanetPoint **a);
 };
 
 

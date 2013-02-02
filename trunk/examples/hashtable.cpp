@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <amanita/Hashtable.h>
 #include <amanita/Vector.h>
-#include <amanita/Word.h>
+#include <amanita/ai/Word.h>
 
 using namespace a;
 
