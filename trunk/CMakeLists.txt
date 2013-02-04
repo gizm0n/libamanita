@@ -426,6 +426,7 @@ if(AMANITA_LIBS)
 		src/amanita/net/Server.cpp
 		src/amanita/net/Socket.cpp
 		src/amanita/set/Fractal.cpp
+		src/amanita/sim/Map.cpp
 		src/amanita/sim/Planet.cpp
 		src/amanita/tk/Application.cpp
 		src/amanita/tk/Browser.cpp
@@ -561,6 +562,7 @@ if(AMANITA_LIBS)
 	)
 
 	install(FILES
+		include/amanita/sim/Map.h
 		include/amanita/sim/Planet.h
 		DESTINATION include/amanita/sim
 	)
@@ -706,6 +708,14 @@ if(AMANITA_EXAMPLES)
 	elseif(HAVE_SDL)
 		add_executable(mandala examples/mandala.cpp)
 		target_link_libraries(mandala amanita ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLTTF_LIBRARY})
+	endif()
+
+	if(HAVE_DD)
+		add_executable(path WIN32 examples/path.cpp ${RC_FILE})
+		target_link_libraries(path amanita ddraw dxguid uuid olepro32 ole32)
+	elseif(HAVE_SDL)
+		add_executable(path examples/path.cpp)
+		target_link_libraries(path amanita ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLTTF_LIBRARY})
 	endif()
 
 	if(HAVE_DD)
