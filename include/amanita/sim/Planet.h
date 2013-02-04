@@ -147,5 +147,5 @@ public:
 }; /* namespace a */
 
 
-#endif /* _AMANITA_COLLECTION_H */
+#endif /* _AMANITA_SIM_PLANET_H */
 
