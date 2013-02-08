@@ -106,7 +106,7 @@ bool Server::start(uint16_t p) {
 			stateChanged(SM_ERR_LISTEN,(intptr_t)&address,(intptr_t)getError(),0);
 		else {
 			stateChanged(SM_STARTING_SERVER,0,0,0);
-			thread.start(_run,this);
+			thread.start(_run,this,0);
 			ret = true;
 		}
 	}
@@ -168,9 +168,10 @@ void Server::run() {
 	size_t i;
 	int n;
 	fd_set test;
+	timeval timeout;
+
 	FD_ZERO(&set);
 	FD_SET(sock,&set);
-	timeval timeout = { 0,LIBAMANITA_SELECT_TIMEOUT };
 //#endif
 	setRunning(true);
 	while(isRunning()) {
@@ -214,11 +215,14 @@ debug_output("Server::run(id=%" PRIu32 ",sock=%p)\n",c->getID(),c->sock);
 
 #elif defined(USE_LINUX) || defined(USE_WIN32)*/
 		test = set;
+		timeout.tv_sec = 0; 
+		timeout.tv_usec = LIBAMANITA_SELECT_TIMEOUT; 
 		n = select(FD_SETSIZE,&test,0,0,&timeout);
 		if(n==-1) {
 			stateChanged(SM_ERR_CHECK_SOCKETS,0,(intptr_t)getError(),0);
 			break;
 		}
+//debug_output("Server::run(0)\n");
 		if(!n) continue;
 
 debug_output("Server::run(1)\n");

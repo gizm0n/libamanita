@@ -1,8 +1,8 @@
-#ifndef _AMANITA_SIM_MAP_H
-#define _AMANITA_SIM_MAP_H
+#ifndef _AMANITA_GAME_MAP_H
+#define _AMANITA_GAME_MAP_H
 
 /**
- * @file amanita/sim/Map.h  
+ * @file amanita/game/Map.h  
  * @author Per Löwgren
  * @date Modified: 2013-02-03
  * @date Created: 2013-02-03
@@ -50,9 +50,10 @@ private:
 
 	Random *chaos;
 
-	void rect(int *m,int x,int y,int w,int h,int t);
+	void rect(int *m,int x,int y,int w,int h,int p);
+	void clear(int *m,int x,int y,int w,int h);
 	void erode(int *m,int s);
-	void makeLayer(int *l,int t,int e1,int e2,int e3);
+	void makeLayer(int *l,int t,int p);
 
 public:
 	Map(Random *r=0);
@@ -60,9 +61,10 @@ public:
 
 	int getWidth() { return width; }
 	int getHeight() { return height; }
+	bool isHWrap() { return wrap&MAP_WRAP_HORIZ; }
+	bool isVWrap() { return wrap&MAP_WRAP_VERT; }
 	int getTerrain(int x,int y) { return x>=0 && y>=0 && x<width && y<height? map[x+y*width] : MAP_WATER; }
-
-	void generate(int w,int h,int wr,int t[]);
+	void generate(int w,int h,const int t[],int wr=MAP_WRAP_HORIZ);
 };
 
 
@@ -70,5 +72,5 @@ public:
 }; /* namespace a */
 
 
-#endif /* _AMANITA_SIM_MAP_H */
+#endif /* _AMANITA_GAME_MAP_H */
 

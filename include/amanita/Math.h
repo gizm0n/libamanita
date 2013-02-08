@@ -94,47 +94,47 @@ extern long sum(long min,long max);
  * @param arr An array of chars to be added together.
  * @param l Length of arr.
  * @return A long containing the sum of arr. */
-extern long sum(char *arr,long l);
+extern long sum(const char arr[],long l);
 /** The sum of arr.
  * @param arr An array of unsigned chars to be added together.
  * @param l Length of arr.
  * @return An unsigned long containing the sum of arr. */
-extern unsigned long sum(unsigned char *arr,long l);
+extern unsigned long sum(const unsigned char arr[],long l);
 /** The sum of arr.
  * @param arr An array of short to be added together.
  * @param l Length of arr.
  * @return A long containing the sum of arr. */
-extern long sum(short *arr,long l);
+extern long sum(const short arr[],long l);
 /** The sum of arr.
  * @param arr An array of unsigned short to be added together.
  * @param l Length of arr.
  * @return An unsigned long containing the sum of arr. */
-extern unsigned long sum(unsigned short *arr,long l);
+extern unsigned long sum(const unsigned short arr[],long l);
 /** The sum of arr.
  * @param arr An array of int to be added together.
  * @param l Length of arr.
  * @return A long containing the sum of arr. */
-extern long sum(int *arr,long l);
+extern long sum(const int arr[],long l);
 /** The sum of arr.
  * @param arr An array of unsigned int to be added together.
  * @param l Length of arr.
  * @return An unsigned long containing the sum of arr. */
-extern unsigned long sum(unsigned int *arr,long l);
+extern unsigned long sum(const unsigned int arr[],long l);
 /** The sum of arr.
  * @param arr An array of long to be added together.
  * @param l Length of arr.
  * @return A long containing the sum of arr. */
-extern long sum(long *arr,long l);
+extern long sum(const long arr[],long l);
 /** The sum of arr.
  * @param arr An array of unsigned long to be added together.
  * @param l Length of arr.
  * @return An unsigned long containing the sum of arr. */
-extern unsigned long sum(unsigned long *arr,long l);
+extern unsigned long sum(const unsigned long arr[],long l);
 /** The sum of arr.
  * @param arr An array of double to be added together.
  * @param l Length of arr.
  * @return A double containing the sum of arr. */
-extern double sum(double *arr,long l);
+extern double sum(const double arr[],long l);
 /** @} */
 
 /** Number of bits in n, or log2 of n, or the left most 1-bit in n.

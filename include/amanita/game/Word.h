@@ -1,8 +1,8 @@
-#ifndef _AMANITA_AI_WORD_H
-#define _AMANITA_AI_WORD_H
+#ifndef _AMANITA_GAME_WORD_H
+#define _AMANITA_GAME_WORD_H
 
 /**
- * @file amanita/ai/Word.h  
+ * @file amanita/game/Word.h  
  * @author Per Löwgren
  * @date Modified: 2013-01-20
  * @date Created: 2008-09-07
@@ -58,4 +58,4 @@ public:
 }; /* namespace a */
 
 
-#endif /* _AMANITA_AI_WORD_H */
+#endif /* _AMANITA_GAME_WORD_H */

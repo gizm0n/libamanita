@@ -101,7 +101,7 @@ debug_output("start(SOCKET_HEADER_INCLUDED)\n");
 #endif /*SOCKET_HEADER_INCLUDED*/
 			if(Socket::send(sock,d,sizeof(d))) {
 				stateChanged(SM_STARTING_CLIENT,0,0,0);
-				thread.start(_run,this);
+				thread.start(_run,this,0);
 				return true;
 			}
 		}
@@ -128,7 +128,7 @@ void Client::run() {
 //#ifdef USE_SDL
 //#elif defined(USE_LINUX) || defined (USE_WIN32)
 	fd_set test;
-	timeval timeout = { 0,LIBAMANITA_SELECT_TIMEOUT };
+	timeval timeout;
 //#endif
 	uint8_t *d;
 	size_t l;
@@ -145,6 +145,8 @@ debug_output("Client::run(n=%d)\n",n);
 
 #elif defined(USE_LINUX) || defined(USE_WIN32)*/
 		test = set;
+		timeout.tv_sec = 0; 
+		timeout.tv_usec = LIBAMANITA_SELECT_TIMEOUT; 
 		n = select(FD_SETSIZE,&test,0,0,&timeout);
 		if(n==-1) {
 			stateChanged(SM_ERR_CHECK_SOCKETS,0,(intptr_t)getError(),0);

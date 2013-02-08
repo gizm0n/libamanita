@@ -62,7 +62,7 @@ namespace a {
 
 /** Timeout in microseconds for select-function, for both Server and Client.
  */
-#define LIBAMANITA_SELECT_TIMEOUT 100000
+#define LIBAMANITA_SELECT_TIMEOUT 250000
 
 
 /*#ifdef USE_SDL

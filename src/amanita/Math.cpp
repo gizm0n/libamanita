@@ -126,55 +126,55 @@ long sum(long min,long max) {
 	return (1+max)*(max>>1)+(max&1? ((1+max)>>1) : 0)-(min>1? sum(0l,min-1) : (min<0? sum(0l,-min) : 0));
 }
 
-long sum(char *arr,long l) {
+long sum(const char arr[],long l) {
 	long s = 0;
 	while(--l>=0) s += arr[l];
 	return s;
 }
 
-unsigned long sum(unsigned char *arr,long l) {
+unsigned long sum(const unsigned char arr[],long l) {
 	unsigned long s = 0;
 	while(--l>=0) s += arr[l];
 	return s;
 }
 
-long sum(short *arr,long l) {
+long sum(const short arr[],long l) {
 	long s = 0;
 	while(--l>=0) s += arr[l];
 	return s;
 }
 
-unsigned long sum(unsigned short *arr,long l) {
+unsigned long sum(const unsigned short arr[],long l) {
 	unsigned long s = 0;
 	while(--l>=0) s += arr[l];
 	return s;
 }
 
-long sum(int *arr,long l) {
+long sum(const int arr[],long l) {
 	long s = 0;
 	while(--l>=0) s += arr[l];
 	return s;
 }
 
-unsigned long sum(unsigned int *arr,long l) {
+unsigned long sum(const unsigned int arr[],long l) {
 	unsigned long s = 0;
 	while(--l>=0) s += arr[l];
 	return s;
 }
 
-long sum(long *arr,long l) {
+long sum(const long arr[],long l) {
 	long s = 0;
 	while(--l>=0) s += arr[l];
 	return s;
 }
 
-unsigned long sum(unsigned long *arr,long l) {
+unsigned long sum(const unsigned long arr[],long l) {
 	unsigned long s = 0;
 	while(--l>=0) s += arr[l];
 	return s;
 }
 
-double sum(double *arr,long l) {
+double sum(const double arr[],long l) {
 	double s = 0;
 	while(--l>=0) s += arr[l];
 	return s;

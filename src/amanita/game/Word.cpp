@@ -4,7 +4,7 @@
 #include <string.h>
 #include <amanita/Random.h>
 #include <amanita/String.h>
-#include <amanita/ai/Word.h>
+#include <amanita/game/Word.h>
 
 
 static const char *vowels = "aaaaaeeeeeiiiiooouuuyy";

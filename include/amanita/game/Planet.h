@@ -1,8 +1,8 @@
-#ifndef _AMANITA_SIM_PLANET_H
-#define _AMANITA_SIM_PLANET_H
+#ifndef _AMANITA_GAME_PLANET_H
+#define _AMANITA_GAME_PLANET_H
 
 /**
- * @file amanita/sim/Planet.h  
+ * @file amanita/game/Planet.h  
  * @author Per Löwgren
  * @date Modified: 2013-01-20
  * @date Created: 2013-01-20
@@ -147,5 +147,5 @@ public:
 }; /* namespace a */
 
 
-#endif /* _AMANITA_SIM_PLANET_H */
+#endif /* _AMANITA_GAME_PLANET_H */
 

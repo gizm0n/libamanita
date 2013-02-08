@@ -400,11 +400,13 @@ if(AMANITA_LIBS)
 		src/amanita/Thread.cpp
 		src/amanita/Vector.cpp
 		src/amanita/Wiki.cpp
-		src/amanita/ai/Path.cpp
-		src/amanita/ai/Word.cpp
 		src/amanita/db/Database.cpp
 		src/amanita/db/Record.cpp
 		src/amanita/db/Result.cpp
+		src/amanita/game/Map.cpp
+		src/amanita/game/Path.cpp
+		src/amanita/game/Planet.cpp
+		src/amanita/game/Word.cpp
 		src/amanita/gui/Application.cpp
 		src/amanita/gui/Button.cpp
 		src/amanita/gui/Display.cpp
@@ -426,8 +428,6 @@ if(AMANITA_LIBS)
 		src/amanita/net/Server.cpp
 		src/amanita/net/Socket.cpp
 		src/amanita/set/Fractal.cpp
-		src/amanita/sim/Map.cpp
-		src/amanita/sim/Planet.cpp
 		src/amanita/tk/Application.cpp
 		src/amanita/tk/Browser.cpp
 		src/amanita/tk/Button.cpp
@@ -511,16 +511,18 @@ if(AMANITA_LIBS)
 	)
 
 	install(FILES
-		include/amanita/ai/Path.h
-		include/amanita/ai/Word.h
-		DESTINATION include/amanita/ai
-	)
-
-	install(FILES
 		include/amanita/db/Database.h
 		include/amanita/db/Record.h
 		include/amanita/db/Result.h
 		DESTINATION include/amanita/db
+	)
+
+	install(FILES
+		include/amanita/game/Map.h
+		include/amanita/game/Path.h
+		include/amanita/game/Planet.h
+		include/amanita/game/Word.h
+		DESTINATION include/amanita/game
 	)
 
 	install(FILES
@@ -559,12 +561,6 @@ if(AMANITA_LIBS)
 	install(FILES
 		include/amanita/set/Fractal.h
 		DESTINATION include/amanita/set
-	)
-
-	install(FILES
-		include/amanita/sim/Map.h
-		include/amanita/sim/Planet.h
-		DESTINATION include/amanita/sim
 	)
 
 	install(FILES
