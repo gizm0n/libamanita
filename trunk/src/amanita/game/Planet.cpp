@@ -7,7 +7,7 @@
 #include <string.h>
 #include <amanita/Math.h>
 #include <amanita/Random.h>
-#include <amanita/sim/Planet.h>
+#include <amanita/game/Planet.h>
 
 
 static const char *era_descriptions[] = { "",

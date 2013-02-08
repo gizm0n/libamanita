@@ -116,7 +116,7 @@ public:
 	 * This method uses the entire list n as the seed.
 	 * @param n A list of seed numbers.
 	 * @param l Length of n. */
-	void setSeed(random_t n[],size_t l);
+	void setSeed(const random_t n[],size_t l);
 
 	/** Get the seed used for random sequence.
 	 * @return The seed. */
@@ -268,7 +268,7 @@ public:
 	 * values in t until it reaches a 0 and set l to this.
 	 * @return The index of the rolled values in the table, ranging from 0-(l-1).
 	 */
-	uint32_t rollTable(int *t,int n=0,int l=0);
+	uint32_t rollTable(const int t[],int n=0,int l=0);
 	/** @} */
 
 	/** @name Open ended roll methods

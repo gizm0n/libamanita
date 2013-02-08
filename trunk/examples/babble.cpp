@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <amanita/ai/Word.h>
+#include <amanita/game/Word.h>
 
 using namespace a;
 

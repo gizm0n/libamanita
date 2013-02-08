@@ -52,6 +52,7 @@ protected:
 	unsigned int mapSize,mapRow;
 
 	void load(const char *fn);
+	void loadXPM(const char **xpm);
 	void draw(rect16_t &src,rect16_t &dst);
 
 public:
@@ -67,6 +68,7 @@ public:
 	Image();
 	Image(int w,int h);
 	Image(const char *fn);
+	Image(const char **xpm);
 	~Image();
 
 	void createMap(int sz);

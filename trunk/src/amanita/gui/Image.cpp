@@ -45,6 +45,12 @@ Image::Image(const char *fn) : Object(),name(0),file(0),surface(0),map(0) {
 	createMap(1);
 }
 
+Image::Image(const char **xpm) : Object(),name(0),file(0),surface(0),map(0) {
+	created++;
+	loadXPM(xpm);
+	createMap(1);
+}
+
 Image::~Image() {
 	deleted++;
 	if(name) { free(name);name = 0; }
@@ -61,7 +67,9 @@ Image::~Image() {
 void Image::createMap(int sz) {
 	if(map) free(map);
 	if(sz<=0) sz = 1;
-	mapRow = 0,mapSize = sz,map = (rect16_t *)malloc(sizeof(rect16_t)*mapSize);
+	mapRow = 0;
+	mapSize = sz;
+	map = (rect16_t *)malloc(sizeof(rect16_t)*mapSize);
 #ifdef USE_SDL
 	setCell(0,0,0,surface->w,surface->h);
 #endif
@@ -101,8 +109,22 @@ void Image::createMap(rect16_t *m,int l) {
 void Image::load(const char *fn) {
 #ifdef USE_SDL
 	Surface s = IMG_Load(fn);
-	surface = SDL_DisplayFormat(s);
-	SDL_FreeSurface(s);
+	if(!s) fprintf(stderr,"Image::load[IMG_Load]: %s\n",IMG_GetError());
+	else {
+		surface = SDL_DisplayFormat(s);
+		SDL_FreeSurface(s);
+	}
+#endif
+}
+
+void Image::loadXPM(const char **xpm) {
+#ifdef USE_SDL
+	Surface s = IMG_ReadXPMFromArray((char **)xpm);
+	if(!s) fprintf(stderr,"Image::loadXPM[IMG_ReadXPMFromArray]: %s\n",IMG_GetError());
+	else {
+		surface = SDL_DisplayFormat(s);
+		SDL_FreeSurface(s);
+	}
 #endif
 }
 

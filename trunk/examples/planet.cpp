@@ -24,10 +24,10 @@ extern "C" {
 #include <amanita/Random.h>
 #include <amanita/Thread.h>
 #include <amanita/Colorcycle.h>
+#include <amanita/game/Planet.h>
 #include <amanita/gui/Application.h>
 #include <amanita/gui/Graphics.h>
 #include <amanita/media/Video.h>
-#include <amanita/sim/Planet.h>
 
 #ifdef USE_WIN32
 #include "_resource.h"

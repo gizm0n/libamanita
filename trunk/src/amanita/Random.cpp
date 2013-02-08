@@ -29,9 +29,9 @@ void Random::setSeed(random_t n) {
 	index = 0;
 }
 
-void Random::setSeed(random_t *n,size_t l) {
+void Random::setSeed(const random_t n[],size_t l) {
 	seed = 0,num = 0,index = 1;
-	for(size_t i=0,j=0; i<256; i++,j++) {
+	for(size_t i=0,j=0; i<256; ++i,++j) {
 		if(j==l) j = 0;
 		num ^= n[j];
 		table[i] = GENERATE_NUMBER;
@@ -125,7 +125,7 @@ int Random::oeD8(int n) {
 	return v;
 }
 
-uint32_t Random::rollTable(int *t,int n,int l) {
+uint32_t Random::rollTable(const int t[],int n,int l) {
 	if(!t || !*t) return 0;
 	if(!n) {
 		if(!l) for(; t[l]>0; l++);
