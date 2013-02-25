@@ -1,9 +1,9 @@
 
 #include "_config.h"
-
-#ifdef USE_WIN32
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef USE_WIN32
 #include <windows.h>
 
 wchar_t *char2w(const char *s) {
@@ -66,5 +66,13 @@ void tfree(tchar_t *s) {
 #endif
 }
 
-#endif
+#endif /* USE_WIN32 */
+
+
+double *dbldup(double d) {
+	double *v = (double *)malloc(sizeof(double));
+	*v = d;
+	return v;
+}
+
 

@@ -93,20 +93,9 @@ Vector::iterator Vector::iterate() {
 	return iter;
 }
 
-
-inline long align_to_size(long n,long sz) { return n<0? (sz+1+n<0? -1 : sz+1+n) : (n>sz? sz : n); }
-
-
 size_t Vector::insert(long n,value_t v,type_t t) {
-	if((n=align_to_size(n,sz))<0) return 0;
+	if((n=alignToSize(n))<0) return 0;
 	if(!list || sz==cap) resize(0);
-	if(t==CHAR_P) v = (value_t)strdup((char *)v);
-#if _WORDSIZE < 64
-	else if(t==DOUBLE) {
-		double *d = (double *)v;
-		v = (value_t)malloc(8),*(double *)v = *d;
-	}
-#endif
 	if((size_t)n<sz) for(size_t i=sz; (long)i>n; --i) list[i] = list[i-1];
 	list[n] = (node){ v,t };
 	return ++sz;
@@ -115,7 +104,7 @@ size_t Vector::insert(long n,value_t v,type_t t) {
 size_t Vector::insert(long n,const char **v) {
 	size_t vsz;
 	for(vsz=0; v[vsz]; ++vsz);
-	if(vsz==0 || (n=align_to_size(n,sz))<0) return 0;
+	if(vsz==0 || (n=alignToSize(n))<0) return 0;
 	if(!list || sz+vsz>cap) resize(sz+vsz);
 	size_t i;
 	node *l;
@@ -126,7 +115,7 @@ size_t Vector::insert(long n,const char **v) {
 }
 
 size_t Vector::insert(long n,const Vector &v) {
-	if((n=align_to_size(n,sz))<0) return 0;
+	if((n=alignToSize(n))<0) return 0;
 	if(!list || sz+v.sz>cap) resize(sz+v.sz);
 	size_t i;
 	node *l;
@@ -135,30 +124,20 @@ size_t Vector::insert(long n,const Vector &v) {
 		l = &list[n+i],*l = v.list[i];
 		if(l->type==CHAR_P) l->value = (value_t)strdup((char *)l->value);
 #if _WORDSIZE < 64
-		else if(l->type==DOUBLE) {
-			double *d = (double *)l->value;
-			l->value = (value_t)malloc(8),*(double *)l->value = *d;
-		}
+		else if(l->type==DOUBLE) l->value = (value_t)dbldup(*(double *)l->value);
 #endif
 	}
 	return sz;
 }
 
 void Vector::set(long n,value_t v,type_t t) {
-	if((n=align_to_size(n,sz))<0) return;
+	if((n=alignToSize(n))<0) return;
 	if(!list || sz==cap) resize(0);
-	if(t==CHAR_P) v = (value_t)strdup((char *)v);
-#if _WORDSIZE < 64
-	else if(t==DOUBLE) {
-		double *d = (double *)v;
-		v = (value_t)malloc(8),*(double *)v = *d;
-	}
-#endif
 	if(n<(long)sz && (list[n].type==CHAR_P
 #if _WORDSIZE < 64
 		|| list[n].type==DOUBLE
 #endif
-		)) free((void *)list[n].value);
+			)) free((void *)list[n].value);
 	list[n] = (node){ v,t };
 	if(n==(long)sz) ++sz;
 }
@@ -167,17 +146,31 @@ size_t Vector::remove(value_t v,type_t t) {
 	size_t i,n = 0;
 	if(v && sz) {
 		for(i=0; i+n<sz; ++i) {
-			while(list[i+n].value==v && (!t || list[i+n].type==t) && i+n<sz) {
-#if _WORDSIZE < 64
-				if(list[i+n].type==DOUBLE) free((void *)list[i+n].value);
-#endif
-				n++;
+			while(list[i+n].value==v && (!t || list[i+n].type==t) && i+n<sz) ++n;
+			if(n) list[i] = list[i+n];
+		}
+		sz -= n;
+	}
+	return n;
+}
+
+size_t Vector::remove(double v) {
+#if _WORDSIZE == 64
+	return remove(_VEC_DOUBLE_VALUE(v),DOUBLE);
+#else
+	size_t n = 0;
+	if(v && sz) {
+		for(size_t i=0; i+n<sz; ++i) {
+			while(list[i+n].type==DOUBLE && i+n<sz && *(double *)list[i+n].value==v) {
+				free((void *)list[i+n].value);
+				++n;
 			}
 			if(n) list[i] = list[i+n];
 		}
 		sz -= n;
 	}
 	return n;
+#endif
 }
 
 size_t Vector::remove(const char *v) {
@@ -186,7 +179,7 @@ size_t Vector::remove(const char *v) {
 		for(size_t i=0; i+n<sz; ++i) {
 			while(list[i+n].type==CHAR_P && i+n<sz && !strcmp((char *)list[i+n].value,v)) {
 				free((void *)list[i+n].value);
-				n++;
+				++n;
 			}
 			if(n) list[i] = list[i+n];
 		}
@@ -207,20 +200,30 @@ size_t Vector::remove(const char **v) {
 
 void Vector::removeAt(long n) {
 	if(sz) {
-		if((n=align_to_size(n,sz))<0) return;
+		if((n=alignToSize(n))<0) return;
 		if(list[n].type==CHAR_P
 #if _WORDSIZE < 64
 			|| list[n].type==DOUBLE
 #endif
 				) free((void *)list[n].value);
 		for(size_t i=n+1; i<sz; ++i) list[i-1] = list[i];
-		sz--;
+		--sz;
 	}
 }
 
 long Vector::find(value_t v,type_t t) {
 	for(size_t i=0; i<sz; ++i) if(list[i].value==v && list[i].type==t) return (long)i;
 	return -1;
+}
+
+long Vector::find(double v) {
+#if _WORDSIZE == 64
+	return find(_VEC_DOUBLE_VALUE(v),DOUBLE);
+#else
+	for(size_t i=0; i<sz; ++i)
+      if(list[i].type==DOUBLE && *(double *)list[i].value==v) return (long)i;
+	return -1;
+#endif
 }
 
 long Vector::find(const char *v) {
@@ -278,7 +281,12 @@ void Vector::trim() {
 
 void Vector::clear() {
 	if(list) {
-		for(size_t i=0; i<sz; ++i) if(list[i].type==CHAR_P) free((void *)list[i].value);
+		for(size_t i=0; i<sz; ++i)
+			if(list[i].type==CHAR_P
+#if _WORDSIZE < 64
+				|| list[i].type==DOUBLE
+#endif
+					) free((void *)list[i].value);
 		free(list);
 	}
 	sz = 0,cap = 16,list = 0;
@@ -300,16 +308,16 @@ size_t Vector::print(const char *fn) {
 size_t Vector::print(FILE *fp) {
 	if(!fp) return 0;
 	for(size_t i=0; i<sz; ++i) {
-		fprintf(fp,"List[%lu,%u]",(unsigned long)i,list[i].type);
+		fprintf(fp,"Vector[%lu,%u]",(unsigned long)i,list[i].type);
 		fflush(fp);
 		if(list[i].value) {
 			switch(list[i].type) {
 				case VOID_P:fprintf(fp,"=%p\n",(void *)list[i].value);break;
 				case INTPTR:fprintf(fp,"=%" PRIuPTR "\n",(intptr_t)list[i].value);break;
 #if _WORDSIZE == 64
-				case DOUBLE:fprintf(fp,"=%f\n",*((double *)((void *)&list[i].value)));break;
+				case DOUBLE:fprintf(fp,"=%g\n",_VEC_DOUBLE_VALUE(list[i].value));break;
 #else
-				case FLOAT:fprintf(fp,"=%f\n",*((float *)((void *)&list[i].value)));break;
+				case FLOAT:fprintf(fp,"=%g\n",*(double *)list[i].value);break;
 #endif
 				case CHAR_P:fprintf(fp,"=\"%s\"\n",(char *)list[i].value);break;
 				case OBJECT:fprintf(fp,"=%p\n",(void *)list[i].value);break;
@@ -370,9 +378,9 @@ size_t Vector::save(FILE *fp,const char *l) {
 			case VOID_P:fprintf(fp,"%p%s",(void *)list[i].value,l);break;
 			case INTPTR:fprintf(fp,"%" PRIuPTR "%s",(intptr_t)list[i].value,l);break;
 #if _WORDSIZE == 64
-			case DOUBLE:fprintf(fp,"%f%s",*((double *)((void *)&list[i].value)),l);break;
+			case DOUBLE:fprintf(fp,"%g%s",_VEC_DOUBLE_VALUE(list[i].value),l);break;
 #else
-			case FLOAT:fprintf(fp,"%f%s",*((float *)((void *)&list[i].value)),l);break;
+			case FLOAT:fprintf(fp,"%g%s",*(double *)list[i].value,l);break;
 #endif
 			case CHAR_P:fprintf(fp,"%s%s",(char *)list[i].value,l);break;
 			case OBJECT:fprintf(fp,"%p%s",(void *)list[i].value,l);break;

@@ -4,7 +4,7 @@
 /**
  * @file amanita/game/Path.h  
  * @author Per Löwgren
- * @date Modified: 2013-01-20
+ * @date Modified: 2013-02-23
  * @date Created: 2008-09-07
  */ 
 
@@ -24,23 +24,34 @@ enum {
 };
 
 enum {
-	PATH_NORTH,
-	PATH_NORTH_EAST,
-	PATH_EAST,
-	PATH_SOUTH_EAST,
-	PATH_SOUTH,
-	PATH_SOUTH_WEST,
-	PATH_WEST,
-	PATH_NORTH_WEST,
-	PATH_UP,
-	PATH_DOWN,
-	PATH_RIGHT,
-	PATH_LEFT,
+	PATH_CANNOT_MOVE					= 0xffff,		//!< Will no include this coordinate in the search
+	PATH_AVOID_MOVE					= 0xfffe,		//!< Is not included as a valid coordinate in the search, but accepted as a destination.
 };
 
 enum {
-	PATH_CANNOT_MOVE					= 0xffff,		//!< Will no include this coordinate in the search
-	PATH_AVOID_MOVE					= 0xfffe,		//!< Is not included as a valid coordinate in the search, but accepted as a destination.
+	PATH_C,			//!< Centre
+	PATH_N,			//!< North
+	PATH_E,			//!< East
+	PATH_S,			//!< South
+	PATH_W,			//!< West
+	PATH_NE,			//!< North-East
+	PATH_SE,			//!< South-East
+	PATH_SW,			//!< South-West
+	PATH_NW,			//!< North-West
+	PATH_NNE,		//!< North-North-East
+	PATH_ENE,		//!< East-North-East
+	PATH_ESE,		//!< East-South-East
+	PATH_SSE,		//!< South-South-East
+	PATH_SSW,		//!< South-South-West
+	PATH_WSW,		//!< West-South-West
+	PATH_WNW,		//!< West-North-West
+	PATH_NNW,		//!< North-North-West
+	PATH_UP,			//!< Up
+	PATH_DN,			//!< Down
+	PATH_R,			//!< Right
+	PATH_L,			//!< Left
+	PATH_IN,			//!< In
+	PATH_OUT,		//!< Out
 };
 
 
@@ -50,17 +61,22 @@ class Path;
 
 
 struct PathNode {
-	uint32_t key;				//!< Hash key.
-	int16_t x;					//!< X coordinate of node
+	uint32_t key;				//!< Hash key. Key used in hashtable.
+	int16_t x;					//!< X coordinate of node.
 	int16_t y;					//!< Y coordinate of node.
-	short s;						//!< s value used in A* algorithm.
-	short g;						//!< g value used in A* algorithm.
-	short h;						//!< h value used in A* algorithm.
-	PathNode *parent;			//!< Parent node in path.
-	PathNode *open;			//!< Open node.
-	PathNode *closed;			//!< Closed node.
+	short s;						//!< s value used in A* algorithm. Steps, the number of steps from starting point.
+	short g;						//!< g value used in A* algorithm. Accumulated move-cost of all steps to and including this node.
+	short h;						//!< h value used in A* algorithm. Heuristic value, approximate distance to destination.
+	PathNode *parent;			//!< Parent node in path. Previous step in the path. When a shorter path is found for any node; parent, s and g are adjusted accordingly.
+	PathNode *open;			//!< Open node. Linked list in the open stack.
+	PathNode *closed;			//!< Closed node. Linked list in the closed hashtable.
 
-	/** Constructor */
+	/** Constructor
+	 * @param x X-coordinate
+	 * @param y Y-coordinate
+	 * @param g g value used in the A* algorithm
+	 * @param h h value used in the A* algorithm
+	 * @param p Parent node, previous step in the path */
 	PathNode(int x,int y,int g,int h,PathNode *p)
 		: x(x),y(y),g(g),h(h),parent(p),open(0),closed(0) { key = (x<<16)|y,s = p? p->s+1 : 0; }
 	/** Destructor */
@@ -91,9 +107,10 @@ int weight(Path &p,PathNode &n,int x,int y) {
 }
  * @endcode
  * 
- * Notice that the actual move-cost may be different. The returned value
- * should be a relative weight between 0-65533 in comparison
- * to other terrain-types, distances, time to move, friction, or similar.
+ * Notice that the actual move-cost may be different. The returned value should be a relative
+ * weight between 0-65533 in comparison to other terrain-types, distances, time to move,
+ * friction, or similar. If you find a need for higher weights-values than a range between 0-65533,
+ * it is perhaps better to recalculate to percent or permille, or even permyriad (1/10000).
  * @param p Path object
  * @param n PathNode, current node positioned at
  * @param x X-coordinate for calculating weight to enter
@@ -133,15 +150,15 @@ typedef int (*path_dir)(Path &p,int x1,int y1,int x2,int y2);
  * positioned at each step in the search and (x2,y2) is the destination. The returned value should be
  * an approximation as close as possible to the real distance, where a lower value generally calculates
  * a more direct path, while a higher value accepts paths a bit more off.
- * @param p Path object
- * @param x1 X-coordinate, leaving
- * @param y1 Y-coordinate, leaving
- * @param x2 X-coordinate, entering
- * @param y2 Y-coordinate, entering
- * @param n A value between 0-3, where 0 means the algorithm is asking for the shortest possible distance, and 3 a generous approximation.
+ * @param p Path object. Use Path::getDestination().
+ * @param x X-coordinate for calculating distance to destination from
+ * @param y Y-coordinate for calculating distance to destination from 
  * @return An approximate evaluation of the distance between (x1,y1) and (x2,y2).
  * @see Path::nodes */
-typedef int (*path_heuristic)(Path &p,int x,int y,int n);
+typedef int (*path_heuristic)(Path &p,int x,int y);
+
+
+typedef void (*path_step)(Path &p,PathNode &n);
 
 
 /** A class for storing a path-trail, with step coordinates.
@@ -161,12 +178,13 @@ protected:
 	step *trail;				//!< Trail of steps.
 	size_t ind;					//!< Index of step at where the trail is.
 	size_t len;					//!< Length of trail. Number of steps.
+	void *obj;					//!< Object moving.
 
 public:
 	/** @name Constructor and Destructor
 	 * @{ */
 	/** Constructor. */
-	Trail() : trail(0),ind(0),len(0) {}
+	Trail() : trail(0),ind(0),len(0),obj(0) {}
 	/** Destructor. */
 	~Trail() { if(trail) free(trail);trail = 0; }
 	/** @} */
@@ -178,6 +196,7 @@ public:
 	int getX() const { return ind<len? trail[ind].x : -1; }					//!< Get x coordinate of step at index.
 	int getY() const { return ind<len? trail[ind].y : -1; }					//!< Get y coordinate of step at index.
 	int getDir() { return ind<len? trail[ind].dir : -1; }						//!< Get direction that step at index is going.
+	void *getObject() { return obj; }
 	size_t index() { return ind; }													//!< Get index of step at where the trail is.
 	size_t setIndex(size_t i) { return ind = i>=0 && i<len? i : 0; }		//!< Set index of step at where the trail is.
 	void first() { ind = 0; }						//!< Set index to first step.
@@ -228,7 +247,11 @@ protected:
 	path_dir dir;
 	/** Heuristic value, callback */
 	path_heuristic heur;
+	/** Move step, callback */
+	path_step step;
 	/** @} */
+
+	Trail *getTrail(PathNode *n);
 
 	void put(PathNode *n);
 	PathNode *get(int x,int y) { return get((x<<16)|y); }
@@ -251,7 +274,7 @@ public:
 	Path(int w,int h,int s,void *m,path_weight pw);
 	~Path();
 
-	void setCallbackFunctions(path_move pm,path_dir pd,path_heuristic ph);
+	void setCallbackFunctions(path_move pm,path_dir pd,path_heuristic ph,path_step ps);
 
 	bool isHWrap() { return style&PATH_HWRAP; }
 	bool isVWrap() { return style&PATH_VWRAP; }
@@ -266,6 +289,12 @@ public:
 	void getStart(int &x,int &y) { x = sx,y = sy; }
 	void getDestination(int &x,int &y) { x = dx,y = dy; }
 
+	bool isWithinReach(int x,int y) { return get(x,y)!=0; }
+	bool isOpen(int x,int y);
+	int getSteps(int x,int y) { PathNode *n = get(x,y);return n? n->s : -1; }
+	int getWeight(int x,int y) { PathNode *n = get(x,y);return n? n->g : -1; }
+	Trail *getTrail(int x,int y) { return getTrail(get(x,y)); }
+
 	/** Calculate the A* path search
 	 * @param o Object to perform search, user data
 	 * @param x1 X-coordinate to start search
@@ -274,7 +303,17 @@ public:
 	 * @param y2 Y-coordinate to end search
 	 * @param l Length to search. No nodes at a distance from (x1,y1) greater than l are searched. If set to zero, all possible nodes are searched.
 	 * @return A Trail-object containing the found path, or to the closest point. If no path is found, NULL is returned. */
-	Trail *search(void *o,int x1,int y1,int x2,int y2,int l=0);
+	Trail *searchPath(void *o,int x1,int y1,int x2,int y2,int l=0);
+
+	/** Calculate the A* path search
+	 * @param o Object to perform search, user data
+	 * @param x1 X-coordinate to start search
+	 * @param y1 Y-coordinate to start search
+	 * @param x2 X-coordinate to end search
+	 * @param y2 Y-coordinate to end search
+	 * @param l Length to search. No nodes at a distance from (x1,y1) greater than l are searched. If set to zero, all possible nodes are searched.
+	 * @return A Trail-object containing the found path, or to the closest point. If no path is found, NULL is returned. */
+	void searchReach(void *o,int x,int y,int s,int m);
 };
 
 }; /* namespace a */

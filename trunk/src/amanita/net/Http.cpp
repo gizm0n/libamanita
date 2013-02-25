@@ -196,7 +196,7 @@ void Http::setFormFile(const char *key,const char *file,const char *content,bool
 		}
 		if(!data || len<=0) free(p);
 		else {
-			multipart++;
+			++multipart;
 			*p = (packet){ strdup(file),strdup(content),loaded,binary,data,(long)len };
 			form.put(key,(void *)p);
 		}
@@ -205,14 +205,15 @@ void Http::setFormFile(const char *key,const char *file,const char *content,bool
 
 void Http::removeFormValue(const char *key) {
 	type_t type;
-	void *p = (void *)form.remove(key,type);
+	void *p = (void *)form.get(key,type);
+	form.remove(key);
 	if(p && type==VOID_P) {
 		packet &pack = *(packet *)p;
 		free(pack.file);
 		free(pack.content);
 		if(pack.loaded) free(pack.data);
 		free(p);
-		multipart--;
+		--multipart;
 	}
 }
 

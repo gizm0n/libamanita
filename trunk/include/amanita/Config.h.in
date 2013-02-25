@@ -4,7 +4,7 @@
 /**
  * @file amanita/Config.h
  * @author Per Löwgren
- * @date Modified: 2012-10-21
+ * @date Modified: 2013-02-25
  * @date Created: 2012-03-01
  */ 
 
@@ -53,6 +53,10 @@
 #define USE_SDL
 #endif
 #endif
+
+
+extern double *dbldup(double d);
+
 
 #include <amanita/Resource.h>
 
