@@ -407,6 +407,12 @@ hash_t crc32(const char *s,bool c) {
 	return crc^0xffffffff;
 }
 
+hash_t crc32(const uint8_t *s,int n) {
+	hash_t crc = 0xffffffff;
+	for(; n>0; --n,++s) crc = (crc>>8)^crc32_table[(crc^(*s))&0xff];
+	return crc^0xffffffff;
+}
+
 /*hash_t hash(const char *s,bool c) {
 	if(c) while(*s) h = 31*h+tolower(*s),++s;
 	else while(*s) h = 31*h+(*s),++s;

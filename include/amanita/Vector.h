@@ -9,9 +9,20 @@
  */ 
 
 #include <stdint.h>
+#include <string.h>
 #include <amanita/Collection.h>
-#include <amanita/Object.h>
+#include <amanita/Config.h>
 #include <amanita/String.h>
+
+
+/** @cond */
+#if _WORDSIZE == 64
+#define _VEC_DBLDUP(d) *((value_t *)((void *)&d))
+#else
+#define _VEC_DBLDUP(d) dbldup(d)
+#endif
+#define _VEC_DOUBLE_VALUE(v) *((value_t *)((void *)&v))
+/** @endcond */
 
 
 /** Amanita Namespace */
@@ -167,16 +178,12 @@ public:
 	Vector &operator<<(void *v) { insert(sz,(value_t)v,VOID_P);return *this; }
 	Vector &operator<<(long v) { insert(sz,(value_t)v,INTPTR);return *this; }
 	Vector &operator<<(unsigned long v) { insert(sz,(value_t)v,INTPTR);return *this; }
-#if _WORDSIZE == 64
-	Vector &operator<<(float v) { double d = v;insert(sz,*(value_t *)((void *)&d),DOUBLE);return *this; }
-#else
-	Vector &operator<<(float v) { insert(sz,*(value_t *)((void *)&v),FLOAT);return *this; }
-#endif
-	Vector &operator<<(double v) { insert(sz,*(value_t *)((void *)&v),DOUBLE);return *this; }
-	Vector &operator<<(const char *v) { insert(sz,(value_t)v,CHAR_P);return *this; }
+	Vector &operator<<(float v) { double d = v;insert(sz,(value_t)_VEC_DBLDUP(d),DOUBLE);return *this; }
+	Vector &operator<<(double v) { insert(sz,(value_t)_VEC_DBLDUP(v),DOUBLE);return *this; }
+	Vector &operator<<(const char *v) { insert(sz,(value_t)strdup(v),CHAR_P);return *this; }
 	Vector &operator<<(const char **v) { insert(sz,v);return *this; }
-	Vector &operator<<(const String *v) { insert(sz,(value_t)((const char *)*v),CHAR_P);return *this; }
-	Vector &operator<<(const String &v) { insert(sz,(value_t)((const char *)v),CHAR_P);return *this; }
+	Vector &operator<<(const String *v) { insert(sz,(value_t)strdup(*v),CHAR_P);return *this; }
+	Vector &operator<<(const String &v) { insert(sz,(value_t)strdup(v),CHAR_P);return *this; }
 	Vector &operator<<(const Object *v) { insert(sz,(value_t)v,OBJECT);return *this; }
 	Vector &operator<<(const Object &v) { insert(sz,(value_t)&v,OBJECT);return *this; }
 	Vector &operator<<(const Vector &a) { insert(sz,a);return *this; }
@@ -187,12 +194,8 @@ public:
 	Vector &operator>>(void *v) { remove((value_t)v,VOID_P);return *this; }
 	Vector &operator>>(long v) { remove((value_t)v,INTPTR);return *this; }
 	Vector &operator>>(unsigned long v) { remove((value_t)v,INTPTR);return *this; }
-#if _WORDSIZE == 64
-	Vector &operator>>(float v) { double d = v;remove(*(value_t *)((void *)&d),DOUBLE);return *this; }
-#else
-	Vector &operator>>(float v) { remove(*(value_t *)((void *)&v),FLOAT);return *this; }
-#endif
-	Vector &operator>>(double v) { remove(*(value_t *)((void *)&v),DOUBLE);return *this; }
+	Vector &operator>>(float v) { double d = v;remove(d);return *this; }
+	Vector &operator>>(double v) { remove(v);return *this; }
 	Vector &operator>>(const char *v) { remove(v);return *this; }
 	Vector &operator>>(const char **v) { remove(v);return *this; }
 	Vector &operator>>(const String *v) { remove((const char *)*v);return *this; }
@@ -206,16 +209,12 @@ public:
 	size_t insert(long n,void *v) { return insert(n,(value_t)v,VOID_P); }
 	size_t insert(long n,long v) { return insert(n,(value_t)v,INTPTR); }
 	size_t insert(long n,unsigned long v) { return insert(n,(value_t)v,INTPTR); }
-#if _WORDSIZE == 64
-	size_t insert(long n,float v) { double d = v;return insert(n,*(value_t *)((void *)&d),DOUBLE); }
-#else
-	size_t insert(long n,float v) { return insert(n,*(value_t *)((void *)&v),FLOAT); }
-#endif
-	size_t insert(long n,double v) { return insert(n,*(value_t *)((void *)&v),DOUBLE); }
-	size_t insert(long n,const char *v) { return insert(n,(value_t)v,CHAR_P); }
+	size_t insert(long n,float v) { double d = v;return insert(n,(value_t)_VEC_DBLDUP(d),DOUBLE); }
+	size_t insert(long n,double v) { return insert(n,(value_t)_VEC_DBLDUP(v),DOUBLE); }
+	size_t insert(long n,const char *v) { return insert(n,(value_t)strdup(v),CHAR_P); }
 	size_t insert(long n,const char **v);
-	size_t insert(long n,const String *v) { return insert(n,(value_t)((const char *)*v),CHAR_P); }
-	size_t insert(long n,const String &v) { return insert(n,(value_t)((const char *)v),CHAR_P); }
+	size_t insert(long n,const String *v) { return insert(n,(value_t)strdup(*v),CHAR_P); }
+	size_t insert(long n,const String &v) { return insert(n,(value_t)strdup(v),CHAR_P); }
 	size_t insert(long n,const Object *v) { return insert(n,(value_t)v,OBJECT); }
 	size_t insert(long n,const Object &v) { return insert(n,(value_t)&v,OBJECT); }
 	size_t insert(long n,const Vector &v);
@@ -226,15 +225,11 @@ public:
 	void set(long n,void *v) { return set(n,(value_t)v,VOID_P); }
 	void set(long n,long v) { return set(n,(value_t)v,INTPTR); }
 	void set(long n,unsigned long v) { return set(n,(value_t)v,INTPTR); }
-#if _WORDSIZE == 64
-	void set(long n,float v) { double d = v;return set(n,*(value_t *)((void *)&d),DOUBLE); }
-#else
-	void set(long n,float v) { return set(n,*(value_t *)((void *)&v),FLOAT); }
-#endif
-	void set(long n,double v) { return set(n,*(value_t *)((void *)&v),DOUBLE); }
-	void set(long n,const char *v) { return set(n,(value_t)v,CHAR_P); }
-	void set(long n,const String *v) { return set(n,(value_t)((const char *)*v),CHAR_P); }
-	void set(long n,const String &v) { return set(n,(value_t)((const char *)v),CHAR_P); }
+	void set(long n,float v) { double d = v;return set(n,(value_t)_VEC_DBLDUP(d),DOUBLE); }
+	void set(long n,double v) { return set(n,(value_t)_VEC_DBLDUP(v),DOUBLE); }
+	void set(long n,const char *v) { return set(n,(value_t)strdup(v),CHAR_P); }
+	void set(long n,const String *v) { return set(n,(value_t)strdup(*v),CHAR_P); }
+	void set(long n,const String &v) { return set(n,(value_t)strdup(v),CHAR_P); }
 	void set(long n,const Object *v) { return set(n,(value_t)v,OBJECT); }
 	void set(long n,const Object &v) { return set(n,(value_t)&v,OBJECT); }
 	/** @} */
@@ -244,12 +239,8 @@ public:
 	size_t remove(void *v) { return remove((value_t)v,VOID_P); }
 	size_t remove(long v) { return remove((value_t)v,INTPTR); }
 	size_t remove(unsigned long v) { return remove((value_t)v,INTPTR); }
-#if _WORDSIZE == 64
-	size_t remove(float v) { double d = v;return remove(*(value_t *)((void *)&d),DOUBLE); }
-#else
-	size_t remove(float v) { return remove(*(value_t *)((void *)&v),FLOAT); }
-#endif
-	size_t remove(double v) { return remove(*(value_t *)((void *)&v),DOUBLE); }
+	size_t remove(float v) { double d = v;return remove(d); }
+	size_t remove(double v);
 	size_t remove(const char *v);
 	size_t remove(const char **v);
 	size_t remove(const String *v) { return remove((const char *)*v); }
@@ -266,12 +257,8 @@ public:
 	long find(void *v) { return find((value_t)v,VOID_P); }
 	long find(long v) { return find((value_t)v,INTPTR); }
 	long find(unsigned long v) { return find((value_t)v,INTPTR); }
-#if _WORDSIZE == 64
-	long find(float v) { double d = v;return find(*(value_t *)((void *)&d),DOUBLE); }
-#else
-	long find(float v) { return find(*(value_t *)((void *)&v),FLOAT); }
-#endif
-	long find(double v) { return find(*(value_t *)((void *)&v),DOUBLE); }
+	long find(float v) { double d = v;return find(d); }
+	long find(double v);
 	long find(const char *v);
 	long find(const String *v) { return find((const char *)*v); }
 	long find(const String &v) { return find((const char *)v); }
@@ -284,12 +271,8 @@ public:
 	bool contains(void *v) { return find((value_t)v,VOID_P)!=-1; }
 	bool contains(long v) { return find((value_t)v,INTPTR)!=-1; }
 	bool contains(unsigned long v) { return find((value_t)v,INTPTR)!=-1; }
-#if _WORDSIZE == 64
-	bool contains(float v) { double d = v;return find(*(value_t *)((void *)&d),DOUBLE)!=-1; }
-#else
-	bool contains(float v) { return find(*(value_t *)((void *)&v),FLOAT)!=-1; }
-#endif
-	bool contains(double v) { return find(*(value_t *)((void *)&v),DOUBLE)!=-1; }
+	bool contains(float v) { double d = v;return find(d)!=-1; }
+	bool contains(double v) { return find(v)!=-1; }
 	bool contains(const char *v) { return find(v)!=-1; }
 	bool contains(const String *v) { return find((const char *)*v)!=-1; }
 	bool contains(const String &v) { return find((const char *)v)!=-1; }

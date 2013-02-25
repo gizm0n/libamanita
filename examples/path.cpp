@@ -79,6 +79,7 @@ const int height = 640;
 Image *terrain;
 bool repaint = true;
 
+Thread thread;
 Map map;
 int view_x = 0;
 int view_y = 0;
@@ -86,7 +87,11 @@ int start_x = -1;
 int start_y = -1;
 int dest_x = -1;
 int dest_y = -1;
+Path *path = 0;
+int path_steps = 0;
+int path_cost = 0;
 Trail *trail = 0;
+
 
 /*	MAP_WATER				= 0x00,
 	MAP_LAND					= 0x01,
@@ -157,8 +162,8 @@ static void paint_step(int x1,int y1,int x2,int y2,int d,int c) {
 		g.drawLine(x2-3,y2-3,x2+3,y2+3,c);
 		g.drawLine(x2-3,y2+3,x2+3,y2-3,c);
 		g.drawLine(x2,y2,
-			x2+(d==PATH_NORTH || d==PATH_SOUTH? 0 : (d==PATH_NORTH_EAST || d==PATH_EAST || d==PATH_SOUTH_EAST? 10 : -10)),
-			y2+(d==PATH_EAST || d==PATH_WEST? 0 : (d==PATH_NORTH_EAST || d==PATH_NORTH || d==PATH_NORTH_WEST? -10 : 10)),c);
+			x2+(d==PATH_N || d==PATH_S? 0 : (d==PATH_NE || d==PATH_E || d==PATH_SE? 10 : -10)),
+			y2+(d==PATH_E || d==PATH_W? 0 : (d==PATH_NE || d==PATH_N || d==PATH_NW? -10 : 10)),c);
 		if(x1+3>-TILE_RECT_WIDTH && y1+3>-TILE_RECT_HEIGHT && x1-3<width+TILE_RECT_WIDTH && y1-3<height+TILE_RECT_HEIGHT)
 			g.drawLine(x1,y1,x2,y2,c);
 	}
@@ -178,7 +183,7 @@ static void tile_to_point(int x1,int y1,int &x2,int &y2) {
 }
 
 static void paint(void *data) {
-	int x,y,px,py,i,t;
+	int x,y,px,py,i,j,t;
 	rect16_t r = { 0,0,TILE_WIDTH,TILE_HEIGHT+1 };
 
 	while(app.isRunning()) {
@@ -217,13 +222,24 @@ static void paint(void *data) {
 					else if(t&MAP_MOUNTAIN) t = terrain_colors[3],r.x = (TILE_WIDTH+1)*3;
 					else if(t&MAP_LAND) t = terrain_colors[1],r.x = TILE_WIDTH+1;*/
 					terrain->draw(px,py-1,r);
+
+					if(path && path->isWithinReach(x,y)) {
+						if(path_steps) i = path->getSteps(x,y),j = path_steps;
+						else i = path->getWeight(x,y),j = path_cost;
+//fprintf(stdout,"paint(i=%d,j=%d)\n",i,j);fflush(stdout);
+						if(j<1) j = 1;
+						if(i>j) i = j;
+						i = (i*0xff)/j;
+						if(path->isOpen(x,y)) g.fillRect(px+TILE_CENTER_X-7,py+TILE_CENTER_Y-7,14,14,0xffffff);
+						g.fillRect(px+TILE_CENTER_X-5,py+TILE_CENTER_Y-5,10,10,(i<<16)|((0xff-i)<<8));
+					}
 				}
 			}
 
 			g.lock();
 
 			if(trail) {
-		//debug_output("paint(tr=%p,index=%d,length=%d)\n",u->tr,u->tr->index(),u->tr->length());fflush(stdout);
+//debug_output("paint(tr=%p,index=%d,length=%d)\n",u->tr,u->tr->index(),u->tr->length());fflush(stdout);
 				i = trail->index();
 				tile_to_point(start_x,start_y,x,y);
 				while(trail->hasMoreSteps()) {
@@ -264,7 +280,7 @@ static void paint(void *data) {
 	MAP_SWAMP,
 	MAP_CITY,
 */
-int weight(Path &p,PathNode &n,int x,int y) {
+int weight_func(Path &p,PathNode &n,int x,int y) {
 	static const int land[] = { -1,2,3,6,5,4,5,4,1 };
 //	static const int water[] = { 1,-1,-1,-1,-1,-1,-1,-1,-1 };
 //	static const int air[] = { 1,1,1,1,1,1,1,1,1 };
@@ -283,13 +299,68 @@ int weight(Path &p,PathNode &n,int x,int y) {
 	return t;
 }
 
+void step_func1(Path &p,PathNode &n) {
+	if(n.g>path_cost) path_cost = n.g;
+	repaint = true;
+	app.pauseFPS(4);
+}
+
+void step_func2(Path &p,PathNode &n) {
+	repaint = true;
+	app.pauseFPS(4);
+}
+
+void path_search_path(void *o) {
+	if(start_x!=-1 && start_y!=-1 && dest_x!=-1 && dest_y!=-1 && path) {
+		trail = path->searchPath(0,start_x,start_y,dest_x,dest_y);
+		if(trail) {
+			path_steps = 0;
+			path_cost = path->getWeight(dest_x,dest_y);
+		} else {
+			delete path;
+			path = 0;
+		}
+		repaint = true;
+	}
+}
+
+void path_search_reach(void *o) {
+	if(start_x!=-1 && start_y!=-1 && path) {
+		path->searchReach(0,start_x,start_y,path_steps,path_cost);
+		repaint = true;
+	}
+}
+
+void find_reach(int s,int m) {
+	if(start_x!=-1 && start_y!=-1) {
+		if(path) delete path;
+		path = new Path(map_width,map_height,PATH_HWRAP|PATH_HEXAGONAL,0,weight_func);
+		path->setCallbackFunctions(0,0,0,step_func2);
+		path_steps = s;
+		path_cost = m;
+		thread.start(path_search_reach);
+	}
+}
+
 static void key(uint32_t sym,uint32_t mod,uint32_t unicode,bool down) {
 fprintf(stderr,"key: [sym: 0x%x, mod: 0x%x unicode: %c]\n",sym,mod,unicode);
 	if(down) {
 		switch(sym) {
 			case KEY_ESC:app.quit();break;
 			case KEY_SPACE:
+				if(start_x!=-1 && start_y!=-1 && dest_x!=-1 && dest_y!=-1) {
+					path = new Path(map_width,map_height,PATH_HWRAP|PATH_HEXAGONAL,0,weight_func);
+					path->setCallbackFunctions(0,0,0,step_func1);
+					path_steps = 0;
+					path_cost = 1;
+					thread.start(path_search_path);
+				}
+				break;
 			case KEY_RETURN:
+				if(path) {
+					delete path;
+					path = 0;
+				}
 				if(trail) {
 					delete trail;
 					trail = 0;
@@ -297,7 +368,24 @@ fprintf(stderr,"key: [sym: 0x%x, mod: 0x%x unicode: %c]\n",sym,mod,unicode);
 				start_x = -1,start_y = -1,dest_x = -1,dest_y = -1,view_x = 0,view_y = 0;
 				map.generate(map_width,map_height,terrain_types,MAP_WRAP_HORIZ);
 				break;
-			case KEY_1:break;
+			case KEY_F1:find_reach(1,0);break;
+			case KEY_F2:find_reach(2,0);break;
+			case KEY_F3:find_reach(3,0);break;
+			case KEY_F4:find_reach(4,0);break;
+			case KEY_F5:find_reach(5,0);break;
+			case KEY_F6:find_reach(6,0);break;
+			case KEY_F7:find_reach(7,0);break;
+			case KEY_F8:find_reach(8,0);break;
+			case KEY_F9:find_reach(9,0);break;
+			case KEY_1:find_reach(0,1);break;
+			case KEY_2:find_reach(0,2);break;
+			case KEY_3:find_reach(0,3);break;
+			case KEY_4:find_reach(0,4);break;
+			case KEY_5:find_reach(0,5);break;
+			case KEY_6:find_reach(0,6);break;
+			case KEY_7:find_reach(0,7);break;
+			case KEY_8:find_reach(0,8);break;
+			case KEY_9:find_reach(0,9);break;
 		}
 		repaint = true;
 	}
@@ -306,23 +394,16 @@ fprintf(stderr,"key: [sym: 0x%x, mod: 0x%x unicode: %c]\n",sym,mod,unicode);
 static int md = 0,mx = -1,my = -1;
 
 static void mouse(uint16_t x,uint16_t y,uint8_t button,uint16_t clicks,bool down) {
-	if(button==1) {
-		if(down) md = 0;
-		else if(md==0) {
-			if(start_x==-1 || start_y==-1 || trail) {
-				point_to_map(x,y,start_x,start_y);
-				dest_x = -1;
-				dest_y = -1;
-				if(trail) delete trail;
-				trail = 0;
-			} else {
-				Path p(map_width,map_height,PATH_HWRAP|PATH_HEXAGONAL,0,weight);
-				point_to_map(x,y,dest_x,dest_y);
-				trail = p.search(0,start_x,start_y,dest_x,dest_y);
-			}
-		}
+	if(down) md = 0;
+	else if(md==0) {
+		if(path) delete path;
+		path = 0;
+		if(trail) delete trail;
+		trail = 0;
+		if(button==1) point_to_map(x,y,start_x,start_y);
+		else if(button==3) point_to_map(x,y,dest_x,dest_y);
+		repaint = true;
 	}
-	repaint = true;
 }
 
 static void motion(uint16_t x,uint16_t y,uint16_t dx,uint16_t dy,bool drag) {
@@ -354,6 +435,8 @@ int main(int argc,char *argv[]) {
 	app.main();
 	app.close();
 
+	if(path) delete path;
+	path = 0;
 	if(trail) delete trail;
 	trail = 0;
 	return 0;

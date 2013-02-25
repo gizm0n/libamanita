@@ -89,6 +89,16 @@ enum {
  * @return Hashvalue. */
 extern hash_t crc32(const char *s,bool c);
 
+/** Cyclic Redundancy Check
+ * Reads in a string s as a command-line argument, and prints out
+ * its 32 bit Cyclic Redundancy Check (CRC32 or Ethernet / AAL5 or ITU-TSS).
+ * 
+ * Uses direct table lookup.
+ * @param s Binary data to calcualte hash from.
+ * @param n Number of bytes.
+ * @return Hashvalue. */
+extern hash_t crc32(const uint8_t *s,int n);
+
 /** Generate hash value from a char string.
  * @param s String to generate hash from.
  * @param c Case insensitive, if true calculates hash based on lower case of the string.

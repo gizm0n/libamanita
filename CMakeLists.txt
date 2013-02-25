@@ -390,6 +390,7 @@ if(AMANITA_LIBS)
 		src/amanita/Flood.cpp
 		src/amanita/Hashtable.cpp
 		src/amanita/Integer.cpp
+		src/amanita/List.cpp
 		src/amanita/Main.cpp
 		src/amanita/Math.cpp
 		src/amanita/Object.cpp
@@ -496,6 +497,7 @@ if(AMANITA_LIBS)
 		include/amanita/Geometry.h
 		include/amanita/Hashtable.h
 		include/amanita/Integer.h
+		include/amanita/List.h
 		include/amanita/Main.h
 		include/amanita/Math.h
 		include/amanita/Object.h
@@ -664,6 +666,9 @@ if(AMANITA_EXAMPLES)
 	add_executable(client examples/client.cpp)
 	target_link_libraries(client amanita ${CMAKE_THREAD_LIBS_INIT})
 
+	add_executable(collection examples/collection.cpp)
+	target_link_libraries(collection amanita)
+
 	add_executable(database examples/database.cpp)
 	target_link_libraries(database amanita sqlite3)
 
@@ -688,9 +693,6 @@ if(AMANITA_EXAMPLES)
 	else()
 		target_link_libraries(gui amanita ${SCINTILLA_LIBRARIES})
 	endif()
-
-	add_executable(hashtable examples/hashtable.cpp)
-	target_link_libraries(hashtable amanita)
 
 	add_executable(horoscope examples/horoscope.c)
 	target_link_libraries(horoscope mandragora m)

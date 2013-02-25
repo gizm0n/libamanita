@@ -121,6 +121,8 @@ protected:
 	size_t sz;	//!< Size of the collection.
 	size_t cap;	//!< Capacity of the collection.
 
+	long alignToSize(long n) { return n<0? (sz+1+n<0? -1 : sz+1+n) : (n>(long)sz? sz : n); }
+
 public:
 	/** Constructor. */
 	Collection() : Object(),sz(0),cap(0) {}
