@@ -1,5 +1,13 @@
 #ifndef _IPOMOEA_HASHTABLE_T_H
 #define _IPOMOEA_HASHTABLE_T_H
+
+/**
+ * @file ipomoea/hashtable_t.h  
+ * @author Per Löwgren
+ * @date Modified: 2013-12-29
+ * @date Created: 2012-10-08
+ */ 
+
 #ifdef __cplusplus
 extern "C" {
 #endif

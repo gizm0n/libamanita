@@ -1,5 +1,13 @@
 #ifndef _IPOMOEA_BF_H
 #define _IPOMOEA_BF_H
+
+/**
+ * @file ipomoea/bf.h  
+ * @author Per Löwgren
+ * @date Modified: 2013-12-29
+ * @date Created: 2013-01-20
+ */ 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,5 +24,6 @@ char *bf_exec(FILE *out,const char *src,const char *in);
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* _IPOMOEA_BF_H */
 

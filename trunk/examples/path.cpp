@@ -74,7 +74,7 @@ const int map_width = 32;
 const int map_height = 32;
 
 const int width = 1200;
-const int height = 640;
+const int height = 700;
 
 Image *terrain;
 bool repaint = true;
@@ -152,39 +152,43 @@ void point_to_map(int xp,int yp,int &xm,int &ym) {
 	}
 }*/
 
-static void paint_marker(int x,int y,int c) {
-	g.drawLine(x-10,y-10,x+10,y+10,c);
-	g.drawLine(x-10,y+10,x+10,y-10,c);
-}
+//static void paint_marker(int x,int y,int c) {
+//	g.drawLine(x-10,y-10,x+10,y+10,c);
+//	g.drawLine(x-10,y+10,x+10,y-10,c);
+//}
 
-static void paint_step(int x1,int y1,int x2,int y2,int d,int c) {
-	if(x2+3>-TILE_RECT_WIDTH && y2+3>-TILE_RECT_HEIGHT && x2-3<width+TILE_RECT_WIDTH && y2-3<height+TILE_RECT_HEIGHT) {
-		g.drawLine(x2-3,y2-3,x2+3,y2+3,c);
-		g.drawLine(x2-3,y2+3,x2+3,y2-3,c);
-		g.drawLine(x2,y2,
-			x2+(d==PATH_N || d==PATH_S? 0 : (d==PATH_NE || d==PATH_E || d==PATH_SE? 10 : -10)),
-			y2+(d==PATH_E || d==PATH_W? 0 : (d==PATH_NE || d==PATH_N || d==PATH_NW? -10 : 10)),c);
-		if(x1+3>-TILE_RECT_WIDTH && y1+3>-TILE_RECT_HEIGHT && x1-3<width+TILE_RECT_WIDTH && y1-3<height+TILE_RECT_HEIGHT)
-			g.drawLine(x1,y1,x2,y2,c);
-	}
-}
+//static void paint_step(int x1,int y1,int x2,int y2,int d,int c) {
+//	if(x2+3>-TILE_RECT_WIDTH && y2+3>-TILE_RECT_HEIGHT && x2-3<width+TILE_RECT_WIDTH && y2-3<height+TILE_RECT_HEIGHT) {
+//		g.drawLine(x2-3,y2-3,x2+3,y2+3,c);
+//		g.drawLine(x2-3,y2+3,x2+3,y2-3,c);
+//		g.drawLine(x2,y2,
+//			x2+(d==PATH_N || d==PATH_S? 0 : (d==PATH_NE || d==PATH_E || d==PATH_SE? 10 : -10)),
+//			y2+(d==PATH_E || d==PATH_W? 0 : (d==PATH_NE || d==PATH_N || d==PATH_NW? -10 : 10)),c);
+//		if(x1+3>-TILE_RECT_WIDTH && y1+3>-TILE_RECT_HEIGHT && x1-3<width+TILE_RECT_WIDTH && y1-3<height+TILE_RECT_HEIGHT)
+//			g.drawLine(x1,y1,x2,y2,c);
+//	}
+//}
 
 static void tile_to_point(int x1,int y1,int &x2,int &y2) {
-	x2 = view_x+x1*TILE_RECT_WIDTH+(y1&1)*TILE_HALF_RECT_WIDTH+TILE_CENTER_X;
+	x2 = view_x+x1*TILE_RECT_WIDTH+(y1&1)*TILE_HALF_RECT_WIDTH;
 	if(map.isHWrap()) {
 		if(x2<-TILE_RECT_WIDTH) x2 += map.getWidth()*TILE_RECT_WIDTH;
 		else if(x2>=width) x2 -= map.getWidth()*TILE_RECT_WIDTH;
 	}
-	y2 = view_y+y1*TILE_RECT_HEIGHT+TILE_CENTER_Y;
+	y2 = view_y+y1*TILE_RECT_HEIGHT;
 	if(map.isVWrap()) {
 		if(y2<-TILE_RECT_HEIGHT) y2 += map.getHeight()*TILE_RECT_HEIGHT;
 		else if(y2>=height) x2 -= map.getHeight()*TILE_RECT_HEIGHT;
 	}
 }
 
+
 static void paint(void *data) {
-	int x,y,px,py,i,j,t;
-	rect16_t r = { 0,0,TILE_WIDTH,TILE_HEIGHT+1 };
+	static const int dirs[] = { 0,0,0,3,0,1,2,4,5 };
+	int x,y,px,py,i,j,t,x2,y2,dir;
+	rect16_t r1 = { 0,0,TILE_WIDTH,TILE_HEIGHT+1 };
+	rect16_t r2 = { 0,39,TILE_WIDTH,TILE_HEIGHT+1 };
+	rect16_t r3 = { 0,78,TILE_WIDTH,TILE_HEIGHT+1 };
 
 	while(app.isRunning()) {
 		if(repaint) {
@@ -210,7 +214,7 @@ static void paint(void *data) {
 					else if(x>=map.getWidth()) { if(map.isHWrap()) x -= map.getWidth();else break; }
 
 					t = map.getTerrain(x,y);
-					r.x = t*(TILE_WIDTH+1);
+					r1.x = t*(TILE_WIDTH+1);
 					t = terrain_colors[t];
 /*					if(t==MAP_WATER) t = terrain_colors[0],r.x = 0;
 					else if(t&MAP_CITY) t = terrain_colors[8],r.x = TILE_WIDTH+1;
@@ -221,11 +225,17 @@ static void paint(void *data) {
 					else if(t&MAP_DESERT) t = terrain_colors[4],r.x = (TILE_WIDTH+1)*4;
 					else if(t&MAP_MOUNTAIN) t = terrain_colors[3],r.x = (TILE_WIDTH+1)*3;
 					else if(t&MAP_LAND) t = terrain_colors[1],r.x = TILE_WIDTH+1;*/
-					terrain->draw(px,py-1,r);
+					terrain->draw(px,py,r1);
 
 					if(path && path->isWithinReach(x,y)) {
 						if(path_steps) i = path->getSteps(x,y),j = path_steps;
 						else i = path->getWeight(x,y),j = path_cost;
+						path->getParent(x,y,x2,y2);
+						if(x2!=-1 && y2!=-1) {
+							dir = dir_hexagonal(*path,x,y,x2,y2);
+							r2.x = dirs[dir]*(TILE_WIDTH+1);
+							terrain->draw(px,py,r2);
+						}
 //fprintf(stdout,"paint(i=%d,j=%d)\n",i,j);fflush(stdout);
 						if(j<1) j = 1;
 						if(i>j) i = j;
@@ -234,6 +244,14 @@ static void paint(void *data) {
 						g.fillRect(px+TILE_CENTER_X-5,py+TILE_CENTER_Y-5,10,10,(i<<16)|((0xff-i)<<8));
 					}
 				}
+			}
+			if(start_x!=-1 && start_y!=-1) {
+				tile_to_point(start_x,start_y,px,py);
+				terrain->draw(px,py,r3);
+			}
+			if(dest_x!=-1 && dest_y!=-1) {
+				tile_to_point(dest_x,dest_y,px,py);
+				terrain->draw(px,py,r3);
 			}
 
 			g.lock();
@@ -246,18 +264,13 @@ static void paint(void *data) {
 					trail->next();
 					if(trail->getX()==-1 && trail->getY()==-1) break;
 					tile_to_point(trail->getX(),trail->getY(),px,py);
-					paint_step(x,y,px,py,trail->getDir(),0x660000);
+					terrain->draw(px,py,r3);
+					r2.x = dirs[trail->getDir()]*(TILE_WIDTH+1);
+					terrain->draw(px,py,r2);
+//					paint_step(x+TILE_CENTER_X,y+TILE_CENTER_Y,px+TILE_CENTER_X,py+TILE_CENTER_Y,trail->getDir(),0x660000);
 					x = px,y = py;
 				}
 				trail->setIndex(i);
-			}
-			if(start_x!=-1 && start_y!=-1) {
-				tile_to_point(start_x,start_y,px,py);
-				paint_marker(px,py,0x660000);
-			}
-			if(dest_x!=-1 && dest_y!=-1) {
-				tile_to_point(dest_x,dest_y,px,py);
-				paint_marker(px,py,0x660000);
 			}
 
 			g.unlock();

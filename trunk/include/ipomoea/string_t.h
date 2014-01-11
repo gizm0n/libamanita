@@ -1,5 +1,13 @@
 #ifndef _IPOMOEA_STRING_T_H
 #define _IPOMOEA_STRING_T_H
+
+/**
+ * @file ipomoea/string_h.h  
+ * @author Per Löwgren
+ * @date Modified: 2013-12-29
+ * @date Created: 2012-12-23
+ */ 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -46,5 +54,6 @@ void str_print(string_t *str);
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* _IPOMOEA_STRING_T_H */
 

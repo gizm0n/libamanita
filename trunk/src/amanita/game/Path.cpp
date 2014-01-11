@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <amanita/Math.h>
 #include <amanita/game/Path.h>
 
 
@@ -74,43 +75,66 @@ static inline void dir_adjust(Path &p,int &x1,int &y1,int &x2,int &y2) {
 	}
 }
 
-static int dir_oblique(Path &p,int x1,int y1,int x2,int y2) {
+int dir_oblique(Path &p,int x1,int y1,int x2,int y2) {
 	dir_adjust(p,x1,y1,x2,y2);
 	return y2==y1? (x2<x1? PATH_W : PATH_E) : (y2<y1? PATH_N : PATH_S);
 }
 
-static int dir_isometric(Path &p,int x1,int y1,int x2,int y2) {
+int dir_isometric(Path &p,int x1,int y1,int x2,int y2) {
 	dir_adjust(p,x1,y1,x2,y2);
 	return y2<y1? (x2<x1+(y1&1)? PATH_NW : PATH_NE) : (x2<x1+(y1&1)? PATH_SW : PATH_SE);
 }
 
-static int dir_hexagonal(Path &p,int x1,int y1,int x2,int y2) {
+int dir_hexagonal(Path &p,int x1,int y1,int x2,int y2) {
 	dir_adjust(p,x1,y1,x2,y2);
 	x2 -= x1+(y1&1);
 	if(abs(y2-y1)==2) return y2<y1? PATH_N : PATH_S;
 	return y2<y1? (x2<0? PATH_NW : PATH_NE) : (x2<0? PATH_SW : PATH_SE);
 }
 
+static inline int manhattan_distance(int x1,int y1,int x2,int y2) {
+	return abs(x1-x2)+abs(y1-y2);
+}
+
+static inline int diagonal_distance(int x1,int y1,int x2,int y2) {
+	x1 = abs(x1-x2),y1 = abs(y1-y2);
+	return x1>y1? x1 : y1;
+}
+
+static inline int euclidian_distance(int x1,int y1,int x2,int y2) {
+	x1 = x1-x2,y1 = y1-y2;
+	return a::sqrt((unsigned long)(x1*x1+y1*y1));
+	
+}
+
+static inline int isometric_distance(int x1,int y1,int x2,int y2) {
+	x1 = abs(x1-x2)*2,y1 = abs(y1-y2);
+	return x1>y1? x1 : y1;
+}
+
+static inline int hexagonal_distance(int x1,int y1,int x2,int y2) {
+	int x = abs(x1-x2)*2,y = abs(y1-y2);
+	if((y&1) && x) ++x;
+	if(y>1) y = y/2;
+	return x>y? x : x+y;
+}
+
 static int heuristic_oblique(Path &p,int x,int y) {
 	int dx,dy;
 	p.getDestination(dx,dy);
 	dir_adjust(p,x,y,dx,dy);
-	x = abs(x-dx),y = abs(y-dy);
-	return x>y? x+y/2 : y+x/2;
-//	return x+y;
-//	return (x+y)*2;
-//	return (x>y? x : y);
+//	x = abs(x-dx),y = abs(y-dy);
+//	return x>y? x+y/2 : y+x/2;
+	return manhattan_distance(x,y,dx,dy);
 }
 
 static int heuristic_isometric(Path &p,int x,int y) {
 	int dx,dy;
 	p.getDestination(dx,dy);
 	dir_adjust(p,x,y,dx,dy);
-	x = abs(x-dx)/2,y = abs(y-dy);
-	return x>y? x+y/2 : y+x/2;
-//	return x+y;
-//	return (x+y)*2;
-//	return (x>y? x : y);
+//	x = abs(x-dx)/2,y = abs(y-dy);
+//	return x>y? x+y/2 : y+x/2;
+	return isometric_distance(x,y,dx,dy);
 }
 
 static int heuristic_hexagonal(Path &p,int x,int y) {
@@ -177,7 +201,7 @@ for(y=0; y<height; ++y) for(x=0; x<width; ++x) if(get(x,y)) mem[y][x] = '+';
 				for(p1=n,p2=0,i=t->len-1; p1; --i,p2=p1,p1=p1->parent) {
 //debug_output("key=%04x\tx1=%d\ty1=%d\tx2=%d\ty2=%d\tdir=%d\n",
 //p1->key,p1->x,p1->y,p2? p2->x : -1,p2? p2->y : -1,p2? dir(*this,p1->x,p1->y,p2->x,p2->y) : 5);
-					t->trail[i] = (Trail::step){ p1->x,p1->y,(uint8_t)(p2? dir(*this,p1->x,p1->y,p2->x,p2->y) : 5) };
+					t->trail[i] = (Trail::step){ p1->x,p1->y,(uint8_t)(p2? dir(*this,p1->x,p1->y,p2->x,p2->y) : PATH_C) };
 
 debug_output("Path::trail[%d]: x=%d, y=%d, dir=%d\n",i,(int)t->trail[i].x,(int)t->trail[i].y,(int)t->trail[i].dir);
 mem[p1->y][p1->x] = (char)('a'+((t->len-1)%('z'-'a')));

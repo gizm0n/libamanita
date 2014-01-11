@@ -119,6 +119,8 @@ debug_output("Writing header...\n");
 	avpicture_fill((AVPicture*)pic_yuv,buf_yuv,PIX_FMT_YUV420P,sc_width,sc_height);
 	buf_out_sz = 0x200000;
 	buf_out = (uint8_t *)av_malloc(buf_out_sz);
+
+	filming = true;
 	return 0;
 }
 

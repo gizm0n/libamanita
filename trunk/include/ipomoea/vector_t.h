@@ -1,5 +1,13 @@
 #ifndef _IPOMOEA_VECTOR_T_H
 #define _IPOMOEA_VECTOR_T_H
+
+/**
+ * @file ipomoea/vector_t.h  
+ * @author Per Löwgren
+ * @date Modified: 2013-12-29
+ * @date Created: 2012-10-08
+ */ 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,5 +64,6 @@ void vec_print_indent(vector_t *vec,int ind);
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* _IPOMOEA_VECTOR_T_H */
 

@@ -384,10 +384,10 @@ int main(int argc,char *argv[]) {
 	}
 
 	app.init(width,height);
-#ifdef HAVE_LIBAVCODEC_H
-	av_register_all();
-	avcodec_register_all();
-#endif
+//#ifdef HAVE_LIBAVCODEC_H
+//	av_register_all();
+//	avcodec_register_all();
+//#endif
 
 	planet.create(
 		width,	
