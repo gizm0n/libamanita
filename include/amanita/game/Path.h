@@ -55,9 +55,15 @@ enum {
 };
 
 
+
 /** @cond */
 class Path;
 /** @endcond */
+
+
+extern int dir_oblique(Path &p,int x1,int y1,int x2,int y2);
+extern int dir_isometric(Path &p,int x1,int y1,int x2,int y2);
+extern int dir_hexagonal(Path &p,int x1,int y1,int x2,int y2);
 
 
 struct PathNode {
@@ -293,6 +299,7 @@ public:
 	bool isOpen(int x,int y);
 	int getSteps(int x,int y) { PathNode *n = get(x,y);return n? n->s : -1; }
 	int getWeight(int x,int y) { PathNode *n = get(x,y);return n? n->g : -1; }
+	void getParent(int x1,int y1,int &x2,int &y2) { PathNode *n = get(x1,y1);if(n && n->parent) n = n->parent,x2 = n->x,y2 = n->y;else x2 = y2 = -1; }
 	Trail *getTrail(int x,int y) { return getTrail(get(x,y)); }
 
 	/** Calculate the A* path search

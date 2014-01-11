@@ -452,7 +452,10 @@ if(AMANITA_LIBS)
 
 
 	set(ipomoea_src
+		src/ipomoea/base58.c
 		src/ipomoea/base64.c
+		src/ipomoea/bigint_t.c
+		src/ipomoea/bf.c
 		src/ipomoea/hashtable_t.c
 		src/ipomoea/rle.c
 		src/ipomoea/string_t.c
@@ -586,8 +589,10 @@ if(AMANITA_LIBS)
 	)
 
 	install(FILES
+		include/ipomoea/base58.h
 		include/ipomoea/base64.h
 		include/ipomoea/bf.h
+		include/ipomoea/bigint_t.h
 		include/ipomoea/hashtable_t.h
 		include/ipomoea/rle.h
 		include/ipomoea/string_t.h
@@ -651,6 +656,9 @@ if(AMANITA_EXAMPLES)
 
 	add_executable(babble examples/babble.cpp)
 	target_link_libraries(babble amanita)
+
+	add_executable(base64 examples/base64.cpp)
+	target_link_libraries(base64 ipomoea)
 
 	if(WIN32)
 		add_executable(browser WIN32 examples/browser.cpp ${RC_FILE})

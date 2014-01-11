@@ -56,6 +56,8 @@ public:
 	int begin(const char *fn,int w,int h,int ws=0,int hs=0);
 	void end();
 
+	bool isFilming() { return filming; }
+
 	int addFrame();
 
 	uint8_t *getBuffer() { return buf_rgb; }

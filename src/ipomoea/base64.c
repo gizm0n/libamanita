@@ -45,11 +45,11 @@ void base64_encode(unsigned char *dst,const unsigned char *src,size_t len) {
 	*d = '\0';
 }
 
-void base64_decode(unsigned char *dst,const unsigned char *src) {
+int base64_decode(unsigned char *dst,const unsigned char *src) {
 	unsigned char *d = dst;
 	const unsigned char *s = src;
-	int i,j,k,l;
-	for(; *s!='\0'; s+=4,d+=3) {
+	int i,j,k,l,len;
+	for(len=0; *s!='\0'; s+=4,d+=3,len+=3) {
 		i = base64_index[(int)s[0]];
 		j = base64_index[(int)s[1]];
 		k = base64_index[(int)s[2]];
@@ -60,6 +60,7 @@ void base64_decode(unsigned char *dst,const unsigned char *src) {
 		d[2] = (unsigned char )(((k<<6)&0xc0)|l);
 	}
 	*d = '\0';
+	return len;
 }
 
 

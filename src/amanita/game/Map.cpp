@@ -78,7 +78,7 @@ debug_output("Map::makeLayer(t:%d, p:%d)\n",t,p);
 	memset(l,0,size*sizeof(int));
 	if(t==MAP_LAND) {
 		rect(l,0,0,width,height,p);
-		e1 = 3,e2 = 2,e3 = 3;
+		e1 = 3,e2 = 1,e3 = 3;
 	} else if(t==MAP_FOREST) {
 		n = height*20/100;
 		rect(l,0,n,width,n,p);

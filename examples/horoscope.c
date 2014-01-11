@@ -1,7 +1,4 @@
 /** An example program on how to use the astronomy and astrology functions in libmandragora.
- * 
- * Compile:
- * gcc astro.c -o astro -I /usr/local/include -I /usr/include -lmandragora -lm
  */
 
 #include <stdio.h>
