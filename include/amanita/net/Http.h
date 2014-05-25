@@ -184,7 +184,7 @@ public:
 	void clearForm();
 
 
-	/** Send a htt-prequest using the GET method.
+	/** Send a HTTP-prequest using the GET method.
 	 * The va_list can be used to format the url with extra params. Note that params should be URL encoded.
 	 * @param host A string containing the host.
 	 * @param url The script or file to be requested.
@@ -199,7 +199,7 @@ public:
 	 */
 	const char *get(const char *host,const char *url);
 
-	/** Send a htt-prequest using the GET method, same as the get-method except accepting a url to be formatted.
+	/** Send a HTTP-prequest using the GET method, same as the get-method except accepting a url to be formatted.
 	 * The va_list can be used to format the url with extra params. Note that params should be URL encoded.
 	 * @param host A string containing the host.
 	 * @param url The script or file to be requested.
@@ -209,26 +209,26 @@ public:
 	 *
 	 * @code
 	 * Http http;
-	 * http.get("www.host.com","script.php?param1=%s&param2=%d",param1,param2);
+	 * http.getf("www.host.com","script.php?param1=%s&param2=%d",param1,param2);
 	 * @endcode
 	 */
 	const char *getf(const char *host,const char *url, ...);
 
-	/** Send a htt-prequest using the POST method.
+	/** Send a HTTP-prequest using the POST method.
 	 * @param host A string containing the host.
 	 * @param url The script or file to be requested.
 	 * @return The response body data.
 	 */
 	const char *post(const char *host,const char *url);
 
-	/** Send a htt-prequest using the POST method, same as the post-method except accepting a url to be formatted.
+	/** Send a HTTP-prequest using the POST method, same as the post-method except accepting a url to be formatted.
 	 * @param host A string containing the host.
 	 * @param url The script or file to be requested.
 	 * @return The response body data.
 	 */
 	const char *postf(const char *host,const char *url, ...);
 
-	/** Send a http-prequest using specified method.
+	/** Send a HTTP-prequest using specified method.
 	 * Set headers and form data previous to calling this method.
 	 * @param host A string containing the host.
 	 * @param url The script or file to be requested.
@@ -247,7 +247,7 @@ public:
 
 	/** Get the HTTP version returned by the response. */
 	float getHTTPVersion() { return ver; }
-	/** Get the resonse-status, 200 means OK, 404 means not found ets. */
+	/** Get the resonse-status, 200 means OK, 404 means not found etc. */
 	int getResponseStatus() { return status; }
 	/** Get response header. */
 	const char *getResponseHeader(const char *key);
