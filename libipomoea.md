@@ -1,0 +1,2 @@
+# Introduction #
+Ipomoea Library is a collection of C structs and functions. It is not compatible with libamanita, but to some extent adds C-functionality similar to that of the C++-classes in libamanita.

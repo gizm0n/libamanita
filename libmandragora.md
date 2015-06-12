@@ -1,0 +1,2 @@
+# Introduction #
+Esoteric Library is entirely built in C programming language, and contains functions for esoteric calculations, such as astrology, tarot and qabalah.

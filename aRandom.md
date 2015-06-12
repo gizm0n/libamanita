@@ -1,0 +1,5 @@
+This is a fairly fast pseudorandom number generator with good enough entropy values. Please visit [www.cacert.at](http://www.cacert.at/cgi-bin/rngresults) to compare results with other PRNGs (Pseudo Random Number Generator) and you will find it if you search for "aRandom 1.01".
+
+The algorithm is inspired by the mersenne twister, and the focus is to make a fast generator more than to accomplish perfect randomness.
+
+Except for the speed, one advantage this generator has compared to others is that it only requires 1036 bytes of memory (on a 32 bit processor, and 2072 on a 64 bit processor), per instance, and the data is stored within the class. So the complete sequence can be stored in a file, not only the seed, but any step within the sequence. This can be used in games for example, where you want to keep a persistent random sequence of events and avoid that the player saves, loads and get another random sequence.

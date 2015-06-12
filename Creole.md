@@ -1,0 +1,3 @@
+# Creole #
+
+Creole is a standardized markup that is used by Wikis.
